@@ -1,3 +1,4 @@
+queueLoad(); // Function called upon loading website
 
 function queueLoad() {
     reset();
@@ -47,7 +48,7 @@ function ready(error, stops, lines) {
       displayTopicWords();
       toggleTopicDocuments(0);
       //plotGraph();
-  
+      
       plotMatrix();
       vocabTable();
       createTimeSVGs();
@@ -111,7 +112,7 @@ function parseLine ( line ) {
        .attr("class", "document")
        .text("[" + docID + "] " + truncate(text));
   }
-// used by addStop, removeStop in vocab
+// used by addStop, removeStop in vocab, saveTopicKeys in downloads, sweep in sweep
 function sortTopicWords() {
     topicWordCounts = [];
     for (var topic = 0; topic < numTopics; topic++) {
@@ -128,3 +129,82 @@ function sortTopicWords() {
       topicWordCounts[topic].sort(byCountDescending);
     }
   }
+
+// Used by saveDocTopics, saveTopicWords, saveGraph in downloads, getTopicCorrelations in correlation
+function zeros(n) {
+  var x = new Array(n);
+  for (var i = 0; i < n; i++) { x[i] = 0.0; }
+  return x;
+}
+
+
+// Change the strings at the end of these lines to reset the default filenames!
+
+
+function onDocumentFileChange(input) {
+  documentsFileArray = input.files;
+}
+function onStopwordFileChange(input) {
+  stoplistFileArray = input.files;
+}
+
+// This function is the callback for "input", it changes as we move the slider
+//  without releasing it.
+function updateTopicCount(input) {
+  d3.select("#num_topics_display").text(input.value);
+}
+// This function is the callback for "change", it only fires when we release the
+//  slider to select a new value.
+function onTopicsChange(input) {
+  console.log("Changing # of topics: " + input.value);
+  
+  var newNumTopics = Number(input.value);
+  if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== numTopics) {
+    changeNumTopics(Number(input.value));
+  }
+}
+
+function changeNumTopics(numTopics_) {
+  numTopics = numTopics_;
+  selectedTopic = -1;
+  
+  completeSweeps = 0;
+  requestedSweeps = 0;
+  d3.select("#iters").text(completeSweeps);
+  
+  wordTopicCounts = {};
+  Object.keys(vocabularyCounts).forEach(function (word) { wordTopicCounts[word] = {} });
+  
+  topicWordCounts = [];
+  tokensPerTopic = zeros(numTopics);
+  topicWeights = zeros(numTopics);
+  
+  documents.forEach( function( currentDoc, i ) {
+    currentDoc.topicCounts = zeros(numTopics);
+    for (var position = 0; position < currentDoc.tokens.length; position++) {
+      var token = currentDoc.tokens[position];
+      token.topic = Math.floor(Math.random() * numTopics);
+      
+      if (! token.isStopword) {
+        tokensPerTopic[token.topic]++;
+        if (! wordTopicCounts[token.word][token.topic]) {
+          wordTopicCounts[token.word][token.topic] = 1;
+        }
+        else {
+          wordTopicCounts[token.word][token.topic] += 1;
+        }
+        currentDoc.topicCounts[token.topic] += 1;
+      }
+    }
+  });
+
+  sortTopicWords();
+  displayTopicWords();
+  reorderDocuments();
+  vocabTable();
+  
+  // Restart the visualizations
+  createTimeSVGs();
+  timeSeries();
+  plotMatrix();
+}

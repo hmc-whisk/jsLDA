@@ -16,7 +16,7 @@ function toggleTopicDocuments(topic) {
     vocabTable();
   }
 
-// used by addStop, removeStop in vocab
+// used by addStop, removeStop in vocab, sweep in sweep, changeNumTopics in processing
 function reorderDocuments() {
     var format = d3.format(".2g");
   

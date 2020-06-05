@@ -1,4 +1,30 @@
-// used by toggleTopicDocuments
+d3.select("#showStops").on("click", function () {
+  if (displayingStopwords) {
+    displayingStopwords = false;
+    this.innerText = "Show stopwords";
+    vocabTable();
+  }
+  else {
+    displayingStopwords = true;
+    this.innerText = "Hide stopwords";
+    vocabTable();
+  }
+});
+
+d3.select("#sortVocabByTopic").on("click", function () {
+  if (sortVocabByTopic) {
+    sortVocabByTopic = false;
+    this.innerText = "Sort by topic";
+    vocabTable();
+  }
+  else {
+    sortVocabByTopic = true;
+    this.innerText = "Sort by frequency";
+    vocabTable();
+  }
+});
+
+// used by toggleTopicDocuments in topicdocuments, ready, changeNumTopics in processing, sweep in sweep
 function vocabTable() {
     var format = d3.format(".2g");
     var wordFrequencies = mostFrequentWords(displayingStopwords, sortVocabByTopic).slice(0, 499);
@@ -111,3 +137,4 @@ function removeStop(word) {
     reorderDocuments();
     vocabTable();
   }
+

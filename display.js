@@ -1,4 +1,4 @@
-// Used by ready in processing, addStop, removeStop in vocab
+// Used by ready, changeNumTopics in processing, addStop, removeStop in vocab, sweep in sweep
 function displayTopicWords() {
     var topicTopWords = [];
   
