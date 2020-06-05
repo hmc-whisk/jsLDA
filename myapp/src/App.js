@@ -4,6 +4,50 @@ import * as d3 from 'd3'
 
 var XRegExp = require('xregexp')
 
+// Where is it used?
+// From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+if (!Object.keys) {
+  Object.keys = (function() {
+    'use strict';
+    var hasOwnProperty = Object.prototype.hasOwnProperty,
+        hasDontEnumBug = !({ toString: null }).propertyIsEnumerable('toString'),
+        dontEnums = [
+          'toString',
+          'toLocaleString',
+          'valueOf',
+          'hasOwnProperty',
+          'isPrototypeOf',
+          'propertyIsEnumerable',
+          'constructor'
+        ],
+        dontEnumsLength = dontEnums.length;
+
+    return function(obj) {
+      if (typeof obj !== 'function' && (typeof obj !== 'object' || obj === null)) {
+        throw new TypeError('Object.keys called on non-object');
+      }
+
+      var result = [], prop, i;
+
+      for (prop in obj) {
+        if (hasOwnProperty.call(obj, prop)) {
+          result.push(prop);
+        }
+      }
+
+      if (hasDontEnumBug) {
+        for (i = 0; i < dontEnumsLength; i++) {
+          if (hasOwnProperty.call(obj, dontEnums[i])) {
+            result.push(dontEnums[i]);
+          }
+        }
+      }
+      return result;
+    };
+  }());
+}
+
+
 // Used for numTopics
 /** This function is copied from stack overflow: http://stackoverflow.com/users/19068/quentin */
 var QueryString = function () {
@@ -85,49 +129,7 @@ class App extends Component {
 
 
 
-  // // Where is it used?
-  // // From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
-  // if (!Object.keys) {
-  //   Object.keys = (function() {
-  //     'use strict';
-  //     var hasOwnProperty = Object.prototype.hasOwnProperty,
-  //         hasDontEnumBug = !({ toString: null }).propertyIsEnumerable('toString'),
-  //         dontEnums = [
-  //           'toString',
-  //           'toLocaleString',
-  //           'valueOf',
-  //           'hasOwnProperty',
-  //           'isPrototypeOf',
-  //           'propertyIsEnumerable',
-  //           'constructor'
-  //         ],
-  //         dontEnumsLength = dontEnums.length;
-
-  //     return function(obj) {
-  //       if (typeof obj !== 'function' && (typeof obj !== 'object' || obj === null)) {
-  //         throw new TypeError('Object.keys called on non-object');
-  //       }
-
-  //       var result = [], prop, i;
-
-  //       for (prop in obj) {
-  //         if (hasOwnProperty.call(obj, prop)) {
-  //           result.push(prop);
-  //         }
-  //       }
-
-  //       if (hasDontEnumBug) {
-  //         for (i = 0; i < dontEnumsLength; i++) {
-  //           if (hasOwnProperty.call(obj, dontEnums[i])) {
-  //             result.push(dontEnums[i]);
-  //           }
-  //         }
-  //       }
-  //       return result;
-  //     };
-  //   }());
-  // }
-
+  
   findNumTopics() {
     this.setState({numTopics: QueryString.topics ? parseInt(QueryString.topics) : 25});
     if (isNaN(this.state.numTopics)) {
@@ -140,6 +142,209 @@ class App extends Component {
     var x = new Array(n);
     for (var i = 0; i < n; i++) { x[i] = 0.0; }
     return x;
+  }
+
+  queueLoad() {
+    this.reset();
+    Promise.all([
+      this.getStoplistUpload(),
+      this.getDocsUpload()
+      ]).then( this.ready
+      )
+  }
+
+  reset() {
+    this.vocabularySize = 0;
+    this.vocabularyCounts = {};
+    this.displayingStopwords = false;
+    this.sortVocabByTopic = false;
+    this.specificityScale = d3.scaleLinear().domain([0,1]).range(["#ffffff", "#99d8c9"]);
+    
+    d3.select("#num-topics-input").property("value", this.numTopics);
+  
+    this.stopwords = {};
+  
+    this.completeSweeps = 0;
+    this.requestedSweeps = 0;
+    d3.select("#iters").text(this.completeSweeps);
+  
+    this.selectedTopic = -1;
+  
+    this.wordTopicCounts = {};
+    this.topicWordCounts = [];
+    this.tokensPerTopic = zeros(this.numTopics);
+    this.topicWeights = zeros(this.numTopics);
+    
+    this.documents = [];
+    d3.selectAll("div.document").remove();
+  }
+  
+  ready(error, stops, lines) {
+    if (error) { alert("File upload failed. Please try again."); throw error;}
+    else {
+      // Create the stoplist
+      console.log(stops);
+      stops.split(/\s+/).forEach(function (w) { console.log(w); this.stopwords[w] = 1; });
+  
+      // Load documents and populate the vocabulary
+      lines.split("\n").forEach(this.parseLine);
+  
+      sortTopicWords();
+      displayTopicWords();
+      toggleTopicDocuments(0);
+      //plotGraph();
+      
+      plotMatrix();
+      vocabTable();
+      createTimeSVGs();
+      timeSeries();
+    }
+  }
+  
+  parseLine ( line ) {
+    if (line == "") { return; }
+    var docID = this.documents.length;
+    var docDate = "";
+    var fields = line.split("\t");
+    var text = fields[0];  // Assume there's just one field, the text
+    if (fields.length == 3) {  // If it's in [ID]\t[TAG]\t[TEXT] format...
+      docID = fields[0];
+      docDate = fields[1]; // do not interpret date as anything but a string
+      text = fields[2];
+    }
+  
+    var tokens = [];
+    var rawTokens = text.toLowerCase().match(this.wordPattern);
+    if (rawTokens == null) { return; }
+    var topicCounts = zeros(this.numTopics);
+  
+    rawTokens.forEach(function (word) {
+      if (word !== "") {
+        var topic = Math.floor(Math.random() * this.numTopics);
+  
+        if (word.length <= 2) { this.stopwords[word] = 1; }
+  
+        var isStopword = this.stopwords[word];
+        if (isStopword) {
+          // Record counts for stopwords, but nothing else
+          if (! this.vocabularyCounts[word]) {
+            this.vocabularyCounts[word] = 1;
+          }
+          else {
+            this.vocabularyCounts[word] += 1;
+          }
+        }
+        else {
+          this.tokensPerTopic[topic]++;
+          if (! this.wordTopicCounts[word]) {
+            this.wordTopicCounts[word] = {};
+            this.vocabularySize++;
+            this.vocabularyCounts[word] = 0;
+          }
+          if (! this.wordTopicCounts[word][topic]) {
+            this.wordTopicCounts[word][topic] = 0;
+          }
+          this.wordTopicCounts[word][topic] += 1;
+          this.vocabularyCounts[word] += 1;
+          this.topicCounts[topic] += 1;
+        }
+        tokens.push({"word":word, "topic":topic, "isStopword":isStopword });
+      }
+    });
+    
+    // Here for today
+    this.documents.push({ "originalOrder" : documents.length, "id" : docID, "date" : docDate, "originalText" : text, "tokens" : tokens, "topicCounts" : topicCounts});
+    d3.select("div#docs-page").append("div")
+       .attr("class", "document")
+       .text("[" + docID + "] " + truncate(text));
+  }
+
+  // used by addStop, removeStop in vocab, saveTopicKeys in downloads, sweep in sweep
+  sortTopicWords() {
+    topicWordCounts = [];
+    for (var topic = 0; topic < numTopics; topic++) {
+      topicWordCounts[topic] = [];
+    }
+  
+    for (var word in wordTopicCounts) {
+      for (var topic in wordTopicCounts[word]) {
+        topicWordCounts[topic].push({"word":word, "count":wordTopicCounts[word][topic]});
+      }
+    }
+  
+    for (var topic = 0; topic < numTopics; topic++) {
+      topicWordCounts[topic].sort(byCountDescending);
+    }
+  }
+
+  // Change the strings at the end of these lines to reset the default filenames!
+  onDocumentFileChange(input) {
+    documentsFileArray = input.files;
+  }
+  onStopwordFileChange(input) {
+    stoplistFileArray = input.files;
+  }
+
+  // This function is the callback for "input", it changes as we move the slider
+  //  without releasing it.
+  updateTopicCount(input) {
+    d3.select("#num_topics_display").text(input.value);
+  }
+
+  // This function is the callback for "change", it only fires when we release the
+  //  slider to select a new value.
+  onTopicsChange(input) {
+    console.log("Changing # of topics: " + input.value);
+    
+    var newNumTopics = Number(input.value);
+    if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== numTopics) {
+      changeNumTopics(Number(input.value));
+    }
+  }
+
+  changeNumTopics(numTopics_) {
+    numTopics = numTopics_;
+    selectedTopic = -1;
+    
+    completeSweeps = 0;
+    requestedSweeps = 0;
+    d3.select("#iters").text(completeSweeps);
+    
+    wordTopicCounts = {};
+    Object.keys(this.vocabularyCounts).forEach(function (word) { wordTopicCounts[word] = {} });
+    
+    topicWordCounts = [];
+    tokensPerTopic = zeros(numTopics);
+    topicWeights = zeros(numTopics);
+    
+    documents.forEach( function( currentDoc, i ) {
+      currentDoc.topicCounts = zeros(numTopics);
+      for (var position = 0; position < currentDoc.tokens.length; position++) {
+        var token = currentDoc.tokens[position];
+        token.topic = Math.floor(Math.random() * numTopics);
+        
+        if (! token.isStopword) {
+          tokensPerTopic[token.topic]++;
+          if (! wordTopicCounts[token.word][token.topic]) {
+            wordTopicCounts[token.word][token.topic] = 1;
+          }
+          else {
+            wordTopicCounts[token.word][token.topic] += 1;
+          }
+          currentDoc.topicCounts[token.topic] += 1;
+        }
+      }
+    });
+
+    sortTopicWords();
+    displayTopicWords();
+    reorderDocuments();
+    vocabTable();
+    
+    // Restart the visualizations
+    createTimeSVGs();
+    timeSeries();
+    plotMatrix();
   }
 
   componentDidMount() {
