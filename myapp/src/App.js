@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'; 
 import './App.css';
-import * as d3 from 'd3'
+import * as d3 from 'd3';
+import plotMatrix from './Correlation.js';
 
 var XRegExp = require('xregexp')
 
@@ -47,7 +48,6 @@ if (!Object.keys) {
   }());
 }
 
-
 // Used for numTopics
 /** This function is copied from stack overflow: http://stackoverflow.com/users/19068/quentin */
 var QueryString = function () {
@@ -72,7 +72,6 @@ var QueryString = function () {
   }
     return query_string;
 } ();
-
 
 class App extends Component {
   state = {
@@ -125,11 +124,15 @@ class App extends Component {
     // used by parseLine
     truncate: function(s) { return s.length > 300 ? s.substring(0, 299) + "..." : s; },
     wordPattern: XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g"),
+
+    // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
+    correlationMinTokens: 2, // used by getTopicCorrelations
+    correlationMinProportion: 0.05, // used by getTopicCorrelations  
+
+    topNWords: function(wordCounts, n) { return wordCounts.slice(0,n).map( function(d) { return d.word; }).join(" "); }, // Used in timeSeries
+
   };
 
-
-
-  
   findNumTopics() {
     this.setState({numTopics: QueryString.topics ? parseInt(QueryString.topics) : 25});
     if (isNaN(this.state.numTopics)) {
@@ -172,8 +175,8 @@ class App extends Component {
   
     this.wordTopicCounts = {};
     this.topicWordCounts = [];
-    this.tokensPerTopic = zeros(this.numTopics);
-    this.topicWeights = zeros(this.numTopics);
+    this.tokensPerTopic = this.zeros(this.numTopics);
+    this.topicWeights = this.zeros(this.numTopics);
     
     this.documents = [];
     d3.selectAll("div.document").remove();
@@ -189,7 +192,7 @@ class App extends Component {
       // Load documents and populate the vocabulary
       lines.split("\n").forEach(this.parseLine);
   
-      sortTopicWords();
+      this.sortTopicWords();
       displayTopicWords();
       toggleTopicDocuments(0);
       //plotGraph();
@@ -216,7 +219,7 @@ class App extends Component {
     var tokens = [];
     var rawTokens = text.toLowerCase().match(this.wordPattern);
     if (rawTokens == null) { return; }
-    var topicCounts = zeros(this.numTopics);
+    var topicCounts = this.zeros(this.numTopics);
   
     rawTokens.forEach(function (word) {
       if (word !== "") {
@@ -253,36 +256,28 @@ class App extends Component {
     });
     
     // Here for today
-    this.documents.push({ "originalOrder" : documents.length, "id" : docID, "date" : docDate, "originalText" : text, "tokens" : tokens, "topicCounts" : topicCounts});
+    this.documents.push({ "originalOrder" : this.documents.length, "id" : docID, "date" : docDate, "originalText" : text, "tokens" : tokens, "topicCounts" : topicCounts});
     d3.select("div#docs-page").append("div")
        .attr("class", "document")
-       .text("[" + docID + "] " + truncate(text));
+       .text("[" + docID + "] " + this.truncate(text));
   }
 
   // used by addStop, removeStop in vocab, saveTopicKeys in downloads, sweep in sweep
   sortTopicWords() {
-    topicWordCounts = [];
-    for (var topic = 0; topic < numTopics; topic++) {
-      topicWordCounts[topic] = [];
+    this.topicWordCounts = [];
+    for (var topic = 0; topic < this.numTopics; topic++) {
+      this.topicWordCounts[topic] = [];
     }
   
-    for (var word in wordTopicCounts) {
-      for (var topic in wordTopicCounts[word]) {
-        topicWordCounts[topic].push({"word":word, "count":wordTopicCounts[word][topic]});
+    for (var word in this.wordTopicCounts) {
+      for (var topic in this.wordTopicCounts[word]) {
+        this.topicWordCounts[topic].push({"word":word, "count":this.wordTopicCounts[word][topic]});
       }
     }
   
-    for (var topic = 0; topic < numTopics; topic++) {
-      topicWordCounts[topic].sort(byCountDescending);
+    for (var topic = 0; topic < this.numTopics; topic++) {
+      this.topicWordCounts[topic].sort(this.byCountDescending);
     }
-  }
-
-  // Change the strings at the end of these lines to reset the default filenames!
-  onDocumentFileChange(input) {
-    documentsFileArray = input.files;
-  }
-  onStopwordFileChange(input) {
-    stoplistFileArray = input.files;
   }
 
   // This function is the callback for "input", it changes as we move the slider
@@ -297,46 +292,46 @@ class App extends Component {
     console.log("Changing # of topics: " + input.value);
     
     var newNumTopics = Number(input.value);
-    if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== numTopics) {
-      changeNumTopics(Number(input.value));
+    if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.numTopics) {
+      this.changeNumTopics(Number(input.value));
     }
   }
 
   changeNumTopics(numTopics_) {
-    numTopics = numTopics_;
-    selectedTopic = -1;
+    this.numTopics = numTopics_;
+    this.selectedTopic = -1;
     
-    completeSweeps = 0;
-    requestedSweeps = 0;
-    d3.select("#iters").text(completeSweeps);
+    this.completeSweeps = 0;
+    this.requestedSweeps = 0;
+    d3.select("#iters").text(this.completeSweeps);
     
-    wordTopicCounts = {};
-    Object.keys(this.vocabularyCounts).forEach(function (word) { wordTopicCounts[word] = {} });
+    this.wordTopicCounts = {};
+    Object.keys(this.vocabularyCounts).forEach(function (word) { this.wordTopicCounts[word] = {} });
     
-    topicWordCounts = [];
-    tokensPerTopic = zeros(numTopics);
-    topicWeights = zeros(numTopics);
+    this.topicWordCounts = [];
+    this.tokensPerTopic = this.zeros(this.numTopics);
+    this.topicWeights = this.zeros(this.numTopics);
     
-    documents.forEach( function( currentDoc, i ) {
-      currentDoc.topicCounts = zeros(numTopics);
+    this.documents.forEach( function( currentDoc, i ) {
+      currentDoc.topicCounts = this.zeros(this.numTopics);
       for (var position = 0; position < currentDoc.tokens.length; position++) {
         var token = currentDoc.tokens[position];
-        token.topic = Math.floor(Math.random() * numTopics);
+        token.topic = Math.floor(Math.random() * this.numTopics);
         
         if (! token.isStopword) {
-          tokensPerTopic[token.topic]++;
-          if (! wordTopicCounts[token.word][token.topic]) {
-            wordTopicCounts[token.word][token.topic] = 1;
+          this.tokensPerTopic[token.topic]++;
+          if (! this.wordTopicCounts[token.word][token.topic]) {
+            this.wordTopicCounts[token.word][token.topic] = 1;
           }
           else {
-            wordTopicCounts[token.word][token.topic] += 1;
+            this.wordTopicCounts[token.word][token.topic] += 1;
           }
           currentDoc.topicCounts[token.topic] += 1;
         }
       }
     });
 
-    sortTopicWords();
+    this.sortTopicWords();
     displayTopicWords();
     reorderDocuments();
     vocabTable();
@@ -344,7 +339,13 @@ class App extends Component {
     // Restart the visualizations
     createTimeSVGs();
     timeSeries();
-    plotMatrix();
+    plotMatrix({  numTopics: this.numTopics,
+                  documents: this.documents,
+                  correlationMinTokens: this.correlationMinTokens,
+                  correlationMinProportion: this.correlationMinProportion,
+                  topicWordCounts: this.topicWordCounts,
+                  topNWords: this.topNWords,
+                  zeros: this.zeros});
   }
 
   componentDidMount() {
@@ -361,6 +362,8 @@ class App extends Component {
       d3.selectAll("ul li").attr("className", "");
       d3.select("#docs-page").style("display", "block");
       d3.select("#docs-tab").attr("className", "selected");
+
+    this.queueLoad();
     });
   }
   
