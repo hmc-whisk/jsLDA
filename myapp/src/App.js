@@ -1,7 +1,9 @@
 import React, { Component } from 'react'; 
 import './App.css';
 import * as d3 from 'd3';
-import plotMatrix from './Correlation.js';
+import Correlation from './corpage';
+import TopicDoc from './docpage';
+import SideBar from './sidebar';
 
 var XRegExp = require('xregexp')
 
@@ -125,13 +127,18 @@ class App extends Component {
     truncate: function(s) { return s.length > 300 ? s.substring(0, 299) + "..." : s; },
     wordPattern: XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g"),
 
-    // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
-    correlationMinTokens: 2, // used by getTopicCorrelations
-    correlationMinProportion: 0.05, // used by getTopicCorrelations  
-
-    topNWords: function(wordCounts, n) { return wordCounts.slice(0,n).map( function(d) { return d.word; }).join(" "); }, // Used in timeSeries
+    timer: 0, // used in sweep
+    documentTopicSmoothing: 0.1, // (used by sweep)
+    topicWordSmoothing: 0.01, // (used by sweep)
 
   };
+
+  selectedTopicChange = (topic) => {
+    this.setState({selectedTopic: topic});
+    if (topic == -1) {
+      this.setState({sortVocabByTopic: false})
+    }
+  }
 
   findNumTopics() {
     this.setState({numTopics: QueryString.topics ? parseInt(QueryString.topics) : 25});
@@ -152,8 +159,7 @@ class App extends Component {
     Promise.all([
       this.getStoplistUpload(),
       this.getDocsUpload()
-      ]).then(function([stops, lines]) {this.ready(null, stops, lines)}
-      )
+      ]).then(function([stops, lines]) {this.ready(null, stops, lines)})
         .catch(function(err) {this.ready(err, null, null)})
   }
 
@@ -198,7 +204,7 @@ class App extends Component {
       toggleTopicDocuments(0);
       //plotGraph();
       
-      plotMatrix();
+      // plotMatrix();
       vocabTable();
       createTimeSVGs();
       timeSeries();
@@ -256,8 +262,8 @@ class App extends Component {
       }
     });
     
-    // Here for today
     this.documents.push({ "originalOrder" : this.documents.length, "id" : docID, "date" : docDate, "originalText" : text, "tokens" : tokens, "topicCounts" : topicCounts});
+    // Need to move this selection and adding to #docs-page into a different component
     d3.select("div#docs-page").append("div")
        .attr("class", "document")
        .text("[" + docID + "] " + this.truncate(text));
@@ -334,19 +340,92 @@ class App extends Component {
 
     this.sortTopicWords();
     displayTopicWords();
-    reorderDocuments();
+    // reorderDocuments();
     vocabTable();
     
     // Restart the visualizations
     createTimeSVGs();
     timeSeries();
-    plotMatrix({  numTopics: this.numTopics,
-                  documents: this.documents,
-                  correlationMinTokens: this.correlationMinTokens,
-                  correlationMinProportion: this.correlationMinProportion,
-                  topicWordCounts: this.topicWordCounts,
-                  topNWords: this.topNWords,
-                  zeros: this.zeros});
+    // plotMatrix();
+  }
+
+  sweep() {
+    var startTime = Date.now();
+
+    var topicNormalizers = this.zeros(this.numTopics);
+    for (var topic = 0; topic < this.numTopics; topic++) {
+      topicNormalizers[topic] = 1.0 / (this.vocabularySize * this.topicWordSmoothing + this.tokensPerTopic[topic]);
+    }
+
+    for (var doc = 0; doc < this.documents.length; doc++) {
+      var currentDoc = this.documents[doc];
+      var docTopicCounts = currentDoc.topicCounts;
+
+      for (var position = 0; position < currentDoc.tokens.length; position++) {
+        var token = currentDoc.tokens[position];
+        if (token.isStopword) { continue; }
+
+        this.tokensPerTopic[ token.topic ]--;
+        var currentWordTopicCounts = this.wordTopicCounts[ token.word ];
+        currentWordTopicCounts[ token.topic ]--;
+        if (currentWordTopicCounts[ token.topic ] == 0) {
+          //delete(currentWordTopicCounts[ token.topic ]);
+        }
+        docTopicCounts[ token.topic ]--;
+        topicNormalizers[ token.topic ] = 1.0 / (this.vocabularySize * this.topicWordSmoothing + this.tokensPerTopic[ token.topic ]);
+
+        var sum = 0.0;
+        for (var topic = 0; topic < this.numTopics; topic++) {
+          if (currentWordTopicCounts[ topic ]) {
+            this.topicWeights[topic] =
+              (this.documentTopicSmoothing + docTopicCounts[topic]) *
+              (this.topicWordSmoothing + currentWordTopicCounts[ topic ]) *
+            topicNormalizers[topic];
+          }
+          else {
+            this.topicWeights[topic] =
+              (this.documentTopicSmoothing + docTopicCounts[topic]) *
+              this.topicWordSmoothing *
+            topicNormalizers[topic];
+          }
+          sum += this.topicWeights[topic];
+        }
+
+        // Sample from an unnormalized discrete distribution
+        var sample = sum * Math.random();
+          var i = 0;
+          sample -= this.topicWeights[i];
+          while (sample > 0.0) {
+            i++;
+            sample -= this.topicWeights[i];
+        }
+        token.topic = i;
+
+        this.tokensPerTopic[ token.topic ]++;
+        if (! currentWordTopicCounts[ token.topic ]) {
+          currentWordTopicCounts[ token.topic ] = 1;
+        }
+        else {
+          currentWordTopicCounts[ token.topic ] += 1;
+        }
+        docTopicCounts[ token.topic ]++;
+
+        topicNormalizers[ token.topic ] = 1.0 / (this.vocabularySize * this.topicWordSmoothing + this.tokensPerTopic[ token.topic ]);
+      }
+    }
+
+    //console.log("sweep in " + (Date.now() - startTime) + " ms");
+    this.completeSweeps += 1;
+    d3.select("#iters").text(this.completeSweeps);
+    if (this.completeSweeps >= this.requestedSweeps) {
+      //reorderDocuments();
+      sortTopicWords();
+      displayTopicWords();
+      // plotMatrix();
+      vocabTable();
+      timeSeries();
+      this.timer.stop();
+    }
   }
 
   componentDidMount() {
@@ -369,7 +448,11 @@ class App extends Component {
   }
   
   render() {
-    console.log(this.state.numTopics)
+    // Remember to add:
+    // d3.select("#sweep").on("click", function() {
+    //   requestedSweeps += 50;
+    //   timer = d3.timer(sweep);
+    // });
     return (
       <div id="app">
       <div id="tooltip"></div>
@@ -382,12 +465,8 @@ class App extends Component {
       <span id="num_topics_control">Train with <input id="num-topics-input" type="range" name="topics" value="25" min="3" max="100" onInput="updateTopicCount(this)" onChange="onTopicsChange(this)"/> <span id="num_topics_display">25</span> topics</span>
       </div>
 
-      <div className="sidebar">
-
-      <div id="topics" className="sidebox">
-      </div>
-
-      </div>
+      <SideBar selectedTopic={this.state.selectedTopic} sortVocabByTopic={this.state.sortVocabByTopic} numTopics={this.state.numTopics} topicWordCounts={this.state.topicWordCounts}
+      selectedTopicChange = {this.selectedTopicChange}/>
 
       <div id="tabwrapper">
       <div className="tabs">
@@ -402,18 +481,8 @@ class App extends Component {
       </div>
       <div id="pages">
 
-      <div id="docs-page" className="page">
-        <div className="upload">
-        <form onSubmit="event.preventDefault(); queueLoad();">
-          <div>Use a different collection:</div>
-          <div>Documents <input id="docs-file-input" type="file" onChange="onDocumentFileChange(this)" size="10"/></div>
-          <div>Stoplist  <input id="stops-file-input" type="file" onChange="onStopwordFileChange(this)" size="10"/></div>
-          <div><button id="load-inputs">Upload</button></div>
-        </form>
-        </div>
-        <div className="help">Documents are sorted by their proportion of the currently selected topic, biased to prefer longer documents.</div>
-        
-      </div>
+      <TopicDoc selectedTopic={this.state.selectedTopic} documents={this.state.documents} sortVocabByTopic={this.state.sortVocabByTopic} truncate={this.state.truncate}
+        numTopics={this.state.numTopics}/>
 
       <div id="vocab-page" className="page">
         <div className="help">Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0. <button id="showStops">Show stopwords</button>
@@ -430,9 +499,8 @@ class App extends Component {
         <div className="help"></div>
       </div>
 
-      <div id="corr-page" className="page">
-        <div className="help">Topics that occur together more than expected are blue, topics that occur together less than expected are red.</div>
-      </div>
+      <Correlation topicWordCounts ={this.state.topicWordCounts} topNWords={this.state.topNWords} numTopics={this.state.numTopics} zeros={this.state.zeros} 
+        documents={this.state.documents}/>
 
       <div id="dl-page" className="page">
         <div className="help">Each file is in comma-separated format.</div>
