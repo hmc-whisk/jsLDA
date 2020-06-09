@@ -154,6 +154,7 @@ class App extends Component {
       this.getDocsUpload()
       ]).then(function([stops, lines]) {this.ready(null, stops, lines)}
       )
+        .catch(function(err) {this.ready(err, null, null)})
   }
 
   reset() {
