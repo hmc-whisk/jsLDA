@@ -133,6 +133,7 @@ class App extends Component {
 
   };
 
+  // Used by sidebar to change selectedTopic and sortVocabByTopic
   selectedTopicChange = (topic) => {
     this.setState({selectedTopic: topic});
     if (topic == -1) {
@@ -200,7 +201,7 @@ class App extends Component {
       lines.split("\n").forEach(this.parseLine);
   
       this.sortTopicWords();
-      displayTopicWords();
+      //displayTopicWords();
       toggleTopicDocuments(0);
       //plotGraph();
       
@@ -339,7 +340,7 @@ class App extends Component {
     });
 
     this.sortTopicWords();
-    displayTopicWords();
+    // displayTopicWords();
     // reorderDocuments();
     vocabTable();
     
@@ -420,7 +421,7 @@ class App extends Component {
     if (this.completeSweeps >= this.requestedSweeps) {
       //reorderDocuments();
       sortTopicWords();
-      displayTopicWords();
+      // displayTopicWords();
       // plotMatrix();
       vocabTable();
       timeSeries();
