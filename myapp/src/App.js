@@ -117,8 +117,14 @@ class App extends Component {
     // in reset, changeNumTopics
     topicWeights: [], // set to zeros(numTopics)
 
+    // Array of dictionaries with keys 
+    // {"originalOrder", "id", "date", "originalText", "tokens", "topicCounts"}
     // used by reset & parseline, changeNumTopics
     documents: [],
+
+    // Location to store uploaded files
+    documentsFileArray: null,
+    stoplistFileArray: null,
 
     // used by sortTopicWords
     byCountDescending: function (a,b) { return b.count - a.count; },
@@ -141,6 +147,20 @@ class App extends Component {
     }
   }
 
+  // Retrieve doc files from upload component
+  onDocumentFileChange(input) {
+    this.setState({
+      documentsFileArray: input.files,
+    });
+  }
+
+  // Retrieve stop word files from upload component
+  onStopwordFileChange(input) {
+    this.setState({
+      stoplistFileArray: input.files,
+    });
+  }
+
   findNumTopics() {
     this.setState({numTopics: QueryString.topics ? parseInt(QueryString.topics) : 25});
     if (isNaN(this.state.numTopics)) {
@@ -155,13 +175,32 @@ class App extends Component {
     return x;
   }
 
-  queueLoad() { 
-    this.reset();
-    Promise.all([
-      this.getStoplistUpload(),
-      this.getDocsUpload()
-      ]).then(function([stops, lines]) {this.ready(null, stops, lines)})
-        .catch(function(err) {this.ready(err, null, null)})
+  getStoplistUpload(callback) {
+    if (this.state.stoplistFileArray.length === 0) {
+        d3.text(stopwordsURL, callback);
+      } else {
+        const fileSelection = this.state.stoplistFileArray[0].slice();
+        var reader = new FileReader();
+        reader.onload = function() {
+          var text = reader.result;
+          callback(null, text);
+        };
+        reader.readAsText(fileSelection);
+      }
+  }
+  
+  getDocsUpload(callback) {
+    if (this.state.documentsFileArray.length === 0) {
+        d3.text(documentsURL, callback);
+    } else {
+        const fileSelection = this.state.documentsFileArray[0].slice();
+        var reader = new FileReader();
+        reader.onload = function() {
+          var text = reader.result;
+          callback(null, text);
+        };
+        reader.readAsText(fileSelection);
+    }
   }
 
   reset() {
@@ -189,6 +228,17 @@ class App extends Component {
     this.documents = [];
     d3.selectAll("div.document").remove();
   }
+
+  queueLoad(event) { 
+    event.preventDefault();
+    this.reset();
+
+    Promise.all([
+      this.getStoplistUpload(),
+      this.getDocsUpload()
+      ]).then(([stops, lines]) => this.ready(null, stops, lines))
+        .catch(err => this.ready(err, null, null))
+  }
   
   ready(error, stops, lines) {
     if (error) { alert("File upload failed. Please try again."); throw error;}
@@ -212,6 +262,15 @@ class App extends Component {
     }
   }
   
+  /**
+  * @summary Format/Save tsv document line
+  * 
+  * @param {String} line A tsv line in format [ID]\t[TAG]\t[TEXT]
+  * or a line containing only the document text
+  * 
+  * @description This is the function used in the file parser
+  * that both formats lines and save them to the correct location
+  */
   parseLine ( line ) {
     if (line == "") { return; }
     var docID = this.documents.length;
@@ -466,8 +525,12 @@ class App extends Component {
       <span id="num_topics_control">Train with <input id="num-topics-input" type="range" name="topics" value="25" min="3" max="100" onInput="updateTopicCount(this)" onChange="onTopicsChange(this)"/> <span id="num_topics_display">25</span> topics</span>
       </div>
 
-      <SideBar selectedTopic={this.state.selectedTopic} sortVocabByTopic={this.state.sortVocabByTopic} numTopics={this.state.numTopics} topicWordCounts={this.state.topicWordCounts}
-      selectedTopicChange = {this.selectedTopicChange}/>
+      <SideBar selectedTopic={this.state.selectedTopic} 
+               sortVocabByTopic={this.state.sortVocabByTopic} 
+               numTopics={this.state.numTopics} 
+               topicWordCounts={this.state.topicWordCounts}
+               selectedTopicChange = {this.selectedTopicChange}
+               />
 
       <div id="tabwrapper">
       <div className="tabs">
@@ -482,8 +545,14 @@ class App extends Component {
       </div>
       <div id="pages">
 
-      <TopicDoc selectedTopic={this.state.selectedTopic} documents={this.state.documents} sortVocabByTopic={this.state.sortVocabByTopic} truncate={this.state.truncate}
-        numTopics={this.state.numTopics}/>
+      <TopicDoc selectedTopic={this.state.selectedTopic} 
+                documents={this.state.documents} 
+                sortVocabByTopic={this.state.sortVocabByTopic} 
+                truncate={this.state.truncate}
+                numTopics={this.state.numTopics}
+                onDocumentFileChange={this.onDocumentFileChange}
+                onStopwordFileChange={this.onStopwordFileChange}
+                onFileUpload = {this.queueLoad}/>
 
       <div id="vocab-page" className="page">
         <div className="help">Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0. <button id="showStops">Show stopwords</button>
@@ -500,8 +569,11 @@ class App extends Component {
         <div className="help"></div>
       </div>
 
-      <Correlation topicWordCounts ={this.state.topicWordCounts} topNWords={this.state.topNWords} numTopics={this.state.numTopics} zeros={this.state.zeros} 
-        documents={this.state.documents}/>
+      <Correlation topicWordCounts ={this.state.topicWordCounts} 
+                   topNWords={this.state.topNWords} 
+                   numTopics={this.state.numTopics} 
+                   zeros={this.state.zeros} 
+                   documents={this.state.documents}/>
 
       <div id="dl-page" className="page">
         <div className="help">Each file is in comma-separated format.</div>
