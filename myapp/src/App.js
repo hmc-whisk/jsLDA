@@ -147,12 +147,12 @@ class App extends Component {
     return x;
   }
 
-  queueLoad() {
+  queueLoad() { 
     this.reset();
     Promise.all([
       this.getStoplistUpload(),
       this.getDocsUpload()
-      ]).then( this.ready
+      ]).then(function([stops, lines]) {this.ready(null, stops, lines)}
       )
   }
 
