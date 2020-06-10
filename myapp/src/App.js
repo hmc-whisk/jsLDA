@@ -4,6 +4,8 @@ import * as d3 from 'd3';
 import Correlation from './corpage';
 import TopicDoc from './docpage';
 import SideBar from './sidebar';
+import VocabTable from './vocabpage';
+import TimeSeries from './timepage';
 
 var XRegExp = require('xregexp')
 
@@ -130,7 +132,6 @@ class App extends Component {
     timer: 0, // used in sweep
     documentTopicSmoothing: 0.1, // (used by sweep)
     topicWordSmoothing: 0.01, // (used by sweep)
-
   };
 
   // Used by sidebar to change selectedTopic and sortVocabByTopic
@@ -149,7 +150,7 @@ class App extends Component {
     }
   }
 
-  zeros(n) {
+  zeros = (n) => {
     var x = new Array(n);
     for (var i = 0; i < n; i++) { x[i] = 0.0; }
     return x;
@@ -202,13 +203,13 @@ class App extends Component {
   
       this.sortTopicWords();
       //displayTopicWords();
-      toggleTopicDocuments(0);
+      // toggleTopicDocuments(0);
       //plotGraph();
       
       // plotMatrix();
-      vocabTable();
-      createTimeSVGs();
-      timeSeries();
+      // vocabTable();
+      // createTimeSVGs();
+      // timeSeries();
     }
   }
   
@@ -342,11 +343,11 @@ class App extends Component {
     this.sortTopicWords();
     // displayTopicWords();
     // reorderDocuments();
-    vocabTable();
+    // vocabTable();
     
     // Restart the visualizations
-    createTimeSVGs();
-    timeSeries();
+    // createTimeSVGs();
+    // timeSeries();
     // plotMatrix();
   }
 
@@ -420,13 +421,69 @@ class App extends Component {
     d3.select("#iters").text(this.completeSweeps);
     if (this.completeSweeps >= this.requestedSweeps) {
       //reorderDocuments();
-      sortTopicWords();
+      this.sortTopicWords();
       // displayTopicWords();
       // plotMatrix();
-      vocabTable();
-      timeSeries();
+      // vocabTable();
+      // timeSeries();
       this.timer.stop();
     }
+  }
+
+  //configure after button
+
+  addStop = (word) => {
+    this.stopwords[word] = 1;
+    this.vocabularySize--;
+    delete this.wordTopicCounts[word];
+  
+      this.documents.forEach( function( currentDoc, i ) {
+      var docTopicCounts = currentDoc.topicCounts;
+      for (var position = 0; position < currentDoc.tokens.length; position++) {
+        var token = currentDoc.tokens[position];
+        if (token.word === word) {
+          token.isStopword = true;
+          this.tokensPerTopic[ token.topic ]--;
+          this.docTopicCounts[ token.topic ]--;
+        }
+      }
+    });
+  
+    this.sortTopicWords();
+    // displayTopicWords();
+    // reorderDocuments();
+    // vocabTable();
+  }
+
+  //configure after button
+  removeStop = (word) => {
+    delete this.stopwords[word];
+    this.vocabularySize++;
+    this.wordTopicCounts[word] = {};
+    var currentWordTopicCounts = this.wordTopicCounts[ word ];
+  
+    this.documents.forEach( function( currentDoc, i ) {
+      var docTopicCounts = currentDoc.topicCounts;
+      for (var position = 0; position < currentDoc.tokens.length; position++) {
+        var token = currentDoc.tokens[position];
+        if (token.word === word) {
+          token.isStopword = false;
+          this.tokensPerTopic[ token.topic ]++;
+          docTopicCounts[ token.topic ]++;
+          if (! currentWordTopicCounts[ token.topic ]) {
+            currentWordTopicCounts[ token.topic ] = 1;
+          }
+          else {
+            currentWordTopicCounts[ token.topic ] += 1;
+          }
+        }
+      }
+    });
+  
+    this.sortTopicWords();
+    // displayTopicWords();
+    // reorderDocuments();
+    // vocabTable();
   }
 
   componentDidMount() {
@@ -436,6 +493,8 @@ class App extends Component {
     
     this.setState({tokensPerTopic: this.zeros(this.state.numTopics)});
     this.setState({topicWeights: this.zeros(this.state.numTopics)});
+
+    this.queueLoad();
     
     // used by parseLine
     d3.select("#docs-tab").on("click", function() {
@@ -443,8 +502,6 @@ class App extends Component {
       d3.selectAll("ul li").attr("className", "");
       d3.select("#docs-page").style("display", "block");
       d3.select("#docs-tab").attr("className", "selected");
-
-    this.queueLoad();
     });
   }
   
@@ -485,22 +542,13 @@ class App extends Component {
       <TopicDoc selectedTopic={this.state.selectedTopic} documents={this.state.documents} sortVocabByTopic={this.state.sortVocabByTopic} truncate={this.state.truncate}
         numTopics={this.state.numTopics}/>
 
-      <div id="vocab-page" className="page">
-        <div className="help">Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0. <button id="showStops">Show stopwords</button>
-      <button id="sortVocabByTopic">Sort by topic</button>
-        </div>
-      <table id="vocab-table">
-      <thead><tr><th>Word</th><th>Frequency</th><th>Topic Specificity</th><th>Stoplist</th></tr></thead>
-      <tbody></tbody>
-      </table>
-      </div>
+      <VocabTable displayingStopwords={this.state.displayingStopwords} sortVocabByTopic={this.state.sortVocabByTopic} vocabularyCounts={this.state.vocabularyCounts}
+      wordTopicCounts={this.state.wordTopicCounts} selectedTopic={this.state.selectedTopic} stopwords ={this.state.stopwords} numTopics={this.state.numTopics}
+      byCountDescending={this.state.byCountDescending} addStop = {this.addStop} removeStop = {this.removeStop}/>
 
-      <div id="ts-page" className="page">
-        <div className="help">Documents are grouped by their "date" field (the second column in the input file). These plots show the average document proportion of each topic at each date value. Date values are <i>not</i> parsed, but simply sorted in the order they appear in the input file.</div>
-        <div className="help"></div>
-      </div>
+      <TimeSeries numTopics={this.state.numTopics} documents={this.state.documents} topicWordCounts={this.state.topicWordCounts}/>
 
-      <Correlation topicWordCounts ={this.state.topicWordCounts} topNWords={this.state.topNWords} numTopics={this.state.numTopics} zeros={this.state.zeros} 
+      <Correlation topicWordCounts ={this.state.topicWordCounts} topNWords={this.state.topNWords} numTopics={this.state.numTopics} zeros={this.zeros} 
         documents={this.state.documents}/>
 
       <div id="dl-page" className="page">
