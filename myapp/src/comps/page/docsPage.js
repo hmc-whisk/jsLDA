@@ -1,8 +1,8 @@
 import React from "react";
-import PageDesc from "./pageDesc"
+// import PageDesc from "./pageDesc"
 import Files from "./fileSelect"
 
-class TopicPage extends React.Component {
+class DocsPage extends React.Component {
 
     render() {
         return (
@@ -10,10 +10,12 @@ class TopicPage extends React.Component {
 
                 <div id="docs-page" class="page">
                     <Files />
+                    <div class="help">Documents are sorted by their proportion of the currently selected topic, biased
+						to prefer longer documents.</div>
 
                 </div>
 
-            <PageDesc />
+
 
             </div>
         );
@@ -21,4 +23,4 @@ class TopicPage extends React.Component {
 
 }
 
-export default TopicPage;
+export default DocsPage;

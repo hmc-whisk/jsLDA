@@ -26,8 +26,8 @@ class Form extends React.Component {
 
                 <button id="sweep" onClick={this.handleClick}>Run 50 iterations</button> Iterations: <span id="iters"> {this.props.iter} </span>
 
-                <span id="num_topics_control">Train with <input id="num-topics-input" type="range" name="topics" value = {this.props.numTopics} 
-                    min="3" max="100" onChange={this.handleChange} /> <span id="num_topics_display">  </span>  { this.props.numTopics } Topics </span>
+                <span id="num_topics_control">Train with <input id="num-topics-input" type="range" name="topics" value={this.props.numTopics}
+                    min="3" max="100" onChange={this.handleChange} /> <span id="num_topics_display">  </span>  {this.props.numTopics} Topics </span>
             </div>
         );
     }
