@@ -18,7 +18,6 @@ class App extends React.Component {
     super(props);
 
     this.state = { iter: 0, numTopics: 25, selectedTab: "docs-tab" };
-
     this.updateIter = this.updateIter.bind(this);
     this.updateNumTopics = this.updateNumTopics.bind(this);
     this.changeTab = this.changeTab.bind(this);
@@ -42,7 +41,7 @@ class App extends React.Component {
       selectedTab: tabID
     });
 
-    console.log("Page is now: " + tabID)
+    console.log("Tab is now: " + tabID)
   }
 
 
