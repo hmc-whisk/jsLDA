@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
-import Form from "./comps/paramForm"
-import SideBar from "./comps/sidebar/sidebar"
+import Form from "./paramForm"
+import SideBar from "./sidebar"
 import Nav from "./navButtons"
 import TopicDoc from "./docpage"
 import Correlation from "./corpage"
