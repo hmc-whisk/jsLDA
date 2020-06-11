@@ -14,16 +14,17 @@ class TopicDoc extends Component {
             docSortSmoothing: 10.0,
             sumDocSortSmoothing: 0
         };
+        console.log(props);
       }
 
-    reorderDocuments() {
+    reorderDocuments = () => {
         var format = d3.format(".2g");
       
         if (this.props.selectedTopic === -1) {
           this.props.documents.sort(function(a, b) { return d3.ascending(a.originalOrder, b.originalOrder); });
           d3.selectAll("div.document").data(this.props.documents)
-          .style("display", "block")
-          .text(function(d) { return "[" + d.id + "] " + this.props.truncate(d.originalText); });
+            .style("display", "block")
+            .text((d) => { return "[" + d.id + "] " + this.props.truncate(d.originalText); });
         }
         else {
           var scores = this.props.documents.map(function (doc, i) {
