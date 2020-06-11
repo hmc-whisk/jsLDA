@@ -346,7 +346,14 @@ class App extends Component {
       }
     });
 
-    temp_documents.push({ "originalOrder" : temp_documents.length, "id" : docID, "date" : docDate, "originalText" : text, "tokens" : tokens, "topicCounts" : topicCounts});
+    temp_documents.push({ 
+      "originalOrder" : temp_documents.length,
+      "id" : docID,
+      "date" : docDate,
+      "originalText" : text,
+      "tokens" : tokens,
+      "topicCounts" : topicCounts
+    });
 
     this.setState({
       stopwords: temp_stopwords,
@@ -446,56 +453,64 @@ class App extends Component {
   sweep() {
     var startTime = Date.now();
 
-    var topicNormalizers = this.zeros(this.numTopics);
-    for (let topic = 0; topic < this.numTopics; topic++) {
-      topicNormalizers[topic] = 1.0 / (this.vocabularySize * this.topicWordSmoothing + this.tokensPerTopic[topic]);
+    // Avoid mutating state
+    let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
+    let temp_topicWeights = this.state.topicWeights.slice();
+
+    var topicNormalizers = this.zeros(this.state.numTopics);
+    for (let topic = 0; topic < this.state.numTopics; topic++) {
+      topicNormalizers[topic] = 1.0 / 
+      (this.state.vocabularySize * this.state.topicWordSmoothing + 
+        temp_tokensPerTopic[topic]);
     }
 
     for (let doc = 0; doc < this.documents.length; doc++) {
-      let currentDoc = this.documents[doc];
+      let currentDoc = this.state.documents[doc];
       let docTopicCounts = currentDoc.topicCounts;
 
       for (let position = 0; position < currentDoc.tokens.length; position++) {
         let token = currentDoc.tokens[position];
         if (token.isStopword) { continue; }
 
-        this.tokensPerTopic[ token.topic ]--;
-        let currentWordTopicCounts = this.wordTopicCounts[ token.word ];
+        temp_tokensPerTopic[ token.topic ]--;
+        let currentWordTopicCounts = this.state.wordTopicCounts[ token.word ];
         currentWordTopicCounts[ token.topic ]--;
         if (currentWordTopicCounts[ token.topic ] === 0) {
           //delete(currentWordTopicCounts[ token.topic ]);
         }
         docTopicCounts[ token.topic ]--;
-        topicNormalizers[ token.topic ] = 1.0 / (this.vocabularySize * this.topicWordSmoothing + this.tokensPerTopic[ token.topic ]);
+        topicNormalizers[ token.topic ] = 1.0 / 
+          (this.state.vocabularySize * this.state.topicWordSmoothing +
+            this.state.tokensPerTopic[ token.topic ]);
 
         let sum = 0.0;
         for (let topic = 0; topic < this.state.numTopics; topic++) {
           if (currentWordTopicCounts[ topic ]) {
-            this.topicWeights[topic] =
-              (this.documentTopicSmoothing + docTopicCounts[topic]) *
-              (this.topicWordSmoothing + currentWordTopicCounts[ topic ]) *
+            temp_topicWeights[topic] =
+              (this.state.documentTopicSmoothing + docTopicCounts[topic]) *
+              (this.state.topicWordSmoothing + currentWordTopicCounts[ topic ]) *
             topicNormalizers[topic];
           }
           else {
-            this.topicWeights[topic] =
-              (this.documentTopicSmoothing + docTopicCounts[topic]) *
-              this.topicWordSmoothing *
+            temp_topicWeights[topic] =
+              (this.state.documentTopicSmoothing + docTopicCounts[topic]) *
+              this.state.topicWordSmoothing *
             topicNormalizers[topic];
           }
-          sum += this.topicWeights[topic];
+          sum += temp_topicWeights[topic];
         }
 
         // Sample from an unnormalized discrete distribution
         var sample = sum * Math.random();
           var i = 0;
-          sample -= this.topicWeights[i];
+          sample -= temp_topicWeights[i];
           while (sample > 0.0) {
             i++;
-            sample -= this.topicWeights[i];
+            sample -= temp_topicWeights[i];
         }
         token.topic = i;
 
-        this.tokensPerTopic[ token.topic ]++;
+        temp_tokensPerTopic[ token.topic ]++;
         if (! currentWordTopicCounts[ token.topic ]) {
           currentWordTopicCounts[ token.topic ] = 1;
         }
@@ -504,14 +519,24 @@ class App extends Component {
         }
         docTopicCounts[ token.topic ]++;
 
-        topicNormalizers[ token.topic ] = 1.0 / (this.vocabularySize * this.topicWordSmoothing + this.tokensPerTopic[ token.topic ]);
+        topicNormalizers[ token.topic ] = 1.0 / 
+          (this.state.vocabularySize * this.state.topicWordSmoothing +
+          temp_tokensPerTopic[ token.topic ]);
       }
     }
 
-    //console.log("sweep in " + (Date.now() - startTime) + " ms");
-    this.completeSweeps += 1;
-    d3.select("#iters").text(this.completeSweeps);
-    if (this.completeSweeps >= this.requestedSweeps) {
+    console.log("sweep in " + (Date.now() - startTime) + " ms");
+
+    this.setState({
+      completeSweeps: this.state.completeSweeps + 1,
+      tokensPerTopic: temp_tokensPerTopic,
+      topicWeights: temp_topicWeights,
+    })
+
+    // TODO: change d3 to React
+    d3.select("#iters").text(this.state.completeSweeps);
+
+    if (this.state.completeSweeps >= this.state.requestedSweeps) {
       //reorderDocuments();
       this.sortTopicWords();
       // displayTopicWords();
