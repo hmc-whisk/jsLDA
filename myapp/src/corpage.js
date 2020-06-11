@@ -8,6 +8,7 @@ import React, { Component } from 'react';
  * measuring which topics appear in documents together.
  */
 
+ 
 class Correlation extends Component {
     constructor(props) {
       super(props);
@@ -17,69 +18,72 @@ class Correlation extends Component {
         // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
         correlationMinTokens: 2,
         correlationMinProportion: 0.05,
-        topNWords: function(wordCounts, n) { return wordCounts.slice(0,n).map( function(d) { return d.word; }).join(" "); }, // Used in timeSeries
       };
     }
 
-    vis = d3.select("#corr-page")
-    .append("svg")
-    .attr("width", this.state.w)
-    .attr("height", this.state.h);
+    // vis = d3.select("#corr-page")
+    // .append("svg")
+    // .attr("width", this.state.w)
+    // .attr("height", this.state.h);
 
-    plotMatrix() {
-        var left = 50;
-        var right = 500;
-        var top = 50;
-        var bottom = 500;
+    topNWords(wordCounts, n) {
+      return wordCounts.slice(0,n).map( function(d) { return d.word; }).join(" ");
+    };
+
+    // plotMatrix() {
+    //     var left = 50;
+    //     var right = 500;
+    //     var top = 50;
+    //     var bottom = 500;
       
-        var correlationMatrix = this.getTopicCorrelations();
-        var correlationGraph = this.getCorrelationGraph(correlationMatrix, -100.0);
+    //     var correlationMatrix = this.getTopicCorrelations();
+    //     var correlationGraph = this.getCorrelationGraph(correlationMatrix, -100.0);
       
-        var topicScale = d3.scalePoint().domain(d3.range(this.props.numTopics)).range([left, right]);
-        var radiusScale = d3.scaleSqrt().domain([0, 1.0]).range([0, 450 / (2 * this.props.numTopics)]);
+    //     var topicScale = d3.scalePoint().domain(d3.range(this.props.numTopics)).range([left, right]);
+    //     var radiusScale = d3.scaleSqrt().domain([0, 1.0]).range([0, 450 / (2 * this.props.numTopics)]);
       
-        var horizontalTopics = this.vis.selectAll("text.hor").data(correlationGraph.nodes);
-        horizontalTopics.exit().remove();
-        horizontalTopics = horizontalTopics.enter().append("text")
-          .attr("class", "hor")
-        .merge(horizontalTopics);
+    //     var horizontalTopics = this.vis.selectAll("text.hor").data(correlationGraph.nodes);
+    //     horizontalTopics.exit().remove();
+    //     horizontalTopics = horizontalTopics.enter().append("text")
+    //       .attr("class", "hor")
+    //     .merge(horizontalTopics);
       
-        horizontalTopics
-          .attr("x", right + 10)
-          .attr("y", function(node) { return topicScale(node.name); })
-          .text(function(node) { return node.words; });
+    //     horizontalTopics
+    //       .attr("x", right + 10)
+    //       .attr("y", function(node) { return topicScale(node.name); })
+    //       .text(function(node) { return node.words; });
       
-        var verticalTopics = this.vis.selectAll("text.ver").data(correlationGraph.nodes);
-        verticalTopics.exit().remove();
-        verticalTopics = verticalTopics.enter().append("text")
-          .attr("class", "ver")
-        .merge(verticalTopics);
+    //     var verticalTopics = this.vis.selectAll("text.ver").data(correlationGraph.nodes);
+    //     verticalTopics.exit().remove();
+    //     verticalTopics = verticalTopics.enter().append("text")
+    //       .attr("class", "ver")
+    //     .merge(verticalTopics);
       
-        verticalTopics
-          .attr("x", function(node) { return topicScale(node.name); })
-          .attr("y", bottom + 10)
-          .attr("transform", function(node) { return "rotate(90," + topicScale(node.name) + "," + (bottom + 10) + ")"; })
-          .text(function(node) { return node.words; });
+    //     verticalTopics
+    //       .attr("x", function(node) { return topicScale(node.name); })
+    //       .attr("y", bottom + 10)
+    //       .attr("transform", function(node) { return "rotate(90," + topicScale(node.name) + "," + (bottom + 10) + ")"; })
+    //       .text(function(node) { return node.words; });
       
-        var circles = this.vis.selectAll("circle").data(correlationGraph.links);
-        circles.exit().remove();
-        circles = circles.enter().append("circle").merge(circles);
+    //     var circles = this.vis.selectAll("circle").data(correlationGraph.links);
+    //     circles.exit().remove();
+    //     circles = circles.enter().append("circle").merge(circles);
       
-        circles.attr("cx", function(link) { return topicScale(link.source); })
-        .attr("cy", function(link) { return topicScale(link.target); })
-        .attr("r", function (link) { return radiusScale(Math.abs(link.value)); })
-        .style("fill", function (link) { return link.value > 0.0 ? "#88f" : "#f88"; })
-        .on("mouseover", function (link) {
-          var tooltip = d3.select("#tooltip");
-          tooltip.style("visibility", "visible")
-          .style("top", (event.pageY-10)+"px").style("left",(event.pageX+20)+"px")
-          .text(correlationGraph.nodes[link.target].words + " / " + correlationGraph.nodes[link.source].words);
-        })
-        .on("mouseout", function () {
-          var tooltip = d3.select("#tooltip");
-          tooltip.style("visibility", "hidden");
-        });
-      }
+    //     circles.attr("cx", function(link) { return topicScale(link.source); })
+    //     .attr("cy", function(link) { return topicScale(link.target); })
+    //     .attr("r", function (link) { return radiusScale(Math.abs(link.value)); })
+    //     .style("fill", function (link) { return link.value > 0.0 ? "#88f" : "#f88"; })
+    //     .on("mouseover", function (link) {
+    //       var tooltip = d3.select("#tooltip");
+    //       tooltip.style("visibility", "visible")
+    //       .style("top", (event.pageY-10)+"px").style("left",(event.pageX+20)+"px")
+    //       .text(correlationGraph.nodes[link.target].words + " / " + correlationGraph.nodes[link.source].words);
+    //     })
+    //     .on("mouseout", function () {
+    //       var tooltip = d3.select("#tooltip");
+    //       tooltip.style("visibility", "hidden");
+    //     });
+    //   }
     
     getTopicCorrelations() {
         // initialize the matrix
@@ -128,7 +132,11 @@ class Correlation extends Component {
     getCorrelationGraph(correlationMatrix, cutoff) {
         var graph = {"nodes": [], "links": []};
         for (var topic = 0; topic < this.props.numTopics; topic++) {
-          graph.nodes.push({"name": topic, "group": 1, "words": this.state.topNWords(this.props.topicWordCounts[topic], 3)});
+          if (this.props.topicWordCounts[topic]){
+          graph.nodes.push({"name": topic, "group": 1, "words": this.topNWords(this.props.topicWordCounts[topic], 3)});}
+          else {
+            graph.nodes.push({"name": topic, "group": 1, "words":""})
+          }
         }
         for (var t1 = 0; t1 < this.props.numTopics; t1++) {
           for (var t2 = 0; t2 < this.props.numTopics; t2++) {
@@ -144,7 +152,7 @@ class Correlation extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        this.plotMatrix();
+        //this.plotMatrix();
     }
 
     render() {
