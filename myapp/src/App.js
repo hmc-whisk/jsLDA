@@ -77,7 +77,13 @@ var QueryString = function () {
 } ();
 
 class App extends Component {
-  state = {
+  constructor(props) {
+    super(props)
+    this.state = this.getInitialState();
+  }
+
+  // Seperate function for easy state reset
+  getInitialState = () => ({
     // Vocabulary statistics
 
     // Needed by reset & parseline
@@ -140,7 +146,7 @@ class App extends Component {
     timer: 0, // used in sweep
     documentTopicSmoothing: 0.1, // (used by sweep)
     topicWordSmoothing: 0.01, // (used by sweep)
-  };
+  });
 
   // Used by sidebar to change selectedTopic and sortVocabByTopic
   selectedTopicChange = (topic) => {
@@ -215,28 +221,26 @@ class App extends Component {
   });
 
   reset() {
-    this.vocabularySize = 0;
-    this.vocabularyCounts = {};
-    this.displayingStopwords = false;
-    this.sortVocabByTopic = false;
-    this.specificityScale = d3.scaleLinear().domain([0,1]).range(["#ffffff", "#99d8c9"]);
-    
-    d3.select("#num-topics-input").property("value", this.numTopics);
-  
-    this.stopwords = {};
-  
-    this.completeSweeps = 0;
-    this.requestedSweeps = 0;
-    d3.select("#iters").text(this.completeSweeps);
-  
-    this.selectedTopic = -1;
-  
-    this.wordTopicCounts = {};
-    this.topicWordCounts = [];
-    this.tokensPerTopic = this.zeros(this.numTopics);
-    this.topicWeights = this.zeros(this.numTopics);
-    
-    this.documents = [];
+    this.setState({
+      vocabularySize: 0,
+      vocabularyCounts: {},
+      displayingStopwords: false,
+      sortVocabByTopic: false,
+      specificityScale: d3.scaleLinear().domain([0,1]).range(["#ffffff", "#99d8c9"]),
+      stopwords: {},
+      completeSweeps: 0,
+      requestedSweeps: 0,
+      selectedTopic: -1,
+      wordTopicCounts: {},
+      topicWordCounts: [],
+      tokensPerTopic: this.zeros(this.state.numTopics),
+      topicWeights: this.zeros(this.state.numTopics),
+      documents: [],
+    })
+
+    // TODO: change this do React code
+    d3.select("#num-topics-input").property("value", this.state.numTopics);
+    d3.select("#iters").text(this.state.completeSweeps);
     d3.selectAll("div.document").remove();
   }
 
@@ -253,13 +257,20 @@ class App extends Component {
       alert("File upload failed. Please try again.");
       throw error;
     } else {
+      // Avoid direct state mutation 
+      let temp_stopwords = this.state.stopwords.slice()
+
       // Create the stoplist
-      stops.split(/\s+/).forEach((w) => { console.log(w); this.state.stopwords[w] = 1; });
+      stops.split(/\s+/).forEach((w) => { console.log(w); temp_stopwords[w] = 1; });
   
       // Load documents and populate the vocabulary
       lines.split("\n").forEach(this.parseLine);
   
       this.sortTopicWords();
+
+      this.setState({
+        stopwords: temp_stopwords,
+      });
       //displayTopicWords();
       // toggleTopicDocuments(0);
       //plotGraph();
@@ -293,6 +304,14 @@ class App extends Component {
       docDate = fields[1]; // do not interpret date as anything but a string
       text = fields[2];
     }
+
+    // Avoid mutating state directly
+    let temp_stopwords = this.state.stopwords.slice();
+    let temp_vocabularyCounts = this.state.vocabularyCounts.slice();
+    let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
+    let temp_wordTopicCounts = this.state.wordTopicCounts.slice();
+    let temp_vocabularySize = this.state.vocabularySize;
+    let temp_documents = this.state.documents.slice();
   
     var tokens = [];
     var rawTokens = text.toLowerCase().match(this.wordPattern);
@@ -301,39 +320,49 @@ class App extends Component {
   
     rawTokens.forEach(function (word) {
       if (word !== "") {
-        var topic = Math.floor(Math.random() * this.numTopics);
+        var topic = Math.floor(Math.random() * this.state.numTopics);
   
-        if (word.length <= 2) { this.stopwords[word] = 1; }
+        if (word.length <= 2) { temp_stopwords[word] = 1; }
   
-        var isStopword = this.stopwords[word];
+        var isStopword = temp_stopwords[word];
         if (isStopword) {
           // Record counts for stopwords, but nothing else
-          if (! this.vocabularyCounts[word]) {
-            this.vocabularyCounts[word] = 1;
+          if (! temp_vocabularyCounts[word]) {
+            temp_vocabularyCounts[word] = 1;
           }
           else {
-            this.vocabularyCounts[word] += 1;
+            temp_vocabularyCounts[word] += 1;
           }
         }
         else {
-          this.tokensPerTopic[topic]++;
-          if (! this.wordTopicCounts[word]) {
-            this.wordTopicCounts[word] = {};
-            this.vocabularySize++;
-            this.vocabularyCounts[word] = 0;
+          temp_tokensPerTopic[topic]++;
+          if (! temp_wordTopicCounts[word]) {
+            temp_wordTopicCounts[word] = {};
+            temp_vocabularySize++;
+            temp_vocabularyCounts[word] = 0;
           }
-          if (! this.wordTopicCounts[word][topic]) {
-            this.wordTopicCounts[word][topic] = 0;
+          if (!temp_wordTopicCounts[word][topic]) {
+            temp_wordTopicCounts[word][topic] = 0;
           }
-          this.wordTopicCounts[word][topic] += 1;
-          this.vocabularyCounts[word] += 1;
-          this.topicCounts[topic] += 1;
+          temp_wordTopicCounts[word][topic] += 1;
+          temp_vocabularyCounts[word] += 1;
+          topicCounts[topic] += 1;
         }
         tokens.push({"word":word, "topic":topic, "isStopword":isStopword });
       }
     });
-    
-    this.documents.push({ "originalOrder" : this.documents.length, "id" : docID, "date" : docDate, "originalText" : text, "tokens" : tokens, "topicCounts" : topicCounts});
+
+    temp_documents.push({ "originalOrder" : this.documents.length, "id" : docID, "date" : docDate, "originalText" : text, "tokens" : tokens, "topicCounts" : topicCounts});
+
+    this.setState({
+      stopwords: temp_stopwords,
+      vocabularyCounts: temp_vocabularyCounts,
+      tokensPerTopic: temp_tokensPerTopic,
+      wordTopicCounts: temp_wordTopicCounts,
+      vocabularySize: temp_vocabularySize,
+      documents: temp_documents,
+    })
+
     // Need to move this selection and adding to #docs-page into a different component
     d3.select("div#docs-page").append("div")
        .attr("class", "document")
@@ -513,7 +542,7 @@ class App extends Component {
         if (token.word === word) {
           token.isStopword = true;
           this.tokensPerTopic[ token.topic ]--;
-          this.docTopicCounts[ token.topic ]--;
+          docTopicCounts[ token.topic ]--;
         }
       }
     });
