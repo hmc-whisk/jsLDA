@@ -673,7 +673,7 @@ function plotMatrix() {
   .attr("cy", function(link) { return topicScale(link.target); })
   .attr("r", function (link) { return radiusScale(Math.abs(link.value)); })
   .style("fill", function (link) { return link.value > 0.0 ? "#88f" : "#f88"; })
-  .on("mouseover", function (link) {
+  .on("mouseover", function (event, link) {
     var tooltip = d3.select("#tooltip");
     tooltip.style("visibility", "visible")
     .style("top", (event.pageY-10)+"px").style("left",(event.pageX+20)+"px")

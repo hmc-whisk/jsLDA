@@ -5,9 +5,12 @@ class SideBar extends Component {
     constructor(props) {
         super(props);
         this.state = {
-          topNWords: function(wordCounts, n) { return wordCounts.slice(0,n).map( function(d) { return d.word; }).join(" "); }, // Used in timeSeries
         };
       }
+
+    topNWords(wordCounts, n) {
+        return wordCounts.slice(0,n).map( function(d) { return d.word; }).join(" ");
+    };
 
     selectedTopicChange = this.props.selectedTopicChange;
 
@@ -16,7 +19,8 @@ class SideBar extends Component {
         var topicTopWords = [];
     
         for (var topic = 0; topic < this.props.numTopics; topic++) {
-        topicTopWords.push(this.state.topNWords(this.props.topicWordCounts[topic], 10));
+        if (this.props.topicWordCounts[topic]) {
+        topicTopWords.push(this.topNWords(this.props.topicWordCounts[topic], 10));}
         }
     
         var topicLines = d3.select("div#topics").selectAll("div.topicwords")
@@ -51,10 +55,11 @@ class SideBar extends Component {
         this.selectedTopicChange(topic);
         }
         // reorderDocuments();
-        vocabTable();
+        // vocabTable();
     }
     
     componentDidMount() {
+        this.toggleTopicDocuments(0)
     }
 
     static getDerivedStateFromProps(props, state) {
