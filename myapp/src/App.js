@@ -1,11 +1,11 @@
 import React, { Component } from 'react'; 
 import './App.css';
 import * as d3 from 'd3';
-import Correlation from './corpage';
-import TopicDoc from './docpage';
-import SideBar from './sidebar';
-import VocabTable from './vocabpage';
-import TimeSeries from './timepage';
+import Correlation from './Correlation';
+import TopicDoc from './TopicDoc';
+import SideBar from './SideBar';
+import VocabTable from './VocabTable';
+import TimeSeries from './TimeSeries';
 
 var XRegExp = require('xregexp')
 
@@ -77,13 +77,7 @@ var QueryString = function () {
 } ();
 
 class App extends Component {
-  constructor(props) {
-    super(props)
-    this.state = this.getInitialState();
-  }
-
-  // Seperate function for easy state reset
-  getInitialState = () => ({
+  state = {
     // Vocabulary statistics
 
     // Needed by reset & parseline
@@ -146,7 +140,7 @@ class App extends Component {
     timer: 0, // used in sweep
     documentTopicSmoothing: 0.1, // (used by sweep)
     topicWordSmoothing: 0.01, // (used by sweep)
-  });
+  };
 
   // Used by sidebar to change selectedTopic and sortVocabByTopic
   selectedTopicChange = (topic) => {
@@ -254,11 +248,11 @@ class App extends Component {
   
   ready = (error, stops, lines) => {
     if (error) { 
-      alert("File upload failed. Please try again.");
+      //alert("File upload failed. Please try again."); // TODO: uncomment when it won't be obnoxious
       throw error;
     } else {
       // Avoid direct state mutation 
-      let temp_stopwords = this.state.stopwords.slice()
+      let temp_stopwords = {...this.state.stopwords};
 
       // Create the stoplist
       stops.split(/\s+/).forEach((w) => { console.log(w); temp_stopwords[w] = 1; });
@@ -306,10 +300,10 @@ class App extends Component {
     }
 
     // Avoid mutating state directly
-    let temp_stopwords = this.state.stopwords.slice();
-    let temp_vocabularyCounts = this.state.vocabularyCounts.slice();
+    let temp_stopwords = {...this.state.stopwords};
+    let temp_vocabularyCounts = {...this.state.vocabularyCounts};
     let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
-    let temp_wordTopicCounts = this.state.wordTopicCounts.slice();
+    let temp_wordTopicCounts = {...this.state.wordTopicCounts};
     let temp_vocabularySize = this.state.vocabularySize;
     let temp_documents = this.state.documents.slice();
   
@@ -352,7 +346,7 @@ class App extends Component {
       }
     });
 
-    temp_documents.push({ "originalOrder" : this.documents.length, "id" : docID, "date" : docDate, "originalText" : text, "tokens" : tokens, "topicCounts" : topicCounts});
+    temp_documents.push({ "originalOrder" : temp_documents.length, "id" : docID, "date" : docDate, "originalText" : text, "tokens" : tokens, "topicCounts" : topicCounts});
 
     this.setState({
       stopwords: temp_stopwords,
