@@ -13,7 +13,6 @@ var XRegExp = require('xregexp')
 // From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
 if (!Object.keys) {
   Object.keys = (function() {
-    'use strict';
     var hasOwnProperty = Object.prototype.hasOwnProperty,
         hasDontEnumBug = !({ toString: null }).propertyIsEnumerable('toString'),
         dontEnums = [
@@ -84,6 +83,9 @@ class App extends Component {
     // Needed by reset & parseline
     vocabularySize: 0,
 
+    documentURL: process.env.PUBLIC_URL + "/documents.txt",
+    stopwordsURL: process.env.PUBLIC_URL + "/stoplist.txt",
+
     // needed by reset & parseline, changeNumTopics
     vocabularyCounts: {},
 
@@ -125,8 +127,8 @@ class App extends Component {
     documents: [],
 
     // Location to store uploaded files
-    documentsFileArray: null,
-    stoplistFileArray: null,
+    documentsFileArray: [],
+    stoplistFileArray: [],
 
     // used by sortTopicWords
     byCountDescending: function (a,b) { return b.count - a.count; },
@@ -143,22 +145,26 @@ class App extends Component {
   // Used by sidebar to change selectedTopic and sortVocabByTopic
   selectedTopicChange = (topic) => {
     this.setState({selectedTopic: topic});
-    if (topic == -1) {
+    if (topic === -1) {
       this.setState({sortVocabByTopic: false})
     }
   }
 
   // Retrieve doc files from upload component
-  onDocumentFileChange(input) {
+  onDocumentFileChange = (event) => {
+    event.preventDefault();
+    console.log(event)
     this.setState({
-      documentsFileArray: input.files,
+      documentsFileArray: event.target.files,
     });
   }
 
   // Retrieve stop word files from upload component
-  onStopwordFileChange(input) {
+  onStopwordFileChange = (event) => {
+    event.preventDefault();
+    console.log(event)
     this.setState({
-      stoplistFileArray: input.files,
+      stoplistFileArray: event.target.files,
     });
   }
 
@@ -176,33 +182,37 @@ class App extends Component {
     return x;
   }
 
-  getStoplistUpload(callback) {
+  getStoplistUpload = new Promise((resolve) => {
+    let text;
     if (this.state.stoplistFileArray.length === 0) {
-        d3.text(stopwordsURL, callback);
+        text = d3.text(this.state.stopwordsURL);
       } else {
         const fileSelection = this.state.stoplistFileArray[0].slice();
-        var reader = new FileReader();
+        let reader = new FileReader();
         reader.onload = function() {
-          var text = reader.result;
-          callback(null, text);
+          text = reader.result;
         };
         reader.readAsText(fileSelection);
-      }
-  }
+    }
+    console.log(text);
+    resolve(text);
+  });
   
-  getDocsUpload(callback) {
+  getDocsUpload = new Promise((resolve) => {
+    let text;
     if (this.state.documentsFileArray.length === 0) {
-        d3.text(documentsURL, callback);
+        text = d3.text(this.state.documentsURL);
     } else {
         const fileSelection = this.state.documentsFileArray[0].slice();
         var reader = new FileReader();
         reader.onload = function() {
-          var text = reader.result;
-          callback(null, text);
+          text = reader.result;
         };
         reader.readAsText(fileSelection);
     }
-  }
+    console.log(text);
+    resolve(text);
+  });
 
   reset() {
     this.vocabularySize = 0;
@@ -230,23 +240,21 @@ class App extends Component {
     d3.selectAll("div.document").remove();
   }
 
-  queueLoad(event) { 
-    event.preventDefault();
+  queueLoad = () => {
     this.reset();
 
-    Promise.all([
-      this.getStoplistUpload(),
-      this.getDocsUpload()
-      ]).then(([stops, lines]) => this.ready(null, stops, lines))
-        .catch(err => this.ready(err, null, null))
+    Promise.all([this.getStoplistUpload,this.getDocsUpload])
+      .then(([stops, lines]) => this.ready(null, stops, lines))
+      .catch(err => this.ready(err, null, null))
   }
   
-  ready(error, stops, lines) {
-    if (error) { alert("File upload failed. Please try again."); throw error;}
-    else {
+  ready = (error, stops, lines) => {
+    if (error) { 
+      alert("File upload failed. Please try again.");
+      throw error;
+    } else {
       // Create the stoplist
-      console.log(stops);
-      stops.split(/\s+/).forEach(function (w) { console.log(w); this.stopwords[w] = 1; });
+      stops.split(/\s+/).forEach((w) => { console.log(w); this.state.stopwords[w] = 1; });
   
       // Load documents and populate the vocabulary
       lines.split("\n").forEach(this.parseLine);
@@ -262,6 +270,8 @@ class App extends Component {
       // timeSeries();
     }
   }
+
+  truncate (s) { return s.length > 300 ? s.substring(0, 299) + "..." : s; }
   
   /**
   * @summary Format/Save tsv document line
@@ -272,13 +282,13 @@ class App extends Component {
   * @description This is the function used in the file parser
   * that both formats lines and save them to the correct location
   */
-  parseLine ( line ) {
-    if (line == "") { return; }
-    var docID = this.documents.length;
+  parseLine = (line) =>  {
+    if (line === "") { return; }
+    var docID = this.state.documents.length;
     var docDate = "";
     var fields = line.split("\t");
     var text = fields[0];  // Assume there's just one field, the text
-    if (fields.length == 3) {  // If it's in [ID]\t[TAG]\t[TEXT] format...
+    if (fields.length === 3) {  // If it's in [ID]\t[TAG]\t[TEXT] format...
       docID = fields[0];
       docDate = fields[1]; // do not interpret date as anything but a string
       text = fields[2];
@@ -287,7 +297,7 @@ class App extends Component {
     var tokens = [];
     var rawTokens = text.toLowerCase().match(this.wordPattern);
     if (rawTokens == null) { return; }
-    var topicCounts = this.zeros(this.numTopics);
+    var topicCounts = this.zeros(this.state.numTopics);
   
     rawTokens.forEach(function (word) {
       if (word !== "") {
@@ -333,17 +343,17 @@ class App extends Component {
   // used by addStop, removeStop in vocab, saveTopicKeys in downloads, sweep in sweep
   sortTopicWords() {
     this.topicWordCounts = [];
-    for (var topic = 0; topic < this.numTopics; topic++) {
+    for (let topic = 0; topic < this.numTopics; topic++) {
       this.topicWordCounts[topic] = [];
     }
   
-    for (var word in this.wordTopicCounts) {
-      for (var topic in this.wordTopicCounts[word]) {
+    for (let word in this.wordTopicCounts) {
+      for (let topic in this.wordTopicCounts[word]) {
         this.topicWordCounts[topic].push({"word":word, "count":this.wordTopicCounts[word][topic]});
       }
     }
   
-    for (var topic = 0; topic < this.numTopics; topic++) {
+    for (let topic = 0; topic < this.numTopics; topic++) {
       this.topicWordCounts[topic].sort(this.byCountDescending);
     }
   }
@@ -414,29 +424,29 @@ class App extends Component {
     var startTime = Date.now();
 
     var topicNormalizers = this.zeros(this.numTopics);
-    for (var topic = 0; topic < this.numTopics; topic++) {
+    for (let topic = 0; topic < this.numTopics; topic++) {
       topicNormalizers[topic] = 1.0 / (this.vocabularySize * this.topicWordSmoothing + this.tokensPerTopic[topic]);
     }
 
-    for (var doc = 0; doc < this.documents.length; doc++) {
-      var currentDoc = this.documents[doc];
-      var docTopicCounts = currentDoc.topicCounts;
+    for (let doc = 0; doc < this.documents.length; doc++) {
+      let currentDoc = this.documents[doc];
+      let docTopicCounts = currentDoc.topicCounts;
 
-      for (var position = 0; position < currentDoc.tokens.length; position++) {
-        var token = currentDoc.tokens[position];
+      for (let position = 0; position < currentDoc.tokens.length; position++) {
+        let token = currentDoc.tokens[position];
         if (token.isStopword) { continue; }
 
         this.tokensPerTopic[ token.topic ]--;
-        var currentWordTopicCounts = this.wordTopicCounts[ token.word ];
+        let currentWordTopicCounts = this.wordTopicCounts[ token.word ];
         currentWordTopicCounts[ token.topic ]--;
-        if (currentWordTopicCounts[ token.topic ] == 0) {
+        if (currentWordTopicCounts[ token.topic ] === 0) {
           //delete(currentWordTopicCounts[ token.topic ]);
         }
         docTopicCounts[ token.topic ]--;
         topicNormalizers[ token.topic ] = 1.0 / (this.vocabularySize * this.topicWordSmoothing + this.tokensPerTopic[ token.topic ]);
 
-        var sum = 0.0;
-        for (var topic = 0; topic < this.numTopics; topic++) {
+        let sum = 0.0;
+        for (let topic = 0; topic < this.state.numTopics; topic++) {
           if (currentWordTopicCounts[ topic ]) {
             this.topicWeights[topic] =
               (this.documentTopicSmoothing + docTopicCounts[topic]) *
