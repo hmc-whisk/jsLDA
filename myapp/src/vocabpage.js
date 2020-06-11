@@ -1,7 +1,7 @@
 import React from "react";
 
 
-class VocabPage extends React.Component {
+class VocabTable extends React.Component {
 
     render() {
         return (
@@ -22,4 +22,4 @@ class VocabPage extends React.Component {
 
 }
 
-export default VocabPage;
+export default VocabTable;

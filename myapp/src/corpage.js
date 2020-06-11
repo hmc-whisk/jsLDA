@@ -1,15 +1,12 @@
 import React from "react";
-// import PageDesc from "./pageDesc"
-import Files from "./fileSelect"
 
-class DocsPage extends React.Component {
+class Correlation extends React.Component {
 
     render() {
         return (
             <div id="pages">
 
                 <div id="docs-page" class="page">
-                    <Files />
                     <div class="help">Documents are sorted by their proportion of the currently selected topic, biased
 						to prefer longer documents.</div>
 
@@ -23,4 +20,8 @@ class DocsPage extends React.Component {
 
 }
 
-export default DocsPage;
+
+export default Correlation;
+
+{/* <div class="help">Documents are sorted by their proportion of the currently selected topic, biased
+						to prefer longer documents.</div> */}

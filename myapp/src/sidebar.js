@@ -1,13 +1,11 @@
 import React from "react";
-import TopicItem from "./topicRender"
 
-class Sidebar extends React.Component {
+class SideBar extends React.Component {
 
     render() {
         return (
             <div className="sidebar">
 
-                <TopicItem />
 
             </div>
         );
@@ -15,4 +13,4 @@ class Sidebar extends React.Component {
 
 }
 
-export default Sidebar;
+export default SideBar;

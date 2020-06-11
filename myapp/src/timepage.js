@@ -1,7 +1,7 @@
 import React from "react";
 
 
-class TSPage extends React.Component {
+class TimeSeries extends React.Component {
 
     render() {
         return (
@@ -22,4 +22,4 @@ class TSPage extends React.Component {
 
 }
 
-export default TSPage;
+export default TimeSeries;

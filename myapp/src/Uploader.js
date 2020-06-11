@@ -1,6 +1,6 @@
 import React from "react";
 
-class Files extends React.Component {
+class Uploader extends React.Component {
 
     render() {
         return (
@@ -22,4 +22,4 @@ class Files extends React.Component {
 
 }
 
-export default Files;
+export default Uploader;

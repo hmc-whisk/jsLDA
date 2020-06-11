@@ -1,18 +1,16 @@
 import React from 'react';
 import './App.css';
 import Form from "./comps/paramForm"
-import Sidebar from "./comps/sidebar/sidebar"
-import Nav from "./comps/page/navButtons"
-import DocsPage from "./comps/page/docsPage"
-import CorrPage from "./comps/page/corrPage"
-import VocabPage from "./comps/page/vocabPage"
-import DLPage from "./comps/page/dlPage"
-import TSPage from "./comps/page/tsPage"
+import SideBar from "./comps/sidebar/sidebar"
+import Nav from "./navButtons"
+import TopicDoc from "./docpage"
+import Correlation from "./corpage"
+import VocabTable from "./vocabpage"
+import DLPage from "./dlpage"
+import TimeSeries from "./timepage"
 
 
 class App extends React.Component {
-
-
 
   constructor(props) {
     super(props);
@@ -41,7 +39,7 @@ class App extends React.Component {
       selectedTab: tabID
     });
 
-    console.log("Tab is now: " + tabID)
+    console.log("Tab   is now: " + tabID)
   }
 
 
@@ -49,16 +47,16 @@ class App extends React.Component {
     var DisplayPage;
     switch (this.state.selectedTab) {
       case "docs-tab":
-        DisplayPage = <DocsPage />;
+        DisplayPage = <TopicDoc />;
         break;
       case "corr-tab":
-        DisplayPage = <CorrPage />;
+        DisplayPage = <Correlation />;
         break;
       case "vocab-tab":
-        DisplayPage = <VocabPage />;
+        DisplayPage = <VocabTable />;
         break;
       case "ts-tab":
-        DisplayPage = <TSPage />;
+        DisplayPage = <TimeSeries />;
         break;
       case "dl-tab":
         DisplayPage = <DLPage />;
@@ -71,7 +69,7 @@ class App extends React.Component {
     return (
       <div className="App">
         <Form iter={this.state.iter} numTopics={this.state.numTopics} onClick={this.updateIter} onChange={this.updateNumTopics} />
-        <Sidebar />
+        <SideBar />
         <div id="tabwrapper">
 
           <Nav onClick={this.changeTab} />
