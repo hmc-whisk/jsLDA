@@ -1,6 +1,11 @@
 import React, { Component } from 'react'; 
 import * as d3 from 'd3';
+import Uploader from './Uploader';
 
+/////@TODO rename this file to TopicDoc.js?/////
+/*
+ * @todo give this class doc strings
+**/
 class TopicDoc extends Component {
     constructor(props) {
         super(props);
@@ -51,14 +56,9 @@ class TopicDoc extends Component {
     render() {
         return (
             <div id="docs-page" className="page">
-                <div className="upload">
-                    <form onSubmit="event.preventDefault(); queueLoad();">
-                    <div>Use a different collection:</div>
-                    <div>Documents <input id="docs-file-input" type="file" onChange="onDocumentFileChange(this)" size="10"/></div>
-                    <div>Stoplist  <input id="stops-file-input" type="file" onChange="onStopwordFileChange(this)" size="10"/></div>
-                    <div><button id="load-inputs">Upload</button></div>
-                    </form>
-                </div>
+                <Uploader onDocumentFileChange = {this.props.onDocumentFileChange}
+                          onStopwordFileChange = {this.props.onStopwordFileChange}
+                          onFileUpload = {this.props.onFileUpload}/>
             <div className="help">Documents are sorted by their proportion of the currently selected topic, biased to prefer longer documents.</div>
             </div>
         )
