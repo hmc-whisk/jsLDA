@@ -3,7 +3,7 @@ import './App.css';
 import * as d3 from 'd3';
 import Correlation from './Correlation';
 import TopicDoc from './TopicDoc';
-import SideBar from './Sidebar';
+import SideBar from './SideBar';
 import VocabTable from './VocabTable';
 import TimeSeries from './TimeSeries';
 import Nav from './navButtons';
@@ -202,40 +202,29 @@ class App extends Component {
   }
 
   getStoplistUpload = () => (new Promise((resolve) => {
-    console.log("getStoplistUploaded started run");
-    let text;
     if (this.state.stoplistFileArray.length === 0) {
-        text = d3.text(this.state.stopwordsURL);
+        resolve(d3.text(this.state.stopwordsURL));
       } else {
-        const fileSelection = this.state.stoplistFileArray[0].slice();
-        let reader = new FileReader();
-        reader.onload = function() {
-          text = reader.result;
-        };
-        reader.readAsText(fileSelection[0]);
+      const fileSelection = this.state.stoplistFileArray[0].slice();
+      let reader = new FileReader();
+      reader.onload = function() {
+        resolve(reader.result);
+      };
+      reader.readAsText(fileSelection[0]);
     }
-    console.log(text);
-    resolve(text);
   }));
   
   getDocsUpload = () => (new Promise((resolve) => {
-    let text;
-    console.log("getDocsUploaded started run");
     if (this.state.documentsFileArray.length === 0) {
-        text = d3.text(this.state.documentsURL);
-        console.log("d3 doc text: " + text)
-
+        resolve(d3.text(this.state.documentsURL));
     } else {
-        const fileSelection = this.state.documentsFileArray[0].slice();
-        var reader = new FileReader();
-        reader.onload = function() {
-          text = reader.result;
-          console.log("upload doc text: " + text)
-        };
-        reader.readAsText(fileSelection[0]);
+      const fileSelection = this.state.documentsFileArray[0].slice();
+      var reader = new FileReader();
+      reader.onload = function() {
+        resolve(reader.result);
+      };
+      reader.readAsText(fileSelection[0]);
     }
-    console.log("getDocsUploaded finished run");
-    resolve(text);
   }));
 
   reset() {
