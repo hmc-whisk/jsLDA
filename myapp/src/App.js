@@ -262,6 +262,10 @@ class App extends Component {
 
       // Create the stoplist
       stops.split(/\s+/).forEach((w) => {temp_stopwords[w] = 1; });
+
+      this.setState({
+        stopwords: temp_stopwords,
+      });
   
       // Load documents and populate the vocabulary
       //lines.split("\n").forEach(this.parseLine);
@@ -269,9 +273,7 @@ class App extends Component {
   
       this.sortTopicWords();
 
-      this.setState({
-        stopwords: temp_stopwords,
-      });
+  
       //displayTopicWords();
       // toggleTopicDocuments(0);
       //plotGraph();
