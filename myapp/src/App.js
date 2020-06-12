@@ -397,7 +397,6 @@ class App extends Component {
   }
 
   parseDoc = (lines) =>  {
-    console.log("Lines:" +lines)
     // Avoid mutating state directly
     let temp_stopwords = {...this.state.stopwords};
     let temp_vocabularyCounts = {...this.state.vocabularyCounts};
@@ -407,9 +406,10 @@ class App extends Component {
     let temp_documents = this.state.documents.slice();
 
     let splitLines = lines.split("\n");
+
     for(let i = 0; i < splitLines.length; i++) {
       let line = splitLines[i];
-      if (line === "") { return; }
+      if (line === "") { continue; }
       var docID = this.state.documents.length;
       console.log("Parsing document: " + line);
       var docDate = "";
@@ -474,6 +474,7 @@ class App extends Component {
         .attr("class", "document")
         .text("[" + docID + "] " + this.truncate(text));
     }
+    console.log("Broke out of loop");
     this.setState({
       stopwords: temp_stopwords,
       vocabularyCounts: temp_vocabularyCounts,
@@ -481,7 +482,8 @@ class App extends Component {
       wordTopicCounts: temp_wordTopicCounts,
       vocabularySize: temp_vocabularySize,
       documents: temp_documents,
-    })
+    });
+    console.log(temp_documents);
   }
 
   // This function is the callback for "input", it changes as we move the slider
