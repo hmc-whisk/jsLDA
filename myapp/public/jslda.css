@@ -28,8 +28,10 @@ div#topics div:hover { background-color: #ccc; }
 
 div.help { padding: 20px 100px 15px 30px; color: #777; }
 
-.page { padding:10px 10px 25px; background-color: #fff; margin-top: 4px; display: none; }
-div#docs-page { display: block; }
+.page { padding:10px 10px 25px; background-color: #fff; margin-top: 4px; display:block;}
+/*div#docs-page { display: block; }*/
+div#corr-page { display: block; }
+
 div.document { font-family: Alegreya, Georgia, Times; margin: 20px; padding: 10px; }
 
 text { font-size: small; fill: #555; dominant-baseline: middle;; }
@@ -42,4 +44,3 @@ table td { text-align: right; padding: 9px 8px 0px 8px; }
 
 input#docs-file-input {}
 input#stops-file-input {}
-

@@ -27,6 +27,7 @@ class VocabTable extends Component {
       wordFrequencies.forEach(function (d) {
         var isStopword = stopwords[d.word];
         var score = specificity(d.word);
+
         var row = table.append("tr");
         row.append("td").text(d.word).style("color", isStopword ? "#444444" : "#000000");
         row.append("td").text(d.count);
@@ -37,6 +38,7 @@ class VocabTable extends Component {
           console.log(d.word);
           if (! isStopword) { addStop(d.word); }
           else { removeStop(d.word); }
+
         });
       });
     }
@@ -69,6 +71,7 @@ class VocabTable extends Component {
     }
   
     specificity = (word)=> {
+
       return 1.0 - (this.entropy(d3.values(this.props.wordTopicCounts[word])) / Math.log(this.props.numTopics));
     }
   

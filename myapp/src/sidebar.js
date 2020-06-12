@@ -18,6 +18,7 @@ class SideBar extends Component {
     displayTopicWords() {
         var topicTopWords = [];
         let toggleTopicDocuments = this.toggleTopicDocuments;
+
     
         for (var topic = 0; topic < this.props.numTopics; topic++) {
         if (this.props.topicWordCounts[topic]) {
@@ -33,6 +34,7 @@ class SideBar extends Component {
         .enter().append("div")
         .attr("class", "topicwords")
         .on("click", function(d, i) { toggleTopicDocuments(i); })
+
         .merge(topicLines);
         
         topicLines.transition().text(function(d, i) { return "[" + i + "] " + d; });
@@ -42,6 +44,7 @@ class SideBar extends Component {
 
     // Used by displayTopicWords in display
     toggleTopicDocuments = (topic) => {
+
         if (topic === this.props.selectedTopic) {
         // unselect the topic
         d3.selectAll("div.topicwords").attr("class", "topicwords");

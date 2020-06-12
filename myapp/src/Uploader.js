@@ -1,5 +1,6 @@
 import React from 'react';
 
+
 /**
  * @summary An upload component
  * @description A function component of a file upload interface
@@ -21,11 +22,13 @@ export function Uploader(props) {
     return(
       <div className="upload">
         <form onSubmit={(event) => {event.preventDefault(); props.onFileUpload();}}>
+
             <div>Use a different collection:</div>
             <div>
                 <label htmlFor="docs-file-input">Documents</label> 
                 <input id="docs-file-input" type="file" 
                 onChange={(event) => props.onDocumentFileChange(event)} size="10"/>
+
             </div>
             <div>
                 <label htmlFor="stops-file-input" >Stoplist</label>  
@@ -34,6 +37,7 @@ export function Uploader(props) {
             </div>
             <div>
                 <input type="submit" id="load-inputs" value="Upload"/>
+
             </div>
         </form>
       </div>
