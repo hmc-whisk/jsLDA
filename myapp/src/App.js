@@ -6,6 +6,9 @@ import TopicDoc from './TopicDoc';
 import SideBar from './Sidebar';
 import VocabTable from './VocabTable';
 import TimeSeries from './TimeSeries';
+import Nav from './navButtons';
+import Form from './paramForm';
+import DLPage from './downloads';
 
 var XRegExp = require('xregexp')
 
@@ -78,13 +81,16 @@ var QueryString = function () {
 
 class App extends Component {
   state = {
+
     // Vocabulary statistics
 
     // Needed by reset & parseline
     vocabularySize: 0,
 
+
     documentsURL: process.env.PUBLIC_URL + "/documents.txt",
     stopwordsURL: process.env.PUBLIC_URL + "/stoplist.txt",
+
 
     // needed by reset & parseline, changeNumTopics
     vocabularyCounts: {},
@@ -107,6 +113,7 @@ class App extends Component {
     requestedSweeps: 0,
 
     // in reset, changeNumTopics
+
     selectedTopic: 0,
 
     // Needed by reset & parseline & sortTopicWords, changeNumTopics
@@ -140,12 +147,23 @@ class App extends Component {
     timer: 0, // used in sweep
     documentTopicSmoothing: 0.1, // (used by sweep)
     topicWordSmoothing: 0.01, // (used by sweep)
-  };
+    
+    selectedTab: "docs-tab"
+    };
+
+  changeTab = (tabID) => {
+    this.setState({
+      selectedTab: tabID
+    });
+
+    console.log("Tab   is now: " + tabID)
+  }
 
   // Used by sidebar to change selectedTopic and sortVocabByTopic
   selectedTopicChange = (topic) => {
     this.setState({selectedTopic: topic});
     if (topic === -1) {
+
       this.setState({sortVocabByTopic: false})
     }
   }
@@ -166,6 +184,7 @@ class App extends Component {
     this.setState({
       stoplistFileArray: [Array.prototype.slice.call(event.target.files)],
     });
+
   }
 
   findNumTopics() {
@@ -205,6 +224,7 @@ class App extends Component {
     if (this.state.documentsFileArray.length === 0) {
         text = d3.text(this.state.documentsURL);
         console.log("d3 doc text: " + text)
+
     } else {
         const fileSelection = this.state.documentsFileArray[0].slice();
         var reader = new FileReader();
@@ -273,7 +293,6 @@ class App extends Component {
   
       this.sortTopicWords();
 
-  
       //displayTopicWords();
       // toggleTopicDocuments(0);
       //plotGraph();
@@ -286,6 +305,7 @@ class App extends Component {
   }
 
   truncate (s) { return s.length > 300 ? s.substring(0, 299) + "..." : s; }
+
   
   /**
   * @summary Format/Save tsv document line
@@ -504,6 +524,7 @@ class App extends Component {
       documents: temp_documents,
     });
 
+
   }
 
   // This function is the callback for "input", it changes as we move the slider
@@ -526,6 +547,7 @@ class App extends Component {
   changeNumTopics(numTopics_) {
     this.numTopics = numTopics_;
     this.selectedTopic = 0;
+
     
     this.completeSweeps = 0;
     this.requestedSweeps = 0;
@@ -545,6 +567,7 @@ class App extends Component {
     tempWordTopicCounts = this.wordTopicCounts;
 
     tempDocuments.forEach( function( currentDoc, i ) {
+
       currentDoc.topicCounts = this.zeros(this.numTopics);
       for (var position = 0; position < currentDoc.tokens.length; position++) {
         var token = currentDoc.tokens[position];
@@ -557,6 +580,7 @@ class App extends Component {
           }
           else {
             tempWordTopicCounts[token.word][token.topic] += 1;
+
           }
           currentDoc.topicCounts[token.topic] += 1;
         }
@@ -653,6 +677,7 @@ class App extends Component {
             topicNormalizers[topic];
           }
           sum += temp_topicWeights[topic];
+
         }
 
         // Sample from an unnormalized discrete distribution
@@ -666,6 +691,7 @@ class App extends Component {
         token.topic = i;
 
         temp_tokensPerTopic[ token.topic ]++;
+
         if (! currentWordTopicCounts[ token.topic ]) {
           currentWordTopicCounts[ token.topic ] = 1;
         }
@@ -692,6 +718,7 @@ class App extends Component {
     d3.select("#iters").text(this.state.completeSweeps);
 
     if (this.state.completeSweeps >= this.state.requestedSweeps) {
+
       //reorderDocuments();
       this.sortTopicWords();
       // displayTopicWords();
@@ -783,11 +810,59 @@ class App extends Component {
     //   requestedSweeps += 50;
     //   timer = d3.timer(sweep);
     // });
+
+    var DisplayPage;
+    switch (this.state.selectedTab) {
+      case "docs-tab":
+        DisplayPage = <TopicDoc selectedTopic={this.state.selectedTopic} 
+        documents={this.state.documents} 
+        sortVocabByTopic={this.state.sortVocabByTopic} 
+        truncate={this.state.truncate}
+        numTopics={this.state.numTopics}
+        onDocumentFileChange={this.onDocumentFileChange}
+        onStopwordFileChange={this.onStopwordFileChange}
+        onFileUpload = {this.queueLoad}
+        />;
+        break;
+      case "corr-tab":
+        DisplayPage = <Correlation topicWordCounts ={this.state.topicWordCounts} 
+        topNWords={this.state.topNWords} 
+        numTopics={this.state.numTopics} 
+        zeros={this.zeros} 
+        documents={this.state.documents}/>;
+        break;
+      case "vocab-tab":
+        DisplayPage = <VocabTable displayingStopwords={this.state.displayingStopwords}
+        sortVocabByTopic={this.state.sortVocabByTopic}
+        vocabularyCounts={this.state.vocabularyCounts}
+        wordTopicCounts={this.state.wordTopicCounts}
+        selectedTopic={this.state.selectedTopic}
+        stopwords ={this.state.stopwords}
+        numTopics={this.state.numTopics}
+        byCountDescending={this.state.byCountDescending}
+        addStop = {this.addStop}
+        removeStop = {this.removeStop}/>;
+        break;
+      case "ts-tab":
+        DisplayPage = <TimeSeries numTopics={this.state.numTopics}
+        documents={this.state.documents}
+        topicWordCounts={this.state.topicWordCounts}/>;
+        break;
+      case "dl-tab":
+        DisplayPage = <DLPage />;
+        break;
+      default:
+        DisplayPage = null;
+        break;
+    }
+
     return (
       <div id="app">
       <div id="tooltip"></div>
 
       <div id="main">
+
+      
       <div id="form" className="top">
         <button id="sweep">Run 50 iterations</button>
         Iterations: <span id="iters">0</span>
@@ -803,50 +878,12 @@ class App extends Component {
                />
 
       <div id="tabwrapper">
-      <div className="tabs">
-      <ul>
-      <li id="docs-tab" className="selected">Topic Documents</li>
-      <li id="corr-tab">Topic Correlations</li>
-      <li id="ts-tab">Time Series</li>
 
-      <li id="dl-tab">Downloads</li>
-      <li id="vocab-tab">Vocabulary</li>
-      </ul>
-      </div>
+      <Nav onClick={this.changeTab}/>
       <div id="pages">
 
-      <TopicDoc selectedTopic={this.state.selectedTopic} 
-                documents={this.state.documents} 
-                sortVocabByTopic={this.state.sortVocabByTopic} 
-                truncate={this.state.truncate}
-                numTopics={this.state.numTopics}
-                onDocumentFileChange={this.onDocumentFileChange}
-                onStopwordFileChange={this.onStopwordFileChange}
-                onFileUpload = {this.queueLoad}/>
+      {DisplayPage}
 
-      <VocabTable displayingStopwords={this.state.displayingStopwords} sortVocabByTopic={this.state.sortVocabByTopic} vocabularyCounts={this.state.vocabularyCounts}
-      wordTopicCounts={this.state.wordTopicCounts} selectedTopic={this.state.selectedTopic} stopwords ={this.state.stopwords} numTopics={this.state.numTopics}
-      byCountDescending={this.state.byCountDescending} addStop = {this.addStop} removeStop = {this.removeStop}/>
-
-      <TimeSeries numTopics={this.state.numTopics} documents={this.state.documents} topicWordCounts={this.state.topicWordCounts}/>
-
-      <Correlation topicWordCounts ={this.state.topicWordCounts} 
-                   topNWords={this.state.topNWords} 
-                   numTopics={this.state.numTopics} 
-                   zeros={this.zeros} 
-                   documents={this.state.documents}/>
-
-      <div id="dl-page" className="page">
-        <div className="help">Each file is in comma-separated format.</div>
-        <ul>
-        <li><a id="doctopics-dl" href="javascript:;" download="doctopics.csv" onClick="saveDocTopics()">Document topics</a></li>
-        <li><a id="topicwords-dl" href="javascript:;" download="topicwords.csv" onClick="saveTopicWords()">Topic words</a></li>
-        <li><a id="keys-dl" href="javascript:;" download="keys.csv" onClick="saveTopicKeys()">Topic summaries</a></li>
-        <li><a id="topictopic-dl" href="javascript:;" download="topictopic.csv" onClick="saveTopicPMI()">Topic-topic connections</a></li>
-        <li><a id="graph-dl" href="javascript:;" download="gephi.csv" onClick="saveGraph()">Doc-topic graph file (for Gephi)</a></li>
-        <li><a id="state-dl" href="javascript:;" download="state.csv" onClick="saveState()">Complete sampling state</a></li>
-        </ul>
-      </div>
 
       </div>
       </div>
