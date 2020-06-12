@@ -6,7 +6,9 @@ import TopicDoc from './docpage';
 import SideBar from './sidebar';
 import VocabTable from './vocabpage';
 import TimeSeries from './timepage';
-
+import Nav from './navButtons';
+import Form from './paramForm';
+import DLPage from './dlpage';
 var XRegExp = require('xregexp')
 
 // Where is it used?
@@ -78,7 +80,9 @@ var QueryString = function () {
 } ();
 
 class App extends Component {
-  state = {
+  constructor(props) {
+    super(props)
+  this.state = {
     // Vocabulary statistics
 
     // Needed by reset & parseline
@@ -140,8 +144,20 @@ class App extends Component {
     topicWordSmoothing: 0.01, // (used by sweep)
 
     documentsURL: "documents.txt",
-    stopwordsURL: "stoplist.txt"
+    stopwordsURL: "stoplist.txt",
+    selectedTab: "docs-tab"
   };
+  this.changeTab = this.changeTab.bind(this);
+};
+
+  changeTab(tabID) {
+    this.setState({
+      selectedTab: tabID
+    });
+
+    console.log("Tab   is now: " + tabID)
+  }
+
 
   // Used by sidebar to change selectedTopic and sortVocabByTopic
   selectedTopicChange = (topic) => {
@@ -562,12 +578,12 @@ class App extends Component {
     this.queueLoad();
     
     // used by parseLine
-    d3.select("#docs-tab").on("click", function() {
-      d3.selectAll(".page").style("display", "none");
-      d3.selectAll("ul li").attr("className", "");
-      d3.select("#docs-page").style("display", "block");
-      d3.select("#docs-tab").attr("className", "selected");
-    });
+  //   d3.select("#docs-tab").on("click", function() {
+  //     d3.selectAll(".page").style("display", "none");
+  //     d3.selectAll("ul li").attr("className", "");
+  //     d3.select("#docs-page").style("display", "block");
+  //     d3.select("#docs-tab").attr("className", "selected");
+  //   });
   }
   
   render() {
@@ -576,11 +592,59 @@ class App extends Component {
     //   requestedSweeps += 50;
     //   timer = d3.timer(sweep);
     // });
+
+    var DisplayPage;
+    switch (this.state.selectedTab) {
+      case "docs-tab":
+        DisplayPage = <TopicDoc selectedTopic={this.state.selectedTopic} 
+        documents={this.state.documents} 
+        sortVocabByTopic={this.state.sortVocabByTopic} 
+        truncate={this.state.truncate}
+        numTopics={this.state.numTopics}
+        onDocumentFileChange={this.onDocumentFileChange}
+        onStopwordFileChange={this.onStopwordFileChange}
+        onFileUpload = {this.queueLoad}
+        />;
+        break;
+      case "corr-tab":
+        DisplayPage = <Correlation topicWordCounts ={this.state.topicWordCounts} 
+        topNWords={this.state.topNWords} 
+        numTopics={this.state.numTopics} 
+        zeros={this.zeros} 
+        documents={this.state.documents}/>;
+        break;
+      case "vocab-tab":
+        DisplayPage = <VocabTable displayingStopwords={this.state.displayingStopwords}
+        sortVocabByTopic={this.state.sortVocabByTopic}
+        vocabularyCounts={this.state.vocabularyCounts}
+        wordTopicCounts={this.state.wordTopicCounts}
+        selectedTopic={this.state.selectedTopic}
+        stopwords ={this.state.stopwords}
+        numTopics={this.state.numTopics}
+        byCountDescending={this.state.byCountDescending}
+        addStop = {this.addStop}
+        removeStop = {this.removeStop}/>;
+        break;
+      case "ts-tab":
+        DisplayPage = <TimeSeries numTopics={this.state.numTopics}
+        documents={this.state.documents}
+        topicWordCounts={this.state.topicWordCounts}/>;
+        break;
+      case "dl-tab":
+        DisplayPage = <DLPage />;
+        break;
+      default:
+        DisplayPage = null;
+        break;
+    }
+
     return (
       <div id="app">
       <div id="tooltip"></div>
 
       <div id="main">
+
+        
       <div id="form" className="top">
         <button id="sweep">Run 50 iterations</button>
         Iterations: <span id="iters">0</span>
@@ -596,59 +660,10 @@ class App extends Component {
                />
 
       <div id="tabwrapper">
-      <div className="tabs">
-      <ul>
-      <li id="docs-tab" className="selected">Topic Documents</li>
-      <li id="corr-tab">Topic Correlations</li>
-      <li id="ts-tab">Time Series</li>
-
-      <li id="dl-tab">Downloads</li>
-      <li id="vocab-tab">Vocabulary</li>
-      </ul>
-      </div>
+      <Nav onClick={this.changeTab}/>
       <div id="pages">
 
-      <TopicDoc selectedTopic={this.state.selectedTopic} 
-                documents={this.state.documents} 
-                sortVocabByTopic={this.state.sortVocabByTopic} 
-                truncate={this.state.truncate}
-                numTopics={this.state.numTopics}
-                onDocumentFileChange={this.onDocumentFileChange}
-                onStopwordFileChange={this.onStopwordFileChange}
-                onFileUpload = {this.queueLoad}/>
-
-      <VocabTable displayingStopwords={this.state.displayingStopwords}
-                  sortVocabByTopic={this.state.sortVocabByTopic}
-                  vocabularyCounts={this.state.vocabularyCounts}
-                  wordTopicCounts={this.state.wordTopicCounts}
-                  selectedTopic={this.state.selectedTopic}
-                  stopwords ={this.state.stopwords}
-                  numTopics={this.state.numTopics}
-                  byCountDescending={this.state.byCountDescending}
-                  addStop = {this.addStop}
-                  removeStop = {this.removeStop}/>
-
-      <TimeSeries numTopics={this.state.numTopics}
-                  documents={this.state.documents}
-                  topicWordCounts={this.state.topicWordCounts}/>
-
-      <Correlation topicWordCounts ={this.state.topicWordCounts} 
-                   topNWords={this.state.topNWords} 
-                   numTopics={this.state.numTopics} 
-                   zeros={this.zeros} 
-                   documents={this.state.documents}/>
-
-      <div id="dl-page" className="page">
-        <div className="help">Each file is in comma-separated format.</div>
-        <ul>
-        <li><a id="doctopics-dl" href="javascript:;" download="doctopics.csv" onClick="saveDocTopics()">Document topics</a></li>
-        <li><a id="topicwords-dl" href="javascript:;" download="topicwords.csv" onClick="saveTopicWords()">Topic words</a></li>
-        <li><a id="keys-dl" href="javascript:;" download="keys.csv" onClick="saveTopicKeys()">Topic summaries</a></li>
-        <li><a id="topictopic-dl" href="javascript:;" download="topictopic.csv" onClick="saveTopicPMI()">Topic-topic connections</a></li>
-        <li><a id="graph-dl" href="javascript:;" download="gephi.csv" onClick="saveGraph()">Doc-topic graph file (for Gephi)</a></li>
-        <li><a id="state-dl" href="javascript:;" download="state.csv" onClick="saveState()">Complete sampling state</a></li>
-        </ul>
-      </div>
+      {DisplayPage}
 
       </div>
       </div>
