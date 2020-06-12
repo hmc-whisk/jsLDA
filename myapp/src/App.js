@@ -83,6 +83,10 @@ class App extends Component {
   constructor(props) {
     super(props)
   this.state = {
+
+    // Temporary variable for manipulating input bar
+    tempNumTopics:25,
+
     // Vocabulary statistics
 
     // Needed by reset & parseline
@@ -147,7 +151,10 @@ class App extends Component {
     stopwordsURL: "stoplist.txt",
     selectedTab: "docs-tab"
   };
+  
   this.changeTab = this.changeTab.bind(this);
+  this.addSweepRequests = this.addSweepRequests.bind(this);
+  this.updateTempNumTopics = this.updateTempNumTopics.bind(this);
 };
 
   changeTab(tabID) {
@@ -239,7 +246,7 @@ class App extends Component {
   
     this.completeSweeps = 0;
     this.requestedSweeps = 0;
-    d3.select("#iters").text(this.completeSweeps);
+    // d3.select("#iters").text(this.completeSweeps);
   
     this.selectedTopic = -1;
   
@@ -585,13 +592,23 @@ class App extends Component {
   //     d3.select("#docs-tab").attr("className", "selected");
   //   });
   }
+
+  addSweepRequests() {
+    this.setState({
+      requestedSweeps: this.state.requestedSweeps + 50
+    });
+    console.log(this.state.requestedSweeps);
+  }
+
+  updateTempNumTopics(val) {
+    this.setState({
+      tempNumTopics: val
+    });
+    console.log("Blur Here: " + this.state.tempNumTopics);
+  }
   
   render() {
-    // Remember to add:
-    // d3.select("#sweep").on("click", function() {
-    //   requestedSweeps += 50;
-    //   timer = d3.timer(sweep);
-    // });
+
 
     var DisplayPage;
     switch (this.state.selectedTab) {
@@ -644,13 +661,17 @@ class App extends Component {
 
       <div id="main">
 
-        
-      <div id="form" className="top">
+      <Form completeSweeps={this.state.completeSweeps} 
+            requestedSweeps = {this.state.requestedSweeps} 
+            numTopics={this.state.tempNumTopics} 
+            onClick={this.addSweepRequests} 
+            onBlur={this.updateTempNumTopics} />
+      {/* <div id="form" className="top">
         <button id="sweep">Run 50 iterations</button>
         Iterations: <span id="iters">0</span>
 
       <span id="num_topics_control">Train with <input id="num-topics-input" type="range" name="topics" value="25" min="3" max="100" onInput="updateTopicCount(this)" onChange="onTopicsChange(this)"/> <span id="num_topics_display">25</span> topics</span>
-      </div>
+      </div> */}
 
       <SideBar selectedTopic={this.state.selectedTopic} 
                sortVocabByTopic={this.state.sortVocabByTopic} 

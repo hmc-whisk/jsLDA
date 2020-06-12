@@ -1,12 +1,15 @@
 import React from "react";
-
+import Slider from "./slider"
 class Form extends React.Component {
 
     constructor(props) {
         super(props);
 
+        this. state = {sliderValue:25};
+
         this.handleClick = this.handleClick.bind(this)
-        this.handleChange = this.handleChange.bind(this)
+        this.updateNumDisplay = this.updateNumDisplay.bind(this);
+
     }
 
     handleClick() {
@@ -14,9 +17,10 @@ class Form extends React.Component {
         this.props.onClick();
     }
 
-    handleChange(e) {
-        const val = e.target.value;
-        this.props.onChange(val);
+    updateNumDisplay(val) {
+        this.setState({
+            sliderValue: val
+          });
     }
 
 
@@ -24,10 +28,8 @@ class Form extends React.Component {
         return (
             <div id="form" className="top">
 
-                <button id="sweep" onClick={this.handleClick}>Run 50 iterations</button> Iterations: <span id="iters"> {this.props.iter} </span>
-
-                <span id="num_topics_control">Train with <input id="num-topics-input" type="range" name="topics" value={this.props.numTopics}
-                    min="3" max="100" onChange={this.handleChange} /> <span id="num_topics_display">  </span>  {this.props.numTopics} Topics </span>
+                <button id="sweep" onClick={this.handleClick} >Run 50 iterations</button> Iterations: <span id="iters"> {this.props.iter} </span>
+                <Slider onChange={this.updateNumDisplay} sliderValue = {this.state.sliderValue} onBlur={this.props.onBlur}/> 
             </div>
         );
     }
