@@ -83,7 +83,7 @@ class App extends Component {
     // Needed by reset & parseline
     vocabularySize: 0,
 
-    documentURL: process.env.PUBLIC_URL + "/documents.txt",
+    documentsURL: process.env.PUBLIC_URL + "/documents.txt",
     stopwordsURL: process.env.PUBLIC_URL + "/stoplist.txt",
 
     // needed by reset & parseline, changeNumTopics
@@ -153,9 +153,9 @@ class App extends Component {
   // Retrieve doc files from upload component
   onDocumentFileChange = (event) => {
     event.preventDefault();
-    console.log(event)
+    console.log(event.target.files)
     this.setState({
-      documentsFileArray: event.target.files,
+      documentsFileArray: [Array.prototype.slice.call(event.target.files)],
     });
   }
 
@@ -164,7 +164,7 @@ class App extends Component {
     event.preventDefault();
     console.log(event)
     this.setState({
-      stoplistFileArray: event.target.files,
+      stoplistFileArray: [Array.prototype.slice.call(event.target.files)],
     });
   }
 
@@ -182,7 +182,8 @@ class App extends Component {
     return x;
   }
 
-  getStoplistUpload = new Promise((resolve) => {
+  getStoplistUpload = () => (new Promise((resolve) => {
+    console.log("getStoplistUploaded started run");
     let text;
     if (this.state.stoplistFileArray.length === 0) {
         text = d3.text(this.state.stopwordsURL);
@@ -192,27 +193,30 @@ class App extends Component {
         reader.onload = function() {
           text = reader.result;
         };
-        reader.readAsText(fileSelection);
+        reader.readAsText(fileSelection[0]);
     }
     console.log(text);
     resolve(text);
-  });
+  }));
   
-  getDocsUpload = new Promise((resolve) => {
+  getDocsUpload = () => (new Promise((resolve) => {
     let text;
+    console.log("getDocsUploaded started run");
     if (this.state.documentsFileArray.length === 0) {
         text = d3.text(this.state.documentsURL);
+        console.log("d3 doc text: " + text)
     } else {
         const fileSelection = this.state.documentsFileArray[0].slice();
         var reader = new FileReader();
         reader.onload = function() {
           text = reader.result;
+          console.log("upload doc text: " + text)
         };
-        reader.readAsText(fileSelection);
+        reader.readAsText(fileSelection[0]);
     }
-    console.log(text);
+    console.log("getDocsUploaded finished run");
     resolve(text);
-  });
+  }));
 
   reset() {
     this.setState({
@@ -239,11 +243,13 @@ class App extends Component {
   }
 
   queueLoad = () => {
-    this.reset();
 
-    Promise.all([this.getStoplistUpload,this.getDocsUpload])
-      .then(([stops, lines]) => this.ready(null, stops, lines))
-      .catch(err => this.ready(err, null, null))
+    this.reset();
+    console.log("got past reset");
+    Promise.all([this.getStoplistUpload(),this.getDocsUpload()])
+      .then(([stops, lines]) => {console.log("Promised Stops: " + stops); this.ready(null, stops, lines)})
+      .catch(err => this.ready(err, null, null));
+    console.log("got past promise");
   }
   
   ready = (error, stops, lines) => {
@@ -255,10 +261,11 @@ class App extends Component {
       let temp_stopwords = {...this.state.stopwords};
 
       // Create the stoplist
-      stops.split(/\s+/).forEach((w) => { console.log(w); temp_stopwords[w] = 1; });
+      stops.split(/\s+/).forEach((w) => {temp_stopwords[w] = 1; });
   
       // Load documents and populate the vocabulary
-      lines.split("\n").forEach(this.parseLine);
+      //lines.split("\n").forEach(this.parseLine);
+      this.parseDoc(lines);
   
       this.sortTopicWords();
 
@@ -290,6 +297,7 @@ class App extends Component {
   parseLine = (line) =>  {
     if (line === "") { return; }
     var docID = this.state.documents.length;
+    console.log("Parsing document: " + docID);
     var docDate = "";
     var fields = line.split("\t");
     var text = fields[0];  // Assume there's just one field, the text
@@ -386,6 +394,94 @@ class App extends Component {
     for (let topic = 0; topic < this.numTopics; topic++) {
       this.topicWordCounts[topic].sort(this.byCountDescending);
     }
+  }
+
+  parseDoc = (lines) =>  {
+    console.log("Lines:" +lines)
+    // Avoid mutating state directly
+    let temp_stopwords = {...this.state.stopwords};
+    let temp_vocabularyCounts = {...this.state.vocabularyCounts};
+    let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
+    let temp_wordTopicCounts = {...this.state.wordTopicCounts};
+    let temp_vocabularySize = this.state.vocabularySize;
+    let temp_documents = this.state.documents.slice();
+
+    let splitLines = lines.split("\n");
+    for(let i = 0; i < splitLines.length; i++) {
+      let line = splitLines[i];
+      if (line === "") { return; }
+      var docID = this.state.documents.length;
+      console.log("Parsing document: " + line);
+      var docDate = "";
+      var fields = line.split("\t");
+      var text = fields[0];  // Assume there's just one field, the text
+      if (fields.length === 3) {  // If it's in [ID]\t[TAG]\t[TEXT] format...
+        docID = fields[0];
+        docDate = fields[1]; // do not interpret date as anything but a string
+        text = fields[2];
+      }
+    
+      var tokens = [];
+      var rawTokens = text.toLowerCase().match(this.wordPattern);
+      if (rawTokens == null) { return; }
+      var topicCounts = this.zeros(this.state.numTopics);
+    
+      rawTokens.forEach(function (word) {
+        if (word !== "") {
+          var topic = Math.floor(Math.random() * this.state.numTopics);
+    
+          if (word.length <= 2) { temp_stopwords[word] = 1; }
+    
+          var isStopword = temp_stopwords[word];
+          if (isStopword) {
+            // Record counts for stopwords, but nothing else
+            if (! temp_vocabularyCounts[word]) {
+              temp_vocabularyCounts[word] = 1;
+            }
+            else {
+              temp_vocabularyCounts[word] += 1;
+            }
+          }
+          else {
+            temp_tokensPerTopic[topic]++;
+            if (! temp_wordTopicCounts[word]) {
+              temp_wordTopicCounts[word] = {};
+              temp_vocabularySize++;
+              temp_vocabularyCounts[word] = 0;
+            }
+            if (!temp_wordTopicCounts[word][topic]) {
+              temp_wordTopicCounts[word][topic] = 0;
+            }
+            temp_wordTopicCounts[word][topic] += 1;
+            temp_vocabularyCounts[word] += 1;
+            topicCounts[topic] += 1;
+          }
+          tokens.push({"word":word, "topic":topic, "isStopword":isStopword });
+        }
+      });
+
+      temp_documents.push({ 
+        "originalOrder" : temp_documents.length,
+        "id" : docID,
+        "date" : docDate,
+        "originalText" : text,
+        "tokens" : tokens,
+        "topicCounts" : topicCounts
+      });
+
+      // Need to move this selection and adding to #docs-page into a different component
+      d3.select("div#docs-page").append("div")
+        .attr("class", "document")
+        .text("[" + docID + "] " + this.truncate(text));
+    }
+    this.setState({
+      stopwords: temp_stopwords,
+      vocabularyCounts: temp_vocabularyCounts,
+      tokensPerTopic: temp_tokensPerTopic,
+      wordTopicCounts: temp_wordTopicCounts,
+      vocabularySize: temp_vocabularySize,
+      documents: temp_documents,
+    })
   }
 
   // This function is the callback for "input", it changes as we move the slider
