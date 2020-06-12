@@ -12,13 +12,17 @@ class TopicDoc extends Component {
         this.state = {
             // used by reorderDocuments
             docSortSmoothing: 10.0,
-            sumDocSortSmoothing: 0
         };
         console.log(props);
       }
 
     reorderDocuments = () => {
         var format = d3.format(".2g");
+        let selectedTopic = this.props.selectedTopic;
+        let docSortSmoothing = this.state.docSortSmoothing;
+        let documents = this.props.documents;
+        let truncate = this.props.truncate;
+        let sumDocSortSmoothing = this.state.docSortSmoothing * this.props.numTopics;
       
         if (this.props.selectedTopic === -1) {
           this.props.documents.sort(function(a, b) { return d3.ascending(a.originalOrder, b.originalOrder); });
@@ -28,7 +32,7 @@ class TopicDoc extends Component {
         }
         else {
           var scores = this.props.documents.map(function (doc, i) {
-            return {docID: i, score: (doc.topicCounts[this.props.selectedTopic] + this.state.docSortSmoothing) / (doc.tokens.length + this.state.sumDocSortSmoothing)};
+            return {docID: i, score: (doc.topicCounts[selectedTopic] + docSortSmoothing) / (doc.tokens.length + sumDocSortSmoothing)};
           });
           scores.sort(function(a, b) {
             return b.score - a.score;
@@ -40,14 +44,13 @@ class TopicDoc extends Component {
           }); */
           // Put in render?
           d3.selectAll("div.document").data(scores)
-            .style("display", function(d) { return this.props.documents[d.docID].topicCounts[this.props.selectedTopic] > 0 ? "block" : "none"; })
-            .text(function(d) { return "[" + this.props.documents[d.docID].id + "/" + format(d.score * 100) + "%] " + this.props.truncate(this.props.documents[d.docID].originalText); });
+            .style("display", function(d) { return documents[d.docID].topicCounts[selectedTopic] > 0 ? "block" : "none"; })
+            .text(function(d) { return "[" + documents[d.docID].id + "/" + format(d.score * 100) + "%] " + truncate(documents[d.docID].originalText); });
          }
       }
     
     
     componentDidMount() {
-        this.setState({sumDocSortSmoothing:this.state.docSortSmoothing * this.props.numTopics});
     }
 
     componentDidUpdate(prevProps) {
