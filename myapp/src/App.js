@@ -1,14 +1,14 @@
 import React, { Component } from 'react'; 
 import './App.css';
 import * as d3 from 'd3';
-import Correlation from './corpage';
+import Correlation from './Correlation';
 import TopicDoc from './docpage';
-import SideBar from './sidebar';
-import VocabTable from './vocabpage';
-import TimeSeries from './timepage';
+import SideBar from './Sidebar';
+import VocabTable from './VocabTable';
+import TimeSeries from './TimeSeries';
 import Nav from './navButtons';
 import Form from './paramForm';
-import DLPage from './dlpage';
+import DLPage from './downloads';
 var XRegExp = require('xregexp')
 
 // Where is it used?
