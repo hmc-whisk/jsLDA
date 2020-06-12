@@ -382,22 +382,21 @@ class App extends Component {
   // used by addStop, removeStop in vocab, saveTopicKeys in downloads, sweep in sweep
   sortTopicWords() {
     let tempTopicWordCounts = [];
-    for (let topic = 0; topic < this.numTopics; topic++) {
+    for (let topic = 0; topic < this.state.numTopics; topic++) {
       tempTopicWordCounts[topic] = [];
     }
   
-    for (let word in this.wordTopicCounts) {
-      for (let topic in this.wordTopicCounts[word]) {
-        tempTopicWordCounts[topic].push({"word":word, "count":this.wordTopicCounts[word][topic]});
+    for (let word in this.state.wordTopicCounts) {
+      for (let topic in this.state.wordTopicCounts[word]) {
+        tempTopicWordCounts[topic].push({"word":word, "count":this.state.wordTopicCounts[word][topic]});
       }
     }
   
-    for (let topic = 0; topic < this.numTopics; topic++) {
-      tempTopicWordCounts[topic].sort(this.byCountDescending);
+    for (let topic = 0; topic < this.state.numTopics; topic++) {
+      tempTopicWordCounts[topic].sort(this.state.byCountDescending);
     }
 
-    this.setState({topicWordCounts: tempTopicWordCounts});
-    
+    this.setState({topicWordCounts: tempTopicWordCounts});    
     // this.topicWordCounts = [];
     // for (let topic = 0; topic < this.numTopics; topic++) {
     //   this.topicWordCounts[topic] = [];
