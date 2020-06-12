@@ -17,20 +17,26 @@ class VocabTable extends Component {
       var wordFrequencies = this.mostFrequentWords(this.props.displayingStopwords, this.props.sortVocabByTopic).slice(0, 499);
       var table = d3.select("#vocab-table tbody");
       table.selectAll("tr").remove();
-    
+      
+      let stopwords = this.props.stopwords;
+      let specificity = this.specificity;
+      let specificityScale = this.specificityScale;
+      let addStop = this.props.addStop;
+      let removeStop = this.props.removeStop;
+
       wordFrequencies.forEach(function (d) {
-        var isStopword = this.props.stopwords[d.word];
-        var score = this.specificity(d.word);
+        var isStopword = stopwords[d.word];
+        var score = specificity(d.word);
         var row = table.append("tr");
         row.append("td").text(d.word).style("color", isStopword ? "#444444" : "#000000");
         row.append("td").text(d.count);
         row.append("td").text(isStopword ? "NA" : format(score))
-        .style("background-color", this.specificityScale(score));
-        row.append("td").append("button").text(this.props.stopwords[d.word] ? "unstop" : "stop")
+        .style("background-color", specificityScale(score));
+        row.append("td").append("button").text(stopwords[d.word] ? "unstop" : "stop")
         .on("click", function () {
           console.log(d.word);
-          if (! isStopword) { this.props.addStop(d.word); }
-          else { this.props.removeStop(d.word); }
+          if (! isStopword) { addStop(d.word); }
+          else { removeStop(d.word); }
         });
       });
     }
@@ -62,7 +68,7 @@ class VocabTable extends Component {
       return wordCounts;
     }
   
-    specificity(word) {
+    specificity = (word)=> {
       return 1.0 - (this.entropy(d3.values(this.props.wordTopicCounts[word])) / Math.log(this.props.numTopics));
     }
   

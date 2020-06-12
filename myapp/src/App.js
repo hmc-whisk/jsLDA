@@ -3,7 +3,7 @@ import './App.css';
 import * as d3 from 'd3';
 import Correlation from './Correlation';
 import TopicDoc from './TopicDoc';
-import SideBar from './SideBar';
+import SideBar from './Sidebar';
 import VocabTable from './VocabTable';
 import TimeSeries from './TimeSeries';
 
@@ -107,7 +107,7 @@ class App extends Component {
     requestedSweeps: 0,
 
     // in reset, changeNumTopics
-    selectedTopic: -1,
+    selectedTopic: 0,
 
     // Needed by reset & parseline & sortTopicWords, changeNumTopics
     wordTopicCounts: {},
@@ -294,106 +294,124 @@ class App extends Component {
   * @description This is the function used in the file parser
   * that both formats lines and save them to the correct location
   */
-  parseLine = (line) =>  {
-    if (line === "") { return; }
-    var docID = this.state.documents.length;
-    console.log("Parsing document: " + docID);
-    var docDate = "";
-    var fields = line.split("\t");
-    var text = fields[0];  // Assume there's just one field, the text
-    if (fields.length === 3) {  // If it's in [ID]\t[TAG]\t[TEXT] format...
-      docID = fields[0];
-      docDate = fields[1]; // do not interpret date as anything but a string
-      text = fields[2];
-    }
+  // parseLine = (line) =>  {
+  //   if (line === "") { return; }
+  //   var docID = this.state.documents.length;
+  //   console.log("Parsing document: " + docID);
+  //   var docDate = "";
+  //   var fields = line.split("\t");
+  //   var text = fields[0];  // Assume there's just one field, the text
+  //   if (fields.length === 3) {  // If it's in [ID]\t[TAG]\t[TEXT] format...
+  //     docID = fields[0];
+  //     docDate = fields[1]; // do not interpret date as anything but a string
+  //     text = fields[2];
+  //   }
 
-    // Avoid mutating state directly
-    let temp_stopwords = {...this.state.stopwords};
-    let temp_vocabularyCounts = {...this.state.vocabularyCounts};
-    let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
-    let temp_wordTopicCounts = {...this.state.wordTopicCounts};
-    let temp_vocabularySize = this.state.vocabularySize;
-    let temp_documents = this.state.documents.slice();
+  //   // Avoid mutating state directly
+  //   let temp_stopwords = {...this.state.stopwords};
+  //   let temp_vocabularyCounts = {...this.state.vocabularyCounts};
+  //   let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
+  //   let temp_wordTopicCounts = {...this.state.wordTopicCounts};
+  //   let temp_vocabularySize = this.state.vocabularySize;
+  //   let temp_documents = this.state.documents.slice();
   
-    var tokens = [];
-    var rawTokens = text.toLowerCase().match(this.wordPattern);
-    if (rawTokens == null) { return; }
-    var topicCounts = this.zeros(this.state.numTopics);
+  //   var tokens = [];
+  //   var rawTokens = text.toLowerCase().match(this.wordPattern);
+  //   if (rawTokens == null) { return; }
+  //   var topicCounts = this.zeros(this.state.numTopics);
   
-    rawTokens.forEach(function (word) {
-      if (word !== "") {
-        var topic = Math.floor(Math.random() * this.state.numTopics);
+  //   rawTokens.forEach(function (word) {
+  //     if (word !== "") {
+  //       var topic = Math.floor(Math.random() * this.state.numTopics);
   
-        if (word.length <= 2) { temp_stopwords[word] = 1; }
+  //       if (word.length <= 2) { temp_stopwords[word] = 1; }
   
-        var isStopword = temp_stopwords[word];
-        if (isStopword) {
-          // Record counts for stopwords, but nothing else
-          if (! temp_vocabularyCounts[word]) {
-            temp_vocabularyCounts[word] = 1;
-          }
-          else {
-            temp_vocabularyCounts[word] += 1;
-          }
-        }
-        else {
-          temp_tokensPerTopic[topic]++;
-          if (! temp_wordTopicCounts[word]) {
-            temp_wordTopicCounts[word] = {};
-            temp_vocabularySize++;
-            temp_vocabularyCounts[word] = 0;
-          }
-          if (!temp_wordTopicCounts[word][topic]) {
-            temp_wordTopicCounts[word][topic] = 0;
-          }
-          temp_wordTopicCounts[word][topic] += 1;
-          temp_vocabularyCounts[word] += 1;
-          topicCounts[topic] += 1;
-        }
-        tokens.push({"word":word, "topic":topic, "isStopword":isStopword });
-      }
-    });
+  //       var isStopword = temp_stopwords[word];
+  //       if (isStopword) {
+  //         // Record counts for stopwords, but nothing else
+  //         if (! temp_vocabularyCounts[word]) {
+  //           temp_vocabularyCounts[word] = 1;
+  //         }
+  //         else {
+  //           temp_vocabularyCounts[word] += 1;
+  //         }
+  //       }
+  //       else {
+  //         temp_tokensPerTopic[topic]++;
+  //         if (! temp_wordTopicCounts[word]) {
+  //           temp_wordTopicCounts[word] = {};
+  //           temp_vocabularySize++;
+  //           temp_vocabularyCounts[word] = 0;
+  //         }
+  //         if (!temp_wordTopicCounts[word][topic]) {
+  //           temp_wordTopicCounts[word][topic] = 0;
+  //         }
+  //         temp_wordTopicCounts[word][topic] += 1;
+  //         temp_vocabularyCounts[word] += 1;
+  //         topicCounts[topic] += 1;
+  //       }
+  //       tokens.push({"word":word, "topic":topic, "isStopword":isStopword });
+  //     }
+  //   });
 
-    temp_documents.push({ 
-      "originalOrder" : temp_documents.length,
-      "id" : docID,
-      "date" : docDate,
-      "originalText" : text,
-      "tokens" : tokens,
-      "topicCounts" : topicCounts
-    });
+  //   temp_documents.push({ 
+  //     "originalOrder" : temp_documents.length,
+  //     "id" : docID,
+  //     "date" : docDate,
+  //     "originalText" : text,
+  //     "tokens" : tokens,
+  //     "topicCounts" : topicCounts
+  //   });
 
-    this.setState({
-      stopwords: temp_stopwords,
-      vocabularyCounts: temp_vocabularyCounts,
-      tokensPerTopic: temp_tokensPerTopic,
-      wordTopicCounts: temp_wordTopicCounts,
-      vocabularySize: temp_vocabularySize,
-      documents: temp_documents,
-    })
+  //   this.setState({
+  //     stopwords: temp_stopwords,
+  //     vocabularyCounts: temp_vocabularyCounts,
+  //     tokensPerTopic: temp_tokensPerTopic,
+  //     wordTopicCounts: temp_wordTopicCounts,
+  //     vocabularySize: temp_vocabularySize,
+  //     documents: temp_documents,
+  //   })
 
-    // Need to move this selection and adding to #docs-page into a different component
-    d3.select("div#docs-page").append("div")
-       .attr("class", "document")
-       .text("[" + docID + "] " + this.truncate(text));
-  }
+  //   // Need to move this selection and adding to #docs-page into a different component
+  //   d3.select("div#docs-page").append("div")
+  //      .attr("class", "document")
+  //      .text("[" + docID + "] " + this.truncate(text));
+  // }
+
 
   // used by addStop, removeStop in vocab, saveTopicKeys in downloads, sweep in sweep
   sortTopicWords() {
-    this.topicWordCounts = [];
+    let tempTopicWordCounts = [];
     for (let topic = 0; topic < this.numTopics; topic++) {
-      this.topicWordCounts[topic] = [];
+      tempTopicWordCounts[topic] = [];
     }
   
     for (let word in this.wordTopicCounts) {
       for (let topic in this.wordTopicCounts[word]) {
-        this.topicWordCounts[topic].push({"word":word, "count":this.wordTopicCounts[word][topic]});
+        tempTopicWordCounts[topic].push({"word":word, "count":this.wordTopicCounts[word][topic]});
       }
     }
   
     for (let topic = 0; topic < this.numTopics; topic++) {
-      this.topicWordCounts[topic].sort(this.byCountDescending);
+      tempTopicWordCounts[topic].sort(this.byCountDescending);
     }
+
+    this.setState({topicWordCounts: tempTopicWordCounts});
+    
+    // this.topicWordCounts = [];
+    // for (let topic = 0; topic < this.numTopics; topic++) {
+    //   this.topicWordCounts[topic] = [];
+    // }
+  
+    // for (let word in this.wordTopicCounts) {
+    //   for (let topic in this.wordTopicCounts[word]) {
+    //     this.topicWordCounts[topic].push({"word":word, "count":this.wordTopicCounts[word][topic]});
+    //   }
+    // }
+  
+    // for (let topic = 0; topic < this.numTopics; topic++) {
+    //   this.topicWordCounts[topic].sort(this.byCountDescending);
+    // }
   }
 
   parseDoc = (lines) =>  {
@@ -404,6 +422,7 @@ class App extends Component {
     let temp_wordTopicCounts = {...this.state.wordTopicCounts};
     let temp_vocabularySize = this.state.vocabularySize;
     let temp_documents = this.state.documents.slice();
+    let numTopics = this.state.numTopics;
 
     let splitLines = lines.split("\n");
 
@@ -411,7 +430,7 @@ class App extends Component {
       let line = splitLines[i];
       if (line === "") { continue; }
       var docID = this.state.documents.length;
-      console.log("Parsing document: " + line);
+      //console.log("Parsing document: " + line);
       var docDate = "";
       var fields = line.split("\t");
       var text = fields[0];  // Assume there's just one field, the text
@@ -422,13 +441,12 @@ class App extends Component {
       }
     
       var tokens = [];
-      var rawTokens = text.toLowerCase().match(this.wordPattern);
-      if (rawTokens == null) { return; }
-      var topicCounts = this.zeros(this.state.numTopics);
-    
+      var rawTokens = text.toLowerCase().match(XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g"));
+      if (rawTokens == null) { continue; }
+      var topicCounts = this.zeros(numTopics);
       rawTokens.forEach(function (word) {
         if (word !== "") {
-          var topic = Math.floor(Math.random() * this.state.numTopics);
+          var topic = Math.floor(Math.random() * (numTopics));
     
           if (word.length <= 2) { temp_stopwords[word] = 1; }
     
@@ -459,7 +477,6 @@ class App extends Component {
           tokens.push({"word":word, "topic":topic, "isStopword":isStopword });
         }
       });
-
       temp_documents.push({ 
         "originalOrder" : temp_documents.length,
         "id" : docID,
@@ -483,7 +500,7 @@ class App extends Component {
       vocabularySize: temp_vocabularySize,
       documents: temp_documents,
     });
-    console.log(temp_documents);
+
   }
 
   // This function is the callback for "input", it changes as we move the slider
@@ -505,37 +522,74 @@ class App extends Component {
 
   changeNumTopics(numTopics_) {
     this.numTopics = numTopics_;
-    this.selectedTopic = -1;
+    this.selectedTopic = 0;
     
     this.completeSweeps = 0;
     this.requestedSweeps = 0;
     d3.select("#iters").text(this.completeSweeps);
     
-    this.wordTopicCounts = {};
-    Object.keys(this.vocabularyCounts).forEach(function (word) { this.wordTopicCounts[word] = {} });
+    let tempWordTopicCounts = {};
+    Object.keys(this.vocabularyCounts).forEach(function (word) { tempWordTopicCounts[word] = {} });
+    this.setState({wordTopicCounts:tempWordTopicCounts})
+
+    // this.wordTopicCounts = {};
+    // Object.keys(this.vocabularyCounts).forEach(function (word) { this.wordTopicCounts[word] = {} });
     
-    this.topicWordCounts = [];
-    this.tokensPerTopic = this.zeros(this.numTopics);
-    this.topicWeights = this.zeros(this.numTopics);
-    
-    this.documents.forEach( function( currentDoc, i ) {
+    let tempTopicWordCounts = [];
+    let tempTokensPerTopic = this.zeros(this.numTopics);
+    let tempTopicWeights = this.zeros(this.numTopics);
+    let tempDocuments = this.documents;
+    tempWordTopicCounts = this.wordTopicCounts;
+
+    tempDocuments.forEach( function( currentDoc, i ) {
       currentDoc.topicCounts = this.zeros(this.numTopics);
       for (var position = 0; position < currentDoc.tokens.length; position++) {
         var token = currentDoc.tokens[position];
         token.topic = Math.floor(Math.random() * this.numTopics);
         
         if (! token.isStopword) {
-          this.tokensPerTopic[token.topic]++;
-          if (! this.wordTopicCounts[token.word][token.topic]) {
-            this.wordTopicCounts[token.word][token.topic] = 1;
+          tempTokensPerTopic[token.topic]++;
+          if (! tempWordTopicCounts[token.word][token.topic]) {
+            tempWordTopicCounts[token.word][token.topic] = 1;
           }
           else {
-            this.wordTopicCounts[token.word][token.topic] += 1;
+            tempWordTopicCounts[token.word][token.topic] += 1;
           }
           currentDoc.topicCounts[token.topic] += 1;
         }
       }
     });
+
+    this.setState({
+      topicWordCounts: tempTopicWordCounts,
+      tokensPerTopic: tempTokensPerTopic,
+      topicWeights: tempTopicWeights,
+      documents: tempDocuments,
+      wordTopicCounts: tempWordTopicCounts
+    });
+
+    // this.topicWordCounts = [];
+    // this.tokensPerTopic = this.zeros(this.numTopics);
+    // this.topicWeights = this.zeros(this.numTopics);
+    
+    // this.documents.forEach( function( currentDoc, i ) {
+    //   currentDoc.topicCounts = this.zeros(this.numTopics);
+    //   for (var position = 0; position < currentDoc.tokens.length; position++) {
+    //     var token = currentDoc.tokens[position];
+    //     token.topic = Math.floor(Math.random() * this.numTopics);
+        
+    //     if (! token.isStopword) {
+    //       this.tokensPerTopic[token.topic]++;
+    //       if (! this.wordTopicCounts[token.word][token.topic]) {
+    //         this.wordTopicCounts[token.word][token.topic] = 1;
+    //       }
+    //       else {
+    //         this.wordTopicCounts[token.word][token.topic] += 1;
+    //       }
+    //       currentDoc.topicCounts[token.topic] += 1;
+    //     }
+    //   }
+    // });
 
     this.sortTopicWords();
     // displayTopicWords();
