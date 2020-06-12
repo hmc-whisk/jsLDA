@@ -418,13 +418,15 @@ class App extends Component {
     // Avoid mutating state directly
     let temp_stopwords = {...this.state.stopwords};
     let temp_vocabularyCounts = {...this.state.vocabularyCounts};
-    let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
+    // let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
+    let temp_tokensPerTopic = this.zeros(this.state.numTopics);
     let temp_wordTopicCounts = {...this.state.wordTopicCounts};
     let temp_vocabularySize = this.state.vocabularySize;
     let temp_documents = this.state.documents.slice();
     let numTopics = this.state.numTopics;
 
     let splitLines = lines.split("\n");
+    console.log(temp_tokensPerTopic)
 
     for(let i = 0; i < splitLines.length; i++) {
       let line = splitLines[i];
