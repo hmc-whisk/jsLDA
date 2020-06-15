@@ -31,6 +31,7 @@ div.help { padding: 20px 100px 15px 30px; color: #777; }
 .page { padding:10px 10px 25px; background-color: #fff; margin-top: 4px; display: none; }
 div#docs-page { display: block; }
 div.document { font-family: Alegreya, Georgia, Times; margin: 20px; padding: 10px; }
+div#ts-page { display: block; }
 
 text { font-size: small; fill: #555; dominant-baseline: middle;; }
 
