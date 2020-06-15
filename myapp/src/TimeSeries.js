@@ -6,23 +6,32 @@ class TimeSeries extends Component {
         super(props);
         this.state = {
             topicTimeGroups: [],
+
             // Constants for metadata time series views.
-            timeSeriesWidth: 500, // used in createTimeSVGs, timeSeries
-            timeSeriesHeight: 75, // used in createTimeSVGs, timeSeries
-            topNWords: function(wordCounts, n) { 
-                return wordCounts.slice(0,n).map((d) => d.word).join(" "); 
-            }
+            timeSeriesWidth: 500, 
+            timeSeriesHeight: 75,
         };
     }
 
     _setRef(componentNode) {
         this._rootNode = componentNode;
     }
+
+    /**
+     * @summary Returns a string of the top n words
+     * @param {Array} wordCounts ordered list of top words
+     * @param {Int} n number of words to return
+     * @returns {String} the top n words 
+     */
+    topNWords(wordCounts, n) { 
+        return wordCounts.slice(0,n).map((d) => d.word).join(" "); 
+    }
     
-    // used by ready, changeNumTopics in processing
+    /**
+     * @summary Creates skeleton of svg component
+     */
     createTimeSVGs () {
         var tsPage = d3.select(this._rootNode);
-        console.log(tsPage);
         // Restart the visualizations
         tsPage.select("svg").remove();
         let temp_topicTimeGroups = [];
@@ -49,7 +58,9 @@ class TimeSeries extends Component {
         });
     }
 
-    // used by sweeep in sweep, changeNumTopics in processing
+    /**
+     * @summary Updates the info in the timeseries graphs
+     */
     timeSeries() {
         for (var topic = 0; topic < this.props.numTopics; topic++) {
             var topicProportions = this.props.documents
@@ -84,7 +95,7 @@ class TimeSeries extends Component {
                     .attr("d", area(topicMeans));
                 this.state.topicTimeGroups[topic]
                     .select("text")
-                    .text(this.state.topNWords(this.props.topicWordCounts[topic], 3))
+                    .text(this.topNWords(this.props.topicWordCounts[topic], 3))
             }
         } 
     }
@@ -107,89 +118,6 @@ class TimeSeries extends Component {
         )
     }
 }
-
-// /**
-//  * @summary Component for displaying topic time series
-//  * 
-//  * @requires
-//  *  @prop numTopics
-//  *  @prop documents
-//  *  @prop topicWordCounts
-//  */
-// class TimeSeries extends Component {
-//     constructor(props) {
-//         super(props);
-//         this.state = {
-//             // Constants for metadata time series views.
-//             timeSeriesWidth: 500, // used in createTimeSVGs, timeSeries
-//             timeSeriesHeight: 75, // used in createTimeSVGs, timeSeries
-//         };
-
-//     }
-
-//     /**
-//      * @summary creates/returns an array of objects with necessary graph info
-//      * @returns [topic1Info, topic2Info, ..., topicNInfo] where
-//      * topicXInfo = {
-//      *  means: [{key: timeKey, value: topicTimeMean}]
-//      *  topWords: String of top 3 words
-//      * }
-//      */
-//     getTopicTimeGroups() {
-//         let topicTimeGroups = [];
-
-//         for (var topic = 0; topic < this.props.numTopics; topic++) {
-//             var topicProportions = this.props.documents
-//                 .map(function (d) { 
-//                     return {
-//                         date: d.date, 
-//                         p: d.topicCounts[topic] / d.tokens.length
-//                     }; 
-//                 });
-
-//             var topicMeans = d3
-//                 .nest()
-//                 .key(function (d) {return d.date; })
-//                 .rollup(function (d) {return d3
-//                     .mean(d, function (x) {return x.p}); })
-//                 .entries(topicProportions);
-
-//             topicTimeGroups.push({
-//                 means: topicMeans,
-//                 topWords: this.topNWords(this.props.topicWordCounts[topic],3),
-//             })
-//         }
-//         console.log(topicTimeGroups);
-//         return topicTimeGroups;
-//     }
-
-//     /**
-//      * Returns 
-//      */
-//     getTopicTimeGraphs() {
-//         let topicTimeGroups = this.getTopicTimeGroups();
-//     }
-
-//     getTopicTimeGraph(topicTimeGroup) {
-        
-//     }
-
-//     topNWords(wordCounts, n) { 
-//         return wordCounts.slice(0,n).map((d) => d.word).join(" "); 
-//     }
-
-//     render() {
-//         let topicTimeGraphs = this.getTopicTimeGraphs();
-
-//         return (
-//             <div id="ts-page" className="page">
-//                 <div className="help">Documents are grouped by their "date" field (the second column in the input file). These plots show the average document proportion of each topic at each date value. Date values are <i>not</i> parsed, but simply sorted in the order they appear in the input file.</div>
-//                 <div className="help"></div>
-//             </div>        
-//         )
-//     }
-    
-// }
 
 export default TimeSeries
 
