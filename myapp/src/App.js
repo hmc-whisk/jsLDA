@@ -295,101 +295,6 @@ class App extends Component {
 
   truncate (s) { return s.length > 300 ? s.substring(0, 299) + "..." : s; }
 
-  
-  /**
-  * @summary Format/Save tsv document line
-  * 
-  * @param {String} line A tsv line in format [ID]\t[TAG]\t[TEXT]
-  * or a line containing only the document text
-  * 
-  * @description This is the function used in the file parser
-  * that both formats lines and save them to the correct location
-  */
-  // parseLine = (line) =>  {
-  //   if (line === "") { return; }
-  //   var docID = this.state.documents.length;
-  //   console.log("Parsing document: " + docID);
-  //   var docDate = "";
-  //   var fields = line.split("\t");
-  //   var text = fields[0];  // Assume there's just one field, the text
-  //   if (fields.length === 3) {  // If it's in [ID]\t[TAG]\t[TEXT] format...
-  //     docID = fields[0];
-  //     docDate = fields[1]; // do not interpret date as anything but a string
-  //     text = fields[2];
-  //   }
-
-  //   // Avoid mutating state directly
-  //   let temp_stopwords = {...this.state.stopwords};
-  //   let temp_vocabularyCounts = {...this.state.vocabularyCounts};
-  //   let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
-  //   let temp_wordTopicCounts = {...this.state.wordTopicCounts};
-  //   let temp_vocabularySize = this.state.vocabularySize;
-  //   let temp_documents = this.state.documents.slice();
-  
-  //   var tokens = [];
-  //   var rawTokens = text.toLowerCase().match(this.wordPattern);
-  //   if (rawTokens == null) { return; }
-  //   var topicCounts = this.zeros(this.state.numTopics);
-  
-  //   rawTokens.forEach(function (word) {
-  //     if (word !== "") {
-  //       var topic = Math.floor(Math.random() * this.state.numTopics);
-  
-  //       if (word.length <= 2) { temp_stopwords[word] = 1; }
-  
-  //       var isStopword = temp_stopwords[word];
-  //       if (isStopword) {
-  //         // Record counts for stopwords, but nothing else
-  //         if (! temp_vocabularyCounts[word]) {
-  //           temp_vocabularyCounts[word] = 1;
-  //         }
-  //         else {
-  //           temp_vocabularyCounts[word] += 1;
-  //         }
-  //       }
-  //       else {
-  //         temp_tokensPerTopic[topic]++;
-  //         if (! temp_wordTopicCounts[word]) {
-  //           temp_wordTopicCounts[word] = {};
-  //           temp_vocabularySize++;
-  //           temp_vocabularyCounts[word] = 0;
-  //         }
-  //         if (!temp_wordTopicCounts[word][topic]) {
-  //           temp_wordTopicCounts[word][topic] = 0;
-  //         }
-  //         temp_wordTopicCounts[word][topic] += 1;
-  //         temp_vocabularyCounts[word] += 1;
-  //         topicCounts[topic] += 1;
-  //       }
-  //       tokens.push({"word":word, "topic":topic, "isStopword":isStopword });
-  //     }
-  //   });
-
-  //   temp_documents.push({ 
-  //     "originalOrder" : temp_documents.length,
-  //     "id" : docID,
-  //     "date" : docDate,
-  //     "originalText" : text,
-  //     "tokens" : tokens,
-  //     "topicCounts" : topicCounts
-  //   });
-
-  //   this.setState({
-  //     stopwords: temp_stopwords,
-  //     vocabularyCounts: temp_vocabularyCounts,
-  //     tokensPerTopic: temp_tokensPerTopic,
-  //     wordTopicCounts: temp_wordTopicCounts,
-  //     vocabularySize: temp_vocabularySize,
-  //     documents: temp_documents,
-  //   })
-
-  //   // Need to move this selection and adding to #docs-page into a different component
-  //   d3.select("div#docs-page").append("div")
-  //      .attr("class", "document")
-  //      .text("[" + docID + "] " + this.truncate(text));
-  // }
-
-
   // used by addStop, removeStop in vocab, saveTopicKeys in downloads, sweep in sweep
   sortTopicWords() {
     let tempTopicWordCounts = [];
@@ -803,39 +708,43 @@ class App extends Component {
     var DisplayPage;
     switch (this.state.selectedTab) {
       case "docs-tab":
-        DisplayPage = <TopicDoc selectedTopic={this.state.selectedTopic} 
-        documents={this.state.documents} 
-        sortVocabByTopic={this.state.sortVocabByTopic} 
-        truncate={this.state.truncate}
-        numTopics={this.state.numTopics}
-        onDocumentFileChange={this.onDocumentFileChange}
-        onStopwordFileChange={this.onStopwordFileChange}
-        onFileUpload = {this.queueLoad}
+        DisplayPage = <TopicDoc 
+          selectedTopic={this.state.selectedTopic} 
+          documents={this.state.documents} 
+          sortVocabByTopic={this.state.sortVocabByTopic} 
+          truncate={this.state.truncate}
+          numTopics={this.state.numTopics}
+          onDocumentFileChange={this.onDocumentFileChange}
+          onStopwordFileChange={this.onStopwordFileChange}
+          onFileUpload = {this.queueLoad}
         />;
         break;
       case "corr-tab":
-        DisplayPage = <Correlation topicWordCounts ={this.state.topicWordCounts} 
-        topNWords={this.state.topNWords} 
-        numTopics={this.state.numTopics} 
-        zeros={this.zeros} 
-        documents={this.state.documents}/>;
+        DisplayPage = <Correlation 
+          topicWordCounts ={this.state.topicWordCounts} 
+          topNWords={this.state.topNWords} 
+          numTopics={this.state.numTopics} 
+          zeros={this.zeros} 
+          documents={this.state.documents}/>;
         break;
       case "vocab-tab":
-        DisplayPage = <VocabTable displayingStopwords={this.state.displayingStopwords}
-        sortVocabByTopic={this.state.sortVocabByTopic}
-        vocabularyCounts={this.state.vocabularyCounts}
-        wordTopicCounts={this.state.wordTopicCounts}
-        selectedTopic={this.state.selectedTopic}
-        stopwords ={this.state.stopwords}
-        numTopics={this.state.numTopics}
-        byCountDescending={this.state.byCountDescending}
-        addStop = {this.addStop}
-        removeStop = {this.removeStop}/>;
+        DisplayPage = <VocabTable 
+          displayingStopwords={this.state.displayingStopwords}
+          sortVocabByTopic={this.state.sortVocabByTopic}
+          vocabularyCounts={this.state.vocabularyCounts}
+          wordTopicCounts={this.state.wordTopicCounts}
+          selectedTopic={this.state.selectedTopic}
+          stopwords ={this.state.stopwords}
+          numTopics={this.state.numTopics}
+          byCountDescending={this.state.byCountDescending}
+          addStop = {this.addStop}
+          removeStop = {this.removeStop}/>;
         break;
       case "ts-tab":
-        DisplayPage = <TimeSeries numTopics={this.state.numTopics}
-        documents={this.state.documents}
-        topicWordCounts={this.state.topicWordCounts}/>;
+        DisplayPage = <TimeSeries 
+          numTopics={this.state.numTopics}
+          documents={this.state.documents}
+          topicWordCounts={this.state.topicWordCounts}/>;
         break;
       case "dl-tab":
         DisplayPage = <DLPage />;
