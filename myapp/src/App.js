@@ -258,8 +258,8 @@ class App extends Component {
     })
 
     // TODO: change this do React code
-    d3.select("#num-topics-input").property("value", this.state.numTopics);
-    d3.select("#iters").text(this.state.completeSweeps);
+    // d3.select("#num-topics-input").property("value", this.state.numTopics);
+    // d3.select("#iters").text(this.state.completeSweeps);
     d3.selectAll("div.document").remove();
   }
 
@@ -535,10 +535,11 @@ class App extends Component {
     // plotMatrix();
   }
 
-  sweep() {
+  sweep = () => {
     var startTime = Date.now();
 
     // Avoid mutating state
+    console.log( this.state.tokensPerTopic);
     let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
     let temp_topicWeights = this.state.topicWeights.slice();
 
@@ -549,7 +550,7 @@ class App extends Component {
         temp_tokensPerTopic[topic]);
     }
 
-    for (let doc = 0; doc < this.documents.length; doc++) {
+    for (let doc = 0; doc < this.state.documents.length; doc++) {
       let currentDoc = this.state.documents[doc];
       let docTopicCounts = currentDoc.topicCounts;
 
@@ -742,6 +743,8 @@ class App extends Component {
     this.setState({
       requestedSweeps: this.state.requestedSweeps + 50
     });
+    // TODO: Cottect Beginning of iteration
+    this.timer = d3.timer(this.sweep);
     console.log("Requested Sweeps Now: " + this.state.requestedSweeps);
   }
 
