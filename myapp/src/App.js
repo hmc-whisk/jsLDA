@@ -8,7 +8,7 @@ import VocabTable from './VocabTable';
 import TimeSeries from './TimeSeries';
 import Nav from './navButtons';
 import Form from './paramForm';
-import DLPage from './downloads';
+import DLPage from './DLPage';
 
 var XRegExp = require('xregexp')
 
@@ -92,9 +92,13 @@ class App extends Component {
     // Needed by reset & parseline
     vocabularySize: 0,
 
-
+    // The file location of default files
     documentsURL: process.env.PUBLIC_URL + "/documents.txt",
     stopwordsURL: process.env.PUBLIC_URL + "/stoplist.txt",
+
+    // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
+    correlationMinTokens: 2,
+    correlationMinProportion: 0.05,
 
 
     // needed by reset & parseline, changeNumTopics
@@ -720,6 +724,63 @@ class App extends Component {
     // vocabTable();
   }
 
+  /* This function will compute pairwise correlations between topics.
+ * Unlike the correlated topic model (CTM) LDA doesn't have parameters
+ * that represent topic correlations. But that doesn't mean that topics are
+ * not correlated, it just means we have to estimate those values by
+ * measuring which topics appear in documents together.
+ */
+getTopicCorrelations = () => {
+
+  // initialize the matrix
+  let correlationMatrix = [this.state.numTopics];
+  for (var t1 = 0; t1 < this.state.numTopics; t1++) {
+    correlationMatrix[t1] = this.zeros(this.state.numTopics);
+  }
+
+  var topicProbabilities = this.zeros(this.state.numTopics);
+
+  // iterate once to get mean log topic proportions
+  this.state.documents.forEach((d, i) => {
+
+    // We want to find the subset of topics that occur with non-trivial concentration in this document.
+    // Only consider topics with at least the minimum number of tokens that are at least 5% of the doc.
+    var documentTopics = [];
+    var tokenCutoff = Math.max(this.state.correlationMinTokens, 
+      this.state.correlationMinProportion * d.tokens.length);
+
+    for (let topic = 0; topic < this.state.numTopics; topic++) {
+      if (d.topicCounts[topic] >= tokenCutoff) {
+        documentTopics.push(topic);
+        topicProbabilities[topic]++; // Count the number of docs with this topic
+      }
+    }
+
+    // Look at all pairs of topics that occur in the document.
+    for (let i = 0; i < documentTopics.length - 1; i++) {
+      for (let j = i + 1; j < documentTopics.length; j++) {
+        correlationMatrix[ documentTopics[i] ][ documentTopics[j] ]++;
+        correlationMatrix[ documentTopics[j] ][ documentTopics[i] ]++;
+      }
+    }
+  });
+
+  for (let t1 = 0; t1 < this.state.numTopics - 1; t1++) {
+    for (let t2 = t1 + 1; t2 < this.state.numTopics; t2++) {
+      correlationMatrix[t1][t2] = Math.log((this.state.documents.length * correlationMatrix[t1][t2]) /
+                                           (topicProbabilities[t1] * topicProbabilities[t2]));
+      correlationMatrix[t2][t1] = Math.log((this.state.documents.length * correlationMatrix[t2][t1]) /
+                                           (topicProbabilities[t1] * topicProbabilities[t2]));
+    }
+  }
+
+  return correlationMatrix;
+}
+
+  topNWords(wordCounts, n) { 
+    return wordCounts.slice(0,n).map( function(d) { return d.word; }).join(" "); 
+  };
+
   componentDidMount() {
     this.findNumTopics();
     // Set upon initialisation, changed to new numTopics in reset
@@ -800,7 +861,15 @@ class App extends Component {
           topicWordCounts={this.state.topicWordCounts}/>;
         break;
       case "dl-tab":
-        DisplayPage = <DLPage />;
+        DisplayPage = <DLPage
+          numTopics={this.state.numTopics}
+          documents={this.state.documents}
+          wordTopicCounts={this.state.wordTopicCounts}
+          topicWordCounts={this.state.topicWordCounts}
+          sortTopicWords={this.sortTopicWords}
+          topNWords={this.topNWords}
+          getTopicCorrelations={this.getTopicCorrelations}
+          tokensPerTopic={this.state.tokensPerTopic}  />;
         break;
       default:
         DisplayPage = null;
