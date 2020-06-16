@@ -51,6 +51,13 @@ class TopicDoc extends Component {
     
     
     componentDidMount() {
+      let truncate = this.props.truncate;
+      this.props.documents.forEach(function (d) {
+        d3.select("div#docs-page").append("div")
+        .attr("class", "document")
+        .text("[" + d.id + "] " + truncate(d.originalText));
+      })
+      this.reorderDocuments();      
     }
 
     componentDidUpdate(prevProps) {
