@@ -96,7 +96,6 @@ class App extends Component {
     vocabularyCounts: {},
 
     //needed by reset
-    displayingStopwords: false,
     sortVocabByTopic: false,
     specificityScale: d3.scaleLinear().domain([0,1]).range(["#ffffff", "#99d8c9"]),
 
@@ -689,13 +688,13 @@ class App extends Component {
 
     this.queueLoad();
     
-    // used by parseLine
-    d3.select("#docs-tab").on("click", function() {
-      d3.selectAll(".page").style("display", "none");
-      d3.selectAll("ul li").attr("className", "");
-      d3.select("#docs-page").style("display", "block");
-      d3.select("#docs-tab").attr("className", "selected");
-    });
+    // // used by parseLine
+    // d3.select("#docs-tab").on("click", function() {
+    //   d3.selectAll(".page").style("display", "none");
+    //   d3.selectAll("ul li").attr("className", "");
+    //   d3.select("#docs-page").style("display", "block");
+    //   d3.select("#docs-tab").attr("className", "selected");
+    // });
   }
   
   render() {
@@ -729,7 +728,6 @@ class App extends Component {
         break;
       case "vocab-tab":
         DisplayPage = <VocabTable 
-          displayingStopwords={this.state.displayingStopwords}
           sortVocabByTopic={this.state.sortVocabByTopic}
           vocabularyCounts={this.state.vocabularyCounts}
           wordTopicCounts={this.state.wordTopicCounts}
