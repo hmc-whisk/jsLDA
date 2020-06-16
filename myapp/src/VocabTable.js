@@ -5,6 +5,7 @@ class VocabTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
+          displayingStopwords: false
         };
       }
     
@@ -14,7 +15,7 @@ class VocabTable extends Component {
       // used by toggleTopicDocuments in topicdocuments, ready, changeNumTopics in processing, sweep in sweep
     vocabTable() {
       var format = d3.format(".2g");
-      var wordFrequencies = this.mostFrequentWords(this.props.displayingStopwords, this.props.sortVocabByTopic).slice(0, 499);
+      var wordFrequencies = this.mostFrequentWords(this.state.displayingStopwords, this.props.sortVocabByTopic).slice(0, 499);
       var table = d3.select("#vocab-table tbody");
       table.selectAll("tr").remove();
       
@@ -49,7 +50,7 @@ class VocabTable extends Component {
       var wordCounts = [];
     
       if (sortByTopic) {
-        for (var word in this.props.vocabularyCounts) {
+        for (let word in this.props.vocabularyCounts) {
           if (this.props.wordTopicCounts[word] &&
             this.props.wordTopicCounts[word][this.props.selectedTopic]) {
             wordCounts.push({"word":word,
@@ -58,7 +59,7 @@ class VocabTable extends Component {
         }
       }
       else {
-        for (var word in this.props.vocabularyCounts) {
+        for (let word in this.props.vocabularyCounts) {
           if (includeStops || ! this.props.stopwords[word]) {
             wordCounts.push({"word":word,
                      "count":this.props.vocabularyCounts[word]});
@@ -80,18 +81,53 @@ class VocabTable extends Component {
       var sum = d3.sum(counts);
       return Math.log(sum) - (1.0 / sum) * d3.sum(counts, function (x) { return x * Math.log(x); });
     }
+
+    setDisplay = (displayingStopwords) => {
+      this.setState({displayingStopwords:displayingStopwords})
+    }
   
     componentDidMount() {
+      this.vocabTable();
     }
 
     componentDidUpdate(prevProps) {
         this.vocabTable();
+        let displayingStopwords = this.state.displayingStopwords;
+        let sortVocabByTopic = this.props.sortVocabByTopic;
+        let setDisplay = this.setDisplay;
+
+        d3.select("#showStops").on("click", function () {
+          if (displayingStopwords) {
+            this.innerText = "Show stopwords";
+            setDisplay(false);
+          //   vocabTable();
+          }
+          else {
+            this.innerText = "Hide stopwords";
+            setDisplay(true);
+          //   vocabTable();
+          }
+        });
+        
+        d3.select("#sortVocabByTopic").on("click", function () {
+          if (sortVocabByTopic) {
+            this.innerText = "Sort by topic";
+            sortVocabByTopic = false;
+          //   vocabTable();
+          }
+          else {
+            this.innerText = "Sort by frequency";
+            sortVocabByTopic = true;
+          //   vocabTable();
+          }
+        });;
     }
 
     render() {
         return (
             <div id="vocab-page" className="page">
-                <div className="help">Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0. <button id="showStops">Show stopwords</button>
+                <div className="help">Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0.
+                    <button id="showStops">Show stopwords</button>
                     <button id="sortVocabByTopic">Sort by topic</button>
                 </div>
                 <table id="vocab-table">
@@ -104,32 +140,4 @@ class VocabTable extends Component {
 }
 
 export default VocabTable
-
-
-
-d3.select("#showStops").on("click", function () {
-    if (this.props.displayingStopwords) {
-      this.props.displayingStopwords = false;
-      this.innerText = "Show stopwords";
-    //   vocabTable();
-    }
-    else {
-      this.props.displayingStopwords = true;
-      this.innerText = "Hide stopwords";
-    //   vocabTable();
-    }
-  });
-  
-  d3.select("#sortVocabByTopic").on("click", function () {
-    if (this.props.sortVocabByTopic) {
-      this.props.sortVocabByTopic = false;
-      this.innerText = "Sort by topic";
-    //   vocabTable();
-    }
-    else {
-      this.props.sortVocabByTopic = true;
-      this.innerText = "Sort by frequency";
-    //   vocabTable();
-    }
-  });
   
