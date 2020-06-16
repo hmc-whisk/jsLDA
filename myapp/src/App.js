@@ -3,7 +3,7 @@ import './App.css';
 import * as d3 from 'd3';
 import Correlation from './Correlation';
 import TopicDoc from './TopicDoc';
-import SideBar from './SideBar';
+import SideBar from './sidebar';
 import VocabTable from './VocabTable';
 import TimeSeries from './TimeSeries';
 import Nav from './navButtons';
@@ -80,7 +80,12 @@ var QueryString = function () {
 } ();
 
 class App extends Component {
-  state = {
+  constructor(props) {
+    super(props)
+  this.state = {
+
+    // Temporary variable for manipulating input bar
+    tempNumTopics:25,
 
     // Vocabulary statistics
 
@@ -148,7 +153,12 @@ class App extends Component {
     topicWordSmoothing: 0.01, // (used by sweep)
     
     selectedTab: "docs-tab"
-    };
+  };
+  
+  this.changeTab = this.changeTab.bind(this);
+  this.addSweepRequests = this.addSweepRequests.bind(this);
+  this.updateTempNumTopics = this.updateTempNumTopics.bind(this);
+};
 
   changeTab = (tabID) => {
     this.setState({
@@ -248,8 +258,8 @@ class App extends Component {
     })
 
     // TODO: change this do React code
-    d3.select("#num-topics-input").property("value", this.state.numTopics);
-    d3.select("#iters").text(this.state.completeSweeps);
+    // d3.select("#num-topics-input").property("value", this.state.numTopics);
+    // d3.select("#iters").text(this.state.completeSweeps);
     d3.selectAll("div.document").remove();
   }
 
@@ -525,10 +535,11 @@ class App extends Component {
     // plotMatrix();
   }
 
-  sweep() {
+  sweep = () => {
     var startTime = Date.now();
 
     // Avoid mutating state
+    console.log( this.state.tokensPerTopic);
     let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
     let temp_topicWeights = this.state.topicWeights.slice();
 
@@ -539,7 +550,7 @@ class App extends Component {
         temp_tokensPerTopic[topic]);
     }
 
-    for (let doc = 0; doc < this.documents.length; doc++) {
+    for (let doc = 0; doc < this.state.documents.length; doc++) {
       let currentDoc = this.state.documents[doc];
       let docTopicCounts = currentDoc.topicCounts;
 
@@ -727,13 +738,25 @@ class App extends Component {
     //   d3.select("#docs-tab").attr("className", "selected");
     // });
   }
+
+  addSweepRequests() {
+    this.setState({
+      requestedSweeps: this.state.requestedSweeps + 50
+    });
+    // TODO: Cottect Beginning of iteration
+    this.timer = d3.timer(this.sweep);
+    console.log("Requested Sweeps Now: " + this.state.requestedSweeps);
+  }
+
+  updateTempNumTopics(val) {
+    this.setState({
+      tempNumTopics: val
+    });
+    console.log("Num Topics Now: : " + this.state.tempNumTopics);
+  }
   
   render() {
-    // Remember to add:
-    // d3.select("#sweep").on("click", function() {
-    //   requestedSweeps += 50;
-    //   timer = d3.timer(sweep);
-    // });
+
 
     var DisplayPage;
     switch (this.state.selectedTab) {
@@ -790,13 +813,19 @@ class App extends Component {
 
       <div id="main">
 
-      
-      <div id="form" className="top">
+      {/* TODO: on button press, start iterating*/}
+      {/* TODO: onBlur, only updates when clicked outside, rather than letting go of slider*/}
+      <Form completeSweeps={this.state.completeSweeps} 
+            requestedSweeps = {this.state.requestedSweeps} 
+            numTopics={this.state.tempNumTopics} 
+            onClick={this.addSweepRequests} 
+            onBlur={this.updateTempNumTopics} />
+      {/* <div id="form" className="top">
         <button id="sweep">Run 50 iterations</button>
         Iterations: <span id="iters">0</span>
 
       <span id="num_topics_control">Train with <input id="num-topics-input" type="range" name="topics" value="25" min="3" max="100" onInput="updateTopicCount(this)" onChange="onTopicsChange(this)"/> <span id="num_topics_display">25</span> topics</span>
-      </div>
+      </div> */}
 
       <SideBar selectedTopic={this.state.selectedTopic} 
                sortVocabByTopic={this.state.sortVocabByTopic} 
