@@ -153,7 +153,10 @@ var tokensPerTopic = zeros(numTopics);
 
 var topicWeights = zeros(numTopics);
 
+// Array of dictionaries with keys 
+// {"originalOrder", "id", "date", "originalText", "tokens", "topicCounts"}
 var documents = [];
+
 var timer;
 var eightDigits = d3.format(".8")
 
@@ -187,6 +190,18 @@ var truncate = function(s) { return s.length > 300 ? s.substring(0, 299) + "..."
 
 var wordPattern = XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g");
 
+/**
+ * @summary Format/Save tsv document line
+ * 
+ * @param {String} line A tsv line in format [ID]\t[TAG]\t[TEXT]
+ * or a line containing only the document text
+ * 
+ * @description This is the function used in the file parser
+ * that both formats lines and save them to the correct location
+ * 
+ * @todo this function needs to be put in the React component
+ * that holds document data
+ */
 function parseLine ( line ) {
   if (line == "") { return; }
   var docID = documents.length;
@@ -658,7 +673,7 @@ function plotMatrix() {
   .attr("cy", function(link) { return topicScale(link.target); })
   .attr("r", function (link) { return radiusScale(Math.abs(link.value)); })
   .style("fill", function (link) { return link.value > 0.0 ? "#88f" : "#f88"; })
-  .on("mouseover", function (link) {
+  .on("mouseover", function (event, link) {
     var tooltip = d3.select("#tooltip");
     tooltip.style("visibility", "visible")
     .style("top", (event.pageY-10)+"px").style("left",(event.pageX+20)+"px")
