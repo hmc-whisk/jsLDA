@@ -628,20 +628,34 @@ class App extends Component {
   //configure after button
 
   addStop = (word) => {
-    this.stopwords[word] = 1;
-    this.vocabularySize--;
-    delete this.wordTopicCounts[word];
+    let stopwords = this.state.stopwords;
+    let vocabularySize = this.state.vocabularySize;
+    let wordTopicCounts = this.state.wordTopicCounts;
+    let documents = this.state.documents;
+    let tokensPerTopic = this.state.tokensPerTopic;
+
+    stopwords[word] = 1;
+    vocabularySize--;
+    delete wordTopicCounts[word];
   
-      this.documents.forEach( function( currentDoc, i ) {
-      var docTopicCounts = currentDoc.topicCounts;
-      for (var position = 0; position < currentDoc.tokens.length; position++) {
-        var token = currentDoc.tokens[position];
-        if (token.word === word) {
-          token.isStopword = true;
-          this.tokensPerTopic[ token.topic ]--;
-          docTopicCounts[ token.topic ]--;
+    documents.forEach( function( currentDoc, i ) {
+    var docTopicCounts = currentDoc.topicCounts;
+    for (var position = 0; position < currentDoc.tokens.length; position++) {
+      var token = currentDoc.tokens[position];
+      if (token.word === word) {
+        token.isStopword = true;
+        tokensPerTopic[ token.topic ]--;
+        docTopicCounts[ token.topic ]--;
         }
       }
+    });
+
+    this.setState({
+      stopwords: stopwords,
+      vocabularySize: vocabularySize,
+      wordTopicCounts: wordTopicCounts,
+      documents: documents,
+      tokensPerTopic: tokensPerTopic
     });
   
     this.sortTopicWords();
@@ -652,18 +666,24 @@ class App extends Component {
 
   //configure after button
   removeStop = (word) => {
-    delete this.stopwords[word];
-    this.vocabularySize++;
-    this.wordTopicCounts[word] = {};
-    var currentWordTopicCounts = this.wordTopicCounts[ word ];
+    let stopwords = this.state.stopwords;
+    let vocabularySize = this.state.vocabularySize;
+    let wordTopicCounts = this.state.wordTopicCounts;
+    let documents = this.state.documents;
+    let tokensPerTopic = this.state.tokensPerTopic;
+
+    delete stopwords[word];
+    vocabularySize++;
+    wordTopicCounts[word] = {};
+    var currentWordTopicCounts = wordTopicCounts[ word ];
   
-    this.documents.forEach( function( currentDoc, i ) {
+    documents.forEach( function( currentDoc, i ) {
       var docTopicCounts = currentDoc.topicCounts;
       for (var position = 0; position < currentDoc.tokens.length; position++) {
         var token = currentDoc.tokens[position];
         if (token.word === word) {
           token.isStopword = false;
-          this.tokensPerTopic[ token.topic ]++;
+          tokensPerTopic[ token.topic ]++;
           docTopicCounts[ token.topic ]++;
           if (! currentWordTopicCounts[ token.topic ]) {
             currentWordTopicCounts[ token.topic ] = 1;
@@ -673,6 +693,14 @@ class App extends Component {
           }
         }
       }
+    });
+
+    this.setState({
+      stopwords: stopwords,
+      vocabularySize: vocabularySize,
+      wordTopicCounts: wordTopicCounts,
+      documents: documents,
+      tokensPerTopic: tokensPerTopic
     });
   
     this.sortTopicWords();
