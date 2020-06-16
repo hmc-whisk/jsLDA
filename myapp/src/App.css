@@ -33,6 +33,7 @@ div#docs-page { display: block; }
 div.document { font-family: Alegreya, Georgia, Times; margin: 20px; padding: 10px; }
 div#ts-page { display: block; }
 div#vocab-page { display: block; }
+div#dl-page { display: block; }
 
 text { font-size: small; fill: #555; dominant-baseline: middle;; }
 
