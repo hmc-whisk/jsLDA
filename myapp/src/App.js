@@ -839,7 +839,8 @@ getTopicCorrelations = () => {
           topNWords={this.state.topNWords} 
           numTopics={this.state.numTopics} 
           zeros={this.zeros} 
-          documents={this.state.documents}/>;
+          documents={this.state.documents}
+          getTopicCorrelations={this.getTopicCorrelations}/>;
         break;
       case "vocab-tab":
         DisplayPage = <VocabTable 
