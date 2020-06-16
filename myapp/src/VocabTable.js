@@ -85,42 +85,49 @@ class VocabTable extends Component {
     setDisplay = (displayingStopwords) => {
       this.setState({displayingStopwords:displayingStopwords})
     }
+
+    setUp = () => {
+      let displayingStopwords = this.state.displayingStopwords;
+      let sortVocabByTopic = this.props.sortVocabByTopic;
+      let setDisplay = this.setDisplay;
+      let setSort = this.props.sortbyTopicChange;
+
+      d3.select("#showStops").on("click", function () {
+        if (displayingStopwords) {
+          this.innerText = "Show stopwords";
+          setDisplay(false);
+        //   vocabTable();
+        }
+        else {
+          this.innerText = "Hide stopwords";
+          setDisplay(true);
+        //   vocabTable();
+        }
+      });
+      
+      d3.select("#sortVocabByTopic").on("click", function () {
+        if (sortVocabByTopic) {
+          this.innerText = "Sort by topic";
+          setSort(false);
+        //   vocabTable();
+        }
+        else {
+          this.innerText = "Sort by frequency";
+          setSort(true);
+        //   vocabTable();
+        }
+      });;
+
+    }
   
     componentDidMount() {
       this.vocabTable();
+      this.setUp();
     }
 
     componentDidUpdate(prevProps) {
         this.vocabTable();
-        let displayingStopwords = this.state.displayingStopwords;
-        let sortVocabByTopic = this.props.sortVocabByTopic;
-        let setDisplay = this.setDisplay;
-
-        d3.select("#showStops").on("click", function () {
-          if (displayingStopwords) {
-            this.innerText = "Show stopwords";
-            setDisplay(false);
-          //   vocabTable();
-          }
-          else {
-            this.innerText = "Hide stopwords";
-            setDisplay(true);
-          //   vocabTable();
-          }
-        });
-        
-        d3.select("#sortVocabByTopic").on("click", function () {
-          if (sortVocabByTopic) {
-            this.innerText = "Sort by topic";
-            sortVocabByTopic = false;
-          //   vocabTable();
-          }
-          else {
-            this.innerText = "Sort by frequency";
-            sortVocabByTopic = true;
-          //   vocabTable();
-          }
-        });;
+        this.setUp();
     }
 
     render() {
