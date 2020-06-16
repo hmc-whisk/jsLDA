@@ -167,6 +167,10 @@ class App extends Component {
     }
   }
 
+  sortbyTopicChange = (sort) => {
+    this.setState({sortVocabByTopic: sort})
+  }
+
   // Retrieve doc files from upload component
   onDocumentFileChange = (event) => {
     event.preventDefault();
@@ -230,7 +234,6 @@ class App extends Component {
     this.setState({
       vocabularySize: 0,
       vocabularyCounts: {},
-      displayingStopwords: false,
       sortVocabByTopic: false,
       specificityScale: d3.scaleLinear().domain([0,1]).range(["#ffffff", "#99d8c9"]),
       stopwords: {},
@@ -729,6 +732,7 @@ class App extends Component {
       case "vocab-tab":
         DisplayPage = <VocabTable 
           sortVocabByTopic={this.state.sortVocabByTopic}
+          sortbyTopicChange={this.sortbyTopicChange}
           vocabularyCounts={this.state.vocabularyCounts}
           wordTopicCounts={this.state.wordTopicCounts}
           selectedTopic={this.state.selectedTopic}
