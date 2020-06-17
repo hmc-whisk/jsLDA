@@ -84,7 +84,11 @@ class Correlation extends Component {
     //       tooltip.style("visibility", "hidden");
     //     });
     //   }
-    
+
+    /**
+     * @todo replace this with the function in App.js to avoid it being
+     * written here and in DLPage.js
+     */
     getTopicCorrelations() {
         // initialize the matrix
         var correlationMatrix = new Array(this.props.numTopics);
