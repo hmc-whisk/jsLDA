@@ -316,9 +316,6 @@ class App extends Component {
     for (let topic = 0; topic < this.state.numTopics; topic++) {
       tempTopicWordCounts[topic] = [];
     }
-    console.log("numTopics In sortTopicWords: " + this.state.numTopics);
-    console.log(tempTopicWordCounts);
-    console.log(this.state.wordTopicCounts);
     for (let word in this.state.wordTopicCounts) {
       for (let topic in this.state.wordTopicCounts[word]) {
         tempTopicWordCounts[topic].push({"word":word, "count":this.state.wordTopicCounts[word][topic]});
