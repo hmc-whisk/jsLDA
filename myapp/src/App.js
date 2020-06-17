@@ -161,7 +161,6 @@ class App extends Component {
   
   this.changeTab = this.changeTab.bind(this);
   this.addSweepRequests = this.addSweepRequests.bind(this);
-  this.updateTempNumTopics = this.updateTempNumTopics.bind(this);
 };
 
   changeTab = (tabID) => {
@@ -312,12 +311,11 @@ class App extends Component {
   truncate (s) { return s.length > 300 ? s.substring(0, 299) + "..." : s; }
 
   // used by addStop, removeStop in vocab, saveTopicKeys in downloads, sweep in sweep
-  sortTopicWords() {
+  sortTopicWords = () => {
     let tempTopicWordCounts = [];
     for (let topic = 0; topic < this.state.numTopics; topic++) {
       tempTopicWordCounts[topic] = [];
     }
-  
     for (let word in this.state.wordTopicCounts) {
       for (let topic in this.state.wordTopicCounts[word]) {
         tempTopicWordCounts[topic].push({"word":word, "count":this.state.wordTopicCounts[word][topic]});
@@ -445,51 +443,43 @@ class App extends Component {
 
   // This function is the callback for "change", it only fires when we release the
   //  slider to select a new value.
-  onTopicsChange(input) {
-    console.log("Changing # of topics: " + input.value);
+  onTopicsChange = (val) => {
+    console.log("Changing # of topics: " + val);
     
-    var newNumTopics = Number(input.value);
+    var newNumTopics = Number(val);
     if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.numTopics) {
-      this.changeNumTopics(Number(input.value));
+      this.changeNumTopics(Number(val));
     }
   }
 
   changeNumTopics(numTopics_) {
-    this.numTopics = numTopics_;
-    this.selectedTopic = 0;
+    let temp_selectedTopic = -1;
+    let temp_topicWordCounts = [];
+    let temp_tokensPerTopic = this.zeros(numTopics_);
+    let temp_topicWeights = this.zeros(numTopics_);
+    let temp_documents = this.state.documents.slice();
+    let temp_wordTopicCounts = {};
+    let temp_completeSweeps = 0;
+    let temp_requestedSweeps = 0;
 
+    d3.select("#iters").text(temp_completeSweeps);
     
-    this.completeSweeps = 0;
-    this.requestedSweeps = 0;
-    d3.select("#iters").text(this.completeSweeps);
-    
-    let tempWordTopicCounts = {};
-    Object.keys(this.vocabularyCounts).forEach(function (word) { tempWordTopicCounts[word] = {} });
-    this.setState({wordTopicCounts:tempWordTopicCounts})
+    Object.keys(this.state.vocabularyCounts).forEach(function (word) { temp_wordTopicCounts[word] = {} });
 
-    // this.wordTopicCounts = {};
-    // Object.keys(this.vocabularyCounts).forEach(function (word) { this.wordTopicCounts[word] = {} });
-    
-    let tempTopicWordCounts = [];
-    let tempTokensPerTopic = this.zeros(this.numTopics);
-    let tempTopicWeights = this.zeros(this.numTopics);
-    let tempDocuments = this.documents;
-    tempWordTopicCounts = this.wordTopicCounts;
+    temp_documents.forEach(( currentDoc, i ) => {
 
-    tempDocuments.forEach( function( currentDoc, i ) {
-
-      currentDoc.topicCounts = this.zeros(this.numTopics);
-      for (var position = 0; position < currentDoc.tokens.length; position++) {
-        var token = currentDoc.tokens[position];
-        token.topic = Math.floor(Math.random() * this.numTopics);
+      currentDoc.topicCounts = this.zeros(numTopics_);
+      for (let position = 0; position < currentDoc.tokens.length; position++) {
+        let token = currentDoc.tokens[position];
+        token.topic = Math.floor(Math.random() * numTopics_);
         
         if (! token.isStopword) {
-          tempTokensPerTopic[token.topic]++;
-          if (! tempWordTopicCounts[token.word][token.topic]) {
-            tempWordTopicCounts[token.word][token.topic] = 1;
+          temp_tokensPerTopic[token.topic]++;
+          if (! temp_wordTopicCounts[token.word][token.topic]) {
+            temp_wordTopicCounts[token.word][token.topic] = 1;
           }
           else {
-            tempWordTopicCounts[token.word][token.topic] += 1;
+            temp_wordTopicCounts[token.word][token.topic] += 1;
 
           }
           currentDoc.topicCounts[token.topic] += 1;
@@ -498,37 +488,17 @@ class App extends Component {
     });
 
     this.setState({
-      topicWordCounts: tempTopicWordCounts,
-      tokensPerTopic: tempTokensPerTopic,
-      topicWeights: tempTopicWeights,
-      documents: tempDocuments,
-      wordTopicCounts: tempWordTopicCounts
-    });
+      selectedTopic: temp_selectedTopic,
+      completeSweeps: temp_completeSweeps,
+      requestedSweeps: temp_requestedSweeps,
+      numTopics: numTopics_,
+      topicWordCounts: temp_topicWordCounts,
+      tokensPerTopic: temp_tokensPerTopic,
+      topicWeights: temp_topicWeights,
+      documents: temp_documents,
+      wordTopicCounts: temp_wordTopicCounts
+    }, () => this.sortTopicWords()); // Wait until state has changed to sort
 
-    // this.topicWordCounts = [];
-    // this.tokensPerTopic = this.zeros(this.numTopics);
-    // this.topicWeights = this.zeros(this.numTopics);
-    
-    // this.documents.forEach( function( currentDoc, i ) {
-    //   currentDoc.topicCounts = this.zeros(this.numTopics);
-    //   for (var position = 0; position < currentDoc.tokens.length; position++) {
-    //     var token = currentDoc.tokens[position];
-    //     token.topic = Math.floor(Math.random() * this.numTopics);
-        
-    //     if (! token.isStopword) {
-    //       this.tokensPerTopic[token.topic]++;
-    //       if (! this.wordTopicCounts[token.word][token.topic]) {
-    //         this.wordTopicCounts[token.word][token.topic] = 1;
-    //       }
-    //       else {
-    //         this.wordTopicCounts[token.word][token.topic] += 1;
-    //       }
-    //       currentDoc.topicCounts[token.topic] += 1;
-    //     }
-    //   }
-    // });
-
-    this.sortTopicWords();
     // displayTopicWords();
     // reorderDocuments();
     // vocabTable();
@@ -808,13 +778,6 @@ getTopicCorrelations = () => {
     this.timer = d3.timer(this.sweep);
     console.log("Requested Sweeps Now: " + this.state.requestedSweeps);
   }
-
-  updateTempNumTopics(val) {
-    this.setState({
-      tempNumTopics: val
-    });
-    console.log("Num Topics Now: : " + this.state.tempNumTopics);
-  }
   
   render() {
 
@@ -888,7 +851,7 @@ getTopicCorrelations = () => {
             requestedSweeps = {this.state.requestedSweeps} 
             numTopics={this.state.tempNumTopics} 
             onClick={this.addSweepRequests} 
-            onBlur={this.updateTempNumTopics} />
+            updateNumTopics={this.onTopicsChange} />
       {/* <div id="form" className="top">
         <button id="sweep">Run 50 iterations</button>
         Iterations: <span id="iters">0</span>
