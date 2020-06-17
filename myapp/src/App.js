@@ -270,11 +270,9 @@ class App extends Component {
   queueLoad = () => {
 
     this.reset();
-    console.log("got past reset");
     Promise.all([this.getStoplistUpload(),this.getDocsUpload()])
-      .then(([stops, lines]) => {console.log("Promised Stops: " + stops); this.ready(null, stops, lines)})
+      .then(([stops, lines]) => {this.ready(null, stops, lines)})
       .catch(err => this.ready(err, null, null));
-    console.log("got past promise");
   }
   
   ready = (error, stops, lines) => {
