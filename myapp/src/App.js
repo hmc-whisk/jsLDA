@@ -188,16 +188,24 @@ class App extends Component {
   // Retrieve doc files from upload component
   onDocumentFileChange = (event) => {
     event.preventDefault();
-    console.log(event.target.files)
+
+    // Prevent empty file change errors
+    if(!event.target.files[0]){return;}
+
+    console.log(event.target.files[0].type)
     this.setState({
       documentsFileArray: [Array.prototype.slice.call(event.target.files)],
+      documentType: event.target.files[0].type,
     });
   }
 
   // Retrieve stop word files from upload component
   onStopwordFileChange = (event) => {
     event.preventDefault();
-    console.log(event)
+    
+    // Prevent empty file change errors
+    if(!event.target.files[0]){return;}
+
     this.setState({
       stoplistFileArray: [Array.prototype.slice.call(event.target.files)],
     });
@@ -233,7 +241,8 @@ class App extends Component {
   
   getDocsUpload = () => (new Promise((resolve) => {
     if (this.state.documentsFileArray.length === 0) {
-        resolve(d3.text(this.state.documentsURL));
+      this.setState({ documentType: "text/plain"});
+      resolve(d3.text(this.state.documentsURL));
     } else {
       const fileSelection = this.state.documentsFileArray[0].slice();
       var reader = new FileReader();
@@ -292,7 +301,7 @@ class App extends Component {
   
       // Load documents and populate the vocabulary
       //lines.split("\n").forEach(this.parseLine);
-      this.parseDoc(lines);
+      this.parseFullDoc(lines);
   
       this.sortTopicWords();
 
@@ -343,27 +352,34 @@ class App extends Component {
     // }
   }
 
-  parseDoc = (lines) =>  {
+  /**
+   * @summary Processes document text to set up topic model
+   * @param docText {String} a string of a tsv or csv file
+   * This function calles upon the documentType state member
+   * to determine whether docText is a csv or tsv. If it isnt
+   * "text/csv" then it will assume it is a tsv.
+   */
+  parseDoc = (docText) => {
     // Avoid mutating state directly
     let temp_stopwords = {...this.state.stopwords};
     let temp_vocabularyCounts = {...this.state.vocabularyCounts};
-    // let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
     let temp_tokensPerTopic = this.zeros(this.state.numTopics);
     let temp_wordTopicCounts = {...this.state.wordTopicCounts};
     let temp_vocabularySize = this.state.vocabularySize;
     let temp_documents = this.state.documents.slice();
     let numTopics = this.state.numTopics;
 
-    let splitLines = lines.split("\n");
-    console.log(temp_tokensPerTopic)
+    if(this.state.documentType == "text/csv") {
+      var parsedDoc = d3.csvParseRows(docText);
+    } else {
+      var parsedDoc = d3.tsvParseRows(docText);
+    }
 
-    for(let i = 0; i < splitLines.length; i++) {
-      let line = splitLines[i];
-      if (line === "") { continue; }
+    for(let i = 0; i < parsedDoc.length; i++) {
+      let fields = parsedDoc[i];
       var docID = this.state.documents.length;
-      //console.log("Parsing document: " + line);
       var docDate = "";
-      var fields = line.split("\t");
+
       var text = fields[0];  // Assume there's just one field, the text
       if (fields.length === 3) {  // If it's in [ID]\t[TAG]\t[TEXT] format...
         docID = fields[0];
@@ -422,7 +438,6 @@ class App extends Component {
         .attr("class", "document")
         .text("[" + docID + "] " + this.truncate(text));
     }
-    console.log("Broke out of loop");
     this.setState({
       stopwords: temp_stopwords,
       vocabularyCounts: temp_vocabularyCounts,
@@ -431,8 +446,6 @@ class App extends Component {
       vocabularySize: temp_vocabularySize,
       documents: temp_documents,
     });
-
-
   }
 
   // This function is the callback for "input", it changes as we move the slider
