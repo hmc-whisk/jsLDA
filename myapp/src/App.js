@@ -267,19 +267,29 @@ class App extends Component {
     d3.selectAll("div.document").remove();
   }
 
+  /**
+   * @summary Runs the document processing pipeline
+   */
   queueLoad = () => {
 
     this.reset();
-    console.log("got past reset");
     Promise.all([this.getStoplistUpload(),this.getDocsUpload()])
-      .then(([stops, lines]) => {console.log("Promised Stops: " + stops); this.ready(null, stops, lines)})
+      .then(([stops, lines]) => {this.ready(null, stops, lines)})
       .catch(err => this.ready(err, null, null));
-    console.log("got past promise");
   }
   
+  /**
+   * @summary Sets up state from document/stopword info
+   * @param {Error} error
+   * @param {String} stops string of stop words with one per line
+   * @param {String} lines string of documents in tsv or csv format
+   *  - Lines should not have column names included
+   *  - Should either include 3 columns in [ID]\t[TAG]\t[TEXT] format or
+   *    one column of just the text
+   */
   ready = (error, stops, lines) => {
     if (error) { 
-      //alert("File upload failed. Please try again."); // TODO: uncomment when it won't be obnoxious
+      alert("File upload failed. Please try again.");
       throw error;
     } else {
       // Avoid direct state mutation 
