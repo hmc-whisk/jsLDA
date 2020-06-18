@@ -77,11 +77,11 @@ class Correlation extends Component {
         .attr("r", function (link) { return radiusScale(Math.abs(link.value)); })
         .style("fill", function (link) { return link.value > 0.0 ? "#88f" : "#f88"; })
         .on("mouseover", function (link) {
-          var X = this.getBoundingClientRect().x;
-          var Y = this.getBoundingClientRect().y;
           var tooltip = d3.select("#tooltip");
+          var tooltipX = this.getBoundingClientRect().x;
+          var tooltipY = this.getBoundingClientRect().y;
           tooltip.style("visibility", "visible")
-          .style("top", (Y-10)+"px").style("left",(X+20)+"px")
+          .style("top", (tooltipY-10)+"px").style("left",(tooltipX+20)+"px")
           .text(correlationGraph.nodes[link.target].words + " / " + correlationGraph.nodes[link.source].words);
         })
      
