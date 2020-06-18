@@ -13,7 +13,6 @@ class TopicDoc extends Component {
             // used by reorderDocuments
             docSortSmoothing: 10.0,
         };
-        console.log(props);
       }
 
     reorderDocuments = () => {
