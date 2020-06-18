@@ -156,12 +156,13 @@ class App extends Component {
     documentTopicSmoothing: 0.1, // (used by sweep)
     topicWordSmoothing: 0.01, // (used by sweep)
     
-    selectedTab: "docs-tab"
+    selectedTab: "docs-tab",
   };
   
   this.changeTab = this.changeTab.bind(this);
   this.addSweepRequests = this.addSweepRequests.bind(this);
 };
+  sweeps = 0;
 
   changeTab = (tabID) => {
     this.setState({
@@ -599,6 +600,7 @@ class App extends Component {
     }
 
     console.log("sweep in " + (Date.now() - startTime) + " ms");
+    console.log(this.sweeps)
 
     this.setState({
       completeSweeps: this.state.completeSweeps + 1,
@@ -618,6 +620,7 @@ class App extends Component {
       // vocabTable();
       // timeSeries();
       this.timer.stop();
+      this.sweeps = 0;
     }
   }
 
@@ -786,8 +789,12 @@ getTopicCorrelations = () => {
       requestedSweeps: this.state.requestedSweeps + 50
     });
     // TODO: Cottect Beginning of iteration
-    this.timer = d3.timer(this.sweep);
-    console.log("Requested Sweeps Now: " + this.state.requestedSweeps);
+    if (this.sweeps === 0) {
+      this.sweeps = 1;
+      console.log(this.swe)
+      this.timer = d3.timer(this.sweep);
+      console.log("Requested Sweeps Now: " + this.state.requestedSweeps);
+    }
   }
   
   render() {
