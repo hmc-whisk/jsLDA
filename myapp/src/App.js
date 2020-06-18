@@ -301,7 +301,7 @@ class App extends Component {
   
       // Load documents and populate the vocabulary
       //lines.split("\n").forEach(this.parseLine);
-      this.parseFullDoc(lines);
+      this.parseDoc(lines);
   
       this.sortTopicWords();
 
