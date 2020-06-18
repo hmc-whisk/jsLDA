@@ -50,6 +50,7 @@ class Correlation extends Component {
         horizontalTopics = horizontalTopics.enter().append("text")
           .attr("class", "hor")
         .merge(horizontalTopics);
+
       
         horizontalTopics
           .attr("x", right + 10)
