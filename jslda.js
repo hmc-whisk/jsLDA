@@ -674,6 +674,7 @@ function plotMatrix() {
   .attr("r", function (link) { return radiusScale(Math.abs(link.value)); })
   .style("fill", function (link) { return link.value > 0.0 ? "#88f" : "#f88"; })
   .on("mouseover", function (event, link) {
+    console.log(link.target);
     var tooltip = d3.select("#tooltip");
     tooltip.style("visibility", "visible")
     .style("top", (event.pageY-10)+"px").style("left",(event.pageX+20)+"px")
