@@ -161,8 +161,8 @@ class App extends Component {
   
   this.changeTab = this.changeTab.bind(this);
   this.addSweepRequests = this.addSweepRequests.bind(this);
-};
-  sweeps = 0;
+  };
+  sweeps = 0; //TODO: figure out why this thing is here
 
   changeTab = (tabID) => {
     this.setState({
@@ -185,7 +185,9 @@ class App extends Component {
     this.setState({sortVocabByTopic: sort})
   }
 
-  // Retrieve doc files from upload component
+  /**
+   * @summary Retrieve doc files from upload component and set documentType
+   */
   onDocumentFileChange = (event) => {
     event.preventDefault();
 
@@ -199,7 +201,9 @@ class App extends Component {
     });
   }
 
-  // Retrieve stop word files from upload component
+  /**
+   * @summary Retrieve stop word files from upload component
+   */
   onStopwordFileChange = (event) => {
     event.preventDefault();
     
@@ -219,13 +223,22 @@ class App extends Component {
     this.setState({numTopics:25});
     }
   }
-
+  /**
+   * @summary returns an array filled with 0.0
+   * @param {Number} n length of array 
+   */
   zeros = (n) => {
     var x = new Array(n);
     for (var i = 0; i < n; i++) { x[i] = 0.0; }
     return x;
   }
 
+  /**
+   * @summary Returns a promise of the correct stopword text
+   * @returns {Promise<String>} stopword text
+   *  - first document in documentsFileArray state if it exists
+   *  - stopwordsURL resource file otherwise
+   */
   getStoplistUpload = () => (new Promise((resolve) => {
     if (this.state.stoplistFileArray.length === 0) {
         resolve(d3.text(this.state.stopwordsURL));
@@ -239,6 +252,12 @@ class App extends Component {
     }
   }));
   
+  /**
+   * @summary Returns a promise of the correct document text
+   * @returns {Promise<String>} document text
+   *  - first document in documentsFileArray state if it exists
+   *  - documentsURL resource file otherwise
+   */
   getDocsUpload = () => (new Promise((resolve) => {
     if (this.state.documentsFileArray.length === 0) {
       this.setState({ documentType: "text/plain"});
@@ -253,6 +272,10 @@ class App extends Component {
     }
   }));
 
+  /**
+   * @summary Resets all the model related props in preperation
+   * for new documents to be processed
+   */
   reset() {
     this.setState({
       vocabularySize: 0,
@@ -366,6 +389,8 @@ class App extends Component {
   /**
    * @summary Processes document text to set up topic model
    * @param docText {String} a string of a tsv or csv file
+   *  - Without column names
+   *  - In format [ID],[TAG],[TEXT] or [TEXT]
    * This function calles upon the documentType state member
    * to determine whether docText is a csv or tsv. If it isnt
    * "text/csv" then it will assume it is a tsv.
@@ -465,8 +490,7 @@ class App extends Component {
     d3.select("#num_topics_display").text(input.value);
   }
 
-  // This function is the callback for "change", it only fires when we release the
-  //  slider to select a new value.
+  // This function is the callback for "change"
   onTopicsChange = (val) => {
     console.log("Changing # of topics: " + val);
     
@@ -476,6 +500,10 @@ class App extends Component {
     }
   }
 
+  /**
+   * @summary Shifts model to have a dif number of topics
+   * @param {Number} numTopics_ new number of topics
+   */
   changeNumTopics(numTopics_) {
     let temp_selectedTopic = -1;
     let temp_topicWordCounts = [];
@@ -527,10 +555,6 @@ class App extends Component {
     // reorderDocuments();
     // vocabTable();
     
-    // Restart the visualizations
-    // createTimeSVGs();
-    // timeSeries();
-    // plotMatrix();
   }
 
   sweep = () => {
@@ -718,59 +742,67 @@ class App extends Component {
     // vocabTable();
   }
 
-  /* This function will compute pairwise correlations between topics.
- * Unlike the correlated topic model (CTM) LDA doesn't have parameters
- * that represent topic correlations. But that doesn't mean that topics are
- * not correlated, it just means we have to estimate those values by
- * measuring which topics appear in documents together.
- */
-getTopicCorrelations = () => {
+  /**
+   * @summary This function will compute pairwise correlations between topics.
+   * @returns {Array<Array<Number>>} 2d array of correlation values
+   * @description Unlike the correlated topic model (CTM) LDA doesn't have 
+   * parameters that represent topic correlations. But that doesn't mean that
+   * topics are not correlated, it just means we have to estimate those values
+   * by measuring which topics appear in documents together.
+   */
+  getTopicCorrelations = () => {
 
-  // initialize the matrix
-  let correlationMatrix = [this.state.numTopics];
-  for (var t1 = 0; t1 < this.state.numTopics; t1++) {
-    correlationMatrix[t1] = this.zeros(this.state.numTopics);
-  }
+    // initialize the matrix
+    let correlationMatrix = [this.state.numTopics];
+    for (var t1 = 0; t1 < this.state.numTopics; t1++) {
+      correlationMatrix[t1] = this.zeros(this.state.numTopics);
+    }
 
-  var topicProbabilities = this.zeros(this.state.numTopics);
+    var topicProbabilities = this.zeros(this.state.numTopics);
 
-  // iterate once to get mean log topic proportions
-  this.state.documents.forEach((d, i) => {
+    // iterate once to get mean log topic proportions
+    this.state.documents.forEach((d, i) => {
 
-    // We want to find the subset of topics that occur with non-trivial concentration in this document.
-    // Only consider topics with at least the minimum number of tokens that are at least 5% of the doc.
-    var documentTopics = [];
-    var tokenCutoff = Math.max(this.state.correlationMinTokens, 
-      this.state.correlationMinProportion * d.tokens.length);
+      // We want to find the subset of topics that occur with non-trivial concentration in this document.
+      // Only consider topics with at least the minimum number of tokens that are at least 5% of the doc.
+      var documentTopics = [];
+      var tokenCutoff = Math.max(this.state.correlationMinTokens, 
+        this.state.correlationMinProportion * d.tokens.length);
 
-    for (let topic = 0; topic < this.state.numTopics; topic++) {
-      if (d.topicCounts[topic] >= tokenCutoff) {
-        documentTopics.push(topic);
-        topicProbabilities[topic]++; // Count the number of docs with this topic
+      for (let topic = 0; topic < this.state.numTopics; topic++) {
+        if (d.topicCounts[topic] >= tokenCutoff) {
+          documentTopics.push(topic);
+          topicProbabilities[topic]++; // Count the number of docs with this topic
+        }
+      }
+
+      // Look at all pairs of topics that occur in the document.
+      for (let i = 0; i < documentTopics.length - 1; i++) {
+        for (let j = i + 1; j < documentTopics.length; j++) {
+          correlationMatrix[ documentTopics[i] ][ documentTopics[j] ]++;
+          correlationMatrix[ documentTopics[j] ][ documentTopics[i] ]++;
+        }
+      }
+    });
+
+    for (let t1 = 0; t1 < this.state.numTopics - 1; t1++) {
+      for (let t2 = t1 + 1; t2 < this.state.numTopics; t2++) {
+        correlationMatrix[t1][t2] = Math.log((this.state.documents.length * correlationMatrix[t1][t2]) /
+                                            (topicProbabilities[t1] * topicProbabilities[t2]));
+        correlationMatrix[t2][t1] = Math.log((this.state.documents.length * correlationMatrix[t2][t1]) /
+                                            (topicProbabilities[t1] * topicProbabilities[t2]));
       }
     }
 
-    // Look at all pairs of topics that occur in the document.
-    for (let i = 0; i < documentTopics.length - 1; i++) {
-      for (let j = i + 1; j < documentTopics.length; j++) {
-        correlationMatrix[ documentTopics[i] ][ documentTopics[j] ]++;
-        correlationMatrix[ documentTopics[j] ][ documentTopics[i] ]++;
-      }
-    }
-  });
-
-  for (let t1 = 0; t1 < this.state.numTopics - 1; t1++) {
-    for (let t2 = t1 + 1; t2 < this.state.numTopics; t2++) {
-      correlationMatrix[t1][t2] = Math.log((this.state.documents.length * correlationMatrix[t1][t2]) /
-                                           (topicProbabilities[t1] * topicProbabilities[t2]));
-      correlationMatrix[t2][t1] = Math.log((this.state.documents.length * correlationMatrix[t2][t1]) /
-                                           (topicProbabilities[t1] * topicProbabilities[t2]));
-    }
+    return correlationMatrix;
   }
 
-  return correlationMatrix;
-}
-
+  /**
+   * @summary Used to get top words from a topic
+   * @param {Array<Object>} wordCounts the word counts for a topic
+   * @param {*} n number of top words to return
+   * @returns {String} the top n words seperated by spaces
+   */
   topNWords(wordCounts, n) { 
     return wordCounts.slice(0,n).map( function(d) { return d.word; }).join(" "); 
   };
@@ -799,6 +831,7 @@ getTopicCorrelations = () => {
       requestedSweeps: this.state.requestedSweeps + 50
     });
     // TODO: Cottect Beginning of iteration
+    // TODO: Change these things to states
     if (this.sweeps === 0) {
       this.sweeps = 1;
       this.timer = d3.timer(this.sweep);
