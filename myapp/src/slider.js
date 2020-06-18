@@ -9,7 +9,6 @@ class Slider extends React.Component {
 
     handleChange = (e) => {
         const val = e.target.value;
-        this.props.onChange(val);
         this.props.updateNumTopics(val);
     }
 
@@ -21,7 +20,10 @@ class Slider extends React.Component {
                     Train with 
                     <input id="num-topics-input" type="range" name="topics" 
                         value={this.props.sliderValue}
-                        min="3" max="100" onChange={(e) => this.handleChange(e)}/> 
+                        min="3" max="100" 
+                        onMouseUp={(e) => this.handleChange(e)}
+                        onInput={(e) => this.props.onInput(e)}
+                        /> 
                     <span id="num_topics_display"> </span>  
                     {this.props.sliderValue} Topics
                 </span>
