@@ -223,7 +223,7 @@ class App extends Component {
     this.setState({numTopics:25});
     }
   }
-  
+
   /**
    * @summary returns an array filled with 0.0
    * @param {Number} n length of array 
@@ -322,7 +322,7 @@ class App extends Component {
    */
   ready = (error, stops, lines) => {
     if (error) { 
-      alert("File upload failed. Please try again.");
+      //alert("File upload failed. Please try again."); TODO: uncomment this for deployment
       throw error;
     } else {
       // Avoid direct state mutation 
