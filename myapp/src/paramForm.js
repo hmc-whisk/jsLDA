@@ -20,7 +20,7 @@ class Form extends React.Component {
     updateNumDisplay(val) {
         this.setState({
             sliderValue: val
-          });
+        });
     }
 
 
@@ -29,7 +29,7 @@ class Form extends React.Component {
             <div id="form" className="top">
 
                 <button id="sweep" onClick={this.handleClick} >Run 50 iterations</button> Iterations: <span id="iters"> {this.props.iter} </span>
-                <Slider onChange={this.updateNumDisplay} sliderValue = {this.state.sliderValue} onBlur={this.props.onBlur}/> 
+                <Slider onChange={this.updateNumDisplay} sliderValue = {this.state.sliderValue} updateNumTopics={this.props.updateNumTopics}/> 
             </div>
         );
     }

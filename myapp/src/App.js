@@ -156,13 +156,13 @@ class App extends Component {
     documentTopicSmoothing: 0.1, // (used by sweep)
     topicWordSmoothing: 0.01, // (used by sweep)
     
-    selectedTab: "docs-tab"
+    selectedTab: "docs-tab",
   };
   
   this.changeTab = this.changeTab.bind(this);
   this.addSweepRequests = this.addSweepRequests.bind(this);
-  this.updateTempNumTopics = this.updateTempNumTopics.bind(this);
 };
+  sweeps = 0;
 
   changeTab = (tabID) => {
     this.setState({
@@ -188,16 +188,24 @@ class App extends Component {
   // Retrieve doc files from upload component
   onDocumentFileChange = (event) => {
     event.preventDefault();
-    console.log(event.target.files)
+
+    // Prevent empty file change errors
+    if(!event.target.files[0]){return;}
+
+    console.log(event.target.files[0].type)
     this.setState({
       documentsFileArray: [Array.prototype.slice.call(event.target.files)],
+      documentType: event.target.files[0].type,
     });
   }
 
   // Retrieve stop word files from upload component
   onStopwordFileChange = (event) => {
     event.preventDefault();
-    console.log(event)
+    
+    // Prevent empty file change errors
+    if(!event.target.files[0]){return;}
+
     this.setState({
       stoplistFileArray: [Array.prototype.slice.call(event.target.files)],
     });
@@ -233,7 +241,8 @@ class App extends Component {
   
   getDocsUpload = () => (new Promise((resolve) => {
     if (this.state.documentsFileArray.length === 0) {
-        resolve(d3.text(this.state.documentsURL));
+      this.setState({ documentType: "text/plain"});
+      resolve(d3.text(this.state.documentsURL));
     } else {
       const fileSelection = this.state.documentsFileArray[0].slice();
       var reader = new FileReader();
@@ -267,19 +276,29 @@ class App extends Component {
     d3.selectAll("div.document").remove();
   }
 
+  /**
+   * @summary Runs the document processing pipeline
+   */
   queueLoad = () => {
 
     this.reset();
-    console.log("got past reset");
     Promise.all([this.getStoplistUpload(),this.getDocsUpload()])
-      .then(([stops, lines]) => {console.log("Promised Stops: " + stops); this.ready(null, stops, lines)})
+      .then(([stops, lines]) => {this.ready(null, stops, lines)})
       .catch(err => this.ready(err, null, null));
-    console.log("got past promise");
   }
   
+  /**
+   * @summary Sets up state from document/stopword info
+   * @param {Error} error
+   * @param {String} stops string of stop words with one per line
+   * @param {String} lines string of documents in tsv or csv format
+   *  - Lines should not have column names included
+   *  - Should either include 3 columns in [ID]\t[TAG]\t[TEXT] format or
+   *    one column of just the text
+   */
   ready = (error, stops, lines) => {
     if (error) { 
-      //alert("File upload failed. Please try again."); // TODO: uncomment when it won't be obnoxious
+      alert("File upload failed. Please try again.");
       throw error;
     } else {
       // Avoid direct state mutation 
@@ -312,12 +331,11 @@ class App extends Component {
   truncate (s) { return s.length > 300 ? s.substring(0, 299) + "..." : s; }
 
   // used by addStop, removeStop in vocab, saveTopicKeys in downloads, sweep in sweep
-  sortTopicWords() {
+  sortTopicWords = () => {
     let tempTopicWordCounts = [];
     for (let topic = 0; topic < this.state.numTopics; topic++) {
       tempTopicWordCounts[topic] = [];
     }
-  
     for (let word in this.state.wordTopicCounts) {
       for (let topic in this.state.wordTopicCounts[word]) {
         tempTopicWordCounts[topic].push({"word":word, "count":this.state.wordTopicCounts[word][topic]});
@@ -345,27 +363,34 @@ class App extends Component {
     // }
   }
 
-  parseDoc = (lines) =>  {
+  /**
+   * @summary Processes document text to set up topic model
+   * @param docText {String} a string of a tsv or csv file
+   * This function calles upon the documentType state member
+   * to determine whether docText is a csv or tsv. If it isnt
+   * "text/csv" then it will assume it is a tsv.
+   */
+  parseDoc = (docText) => {
     // Avoid mutating state directly
     let temp_stopwords = {...this.state.stopwords};
     let temp_vocabularyCounts = {...this.state.vocabularyCounts};
-    // let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
     let temp_tokensPerTopic = this.zeros(this.state.numTopics);
     let temp_wordTopicCounts = {...this.state.wordTopicCounts};
     let temp_vocabularySize = this.state.vocabularySize;
     let temp_documents = this.state.documents.slice();
     let numTopics = this.state.numTopics;
 
-    let splitLines = lines.split("\n");
-    console.log(temp_tokensPerTopic)
+    if(this.state.documentType == "text/csv") {
+      var parsedDoc = d3.csvParseRows(docText);
+    } else {
+      var parsedDoc = d3.tsvParseRows(docText);
+    }
 
-    for(let i = 0; i < splitLines.length; i++) {
-      let line = splitLines[i];
-      if (line === "") { continue; }
+    for(let i = 0; i < parsedDoc.length; i++) {
+      let fields = parsedDoc[i];
       var docID = this.state.documents.length;
-      //console.log("Parsing document: " + line);
       var docDate = "";
-      var fields = line.split("\t");
+
       var text = fields[0];  // Assume there's just one field, the text
       if (fields.length === 3) {  // If it's in [ID]\t[TAG]\t[TEXT] format...
         docID = fields[0];
@@ -424,7 +449,6 @@ class App extends Component {
         .attr("class", "document")
         .text("[" + docID + "] " + this.truncate(text));
     }
-    console.log("Broke out of loop");
     this.setState({
       stopwords: temp_stopwords,
       vocabularyCounts: temp_vocabularyCounts,
@@ -433,8 +457,6 @@ class App extends Component {
       vocabularySize: temp_vocabularySize,
       documents: temp_documents,
     });
-
-
   }
 
   // This function is the callback for "input", it changes as we move the slider
@@ -445,51 +467,43 @@ class App extends Component {
 
   // This function is the callback for "change", it only fires when we release the
   //  slider to select a new value.
-  onTopicsChange(input) {
-    console.log("Changing # of topics: " + input.value);
+  onTopicsChange = (val) => {
+    console.log("Changing # of topics: " + val);
     
-    var newNumTopics = Number(input.value);
+    var newNumTopics = Number(val);
     if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.numTopics) {
-      this.changeNumTopics(Number(input.value));
+      this.changeNumTopics(Number(val));
     }
   }
 
   changeNumTopics(numTopics_) {
-    this.numTopics = numTopics_;
-    this.selectedTopic = 0;
+    let temp_selectedTopic = -1;
+    let temp_topicWordCounts = [];
+    let temp_tokensPerTopic = this.zeros(numTopics_);
+    let temp_topicWeights = this.zeros(numTopics_);
+    let temp_documents = this.state.documents.slice();
+    let temp_wordTopicCounts = {};
+    let temp_completeSweeps = 0;
+    let temp_requestedSweeps = 0;
 
+    d3.select("#iters").text(temp_completeSweeps);
     
-    this.completeSweeps = 0;
-    this.requestedSweeps = 0;
-    d3.select("#iters").text(this.completeSweeps);
-    
-    let tempWordTopicCounts = {};
-    Object.keys(this.vocabularyCounts).forEach(function (word) { tempWordTopicCounts[word] = {} });
-    this.setState({wordTopicCounts:tempWordTopicCounts})
+    Object.keys(this.state.vocabularyCounts).forEach(function (word) { temp_wordTopicCounts[word] = {} });
 
-    // this.wordTopicCounts = {};
-    // Object.keys(this.vocabularyCounts).forEach(function (word) { this.wordTopicCounts[word] = {} });
-    
-    let tempTopicWordCounts = [];
-    let tempTokensPerTopic = this.zeros(this.numTopics);
-    let tempTopicWeights = this.zeros(this.numTopics);
-    let tempDocuments = this.documents;
-    tempWordTopicCounts = this.wordTopicCounts;
+    temp_documents.forEach(( currentDoc, i ) => {
 
-    tempDocuments.forEach( function( currentDoc, i ) {
-
-      currentDoc.topicCounts = this.zeros(this.numTopics);
-      for (var position = 0; position < currentDoc.tokens.length; position++) {
-        var token = currentDoc.tokens[position];
-        token.topic = Math.floor(Math.random() * this.numTopics);
+      currentDoc.topicCounts = this.zeros(numTopics_);
+      for (let position = 0; position < currentDoc.tokens.length; position++) {
+        let token = currentDoc.tokens[position];
+        token.topic = Math.floor(Math.random() * numTopics_);
         
         if (! token.isStopword) {
-          tempTokensPerTopic[token.topic]++;
-          if (! tempWordTopicCounts[token.word][token.topic]) {
-            tempWordTopicCounts[token.word][token.topic] = 1;
+          temp_tokensPerTopic[token.topic]++;
+          if (! temp_wordTopicCounts[token.word][token.topic]) {
+            temp_wordTopicCounts[token.word][token.topic] = 1;
           }
           else {
-            tempWordTopicCounts[token.word][token.topic] += 1;
+            temp_wordTopicCounts[token.word][token.topic] += 1;
 
           }
           currentDoc.topicCounts[token.topic] += 1;
@@ -498,37 +512,17 @@ class App extends Component {
     });
 
     this.setState({
-      topicWordCounts: tempTopicWordCounts,
-      tokensPerTopic: tempTokensPerTopic,
-      topicWeights: tempTopicWeights,
-      documents: tempDocuments,
-      wordTopicCounts: tempWordTopicCounts
-    });
+      selectedTopic: temp_selectedTopic,
+      completeSweeps: temp_completeSweeps,
+      requestedSweeps: temp_requestedSweeps,
+      numTopics: numTopics_,
+      topicWordCounts: temp_topicWordCounts,
+      tokensPerTopic: temp_tokensPerTopic,
+      topicWeights: temp_topicWeights,
+      documents: temp_documents,
+      wordTopicCounts: temp_wordTopicCounts
+    }, () => this.sortTopicWords()); // Wait until state has changed to sort
 
-    // this.topicWordCounts = [];
-    // this.tokensPerTopic = this.zeros(this.numTopics);
-    // this.topicWeights = this.zeros(this.numTopics);
-    
-    // this.documents.forEach( function( currentDoc, i ) {
-    //   currentDoc.topicCounts = this.zeros(this.numTopics);
-    //   for (var position = 0; position < currentDoc.tokens.length; position++) {
-    //     var token = currentDoc.tokens[position];
-    //     token.topic = Math.floor(Math.random() * this.numTopics);
-        
-    //     if (! token.isStopword) {
-    //       this.tokensPerTopic[token.topic]++;
-    //       if (! this.wordTopicCounts[token.word][token.topic]) {
-    //         this.wordTopicCounts[token.word][token.topic] = 1;
-    //       }
-    //       else {
-    //         this.wordTopicCounts[token.word][token.topic] += 1;
-    //       }
-    //       currentDoc.topicCounts[token.topic] += 1;
-    //     }
-    //   }
-    // });
-
-    this.sortTopicWords();
     // displayTopicWords();
     // reorderDocuments();
     // vocabTable();
@@ -543,7 +537,6 @@ class App extends Component {
     var startTime = Date.now();
 
     // Avoid mutating state
-    console.log( this.state.tokensPerTopic);
     let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
     let temp_topicWeights = this.state.topicWeights.slice();
 
@@ -637,6 +630,7 @@ class App extends Component {
       // vocabTable();
       // timeSeries();
       this.timer.stop();
+      this.sweeps = 0;
     }
   }
 
@@ -805,15 +799,11 @@ getTopicCorrelations = () => {
       requestedSweeps: this.state.requestedSweeps + 50
     });
     // TODO: Cottect Beginning of iteration
-    this.timer = d3.timer(this.sweep);
-    console.log("Requested Sweeps Now: " + this.state.requestedSweeps);
-  }
-
-  updateTempNumTopics(val) {
-    this.setState({
-      tempNumTopics: val
-    });
-    console.log("Num Topics Now: : " + this.state.tempNumTopics);
+    if (this.sweeps === 0) {
+      this.sweeps = 1;
+      this.timer = d3.timer(this.sweep);
+      console.log("Requested Sweeps Now: " + this.state.requestedSweeps);
+    }
   }
   
   render() {
@@ -889,7 +879,7 @@ getTopicCorrelations = () => {
             requestedSweeps = {this.state.requestedSweeps} 
             numTopics={this.state.tempNumTopics} 
             onClick={this.addSweepRequests} 
-            onBlur={this.updateTempNumTopics} />
+            updateNumTopics={this.onTopicsChange} />
       {/* <div id="form" className="top">
         <button id="sweep">Run 50 iterations</button>
         Iterations: <span id="iters">0</span>
