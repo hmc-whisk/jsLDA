@@ -29,6 +29,7 @@ class DLPage extends React.Component {
                         <li><a id="topictopic-dl" href="#" download="topictopic.csv" onClick={() => this.saveTopicPMI()}>Topic-topic connections</a></li>
                         <li><a id="graph-dl" href="#" download="gephi.csv" onClick={() => this.saveGraph()}>Doc-topic graph file (for Gephi)</a></li>
                         <li><a id="state-dl" href="#" download="state.csv" onClick={() => this.saveState()}>Complete sampling state</a></li>
+                        <li><a id="topicstime-dl" href="#" download="topicstime.csv" onClick={() => this.saveTopicsTime()}>Topic values over time</a></li>
                     </ul>
                 </div>
 
@@ -54,18 +55,64 @@ class DLPage extends React.Component {
           var blob = new Blob([s], {type: type});
           return window.URL.createObjectURL(blob);
         }
-      }
+    }
+
+    /**
+     * @summary changes the href of topicstime-dl to a csv of topics over time
+     * @author Theo Bayard de Volo
+     * Note: If the date ids have quotes in them, this will strip them out
+     * for the csv because they would make the file unreadable. 
+     */
+    saveTopicsTime = () => {
+        // Set up CSV column names
+        var topicTimeCSV = "Topic Number";
+
+        // Add a csv row for every topic
+        for (let topic = 0; topic < this.props.numTopics; topic++) {
+            var topicProportions = this.props.documents
+                .map(function (d) { 
+                    return {
+                        date: d.date, 
+                        p: d.topicCounts[topic] / d.tokens.length
+                    }; 
+                });
+            var topicMeans = d3
+                .nest()
+                .key(function (d) {return d.date; })
+                .rollup(function (d) {return d3
+                    .mean(d, function (x) {return x.p}); })
+                .entries(topicProportions);
+            
+            // Add column names on first pass
+            if(topic === 0) {
+                for (let i = 0; i < topicMeans.length; i++) {
+                    topicTimeCSV += ',"' + topicMeans[i].key.replace('"','') + '"'
+                }
+                topicTimeCSV += "\n"
+            }
+
+            // Add topic Number
+            topicTimeCSV += topic + ",";
+
+            // Add mean values
+            for (let i = 0; i < topicMeans.length; i++){
+                topicTimeCSV += topicMeans[i].value + ",";
+            }
+            topicTimeCSV = topicTimeCSV.slice(0,-1); // Remove last comma
+            topicTimeCSV = topicTimeCSV += "\n";
+        }
+        d3.select("#topicstime-dl").attr("href", this.toURL(topicTimeCSV, "text/csv"));
+    }
 
     saveDocTopics = () => {
         var docTopicsCSV = "";
-          var topicProbabilities = this.zeros(this.props.numTopics);
       
-          this.props.documents.forEach(function(d, i) {
-          docTopicsCSV += d.id + "," + d.topicCounts.map((x) => { return d3.format(".8")(x / d.tokens.length); }).join(",") + "\n";
+        this.props.documents.forEach(function(d, i) {
+            docTopicsCSV += d.id + "," + d.topicCounts.map((x) => { return d3.format(".8")(x / d.tokens.length); }).join(",") + "\n";
         });
       
         d3.select("#doctopics-dl").attr("href", this.toURL(docTopicsCSV, "text/csv"));
-      }
+    }
       
     saveTopicWords = () => {
         var topicWordsCSV = "word," + d3
@@ -108,7 +155,7 @@ class DLPage extends React.Component {
             }).join(",") + "\n"; 
         });
         d3.select("#topictopic-dl").attr("href", this.toURL(pmiCSV, "text/csv"));
-      }
+    }
       
     saveGraph = () => {
         var graphCSV = "Source,Target,Weight,Type\n";
@@ -123,7 +170,7 @@ class DLPage extends React.Component {
         });
       
         d3.select("#graph-dl").attr("href", this.toURL(graphCSV, "text/csv"));
-      }
+    }
       
     saveState = () => {
         var state = "DocID,Word,Topic";
