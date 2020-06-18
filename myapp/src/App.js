@@ -223,6 +223,7 @@ class App extends Component {
     this.setState({numTopics:25});
     }
   }
+  
   /**
    * @summary returns an array filled with 0.0
    * @param {Number} n length of array 
@@ -906,8 +907,6 @@ class App extends Component {
 
       <div id="main">
 
-      {/* TODO: on button press, start iterating*/}
-      {/* TODO: onBlur, only updates when clicked outside, rather than letting go of slider*/}
       <Form completeSweeps={this.state.completeSweeps} 
             requestedSweeps = {this.state.requestedSweeps} 
             numTopics={this.state.tempNumTopics} 
