@@ -76,20 +76,19 @@ class Correlation extends Component {
         .attr("cy", function(link) { return topicScale(link.target); })
         .attr("r", function (link) { return radiusScale(Math.abs(link.value)); })
         .style("fill", function (link) { return link.value > 0.0 ? "#88f" : "#f88"; })
-        .on("mouseover", function (event, link) {
+        .on("mouseover", function (link) {
+          var X = this.getBoundingClientRect().x;
+          var Y = this.getBoundingClientRect().y;
           var tooltip = d3.select("#tooltip");
-          console.log(link);
-          console.log(correlationGraph.nodes[link]);
           tooltip.style("visibility", "visible")
-          .style("top", (event.pageY-10)+"px").style("left",(event.pageX+20)+"px")
+          .style("top", (Y-10)+"px").style("left",(X+20)+"px")
           .text(correlationGraph.nodes[link.target].words + " / " + correlationGraph.nodes[link.source].words);
         })
+     
         .on("mouseout", function () {
           var tooltip = d3.select("#tooltip");
           tooltip.style("visibility", "hidden");
         });
-        console.log("Graph Plotted");
-        console.log(correlationGraph);
       }
     
 
