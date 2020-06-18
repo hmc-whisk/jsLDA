@@ -931,7 +931,7 @@ class App extends Component {
       <Nav onClick={this.changeTab}/>
       <div id="pages">
 
-      {DisplayPage}
+      {this.state.topicWordCounts.length === 0 ? null : DisplayPage}
 
 
       </div>

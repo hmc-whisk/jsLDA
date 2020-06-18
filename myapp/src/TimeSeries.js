@@ -95,7 +95,7 @@ class TimeSeries extends Component {
                     .attr("d", area(topicMeans));
                 this.state.topicTimeGroups[topic]
                     .select("text")
-                    .text(this.topNWords(this.props.topicWordCounts[topic], 3))
+                    .text(this.topNWords(this.props.topicWordCounts[topic], 3));
             }
         } 
     }
