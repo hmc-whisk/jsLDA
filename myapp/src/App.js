@@ -525,7 +525,6 @@ class App extends Component {
     var startTime = Date.now();
 
     // Avoid mutating state
-    console.log( this.state.tokensPerTopic);
     let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
     let temp_topicWeights = this.state.topicWeights.slice();
 
@@ -600,7 +599,6 @@ class App extends Component {
     }
 
     console.log("sweep in " + (Date.now() - startTime) + " ms");
-    console.log(this.sweeps)
 
     this.setState({
       completeSweeps: this.state.completeSweeps + 1,
@@ -791,7 +789,6 @@ getTopicCorrelations = () => {
     // TODO: Cottect Beginning of iteration
     if (this.sweeps === 0) {
       this.sweeps = 1;
-      console.log(this.swe)
       this.timer = d3.timer(this.sweep);
       console.log("Requested Sweeps Now: " + this.state.requestedSweeps);
     }
