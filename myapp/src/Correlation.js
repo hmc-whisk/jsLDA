@@ -78,6 +78,8 @@ class Correlation extends Component {
         .style("fill", function (link) { return link.value > 0.0 ? "#88f" : "#f88"; })
         .on("mouseover", function (event, link) {
           var tooltip = d3.select("#tooltip");
+          console.log(link);
+          console.log(correlationGraph.nodes[link]);
           tooltip.style("visibility", "visible")
           .style("top", (event.pageY-10)+"px").style("left",(event.pageX+20)+"px")
           .text(correlationGraph.nodes[link.target].words + " / " + correlationGraph.nodes[link.source].words);
