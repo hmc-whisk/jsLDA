@@ -1,5 +1,6 @@
 import React, { Component } from 'react'; 
 import * as d3 from 'd3';
+import {topNWords} from '../../funcs/utilityFunctions'
 
 class TimeSeries extends Component {
     constructor(props) {
@@ -15,16 +16,6 @@ class TimeSeries extends Component {
 
     _setRef(componentNode) {
         this._rootNode = componentNode;
-    }
-
-    /**
-     * @summary Returns a string of the top n words
-     * @param {Array} wordCounts ordered list of top words
-     * @param {Int} n number of words to return
-     * @returns {String} the top n words 
-     */
-    topNWords(wordCounts, n) { 
-        return wordCounts.slice(0,n).map((d) => d.word).join(" "); 
     }
     
     /**
@@ -95,7 +86,7 @@ class TimeSeries extends Component {
                     .attr("d", area(topicMeans));
                 this.state.topicTimeGroups[topic]
                     .select("text")
-                    .text(this.topNWords(this.props.topicWordCounts[topic], 3));
+                    .text(topNWords(this.props.topicWordCounts[topic], 3));
             }
         } 
     }

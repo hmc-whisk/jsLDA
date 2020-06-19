@@ -1,83 +1,25 @@
 import React, { Component } from 'react'; 
 import './App.css';
 import * as d3 from 'd3';
-import Correlation from './Correlation';
-import TopicDoc from './TopicDoc';
-import SideBar from './sidebar';
-import VocabTable from './VocabTable';
-import TimeSeries from './TimeSeries';
-import Nav from './navButtons';
-import Form from './paramForm';
-import DLPage from './DLPage';
+import {zeros, getQueryString, getObjectKeys} from '../../funcs/utilityFunctions'
+
+import Correlation from '../Pages/Correlation';
+import TopicDoc from '../Pages/TopicDoc';
+import SideBar from '../SideBar';
+import VocabTable from '../Pages/VocabTable';
+import TimeSeries from '../Pages/TimeSeries';
+import NavBar from '../Header/NavBar';
+import TopBar from '../Header/TopBar';
+import DLPage from '../Pages/DLPage';
 
 var XRegExp = require('xregexp')
 
-// Where is it used?
-// From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+// This adds the Object.keys() function to some old browsers that don't support it
 if (!Object.keys) {
-  Object.keys = (function() {
-    var hasOwnProperty = Object.prototype.hasOwnProperty,
-        hasDontEnumBug = !({ toString: null }).propertyIsEnumerable('toString'),
-        dontEnums = [
-          'toString',
-          'toLocaleString',
-          'valueOf',
-          'hasOwnProperty',
-          'isPrototypeOf',
-          'propertyIsEnumerable',
-          'constructor'
-        ],
-        dontEnumsLength = dontEnums.length;
-
-    return function(obj) {
-      if (typeof obj !== 'function' && (typeof obj !== 'object' || obj === null)) {
-        throw new TypeError('Object.keys called on non-object');
-      }
-
-      var result = [], prop, i;
-
-      for (prop in obj) {
-        if (hasOwnProperty.call(obj, prop)) {
-          result.push(prop);
-        }
-      }
-
-      if (hasDontEnumBug) {
-        for (i = 0; i < dontEnumsLength; i++) {
-          if (hasOwnProperty.call(obj, dontEnums[i])) {
-            result.push(dontEnums[i]);
-          }
-        }
-      }
-      return result;
-    };
-  }());
+  Object.keys = (getObjectKeys());
 }
 
-// Used for numTopics
-/** This function is copied from stack overflow: http://stackoverflow.com/users/19068/quentin */
-var QueryString = function () {
-  // This function is anonymous, is executed immediately and
-  // the return value is assigned to QueryString!
-  var query_string = {};
-  var query = window.location.search.substring(1);
-  var vars = query.split("&");
-  for (var i=0;i<vars.length;i++) {
-    var pair = vars[i].split("=");
-    // If first entry with this name
-    if (typeof query_string[pair[0]] === "undefined") {
-      query_string[pair[0]] = pair[1];
-    // If second entry with this name
-    } else if (typeof query_string[pair[0]] === "string") {
-      var arr = [ query_string[pair[0]], pair[1] ];
-      query_string[pair[0]] = arr;
-    // If third or later entry with this name
-    } else {
-      query_string[pair[0]].push(pair[1]);
-    }
-  }
-    return query_string;
-} ();
+var QueryString = getQueryString();
 
 class App extends Component {
   constructor(props) {
@@ -224,15 +166,6 @@ class App extends Component {
     }
   }
 
-  /**
-   * @summary returns an array filled with 0.0
-   * @param {Number} n length of array 
-   */
-  zeros = (n) => {
-    var x = new Array(n);
-    for (var i = 0; i < n; i++) { x[i] = 0.0; }
-    return x;
-  }
 
   /**
    * @summary Returns a promise of the correct stopword text
@@ -289,8 +222,8 @@ class App extends Component {
       selectedTopic: -1,
       wordTopicCounts: {},
       topicWordCounts: [],
-      tokensPerTopic: this.zeros(this.state.numTopics),
-      topicWeights: this.zeros(this.state.numTopics),
+      tokensPerTopic: zeros(this.state.numTopics),
+      topicWeights: zeros(this.state.numTopics),
       documents: [],
     })
 
@@ -400,7 +333,7 @@ class App extends Component {
     // Avoid mutating state directly
     let temp_stopwords = {...this.state.stopwords};
     let temp_vocabularyCounts = {...this.state.vocabularyCounts};
-    let temp_tokensPerTopic = this.zeros(this.state.numTopics);
+    let temp_tokensPerTopic = zeros(this.state.numTopics);
     let temp_wordTopicCounts = {...this.state.wordTopicCounts};
     let temp_vocabularySize = this.state.vocabularySize;
     let temp_documents = this.state.documents.slice();
@@ -427,7 +360,7 @@ class App extends Component {
       var tokens = [];
       var rawTokens = text.toLowerCase().match(XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g"));
       if (rawTokens == null) { continue; }
-      var topicCounts = this.zeros(numTopics);
+      var topicCounts = zeros(numTopics);
       rawTokens.forEach(function (word) {
         if (word !== "") {
           var topic = Math.floor(Math.random() * (numTopics));
@@ -508,8 +441,8 @@ class App extends Component {
   changeNumTopics(numTopics_) {
     let temp_selectedTopic = -1;
     let temp_topicWordCounts = [];
-    let temp_tokensPerTopic = this.zeros(numTopics_);
-    let temp_topicWeights = this.zeros(numTopics_);
+    let temp_tokensPerTopic = zeros(numTopics_);
+    let temp_topicWeights = zeros(numTopics_);
     let temp_documents = this.state.documents.slice();
     let temp_wordTopicCounts = {};
     let temp_completeSweeps = 0;
@@ -521,7 +454,7 @@ class App extends Component {
 
     temp_documents.forEach(( currentDoc, i ) => {
 
-      currentDoc.topicCounts = this.zeros(numTopics_);
+      currentDoc.topicCounts = zeros(numTopics_);
       for (let position = 0; position < currentDoc.tokens.length; position++) {
         let token = currentDoc.tokens[position];
         token.topic = Math.floor(Math.random() * numTopics_);
@@ -565,7 +498,7 @@ class App extends Component {
     let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
     let temp_topicWeights = this.state.topicWeights.slice();
 
-    var topicNormalizers = this.zeros(this.state.numTopics);
+    var topicNormalizers = zeros(this.state.numTopics);
     for (let topic = 0; topic < this.state.numTopics; topic++) {
       topicNormalizers[topic] = 1.0 / 
       (this.state.vocabularySize * this.state.topicWordSmoothing + 
@@ -756,10 +689,10 @@ class App extends Component {
     // initialize the matrix
     let correlationMatrix = [this.state.numTopics];
     for (var t1 = 0; t1 < this.state.numTopics; t1++) {
-      correlationMatrix[t1] = this.zeros(this.state.numTopics);
+      correlationMatrix[t1] = zeros(this.state.numTopics);
     }
 
-    var topicProbabilities = this.zeros(this.state.numTopics);
+    var topicProbabilities = zeros(this.state.numTopics);
 
     // iterate once to get mean log topic proportions
     this.state.documents.forEach((d, i) => {
@@ -798,23 +731,13 @@ class App extends Component {
     return correlationMatrix;
   }
 
-  /**
-   * @summary Used to get top words from a topic
-   * @param {Array<Object>} wordCounts the word counts for a topic
-   * @param {*} n number of top words to return
-   * @returns {String} the top n words seperated by spaces
-   */
-  topNWords(wordCounts, n) { 
-    return wordCounts.slice(0,n).map( function(d) { return d.word; }).join(" "); 
-  };
-
   componentDidMount() {
     this.findNumTopics();
     // Set upon initialisation, changed to new numTopics in reset
     d3.select("#num-topics-input").attr("value", this.state.numTopics);
     
-    this.setState({tokensPerTopic: this.zeros(this.state.numTopics)});
-    this.setState({topicWeights: this.zeros(this.state.numTopics)});
+    this.setState({tokensPerTopic: zeros(this.state.numTopics)});
+    this.setState({topicWeights: zeros(this.state.numTopics)});
 
     this.queueLoad();
     
@@ -859,10 +782,8 @@ class App extends Component {
         break;
       case "corr-tab":
         DisplayPage = <Correlation 
-          topicWordCounts ={this.state.topicWordCounts} 
-          topNWords={this.state.topNWords} 
+          topicWordCounts ={this.state.topicWordCounts}  
           numTopics={this.state.numTopics} 
-          zeros={this.zeros} 
           documents={this.state.documents}
           getTopicCorrelations={this.getTopicCorrelations}/>;
         break;
@@ -892,7 +813,6 @@ class App extends Component {
           wordTopicCounts={this.state.wordTopicCounts}
           topicWordCounts={this.state.topicWordCounts}
           sortTopicWords={this.sortTopicWords}
-          topNWords={this.topNWords}
           getTopicCorrelations={this.getTopicCorrelations}
           tokensPerTopic={this.state.tokensPerTopic}  />;
         break;
@@ -907,7 +827,7 @@ class App extends Component {
 
       <div id="main">
 
-      <Form completeSweeps={this.state.completeSweeps} 
+      <TopBar completeSweeps={this.state.completeSweeps} 
             requestedSweeps = {this.state.requestedSweeps} 
             numTopics={this.state.tempNumTopics} 
             onClick={this.addSweepRequests} 
@@ -928,7 +848,7 @@ class App extends Component {
 
       <div id="tabwrapper">
 
-      <Nav onClick={this.changeTab}/>
+      <NavBar onClick={this.changeTab}/>
       <div id="pages">
 
       {this.state.topicWordCounts.length === 0 ? null : DisplayPage}
