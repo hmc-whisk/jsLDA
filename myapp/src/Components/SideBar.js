@@ -1,5 +1,6 @@
 import React, { Component } from 'react'; 
 import * as d3 from 'd3';
+import {topNWords} from '../funcs/utilityFunctions'
 
 class SideBar extends Component {
     constructor(props) {
@@ -8,9 +9,6 @@ class SideBar extends Component {
         };
       }
 
-    topNWords(wordCounts, n) {
-        return wordCounts.slice(0,n).map( function(d) { return d.word; }).join(" ");
-    };
 
     selectedTopicChange = this.props.selectedTopicChange;
 
@@ -22,7 +20,7 @@ class SideBar extends Component {
     
         for (var topic = 0; topic < this.props.numTopics; topic++) {
         if (this.props.topicWordCounts[topic]) {
-        topicTopWords.push(this.topNWords(this.props.topicWordCounts[topic], 10));}
+        topicTopWords.push(topNWords(this.props.topicWordCounts[topic], 10));}
         }
     
         var topicLines = d3.select("div#topics").selectAll("div.topicwords")

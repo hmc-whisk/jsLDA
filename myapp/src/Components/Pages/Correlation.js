@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import React, { Component } from 'react'; 
+import {topNWords} from '../../funcs/utilityFunctions'
 
 /* This function will compute pairwise correlations between topics.
  * Unlike the correlated topic model (CTM) LDA doesn't have parameters
@@ -28,9 +29,6 @@ class Correlation extends Component {
 
 
 
-    topNWords(wordCounts, n) {
-      return wordCounts.slice(0,n).map( function(d) { return d.word; }).join(" ");
-    };
 
     plotMatrix = () => {
         var left = 50;
@@ -97,7 +95,7 @@ class Correlation extends Component {
         var graph = {"nodes": [], "links": []};
         for (var topic = 0; topic < this.props.numTopics; topic++) {
           if (this.props.topicWordCounts[topic]){
-          graph.nodes.push({"name": topic, "group": 1, "words": this.topNWords(this.props.topicWordCounts[topic], 3)});}
+          graph.nodes.push({"name": topic, "group": 1, "words":topNWords(this.props.topicWordCounts[topic], 3)});}
           else {
             graph.nodes.push({"name": topic, "group": 1, "words":""})
           }
