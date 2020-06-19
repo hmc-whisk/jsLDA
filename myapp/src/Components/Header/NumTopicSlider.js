@@ -1,6 +1,6 @@
 import React from "react";
 
-class Slider extends React.Component {
+class NumTopicSlider extends React.Component {
 
     constructor(props) {
         super(props);
@@ -32,6 +32,6 @@ class Slider extends React.Component {
 
 }
 
-export default Slider;
+export default NumTopicSlider;
 
 
