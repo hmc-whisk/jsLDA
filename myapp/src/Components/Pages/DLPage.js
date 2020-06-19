@@ -1,5 +1,6 @@
 import React from "react";
 import * as d3 from "d3"
+import {topNWords, zeros} from '../../funcs/utilityFunctions'
 
 /**
  * @summary Component for Download page
@@ -9,7 +10,6 @@ import * as d3 from "d3"
  *  @prop wordTopicCounts
  *  @prop topicWordCounts
  *  @prop sortTopicWords
- *  @prop topNWords
  *  @prop getTopicCorrelations
  *  @prop tokensPerTopic
  */
@@ -38,11 +38,6 @@ class DLPage extends React.Component {
         );
     }
 
-    zeros (n) {
-        var x = new Array(n);
-        for (var i = 0; i < n; i++) { x[i] = 0.0; }
-        return x;
-    }
 
     eightDigits = d3.format(".8");
 
@@ -120,7 +115,7 @@ class DLPage extends React.Component {
             .map(function(t) {return "topic" + t; } )
             .join(",") + "\n";
         for (let word in this.props.wordTopicCounts) {
-            let topicProbabilities = this.zeros(this.props.numTopics);
+            let topicProbabilities = zeros(this.props.numTopics);
             for (let topic in this.props.wordTopicCounts[word]) {
                 topicProbabilities[topic] = this.eightDigits(
                     this.props.wordTopicCounts[word][topic] / 
@@ -139,7 +134,7 @@ class DLPage extends React.Component {
       
             for (var topic = 0; topic < this.props.numTopics; topic++) {
                 keysCSV += topic + "," + this.props.tokensPerTopic[topic] + 
-                ",\"" + this.props.topNWords(this.props.topicWordCounts[topic], 10)
+                ",\"" + topNWords(this.props.topicWordCounts[topic], 10)
                 + "\"\n";
             }
       
@@ -159,7 +154,7 @@ class DLPage extends React.Component {
       
     saveGraph = () => {
         var graphCSV = "Source,Target,Weight,Type\n";
-        var topicProbabilities = this.zeros(this.props.numTopics);
+        var topicProbabilities = zeros(this.props.numTopics);
       
         this.props.documents.forEach((d, i) => {
             d.topicCounts.forEach((x, topic) => {
