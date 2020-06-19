@@ -1,7 +1,7 @@
 import React, { Component } from 'react'; 
 import './App.css';
 import * as d3 from 'd3';
-import {zeros, getQueryString} from '../../funcs/utilityFunctions'
+import {zeros, getQueryString, getObjectKeys} from '../../funcs/utilityFunctions'
 
 import Correlation from '../Pages/Correlation';
 import TopicDoc from '../Pages/TopicDoc';
@@ -14,47 +14,9 @@ import DLPage from '../Pages/DLPage';
 
 var XRegExp = require('xregexp')
 
-
-// From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
 // This adds the Object.keys() function to some old browsers that don't support it
 if (!Object.keys) {
-  Object.keys = (function() {
-    var hasOwnProperty = Object.prototype.hasOwnProperty,
-        hasDontEnumBug = !({ toString: null }).propertyIsEnumerable('toString'),
-        dontEnums = [
-          'toString',
-          'toLocaleString',
-          'valueOf',
-          'hasOwnProperty',
-          'isPrototypeOf',
-          'propertyIsEnumerable',
-          'constructor'
-        ],
-        dontEnumsLength = dontEnums.length;
-
-    return function(obj) {
-      if (typeof obj !== 'function' && (typeof obj !== 'object' || obj === null)) {
-        throw new TypeError('Object.keys called on non-object');
-      }
-
-      var result = [], prop, i;
-
-      for (prop in obj) {
-        if (hasOwnProperty.call(obj, prop)) {
-          result.push(prop);
-        }
-      }
-
-      if (hasDontEnumBug) {
-        for (i = 0; i < dontEnumsLength; i++) {
-          if (hasOwnProperty.call(obj, dontEnums[i])) {
-            result.push(dontEnums[i]);
-          }
-        }
-      }
-      return result;
-    };
-  }());
+  Object.keys = (getObjectKeys());
 }
 
 var QueryString = getQueryString();
