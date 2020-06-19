@@ -8,8 +8,8 @@ import TopicDoc from '../Pages/TopicDoc';
 import SideBar from '../SideBar';
 import VocabTable from '../Pages/VocabTable';
 import TimeSeries from '../Pages/TimeSeries';
-import NavBar from '../NavBar';
-import TopBar from '../TopBar';
+import NavBar from '../Header/NavBar';
+import TopBar from '../Header/TopBar';
 import DLPage from '../Pages/DLPage';
 
 var XRegExp = require('xregexp')
