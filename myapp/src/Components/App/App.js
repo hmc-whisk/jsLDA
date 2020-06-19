@@ -1,7 +1,7 @@
 import React, { Component } from 'react'; 
 import './App.css';
 import * as d3 from 'd3';
-import {zeros, queryStringFunc, getQueryString} from '../../funcs/utilityFunctions'
+import {zeros, getQueryString} from '../../funcs/utilityFunctions'
 
 import Correlation from '../Pages/Correlation';
 import TopicDoc from '../Pages/TopicDoc';
