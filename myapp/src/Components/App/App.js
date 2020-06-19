@@ -1,14 +1,14 @@
 import React, { Component } from 'react'; 
 import './App.css';
 import * as d3 from 'd3';
-import Correlation from './Correlation';
-import TopicDoc from './TopicDoc';
-import SideBar from './sidebar';
-import VocabTable from './VocabTable';
-import TimeSeries from './TimeSeries';
-import Nav from './navButtons';
-import Form from './paramForm';
-import DLPage from './DLPage';
+import Correlation from '../Pages/Correlation';
+import TopicDoc from '../Pages/TopicDoc';
+import SideBar from '../SideBar';
+import VocabTable from '../Pages/VocabTable';
+import TimeSeries from '../Pages/TimeSeries';
+import NavBar from '../NavBar';
+import TopBar from '../TopBar';
+import DLPage from '../Pages/DLPage';
 
 var XRegExp = require('xregexp')
 
@@ -907,7 +907,7 @@ class App extends Component {
 
       <div id="main">
 
-      <Form completeSweeps={this.state.completeSweeps} 
+      <TopBar completeSweeps={this.state.completeSweeps} 
             requestedSweeps = {this.state.requestedSweeps} 
             numTopics={this.state.tempNumTopics} 
             onClick={this.addSweepRequests} 
@@ -928,7 +928,7 @@ class App extends Component {
 
       <div id="tabwrapper">
 
-      <Nav onClick={this.changeTab}/>
+      <NavBar onClick={this.changeTab}/>
       <div id="pages">
 
       {this.state.topicWordCounts.length === 0 ? null : DisplayPage}

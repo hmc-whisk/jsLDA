@@ -1,6 +1,6 @@
 import React from "react";
-import Slider from "./slider"
-class Form extends React.Component {
+import NumTopicSlider from "./NumTopicSlider"
+class TopBar extends React.Component {
 
     constructor(props) {
         super(props);
@@ -8,7 +8,6 @@ class Form extends React.Component {
         this.state = {sliderValue:25};
         this.handleClick = this.handleClick.bind(this)
         this.updateNumDisplay = this.updateNumDisplay.bind(this);
-
     }
 
     handleClick() {
@@ -29,7 +28,7 @@ class Form extends React.Component {
             <div id="form" className="top">
 
                 <button id="sweep" onClick={this.handleClick} >Run 50 iterations</button> Iterations: <span id="iters"> {this.props.iter} </span>
-                <Slider 
+                <NumTopicSlider 
                     onChange={this.updateNumDisplay} 
                     sliderValue = {this.state.sliderValue} 
                     updateNumTopics={this.props.updateNumTopics}
@@ -41,6 +40,6 @@ class Form extends React.Component {
 
 }
 
-export default Form;
+export default TopBar;
 
 
