@@ -103,6 +103,7 @@ class App extends Component {
   
   this.changeTab = this.changeTab.bind(this);
   this.addSweepRequests = this.addSweepRequests.bind(this);
+  this.changeSweepAmount = this.changeSweepAmount.bind(this);
   };
   sweeps = 0; //TODO: figure out why this thing is here
 
@@ -212,6 +213,7 @@ class App extends Component {
    */
   reset() {
     this.setState({
+      sweepParameter: 50,
       vocabularySize: 0,
       vocabularyCounts: {},
       sortVocabByTopic: false,
@@ -752,7 +754,7 @@ class App extends Component {
 
   addSweepRequests() {
     this.setState({
-      requestedSweeps: this.state.requestedSweeps + 50
+      requestedSweeps: this.state.requestedSweeps + this.state.sweepParameter
     });
     // TODO: Cottect Beginning of iteration
     // TODO: Change these things to states
@@ -761,6 +763,12 @@ class App extends Component {
       this.timer = d3.timer(this.sweep);
       console.log("Requested Sweeps Now: " + this.state.requestedSweeps);
     }
+  }
+
+  changeSweepAmount(val) {
+    this.setState( {
+      sweepParameter: parseInt(val, 10)
+    })
   }
   
   render() {
@@ -831,7 +839,9 @@ class App extends Component {
             requestedSweeps = {this.state.requestedSweeps} 
             numTopics={this.state.tempNumTopics} 
             onClick={this.addSweepRequests} 
-            updateNumTopics={this.onTopicsChange} />
+            updateNumTopics={this.onTopicsChange} 
+            sweepParameter = {this.state.sweepParameter}
+            onChange = {this.changeSweepAmount}/>
       {/* <div id="form" className="top">
         <button id="sweep">Run 50 iterations</button>
         Iterations: <span id="iters">0</span>
