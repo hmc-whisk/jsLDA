@@ -36,7 +36,10 @@ class TopBar extends React.Component {
             <div id="form" className="top">
                 Enter Number of Iterations: &nbsp;
                 <input onChange = {this.handleChange} value = {this.props.sweepParameter} type="text" pattern="\d*" maxlength="5" size = "5"/>
-                <button id="sweep" onClick={this.handleClick} >Run {this.props.sweepParameter} iterations</button> Iterations: <span id="iters"> {this.props.iter} </span>                <NumTopicSlider 
+                <button id="sweep" onClick={this.handleClick} >Run {this.props.sweepParameter} iterations</button> 
+                <button id="stopSweep" onClick={() => this.props.stopButtonClick()}>Stop</button>
+                Iterations:<span id="iters"> {this.props.iter} </span>
+                <NumTopicSlider 
                     onChange={this.updateNumDisplay} 
                     sliderValue = {this.state.sliderValue} 
                     updateNumTopics={this.props.updateNumTopics}

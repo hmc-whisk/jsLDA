@@ -770,6 +770,12 @@ class App extends Component {
       sweepParameter: parseInt(val, 10)
     })
   }
+
+  stopButtonClick = () => {
+    this.setState({
+      requestedSweeps: this.state.completeSweeps + 1,
+    })
+  }
   
   render() {
 
@@ -840,8 +846,10 @@ class App extends Component {
             numTopics={this.state.tempNumTopics} 
             onClick={this.addSweepRequests} 
             updateNumTopics={this.onTopicsChange} 
-            sweepParameter = {this.state.sweepParameter}
-            onChange = {this.changeSweepAmount}/>
+            sweepParameter={this.state.sweepParameter}
+            onChange={this.changeSweepAmount}
+            stopButtonClick={this.stopButtonClick}
+            />
       {/* <div id="form" className="top">
         <button id="sweep">Run 50 iterations</button>
         Iterations: <span id="iters">0</span>
