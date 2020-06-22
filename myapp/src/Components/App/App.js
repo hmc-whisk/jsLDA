@@ -11,6 +11,7 @@ import TimeSeries from '../Pages/TimeSeries';
 import NavBar from '../Header/NavBar';
 import TopBar from '../Header/TopBar';
 import DLPage from '../Pages/DLPage';
+import HomePage from '../Pages/HomePage';
 
 var XRegExp = require('xregexp')
 
@@ -98,7 +99,7 @@ class App extends Component {
     documentTopicSmoothing: 0.1, // (used by sweep)
     topicWordSmoothing: 0.01, // (used by sweep)
     
-    selectedTab: "docs-tab",
+    selectedTab: "home-tab",
   };
   
   this.changeTab = this.changeTab.bind(this);
@@ -778,8 +779,6 @@ class App extends Component {
   }
   
   render() {
-
-
     var DisplayPage;
     switch (this.state.selectedTab) {
       case "docs-tab":
@@ -791,8 +790,7 @@ class App extends Component {
           numTopics={this.state.numTopics}
           onDocumentFileChange={this.onDocumentFileChange}
           onStopwordFileChange={this.onStopwordFileChange}
-          onFileUpload = {this.queueLoad}
-        />;
+          onFileUpload = {this.queueLoad}/>;
         break;
       case "corr-tab":
         DisplayPage = <Correlation 
@@ -828,7 +826,13 @@ class App extends Component {
           topicWordCounts={this.state.topicWordCounts}
           sortTopicWords={this.sortTopicWords}
           getTopicCorrelations={this.getTopicCorrelations}
-          tokensPerTopic={this.state.tokensPerTopic}  />;
+          tokensPerTopic={this.state.tokensPerTopic}/>;
+        break;
+      case "home-tab":
+        DisplayPage = <HomePage
+          onDocumentFileChange={this.onDocumentFileChange}
+          onStopwordFileChange={this.onStopwordFileChange}
+          onFileUpload = {this.queueLoad}/>
         break;
       default:
         DisplayPage = null;
