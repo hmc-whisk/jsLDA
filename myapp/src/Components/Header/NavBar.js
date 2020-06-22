@@ -5,7 +5,7 @@ class NavBar extends React.Component {
 	constructor(props) {
 		super(props);
 
-		this.state = { docs: "selected" };
+		this.state = { home: "selected" };
 		this.handleClick = this.handleClick.bind(this)
 	}
 
@@ -39,7 +39,12 @@ class NavBar extends React.Component {
 		} else {
 			this.setState({ vocab: "" });
 		}
-
+		
+		if (id === "home-tab") {
+			this.setState({ home: "selected" });
+		} else {
+			this.setState({ home: "" });
+		}
 	}
 
 
@@ -56,6 +61,7 @@ class NavBar extends React.Component {
 		return (
 			<div className="tabs">
 				<ul>
+					<li id="home-tab" className={this.state.home} onClick={this.handleClick} >Home Page</li>
 					<li id="docs-tab" className={this.state.docs} onClick={this.handleClick}>Topic Documents</li>
 					<li id="corr-tab" className={this.state.corr} onClick={this.handleClick} >Topic Correlations</li>
 					<li id="ts-tab" className={this.state.ts} onClick={this.handleClick} >Time Series</li>
