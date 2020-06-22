@@ -1,4 +1,4 @@
 node_modules
 myapp/node_modules
 .vscode
-
+myapp/src/.DS_Store
