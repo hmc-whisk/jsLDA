@@ -8,6 +8,8 @@ class TopBar extends React.Component {
         this.state = {sliderValue:25};
         this.handleClick = this.handleClick.bind(this)
         this.updateNumDisplay = this.updateNumDisplay.bind(this);
+        this.handleChange = this.handleChange.bind(this);
+        this.handleChange = this.handleChange.bind(this);
     }
 
     handleClick() {
@@ -21,14 +23,20 @@ class TopBar extends React.Component {
             sliderValue: val
         });
     }
+    handleChange(e) {
+        // Either value number or 0 (avoids NaN)
+        const val = e.target.value || 0;
+
+        this.props.onChange(val);
+    }
 
 
     render() {
         return (
             <div id="form" className="top">
-
-                <button id="sweep" onClick={this.handleClick} >Run 50 iterations</button> Iterations: <span id="iters"> {this.props.iter} </span>
-                <NumTopicSlider 
+                Enter Number of Iterations: &nbsp;
+                <input onChange = {this.handleChange} value = {this.props.sweepParameter} type="text" pattern="\d*" maxlength="5" size = "5"/>
+                <button id="sweep" onClick={this.handleClick} >Run {this.props.sweepParameter} iterations</button> Iterations: <span id="iters"> {this.props.iter} </span>                <NumTopicSlider 
                     onChange={this.updateNumDisplay} 
                     sliderValue = {this.state.sliderValue} 
                     updateNumTopics={this.props.updateNumTopics}
