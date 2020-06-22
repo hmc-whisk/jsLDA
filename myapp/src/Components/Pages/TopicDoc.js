@@ -1,6 +1,5 @@
 import React, { Component } from 'react'; 
 import * as d3 from 'd3';
-import Uploader from './Uploader';
 
 /////@TODO rename this file to TopicDoc.js?/////
 /*
@@ -66,9 +65,6 @@ class TopicDoc extends Component {
     render() {
         return (
             <div id="docs-page" className="page">
-                <Uploader onDocumentFileChange = {this.props.onDocumentFileChange}
-                          onStopwordFileChange = {this.props.onStopwordFileChange}
-                          onFileUpload = {this.props.onFileUpload}/>
             <div className="help">Documents are sorted by their proportion of the currently selected topic, biased to prefer longer documents.</div>
             </div>
         )
