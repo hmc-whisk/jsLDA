@@ -453,16 +453,12 @@ class LDAModel {
     }
 
     /**
-<<<<<<< HEAD
      * @summary This function will compute pairwise correlations between topics.
      * @returns {Array<Array<Number>>} 2d array of correlation values
      * @description Unlike the correlated topic model (CTM) LDA doesn't have 
      * parameters that represent topic correlations. But that doesn't mean that
      * topics are not correlated, it just means we have to estimate those values
      * by measuring which topics appear in documents together.
-=======
-     * @summary Returns a matrix containing the topic correlations
->>>>>>> 495e514c90bb09f0a8b3175bc1f2d3fabf492de2
      */
     getTopicCorrelations() {
         // initialize the matrix
@@ -510,14 +506,6 @@ class LDAModel {
         return correlationMatrix;
     }
 
-<<<<<<< HEAD
-    /**
-     * @summary Asks the model to do complete sweeps
-     * @param {Number} parameter number of sweeps to complete
-     */
-    addSweepRequest(parameter) {
-        this._requestedSweeps += parameter
-=======
     
     /**
      * @summary Adds the appropirate number of sweeps to be performed
@@ -526,7 +514,6 @@ class LDAModel {
     addSweepRequest(numRequests) {
 
         this._requestedSweeps += numRequests
->>>>>>> 495e514c90bb09f0a8b3175bc1f2d3fabf492de2
 
         if (this._sweeps === 0) {
             this._sweeps = 1;
