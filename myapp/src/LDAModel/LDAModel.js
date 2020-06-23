@@ -60,24 +60,178 @@ class LDAModel {
 
     _byCountDescending(a, b) { return b.count - a.count; };
 
+    _truncate(s) { 
+        return s.length > 300 ? s.substring(0, 299) + "..." : s; 
+    };
+
     _reset() {
 
     }
 
-    ready() {
+    /**
+     * @summary Sets up state from document/stopword info
+     * @param {Error} error
+     * @param {String} stops string of stop words with one per line
+     * @param {String} doc string of documents in tsv or csv format
+     *  - Lines should not have column names included
+     *  - See parseDoc for
+     */
+    ready = (error, stops, doc) => {
+        if (error) { 
+            //alert("File upload failed. Please try again."); TODO: uncomment this for deployment
+            throw error;
+        } else {
+            // Create the stoplist
+            stops.split(/\s+/).forEach((w) => {this._stopwords[w] = 1; });
+        
+            // Load documents and populate the vocabulary
+            this._parseDoc(doc);
+        
+            this._sortTopicWords();
+        }
+    }
+
+    /**
+     * @summary Processes document text to set up topic model
+     * @param docText {String} a string of a tsv or csv file
+     *  - With column names
+     *    - a "text" column with the document text is required
+     *    - an "id" column will be used for document ids
+     *    - a "tag" column will be used to sort/group documents by date
+     *    - all other columns are assumed to be metadata
+     * This function calles upon the documentType state member
+     * to determine whether docText is a csv or tsv. If it isnt
+     * "text/csv" then it will assume it is a tsv.
+     */
+    _parseDoc = (docText) => {
+        tokensPerTopic = zeros(this.state.numTopics);
+
+        var parsedDoc
+        if(this.state.documentType === "text/csv") {
+            parsedDoc = d3.csvParseRows(docText);
+        } else {
+            parsedDoc = d3.tsvParseRows(docText);
+        }
+        
+        // Handle empty documents
+        if(parsedDoc.length===0){
+            alert("Document file is empty");
+            return;
+        }
+
+        let columnInfo = this.getColumnInfo(parsedDoc[0]);
+
+        // Handle no text colunm
+        if(columnInfo["text"] === -1) {
+            alert("No text column found in document file");
+            return;
+        }
+
+        for(let i = 1; i < parsedDoc.length; i++) {
+            let fields = parsedDoc[i];
+            // Set fields based on whether they exist
+            var docID = columnInfo.id === -1 ? 
+                this._documents.length : 
+                fields[columnInfo.id];
+            var docDate = columnInfo.date_tag === -1 ? 
+                "" : 
+                fields[columnInfo.date_tag];
+            var text = fields[columnInfo.text];
+            
+            var tokens = [];
+            var rawTokens = text.toLowerCase().match(XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g"));
+            if (rawTokens == null) { continue; }
+            var topicCounts = zeros(this._numTopics);
+            rawTokens.forEach(function (word) {
+                if (word !== "") {
+                var topic = Math.floor(Math.random() * (this._numTopics));
+            
+                if (word.length <= 2) { this._stopwords[word] = 1; }
+            
+                var isStopword = this._stopwords[word];
+                if (isStopword) {
+                    // Record counts for stopwords, but nothing else
+                    if (! this._vocabularyCounts[word]) {
+                    this._vocabularyCounts[word] = 1;
+                    }
+                    else {
+                    this._vocabularyCounts[word] += 1;
+                    }
+                }
+                else {
+                    _tokensPerTopic[topic]++;
+                    if (! this._wordTopicCounts[word]) {
+                    this._wordTopicCounts[word] = {};
+                    this._vocabularySize++;
+                    this._vocabularyCounts[word] = 0;
+                    }
+                    if (!this._wordTopicCounts[word][topic]) {
+                    this._wordTopicCounts[word][topic] = 0;
+                    }
+                    this._wordTopicCounts[word][topic] += 1;
+                    this._vocabularyCounts[word] += 1;
+                    topicCounts[topic] += 1;
+                }
+                tokens.push({"word":word, "topic":topic, "isStopword":isStopword });
+                }
+            });
+
+            let metadata = {}
+            for (const [key, index] of Object.entries(columnInfo["metadata"])) {
+                metadata[key] = fields[index];
+            }
+
+            this._documents.push({ 
+                "originalOrder" : this._documents.length,
+                "id" : docID,
+                "date" : docDate,
+                "originalText" : text,
+                "tokens" : tokens,
+                "topicCounts" : topicCounts,
+                "metadata" : metadata
+            });
+
+            // Need to move this selection and adding to #docs-page into a different component
+            d3.select("div#docs-page").append("div")
+                .attr("class", "document")
+                .text("[" + docID + "] " + this.truncate(text));
+        }
 
     }
 
-    _parseDoc() {
+    _sortTopicWords() {
 
     }
 
-    sortTopicWords() {
+    /**
+     * @summary Parses column names to get column index info
+     * @param {Array<String>} header an array of column names
+     * @returns {Object} {"id":index, "text":index, "date_tag":index, 
+     *  "metadata": {"columnName1":index,..."columnNameN":index}}
+     */
+    _getColumnInfo(header) {
+        let columnInfo = {"metadata":{}};
+        let lookFor = ["id","text","date_tag"]; // special columns
+        let columnIsMetadata = Array(header.length).fill(true);
+        header = header.map((s) => s.toLocaleLowerCase());
 
-    }
+        // Process special columns
+        for (let columnName of lookFor){
+            let index = header.indexOf(columnName);
+            columnInfo[columnName] = index;
 
-    _getColumnInfo() {
-
+            if(index !== -1) {
+                columnIsMetadata[index] = false; 
+            }
+        }
+        // Process metadata
+        for (let i = 0; i < header.length; i++) {
+            if(columnIsMetadata[i]) {
+                // Add this column to metadata object
+                columnInfo["metadata"][header[i]]=i;
+            }
+        }
+        return columnInfo;
     }
 
     changeNumTopics() {
