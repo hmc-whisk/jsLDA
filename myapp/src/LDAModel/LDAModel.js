@@ -9,7 +9,6 @@ if (!Object.keys) {
 /**
  * @summary Creates/maintains a topic model over a corpus
  */
->>>>>>> origin/reactLDA-#45
 class LDAModel {
     constructor() {
         // Needed by reset & parseline
@@ -69,14 +68,39 @@ class LDAModel {
         this._sweeps = 0; // (used by addSweepRequest) for finding whether an additional sweep call should be called
     }
 
+    /**
+     * @summary function to sort by Object's count attribute
+     * @param {Object} a 
+     * @param {Object} b 
+     */
     _byCountDescending(a, b) { return b.count - a.count; };
 
+    /**
+     * @summary Truncates s to <= 300 characters
+     * @param {String} s text to be truncated
+     */
     _truncate(s) { 
         return s.length > 300 ? s.substring(0, 299) + "..." : s; 
     };
 
+    /**
+     * @summary Resets data members in preperation
+     * for new documents to be processed
+     */
     _reset() {
-
+        this._vocabularySize = 0;
+        this._vocabularyCounts = {};
+        this._sortVocabByTopic = false;
+        this._specificityScale = d3.scaleLinear().domain([0,1]).range(["#ffffff", "#99d8c9"]);
+        this._stopwords = {};
+        this._completeSweeps = 0;
+        this._requestedSweeps = 0;
+        this._selectedTopic = -1;
+        this._wordTopicCounts = {};
+        this._topicWordCounts = [];
+        this._tokensPerTopic = zeros(this._numTopics);
+        this._topicWeights = zeros(this._numTopics);
+        this._documents = [];
     }
 
     /**
@@ -244,6 +268,7 @@ class LDAModel {
         }
         return columnInfo;
     }
+
     /**
      * @summary Shifts model to have a dif number of topics
      * @param {Number} numTopics new number of topics
@@ -284,9 +309,10 @@ class LDAModel {
         this.sortTopicWords()
     }
 
+    /**
+     * @summary completes one training iteration
+     */
     _sweep() {
-
-            
         var startTime = Date.now();
     
         var topicNormalizers = zeros(this._numTopics);
@@ -370,7 +396,7 @@ class LDAModel {
           this.timer.stop();
           this.sweeps = 0;
         }
-      }
+    }
 
     /**
      * @summary adds a word to model's stoplist
@@ -399,7 +425,7 @@ class LDAModel {
      * @summary removes a word from stoplist
      * @param {String} word the word to remove
      */
-        removeStop = (word) => {
+    removeStop = (word) => {
         delete this._stopwords[word];
         this._vocabularySize++;
         this._wordTopicCounts[word] = {};
@@ -422,7 +448,6 @@ class LDAModel {
                 }
             }
         });
-
         this._sortTopicWords();
     }
 
