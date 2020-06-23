@@ -1,7 +1,9 @@
 import React, { Component } from 'react'; 
 import './App.css';
 import * as d3 from 'd3';
+
 import {zeros, getQueryString, getObjectKeys} from '../../funcs/utilityFunctions'
+import LDAModel from '../../LDAModel/LDAModel'
 
 import Correlation from '../Pages/Correlation';
 import TopicDoc from '../Pages/TopicDoc';
@@ -27,30 +29,29 @@ var QueryString = getQueryString();
 class App extends Component {
   constructor(props) {
     super(props)
-  this.state = {
 
-    // Temporary variable for manipulating input bar
-    tempNumTopics:25,
+    let startingNumTopics = 25;
 
-    // Vocabulary statistics
+    this.state = {
+      ldaModel: new LDAModel(startingNumTopics),
 
-    // The file location of default files
-    documentsURL: defaultDoc,
-    stopwordsURL: defaultStops,
+      // The file location of default files
+      documentsURL: defaultDoc,
+      stopwordsURL: defaultStops,
 
-    // Location to store uploaded files
-    documentsFileArray: [],
-    stoplistFileArray: [],
+      // Location to store uploaded files
+      documentsFileArray: [],
+      stoplistFileArray: [],
 
-    selectedTab: "home-tab",
+      selectedTab: "home-tab",
 
-    update: true,
-  };
-  
-  this.changeTab = this.changeTab.bind(this);
-  // TODO Moved to LDAModel, need new function to replace
-  // this.addSweepRequests = this.addSweepRequests.bind(this);
-  this.changeSweepAmount = this.changeSweepAmount.bind(this);
+      update: true,
+    };
+    
+    this.changeTab = this.changeTab.bind(this);
+    // TODO Moved to LDAModel, need new function to replace
+    // this.addSweepRequests = this.addSweepRequests.bind(this);
+    this.changeSweepAmount = this.changeSweepAmount.bind(this);
   };
 
 
@@ -60,19 +61,6 @@ class App extends Component {
     });
 
     console.log("Tab   is now: " + tabID)
-  }
-
-  // Used by sidebar to change selectedTopic and sortVocabByTopic
-  selectedTopicChange = (topic) => {
-    this.setState({selectedTopic: topic});
-    if (topic === -1) {
-
-      this.setState({sortVocabByTopic: false})
-    }
-  }
-
-  sortbyTopicChange = (sort) => {
-    this.setState({sortVocabByTopic: sort})
   }
 
   /**
@@ -86,8 +74,8 @@ class App extends Component {
 
     this.setState({
       documentsFileArray: [Array.prototype.slice.call(event.target.files)],
-      documentType: event.target.files[0].type,
     });
+    this.state.ldaModel.documentType = event.target.files[0].type;
   }
 
   /**
@@ -105,6 +93,7 @@ class App extends Component {
 
   }
 
+  // TODO: figure out what is going on here
   findNumTopics() {
     this.setState({numTopics: QueryString.topics ? parseInt(QueryString.topics) : 25});
     if (isNaN(this.state.numTopics)) {
@@ -141,7 +130,7 @@ class App extends Component {
    */
   getDocsUpload = () => (new Promise((resolve) => {
     if (this.state.documentsFileArray.length === 0) {
-      this.setState({ documentType: "text/csv"});
+      this.state.ldaModel.documentType = "text/csv";
       resolve(d3.text(this.state.documentsURL));
     } else {
       const fileSelection = this.state.documentsFileArray[0].slice();
@@ -159,10 +148,10 @@ class App extends Component {
    */
   queueLoad = () => {
 
-    this.reset();
+    this.state.ldaModel.reset();
     Promise.all([this.getStoplistUpload(),this.getDocsUpload()])
-      .then(([stops, lines]) => {this.ready(null, stops, lines)})
-      .catch(err => this.ready(err, null, null));
+      .then(([stops, lines]) => {this.state.ldaModel.ready(null, stops, lines)})
+      .catch(err => this.state.ldaModel.ready(err, null, null));
   }
   
 
@@ -177,20 +166,15 @@ class App extends Component {
     console.log("Changing # of topics: " + val);
     
     var newNumTopics = Number(val);
-    if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.numTopics) {
-      this.changeNumTopics(Number(val));
+    if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.state.ldaModel.numTopics) {
+      this.state.ldaModel.changeNumTopics(Number(val));
     }
   }
-
 
   componentDidMount() {
     this.findNumTopics();
     // Set upon initialisation, changed to new numTopics in reset
-    d3.select("#num-topics-input").attr("value", this.state.numTopics);
-    
-    this.setState({tokensPerTopic: zeros(this.state.numTopics)});
-    this.setState({topicWeights: zeros(this.state.numTopics)});
-
+    d3.select("#num-topics-input").attr("value", this.state.ldaModel.numTopics);
     this.queueLoad();
     
   }
@@ -202,9 +186,7 @@ class App extends Component {
   }
 
   stopButtonClick = () => {
-    this.setState({
-      requestedSweeps: this.state.completeSweeps + 1,
-    })
+    this.state.ldaModel.stopSweeps();
   }
   
   render() {
@@ -212,10 +194,10 @@ class App extends Component {
     switch (this.state.selectedTab) {
       case "docs-tab":
         DisplayPage = <TopicDoc 
-          selectedTopic={this.state.selectedTopic} 
-          documents={this.state.documents} 
-          sortVocabByTopic={this.state.sortVocabByTopic} 
-          numTopics={this.state.numTopics}
+          selectedTopic={this.state.ldaModel.selectedTopic} 
+          documents={this.state.ldaModel.documents} 
+          sortVocabByTopic={this.state.ldaModel.sortVocabByTopic} 
+          numTopics={this.state.ldaModel.numTopics}
           onDocumentFileChange={this.onDocumentFileChange}
           onStopwordFileChange={this.onStopwordFileChange}
           onFileUpload = {this.queueLoad}
@@ -223,42 +205,42 @@ class App extends Component {
         break;
       case "corr-tab":
         DisplayPage = <Correlation 
-          topicWordCounts ={this.state.topicWordCounts}  
-          numTopics={this.state.numTopics} 
-          documents={this.state.documents}
-          getTopicCorrelations={this.getTopicCorrelations}
+          topicWordCounts ={this.state.ldaModel.topicWordCounts}  
+          numTopics={this.state.ldaModel.numTopics} 
+          documents={this.state.ldaModel.documents}
+          getTopicCorrelations={this.state.ldaModel.getTopicCorrelations}
           update = {this.state.update}/>;
         break;
       case "vocab-tab":
         DisplayPage = <VocabTable 
-          sortVocabByTopic={this.state.sortVocabByTopic}
-          sortbyTopicChange={this.sortbyTopicChange}
-          vocabularyCounts={this.state.vocabularyCounts}
-          wordTopicCounts={this.state.wordTopicCounts}
-          selectedTopic={this.state.selectedTopic}
-          stopwords ={this.state.stopwords}
-          numTopics={this.state.numTopics}
-          byCountDescending={this.state.byCountDescending}
-          addStop = {this.addStop}
-          removeStop = {this.removeStop}
+          sortVocabByTopic={this.state.ldaModel.sortVocabByTopic}
+          sortbyTopicChange={this.state.ldaModel.sortbyTopicChange}
+          vocabularyCounts={this.state.ldaModel.vocabularyCounts}
+          wordTopicCounts={this.state.ldaModel.wordTopicCounts}
+          selectedTopic={this.state.ldaModel.selectedTopic}
+          stopwords ={this.state.ldaModel.stopwords}
+          numTopics={this.state.ldaModel.numTopics}
+          byCountDescending={this.state.ldaModel.byCountDescending}
+          addStop = {this.state.ldaModel.addStop}
+          removeStop = {this.state.ldaModel.removeStop}
           update = {this.state.update}/>;
         break;
       case "ts-tab":
         DisplayPage = <TimeSeries 
-          numTopics={this.state.numTopics}
-          documents={this.state.documents}
-          topicWordCounts={this.state.topicWordCounts}
+          numTopics={this.state.ldaModel.numTopics}
+          documents={this.state.ldaModel.documents}
+          topicWordCounts={this.state.ldaModel.topicWordCounts}
           update = {this.state.update}/>;
         break;
       case "dl-tab":
         DisplayPage = <DLPage
-          numTopics={this.state.numTopics}
-          documents={this.state.documents}
-          wordTopicCounts={this.state.wordTopicCounts}
-          topicWordCounts={this.state.topicWordCounts}
-          sortTopicWords={this.sortTopicWords}
-          getTopicCorrelations={this.getTopicCorrelations}
-          tokensPerTopic={this.state.tokensPerTopic}/>;
+          numTopics={this.state.ldaModel.numTopics}
+          documents={this.state.ldaModel.documents}
+          wordTopicCounts={this.state.ldaModel.wordTopicCounts}
+          topicWordCounts={this.state.ldaModel.topicWordCounts}
+          sortTopicWords={this.state.ldaModel.sortTopicWords}
+          getTopicCorrelations={this.state.ldaModel.getTopicCorrelations}
+          tokensPerTopic={this.state.ldaModel.tokensPerTopic}/>;
         break;
       case "home-tab":
         DisplayPage = <HomePage
@@ -270,6 +252,8 @@ class App extends Component {
         DisplayPage = null;
         break;
     }
+
+    console.log(this.state.ldaModel)
 
     return (
       <div id="app">
@@ -305,7 +289,7 @@ class App extends Component {
       <NavBar onClick={this.changeTab}/>
       <div id="pages">
 
-      {this.state.topicWordCounts.length === 0 ? null : DisplayPage}
+      {this.state.ldaModel.topicWordCounts.length === 0 ? null : DisplayPage}
 
 
       </div>
