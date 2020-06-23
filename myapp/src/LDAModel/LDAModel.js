@@ -1,3 +1,10 @@
+import {zeros, getObjectKeys} from '../../funcs/utilityFunctions'
+
+// This adds the Object.keys() function to some old browsers that don't support it
+if (!Object.keys) {
+    Object.keys = (getObjectKeys());
+}
+
 /**
  * @summary Creates/maintains a topic model over a corpus
  */
@@ -233,9 +240,44 @@ class LDAModel {
         }
         return columnInfo;
     }
+    /**
+     * @summary Shifts model to have a dif number of topics
+     * @param {Number} numTopics new number of topics
+     */
+    changeNumTopics(numTopics) {
+        this._numTopics = numTopics;
+        this._selectedTopic = -1;
+        this._topicWordCounts = [];
+        this._tokensPerTopic = zeros(this._numTopics);
+        this._topicWeights = zeros(this._numTopics);
+        this._wordTopicCounts = {};
+        this._completeSweeps = 0;
+        this._requestedSweeps = 0;
 
-    changeNumTopics() {
+        d3.select("#iters").text(this._completeSweeps);
+        
+        Object.keys(this.state.vocabularyCounts).forEach(function (word) { this._wordTopicCounts[word] = {} });
 
+        this._documents.forEach(( currentDoc, i ) => {
+            currentDoc.topicCounts = zeros(this._numTopics);
+            for (let position = 0; position < currentDoc.tokens.length; position++) {
+                let token = currentDoc.tokens[position];
+                token.topic = Math.floor(Math.random() * this._numTopics);
+                
+                if (! token.isStopword) {
+                    this._tokensPerTopic[token.topic]++;
+                if (! this._wordTopicCounts[token.word][token.topic]) {
+                    this._wordTopicCounts[token.word][token.topic] = 1;
+                }
+                else {
+                    this._wordTopicCounts[token.word][token.topic] += 1;
+                }
+                currentDoc.topicCounts[token.topic] += 1;
+                }
+            }
+        });
+ 
+        this.sortTopicWords()
     }
 
     _sweep() {
