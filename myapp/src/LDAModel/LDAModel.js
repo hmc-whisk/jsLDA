@@ -101,3 +101,5 @@ class LDAModel {
 
     }
 }
+
+export default LDAModel;
