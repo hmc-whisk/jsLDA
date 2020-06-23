@@ -1,5 +1,5 @@
 
-import {zeros, getObjectKeys} from '../../funcs/utilityFunctions'
+import {zeros, getObjectKeys, truncate} from '../../funcs/utilityFunctions'
 import * as d3 from 'd3';
 // This adds the Object.keys() function to some old browsers that don't support it
 if (!Object.keys) {
@@ -66,14 +66,6 @@ class LDAModel {
      * @param {Object} b 
      */
     _byCountDescending(a, b) { return b.count - a.count; };
-
-    /**
-     * @summary Truncates s to <= 300 characters
-     * @param {String} s text to be truncated
-     */
-    _truncate(s) { 
-        return s.length > 300 ? s.substring(0, 299) + "..." : s; 
-    };
 
     /**
      * @summary Resets data members in preperation
@@ -221,7 +213,7 @@ class LDAModel {
             // Need to move this selection and adding to #docs-page into a different component
             d3.select("div#docs-page").append("div")
                 .attr("class", "document")
-                .text("[" + docID + "] " + this.truncate(text));
+                .text("[" + docID + "] " + truncate(text));
         }
 
     }
