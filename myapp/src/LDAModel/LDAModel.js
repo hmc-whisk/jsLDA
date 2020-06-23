@@ -210,7 +210,20 @@ class LDAModel {
     }
 
     _sortTopicWords() {
-
+            this.topicWordCounts = [];
+            for (let topic = 0; topic < this.numTopics; topic++) {
+                this.topicWordCounts[topic] = [];
+            }
+            for (let word in this.wordTopicCounts) {
+              for (let topic in this.wordTopicCounts[word]) {
+                this.topicWordCounts[topic].push({"word":word, "count":this.wordTopicCounts[word][topic]});
+              }
+            }
+          
+            for (let topic = 0; topic < this.numTopics; topic++) {
+                this.topicWordCounts[topic].sort(this.byCountDescending);
+            }
+        
     }
 
     /**
