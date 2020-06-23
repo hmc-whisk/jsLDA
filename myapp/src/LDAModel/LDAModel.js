@@ -10,7 +10,7 @@ if (!Object.keys) {
  * @summary Creates/maintains a topic model over a corpus
  */
 class LDAModel {
-    constructor() {
+    constructor(numTopics) {
 
         this._vocabularySize = 0;
 
@@ -28,7 +28,7 @@ class LDAModel {
 
         // Topic model parameters
 
-        this.numTopics = 0; // run findNumTopics upon mount
+        this.numTopics = numTopics;
 
         this._stopwords = {};
 
@@ -41,9 +41,9 @@ class LDAModel {
 
         this._topicWordCounts = [];
 
-        this._tokensPerTopic = []; // set to zeros(numTopics)
+        this._tokensPerTopic = zeros(this.numTopics); // set to zeros(numTopics)
 
-        this._topicWeights = []; // set to zeros(numTopics)
+        this._topicWeights = zeros(this.numTopics); // set to zeros(numTopics)
 
         // Array of dictionaries with keys 
         // {"originalOrder", "id", "date", "originalText", "tokens", "topicCounts", "metadata"}
