@@ -62,6 +62,13 @@ class TopicDoc extends Component {
         this.reorderDocuments();
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+      if (nextProps.update == false) {
+        return false
+      }
+      return true
+    }
+
     render() {
         return (
             <div id="docs-page" className="page">

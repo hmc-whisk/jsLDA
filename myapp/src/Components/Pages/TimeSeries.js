@@ -100,6 +100,13 @@ class TimeSeries extends Component {
         this.timeSeries();
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextProps.update === false) {
+            return false
+        }
+        return true
+    }
+
     render() {
         return (
             <div id="ts-page" className="page" ref={this._setRef.bind(this)}>

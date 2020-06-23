@@ -100,13 +100,17 @@ class App extends Component {
     topicWordSmoothing: 0.01, // (used by sweep)
     
     selectedTab: "home-tab",
+
+    update: true,
   };
   
   this.changeTab = this.changeTab.bind(this);
   this.addSweepRequests = this.addSweepRequests.bind(this);
   this.changeSweepAmount = this.changeSweepAmount.bind(this);
   };
-  sweeps = 0; //TODO: figure out why this thing is here
+  sweeps = 0; //Used for finding whether an additional sweep call should be called
+  topicWeight = []; // temp storage for data in sweep
+  tokenPerTopic = [];
 
   changeTab = (tabID) => {
     this.setState({
@@ -498,8 +502,8 @@ class App extends Component {
     var startTime = Date.now();
 
     // Avoid mutating state
-    let temp_tokensPerTopic = this.state.tokensPerTopic.slice();
-    let temp_topicWeights = this.state.topicWeights.slice();
+    let temp_tokensPerTopic = this.tokenPerTopic.slice();
+    let temp_topicWeights = this.topicWeight.slice();
 
     var topicNormalizers = zeros(this.state.numTopics);
     for (let topic = 0; topic < this.state.numTopics; topic++) {
@@ -573,17 +577,25 @@ class App extends Component {
 
     console.log("sweep in " + (Date.now() - startTime) + " ms");
 
-    this.setState({
-      completeSweeps: this.state.completeSweeps + 1,
-      tokensPerTopic: temp_tokensPerTopic,
-      topicWeights: temp_topicWeights,
-    })
+    this.tokenPerTopic = temp_tokensPerTopic;
+    this.topicWeight = temp_topicWeights;
+    // this.setState({
+    //   completeSweeps: this.state.completeSweeps + 1,
+    //   tokensPerTopic: temp_tokensPerTopic,
+    //   topicWeights: temp_topicWeights,
+    // })
+
+    this.setState({ completeSweeps: this.state.completeSweeps + 1})
 
     // TODO: change d3 to React
     d3.select("#iters").text(this.state.completeSweeps);
 
     if (this.state.completeSweeps >= this.state.requestedSweeps) {
-
+    this.setState({
+      tokensPerTopic: temp_tokensPerTopic,
+      topicWeights: temp_topicWeights,
+      update: true,
+    })
       //reorderDocuments();
       this.sortTopicWords();
       // displayTopicWords();
@@ -755,12 +767,16 @@ class App extends Component {
 
   addSweepRequests() {
     this.setState({
-      requestedSweeps: this.state.requestedSweeps + this.state.sweepParameter
+      requestedSweeps: this.state.requestedSweeps + this.state.sweepParameter,
+      update: false,
+
     });
     // TODO: Cottect Beginning of iteration
     // TODO: Change these things to states
     if (this.sweeps === 0) {
       this.sweeps = 1;
+      this.topicWeight = this.state.topicWeights;
+      this.tokenPerTopic = this.state.tokensPerTopic;
       this.timer = d3.timer(this.sweep);
       console.log("Requested Sweeps Now: " + this.state.requestedSweeps);
     }
@@ -790,14 +806,16 @@ class App extends Component {
           numTopics={this.state.numTopics}
           onDocumentFileChange={this.onDocumentFileChange}
           onStopwordFileChange={this.onStopwordFileChange}
-          onFileUpload = {this.queueLoad}/>;
+          onFileUpload = {this.queueLoad}
+          update = {this.state.update}/>;
         break;
       case "corr-tab":
         DisplayPage = <Correlation 
           topicWordCounts ={this.state.topicWordCounts}  
           numTopics={this.state.numTopics} 
           documents={this.state.documents}
-          getTopicCorrelations={this.getTopicCorrelations}/>;
+          getTopicCorrelations={this.getTopicCorrelations}
+          update = {this.state.update}/>;
         break;
       case "vocab-tab":
         DisplayPage = <VocabTable 
@@ -810,13 +828,15 @@ class App extends Component {
           numTopics={this.state.numTopics}
           byCountDescending={this.state.byCountDescending}
           addStop = {this.addStop}
-          removeStop = {this.removeStop}/>;
+          removeStop = {this.removeStop}
+          update = {this.state.update}/>;
         break;
       case "ts-tab":
         DisplayPage = <TimeSeries 
           numTopics={this.state.numTopics}
           documents={this.state.documents}
-          topicWordCounts={this.state.topicWordCounts}/>;
+          topicWordCounts={this.state.topicWordCounts}
+          update = {this.state.update}/>;
         break;
       case "dl-tab":
         DisplayPage = <DLPage
