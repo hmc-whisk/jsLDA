@@ -239,12 +239,54 @@ class LDAModel {
 
     }
 
-    addStop() {
+    /**
+     * @summary adds a word to model's stoplist
+     * @param {String} word the word to be added to stoplist
+     */
+    addStop = (word) => {  
+        this._stopwords[word] = 1;
+        this._vocabularySize--;
+        delete this._wordTopicCounts[word];
 
+        this._documents.forEach( function( currentDoc, i ) {
+            var docTopicCounts = currentDoc.topicCounts;
+            for (var position = 0; position < currentDoc.tokens.length; position++) {
+                var token = currentDoc.tokens[position];
+                if (token.word === word) {
+                    token.isStopword = true;
+                    this._tokensPerTopic[ token.topic ]--;
+                    docTopicCounts[ token.topic ]--;
+                }
+            }
+        });
+        this.sortTopicWords();
     }
 
-    removeStop() {
+    removeStop = (word) => {
+        delete this._stopwords[word];
+        this._vocabularySize++;
+        this._wordTopicCounts[word] = {};
+        var currentWordTopicCounts = this._wordTopicCounts[ word ];
+        
+        this._documents.forEach( function( currentDoc, i ) {
+            var docTopicCounts = currentDoc.topicCounts;
+            for (var position = 0; position < currentDoc.tokens.length; position++) {
+                var token = currentDoc.tokens[position];
+                if (token.word === word) {
+                    token.isStopword = false;
+                    this._tokensPerTopic[ token.topic ]++;
+                    docTopicCounts[ token.topic ]++;
+                    if (! currentWordTopicCounts[ token.topic ]) {
+                        currentWordTopicCounts[ token.topic ] = 1;
+                    }
+                    else {
+                        currentWordTopicCounts[ token.topic ] += 1;
+                    }
+                }
+            }
+        });
 
+        this._sortTopicWords();
     }
 
     getTopicCorrelations() {
