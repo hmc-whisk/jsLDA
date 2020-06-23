@@ -9,7 +9,6 @@ if (!Object.keys) {
 /**
  * @summary Creates/maintains a topic model over a corpus
  */
->>>>>>> origin/reactLDA-#45
 class LDAModel {
     constructor() {
         // Needed by reset & parseline
@@ -426,6 +425,9 @@ class LDAModel {
         this._sortTopicWords();
     }
 
+    /**
+     * @summary Returns a matrix containing the topic correlations
+     */
     getTopicCorrelations() {
         // initialize the matrix
         let correlationMatrix = [this._numTopics];
@@ -472,9 +474,14 @@ class LDAModel {
         return correlationMatrix;
     }
 
-    addSweepRequest(parameter) {
+    
+    /**
+     * @summary Adds the appropirate number of sweeps to be performed
+     * @param {Number} numRequests number of iterations to be requested
+     */
+    addSweepRequest(numRequests) {
 
-        this._requestedSweeps += parameter
+        this._requestedSweeps += numRequests
 
         if (this._sweeps === 0) {
             this._sweeps = 1;
