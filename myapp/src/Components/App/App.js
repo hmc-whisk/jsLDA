@@ -48,7 +48,8 @@ class App extends Component {
   };
   
   this.changeTab = this.changeTab.bind(this);
-  this.addSweepRequests = this.addSweepRequests.bind(this);
+  // TODO Moved to LDAModel, need new function to replace
+  // this.addSweepRequests = this.addSweepRequests.bind(this);
   this.changeSweepAmount = this.changeSweepAmount.bind(this);
   };
 
@@ -192,13 +193,6 @@ class App extends Component {
 
     this.queueLoad();
     
-    // // used by parseLine
-    // d3.select("#docs-tab").on("click", function() {
-    //   d3.selectAll(".page").style("display", "none");
-    //   d3.selectAll("ul li").attr("className", "");
-    //   d3.select("#docs-page").style("display", "block");
-    //   d3.select("#docs-tab").attr("className", "selected");
-    // });
   }
 
   changeSweepAmount(val) {
