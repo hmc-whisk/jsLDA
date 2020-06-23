@@ -504,16 +504,23 @@ class App extends Component {
     // Avoid mutating state
     let temp_tokensPerTopic = this.tokenPerTopic.slice();
     let temp_topicWeights = this.topicWeight.slice();
+    let temp_numTopics = this.state.numTopics;
+    let temp_topicWordSmoothing = this.state.topicWordSmoothing;
+    let temp_vocabularySize = this.state.vocabularySize;
+    let temp_documents = this.state.documents
+    let temp_wordTopicCounts = this.state.wordTopicCounts;
+    let temp_documentTopicSmoothing = this.state.documentTopicSmoothing;
 
-    var topicNormalizers = zeros(this.state.numTopics);
-    for (let topic = 0; topic < this.state.numTopics; topic++) {
+
+    var topicNormalizers = zeros(temp_numTopics);
+    for (let topic = 0; topic < temp_numTopics; topic++) {
       topicNormalizers[topic] = 1.0 / 
-      (this.state.vocabularySize * this.state.topicWordSmoothing + 
+      (temp_vocabularySize * temp_topicWordSmoothing + 
         temp_tokensPerTopic[topic]);
     }
 
-    for (let doc = 0; doc < this.state.documents.length; doc++) {
-      let currentDoc = this.state.documents[doc];
+    for (let doc = 0; doc < temp_documents.length; doc++) {
+      let currentDoc = temp_documents[doc];
       let docTopicCounts = currentDoc.topicCounts;
 
       for (let position = 0; position < currentDoc.tokens.length; position++) {
@@ -521,28 +528,28 @@ class App extends Component {
         if (token.isStopword) { continue; }
 
         temp_tokensPerTopic[ token.topic ]--;
-        let currentWordTopicCounts = this.state.wordTopicCounts[ token.word ];
+        let currentWordTopicCounts = temp_wordTopicCounts[ token.word ];
         currentWordTopicCounts[ token.topic ]--;
         if (currentWordTopicCounts[ token.topic ] === 0) {
           //delete(currentWordTopicCounts[ token.topic ]);
         }
         docTopicCounts[ token.topic ]--;
         topicNormalizers[ token.topic ] = 1.0 / 
-          (this.state.vocabularySize * this.state.topicWordSmoothing +
-            this.state.tokensPerTopic[ token.topic ]);
+          (temp_vocabularySize * temp_topicWordSmoothing +
+            temp_tokensPerTopic[ token.topic ]);
 
         let sum = 0.0;
-        for (let topic = 0; topic < this.state.numTopics; topic++) {
+        for (let topic = 0; topic < temp_numTopics; topic++) {
           if (currentWordTopicCounts[ topic ]) {
             temp_topicWeights[topic] =
-              (this.state.documentTopicSmoothing + docTopicCounts[topic]) *
-              (this.state.topicWordSmoothing + currentWordTopicCounts[ topic ]) *
+              (temp_documentTopicSmoothing + docTopicCounts[topic]) *
+              (temp_topicWordSmoothing + currentWordTopicCounts[ topic ]) *
             topicNormalizers[topic];
           }
           else {
             temp_topicWeights[topic] =
-              (this.state.documentTopicSmoothing + docTopicCounts[topic]) *
-              this.state.topicWordSmoothing *
+              (temp_documentTopicSmoothing + docTopicCounts[topic]) *
+              temp_topicWordSmoothing *
             topicNormalizers[topic];
           }
           sum += temp_topicWeights[topic];
@@ -570,7 +577,7 @@ class App extends Component {
         docTopicCounts[ token.topic ]++;
 
         topicNormalizers[ token.topic ] = 1.0 / 
-          (this.state.vocabularySize * this.state.topicWordSmoothing +
+          (temp_vocabularySize * temp_topicWordSmoothing +
           temp_tokensPerTopic[ token.topic ]);
       }
     }
