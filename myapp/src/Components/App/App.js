@@ -141,7 +141,6 @@ class App extends Component {
     // Prevent empty file change errors
     if(!event.target.files[0]){return;}
 
-    console.log(event.target.files[0].type)
     this.setState({
       documentsFileArray: [Array.prototype.slice.call(event.target.files)],
       documentType: event.target.files[0].type,
@@ -333,7 +332,6 @@ class App extends Component {
    *  "metadata": {"columnName1":index,..."columnNameN":index}}
    */
   getColumnInfo(header) {
-    console.log(header)
     let columnInfo = {"metadata":{}};
     let lookFor = ["id","text","date_tag"]; // special columns
     let columnIsMetadata = Array(header.length).fill(true);
@@ -348,7 +346,6 @@ class App extends Component {
         columnIsMetadata[index] = false; 
       }
     }
-    console.log(columnIsMetadata)
     // Process metadata
     for (let i = 0; i < header.length; i++) {
       if(columnIsMetadata[i]) {
@@ -356,7 +353,6 @@ class App extends Component {
         columnInfo["metadata"][header[i]]=i;
       }
     }
-    console.log(columnInfo);
     return columnInfo;
   }
 
