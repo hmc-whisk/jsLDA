@@ -1,22 +1,24 @@
 import {zeros} from '../../funcs/utilityFunctions'
+import * as d3 from 'd3';
+
 class LDAModel {
     constructor() {
         // Needed by reset & parseline
-        _vocabularySize = 0;
+        this._vocabularySize = 0;
 
         // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
-        _correlationMinTokens = 2;
-        _correlationMinProportion = 0.05;
+        this._correlationMinTokens = 2;
+        this._correlationMinProportion = 0.05;
 
 
         // needed by reset & parseline, changeNumTopics
-        _vocabularyCounts = {};
+        this._vocabularyCounts = {};
 
         //needed by reset
-        _sortVocabByTopic = false;
-        _this.specificityScale = d3.scaleLinear().domain([0, 1]).range(["#ffffff", "#99d8c9"]);
+        this._sortVocabByTopic = false;
+        this._this.specificityScale = d3.scaleLinear().domain([0, 1]).range(["#ffffff", "#99d8c9"]);
 
-        _wordPattern = XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g");
+        this._wordPattern = XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g");
 
         // Topic model parameters
 
@@ -313,9 +315,6 @@ class LDAModel {
         }
     
         console.log("sweep in " + (Date.now() - startTime) + " ms");
-    
-        this.tokenPerTopic = this._tokensPerTopic;
-        this.topicWeight = this._topicWeights;
         this.completeSweeps += 1;    
 
         // TODO: Update completed sweeps outside of this function
@@ -381,12 +380,12 @@ class LDAModel {
 
     getTopicCorrelations() {
         // initialize the matrix
-        let correlationMatrix = [this.numTopics];
-        for (var t1 = 0; t1 < this.numTopics; t1++) {
-            correlationMatrix[t1] = zeros(this.numTopics);
+        let correlationMatrix = [this._numTopics];
+        for (var t1 = 0; t1 < this._numTopics; t1++) {
+            correlationMatrix[t1] = zeros(this._numTopics);
         }
 
-        var topicProbabilities = zeros(this.numTopics);
+        var topicProbabilities = zeros(this._numTopics);
 
         // iterate once to get mean log topic proportions
         this.documents.forEach((d, i) => {
@@ -394,10 +393,10 @@ class LDAModel {
             // We want to find the subset of topics that occur with non-trivial concentration in this document.
             // Only consider topics with at least the minimum number of tokens that are at least 5% of the doc.
             var documentTopics = [];
-            var tokenCutoff = Math.max(this.correlationMinTokens,
+            var tokenCutoff = Math.max(this._correlationMinTokens,
                 this.correlationMinProportion * d.tokens.length);
 
-            for (let topic = 0; topic < this.numTopics; topic++) {
+            for (let topic = 0; topic < this._numTopics; topic++) {
                 if (d.topicCounts[topic] >= tokenCutoff) {
                     documentTopics.push(topic);
                     topicProbabilities[topic]++; // Count the number of docs with this topic
@@ -413,11 +412,11 @@ class LDAModel {
             }
         });
 
-        for (let t1 = 0; t1 < this.numTopics - 1; t1++) {
-            for (let t2 = t1 + 1; t2 < this.numTopics; t2++) {
-                correlationMatrix[t1][t2] = Math.log((this.documents.length * correlationMatrix[t1][t2]) /
+        for (let t1 = 0; t1 < this._numTopics - 1; t1++) {
+            for (let t2 = t1 + 1; t2 < this._numTopics; t2++) {
+                correlationMatrix[t1][t2] = Math.log((this._documents.length * correlationMatrix[t1][t2]) /
                     (topicProbabilities[t1] * topicProbabilities[t2]));
-                correlationMatrix[t2][t1] = Math.log((this.documents.length * correlationMatrix[t2][t1]) /
+                correlationMatrix[t2][t1] = Math.log((this._documents.length * correlationMatrix[t2][t1]) /
                     (topicProbabilities[t1] * topicProbabilities[t2]));
             }
         }
@@ -431,8 +430,8 @@ class LDAModel {
 
         if (this._sweeps === 0) {
             this._sweeps = 1;
-            this.timer = d3.timer(this._sweep);
-            console.log("Requested Sweeps Now: " + this.requestedSweeps);
+            this._timer = d3.timer(this._sweep);
+            console.log("Requested Sweeps Now: " + this._requestedSweeps);
         }
     }
 }
