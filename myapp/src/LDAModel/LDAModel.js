@@ -235,7 +235,20 @@ class LDAModel {
     }
 
     _sortTopicWords() {
-
+            this.topicWordCounts = [];
+            for (let topic = 0; topic < this.numTopics; topic++) {
+                this.topicWordCounts[topic] = [];
+            }
+            for (let word in this.wordTopicCounts) {
+              for (let topic in this.wordTopicCounts[word]) {
+                this.topicWordCounts[topic].push({"word":word, "count":this.wordTopicCounts[word][topic]});
+              }
+            }
+          
+            for (let topic = 0; topic < this.numTopics; topic++) {
+                this.topicWordCounts[topic].sort(this.byCountDescending);
+            }
+        
     }
 
     /**
@@ -451,6 +464,9 @@ class LDAModel {
         this._sortTopicWords();
     }
 
+    /**
+     * @summary Returns a matrix containing the topic correlations
+     */
     getTopicCorrelations() {
         // initialize the matrix
         let correlationMatrix = [this._numTopics];
@@ -497,9 +513,14 @@ class LDAModel {
         return correlationMatrix;
     }
 
-    addSweepRequest(parameter) {
+    
+    /**
+     * @summary Adds the appropirate number of sweeps to be performed
+     * @param {Number} numRequests number of iterations to be requested
+     */
+    addSweepRequest(numRequests) {
 
-        this._requestedSweeps += parameter
+        this._requestedSweeps += numRequests
 
         if (this._sweeps === 0) {
             this._sweeps = 1;
