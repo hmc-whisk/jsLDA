@@ -89,3 +89,11 @@ export function getObjectKeys() {
       return result;
     };
 };
+
+/**
+ * @summary Truncates s to <= 300 characters
+ * @param {String} s text to be truncated
+ */
+export function truncate(s) { 
+  return s.length > 300 ? s.substring(0, 299) + "..." : s; 
+}
