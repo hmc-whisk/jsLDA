@@ -46,14 +46,16 @@ class App extends Component {
 
     update: true,
   };
-  
+  // TODO make consistent with arrow functions instead of bindings
   this.changeTab = this.changeTab.bind(this);
   // TODO Moved to LDAModel, need new function to replace
   // this.addSweepRequests = this.addSweepRequests.bind(this);
   this.changeSweepAmount = this.changeSweepAmount.bind(this);
   };
 
-
+  /**
+   * @summary Update the page/tab user is looking at, causing rerender of components
+   */
   changeTab = (tabID) => {
     this.setState({
       selectedTab: tabID
@@ -62,7 +64,9 @@ class App extends Component {
     console.log("Tab   is now: " + tabID)
   }
 
-  // Used by sidebar to change selectedTopic and sortVocabByTopic
+  /**
+   * @summary Used by sidebar to change selectedTopic and sortVocabByTopic
+   */
   selectedTopicChange = (topic) => {
     this.setState({selectedTopic: topic});
     if (topic === -1) {
@@ -105,6 +109,10 @@ class App extends Component {
 
   }
 
+  /**
+   * @summary Older function to check the curent number of topics
+   * TODO Make sure nothing relies on this function and remove
+   */
   findNumTopics() {
     this.setState({numTopics: QueryString.topics ? parseInt(QueryString.topics) : 25});
     if (isNaN(this.state.numTopics)) {
@@ -166,13 +174,16 @@ class App extends Component {
   }
   
 
-  // This function is the callback for "input", it changes as we move the slider
-  //  without releasing it.
+  /**
+   * @summary This function is the callback for "input", it changes as we move the slider without releasing it.
+   */
   updateTopicCount(input) {
     d3.select("#num_topics_display").text(input.value);
   }
 
-  // This function is the callback for "change"
+  /**
+   * @summary This function is the callback for "change"
+   */
   onTopicsChange = (val) => {
     console.log("Changing # of topics: " + val);
     
@@ -182,6 +193,25 @@ class App extends Component {
     }
   }
 
+
+  
+  /**
+   * @summary Callback function for pressing the run iterations button
+   */
+  changeSweepAmount(val) {
+    this.setState( {
+      sweepParameter: parseInt(val, 10)
+    })
+  }
+
+  /**
+   * @summary Callback function for pressing the stop button
+   */
+  stopButtonClick = () => {
+    this.setState({
+      requestedSweeps: this.state.completeSweeps + 1,
+    })
+  }
 
   componentDidMount() {
     this.findNumTopics();
@@ -193,18 +223,6 @@ class App extends Component {
 
     this.queueLoad();
     
-  }
-
-  changeSweepAmount(val) {
-    this.setState( {
-      sweepParameter: parseInt(val, 10)
-    })
-  }
-
-  stopButtonClick = () => {
-    this.setState({
-      requestedSweeps: this.state.completeSweeps + 1,
-    })
   }
   
   render() {
@@ -286,12 +304,7 @@ class App extends Component {
             onChange={this.changeSweepAmount}
             stopButtonClick={this.stopButtonClick}
             />
-      {/* <div id="form" className="top">
-        <button id="sweep">Run 50 iterations</button>
-        Iterations: <span id="iters">0</span>
 
-      <span id="num_topics_control">Train with <input id="num-topics-input" type="range" name="topics" value="25" min="3" max="100" onInput="updateTopicCount(this)" onChange="onTopicsChange(this)"/> <span id="num_topics_display">25</span> topics</span>
-      </div> */}
 
       <SideBar selectedTopic={this.state.selectedTopic} 
                sortVocabByTopic={this.state.sortVocabByTopic} 
