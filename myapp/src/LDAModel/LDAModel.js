@@ -1,5 +1,6 @@
-import {zeros, getObjectKeys} from '../../funcs/utilityFunctions'
 
+import {zeros, getObjectKeys} from '../../funcs/utilityFunctions'
+import * as d3 from 'd3';
 // This adds the Object.keys() function to some old browsers that don't support it
 if (!Object.keys) {
     Object.keys = (getObjectKeys());
@@ -8,24 +9,25 @@ if (!Object.keys) {
 /**
  * @summary Creates/maintains a topic model over a corpus
  */
+>>>>>>> origin/reactLDA-#45
 class LDAModel {
     constructor() {
         // Needed by reset & parseline
-        _vocabularySize = 0;
+        this._vocabularySize = 0;
 
         // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
-        _correlationMinTokens = 2;
-        _correlationMinProportion = 0.05;
+        this._correlationMinTokens = 2;
+        this._correlationMinProportion = 0.05;
 
 
         // needed by reset & parseline, changeNumTopics
-        _vocabularyCounts = {};
+        this._vocabularyCounts = {};
 
         //needed by reset
-        _sortVocabByTopic = false;
-        _this.specificityScale = d3.scaleLinear().domain([0,1]).range(["#ffffff", "#99d8c9"]);
+        this._sortVocabByTopic = false;
+        this._this.specificityScale = d3.scaleLinear().domain([0, 1]).range(["#ffffff", "#99d8c9"]);
 
-        _wordPattern = XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g");
+        this._wordPattern = XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g");
 
         // Topic model parameters
 
@@ -63,9 +65,11 @@ class LDAModel {
         this._timer = 0; // used in sweep
         this._documentTopicSmoothing = 0.1; // (used by sweep)
         this._topicWordSmoothing = 0.01; // (used by sweep)
+
+        this._sweeps = 0; // (used by addSweepRequest) for finding whether an additional sweep call should be called
     }
 
-    _byCountDescending(a,b) { return b.count - a.count; };
+    _byCountDescending(a, b) { return b.count - a.count; };
 
     _truncate(s) { 
         return s.length > 300 ? s.substring(0, 299) + "..." : s; 
@@ -282,7 +286,91 @@ class LDAModel {
 
     _sweep() {
 
-    }
+            
+        var startTime = Date.now();
+    
+        var topicNormalizers = zeros(this._numTopics);
+        for (let topic = 0; topic < this._numTopics; topic++) {
+          topicNormalizers[topic] = 1.0 / 
+          (this._vocabularySize * this._topicWordSmoothing + 
+            this._tokensPerTopic[topic]);
+        }
+    
+        for (let doc = 0; doc < this._documents.length; doc++) {
+          let currentDoc = this._documents[doc];
+          let docTopicCounts = currentDoc.topicCounts;
+    
+          for (let position = 0; position < currentDoc.tokens.length; position++) {
+            let token = currentDoc.tokens[position];
+            if (token.isStopword) { continue; }
+    
+            this._tokensPerTopic[ token.topic ]--;
+            let currentWordTopicCounts = this._wordTopicCounts[ token.word ];
+            currentWordTopicCounts[ token.topic ]--;
+            if (currentWordTopicCounts[ token.topic ] === 0) {
+            }
+            docTopicCounts[ token.topic ]--;
+            topicNormalizers[ token.topic ] = 1.0 / 
+              (this._vocabularySize * this._topicWordSmoothing +
+                this._tokensPerTopic[ token.topic ]);
+    
+            let sum = 0.0;
+            for (let topic = 0; topic < this._numTopics; topic++) {
+              if (currentWordTopicCounts[ topic ]) {
+                this._topicWeights[topic] =
+                  (this._documentTopicSmoothing + docTopicCounts[topic]) *
+                  (this._topicWordSmoothing + currentWordTopicCounts[ topic ]) *
+                topicNormalizers[topic];
+              }
+              else {
+                this._topicWeights[topic] =
+                  (this._documentTopicSmoothing + docTopicCounts[topic]) *
+                  this._topicWordSmoothing *
+                topicNormalizers[topic];
+              }
+              sum += this._topicWeights[topic];
+    
+            }
+    
+            // Sample from an unnormalized discrete distribution
+            var sample = sum * Math.random();
+              var i = 0;
+              sample -= this._topicWeights[i];
+              while (sample > 0.0) {
+                i++;
+                sample -= this._topicWeights[i];
+            }
+            token.topic = i;
+    
+            this._tokensPerTopic[ token.topic ]++;
+    
+            if (! currentWordTopicCounts[ token.topic ]) {
+              currentWordTopicCounts[ token.topic ] = 1;
+            }
+            else {
+              currentWordTopicCounts[ token.topic ] += 1;
+            }
+            docTopicCounts[ token.topic ]++;
+    
+            topicNormalizers[ token.topic ] = 1.0 / 
+              (this._vocabularySize * this._topicWordSmoothing +
+              this._tokensPerTopic[ token.topic ]);
+          }
+        }
+    
+        console.log("sweep in " + (Date.now() - startTime) + " ms");
+        this.completeSweeps += 1;    
+
+        // TODO: Update completed sweeps outside of this function
+        d3.select("#iters").text(this.completeSweeps);
+    
+        if (this.completeSweeps >= this.requestedSweeps) {
+          this.update = true;
+          this.sortTopicWords();
+          this.timer.stop();
+          this.sweeps = 0;
+        }
+      }
 
     /**
      * @summary adds a word to model's stoplist
@@ -311,7 +399,7 @@ class LDAModel {
      * @summary removes a word from stoplist
      * @param {String} word the word to remove
      */
-    removeStop = (word) => {
+        removeStop = (word) => {
         delete this._stopwords[word];
         this._vocabularySize++;
         this._wordTopicCounts[word] = {};
@@ -339,11 +427,60 @@ class LDAModel {
     }
 
     getTopicCorrelations() {
+        // initialize the matrix
+        let correlationMatrix = [this._numTopics];
+        for (var t1 = 0; t1 < this._numTopics; t1++) {
+            correlationMatrix[t1] = zeros(this._numTopics);
+        }
 
+        var topicProbabilities = zeros(this._numTopics);
+
+        // iterate once to get mean log topic proportions
+        this.documents.forEach((d, i) => {
+
+            // We want to find the subset of topics that occur with non-trivial concentration in this document.
+            // Only consider topics with at least the minimum number of tokens that are at least 5% of the doc.
+            var documentTopics = [];
+            var tokenCutoff = Math.max(this._correlationMinTokens,
+                this.correlationMinProportion * d.tokens.length);
+
+            for (let topic = 0; topic < this._numTopics; topic++) {
+                if (d.topicCounts[topic] >= tokenCutoff) {
+                    documentTopics.push(topic);
+                    topicProbabilities[topic]++; // Count the number of docs with this topic
+                }
+            }
+
+            // Look at all pairs of topics that occur in the document.
+            for (let i = 0; i < documentTopics.length - 1; i++) {
+                for (let j = i + 1; j < documentTopics.length; j++) {
+                    correlationMatrix[documentTopics[i]][documentTopics[j]]++;
+                    correlationMatrix[documentTopics[j]][documentTopics[i]]++;
+                }
+            }
+        });
+
+        for (let t1 = 0; t1 < this._numTopics - 1; t1++) {
+            for (let t2 = t1 + 1; t2 < this._numTopics; t2++) {
+                correlationMatrix[t1][t2] = Math.log((this._documents.length * correlationMatrix[t1][t2]) /
+                    (topicProbabilities[t1] * topicProbabilities[t2]));
+                correlationMatrix[t2][t1] = Math.log((this._documents.length * correlationMatrix[t2][t1]) /
+                    (topicProbabilities[t1] * topicProbabilities[t2]));
+            }
+        }
+
+        return correlationMatrix;
     }
 
-    addSweepRequest() {
+    addSweepRequest(parameter) {
 
+        this._requestedSweeps += parameter
+
+        if (this._sweeps === 0) {
+            this._sweeps = 1;
+            this._timer = d3.timer(this._sweep);
+            console.log("Requested Sweeps Now: " + this._requestedSweeps);
+        }
     }
 }
 
