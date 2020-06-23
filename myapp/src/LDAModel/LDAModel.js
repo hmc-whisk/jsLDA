@@ -1,3 +1,6 @@
+/**
+ * @summary Creates/maintains a topic model over a corpus
+ */
 class LDAModel {
     constructor() {
         // Needed by reset & parseline
@@ -262,6 +265,10 @@ class LDAModel {
         this.sortTopicWords();
     }
 
+    /**
+     * @summary removes a word from stoplist
+     * @param {String} word the word to remove
+     */
     removeStop = (word) => {
         delete this._stopwords[word];
         this._vocabularySize++;
