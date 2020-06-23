@@ -239,74 +239,64 @@ class LDAModel {
     }
 
     _sweep() {
-        var startTime = Date.now();
 
-        // Avoid mutating state
-        let temp_tokensPerTopic = this.tokenPerTopic.slice();
-        let temp_topicWeights = this.topicWeight.slice();
-        let temp_numTopics = this.numTopics;
-        let temp_topicWordSmoothing = this.topicWordSmoothing;
-        let temp_vocabularySize = this.vocabularySize;
-        let temp_documents = this.documents
-        let temp_wordTopicCounts = this.wordTopicCounts;
-        let temp_documentTopicSmoothing = this.documentTopicSmoothing;
+            
+        var startTime = Date.now();
     
-    
-        var topicNormalizers = zeros(temp_numTopics);
-        for (let topic = 0; topic < temp_numTopics; topic++) {
+        var topicNormalizers = zeros(this._numTopics);
+        for (let topic = 0; topic < this._numTopics; topic++) {
           topicNormalizers[topic] = 1.0 / 
-          (temp_vocabularySize * temp_topicWordSmoothing + 
-            temp_tokensPerTopic[topic]);
+          (this._vocabularySize * this._topicWordSmoothing + 
+            this._tokensPerTopic[topic]);
         }
     
-        for (let doc = 0; doc < temp_documents.length; doc++) {
-          let currentDoc = temp_documents[doc];
+        for (let doc = 0; doc < this._documents.length; doc++) {
+          let currentDoc = this._documents[doc];
           let docTopicCounts = currentDoc.topicCounts;
     
           for (let position = 0; position < currentDoc.tokens.length; position++) {
             let token = currentDoc.tokens[position];
             if (token.isStopword) { continue; }
     
-            temp_tokensPerTopic[ token.topic ]--;
-            let currentWordTopicCounts = temp_wordTopicCounts[ token.word ];
+            this._tokensPerTopic[ token.topic ]--;
+            let currentWordTopicCounts = this._wordTopicCounts[ token.word ];
             currentWordTopicCounts[ token.topic ]--;
             if (currentWordTopicCounts[ token.topic ] === 0) {
-              //delete(currentWordTopicCounts[ token.topic ]);
             }
             docTopicCounts[ token.topic ]--;
             topicNormalizers[ token.topic ] = 1.0 / 
-              (temp_vocabularySize * temp_topicWordSmoothing +
-                temp_tokensPerTopic[ token.topic ]);
+              (this._vocabularySize * this._topicWordSmoothing +
+                this._tokensPerTopic[ token.topic ]);
     
             let sum = 0.0;
-            for (let topic = 0; topic < temp_numTopics; topic++) {
+            for (let topic = 0; topic < this._numTopics; topic++) {
               if (currentWordTopicCounts[ topic ]) {
-                temp_topicWeights[topic] =
-                  (temp_documentTopicSmoothing + docTopicCounts[topic]) *
-                  (temp_topicWordSmoothing + currentWordTopicCounts[ topic ]) *
+                this._topicWeights[topic] =
+                  (this._documentTopicSmoothing + docTopicCounts[topic]) *
+                  (this._topicWordSmoothing + currentWordTopicCounts[ topic ]) *
                 topicNormalizers[topic];
               }
               else {
-                temp_topicWeights[topic] =
-                  (temp_documentTopicSmoothing + docTopicCounts[topic]) *
-                  temp_topicWordSmoothing *
+                this._topicWeights[topic] =
+                  (this._documentTopicSmoothing + docTopicCounts[topic]) *
+                  this._topicWordSmoothing *
                 topicNormalizers[topic];
               }
-              sum += temp_topicWeights[topic];
+              sum += this._topicWeights[topic];
     
             }
     
             // Sample from an unnormalized discrete distribution
             var sample = sum * Math.random();
               var i = 0;
-              sample -= temp_topicWeights[i];
+              sample -= this._topicWeights[i];
               while (sample > 0.0) {
                 i++;
-                sample -= temp_topicWeights[i];
+                sample -= this._topicWeights[i];
             }
             token.topic = i;
     
-            temp_tokensPerTopic[ token.topic ]++;
+            this._tokensPerTopic[ token.topic ]++;
     
             if (! currentWordTopicCounts[ token.topic ]) {
               currentWordTopicCounts[ token.topic ] = 1;
@@ -317,25 +307,22 @@ class LDAModel {
             docTopicCounts[ token.topic ]++;
     
             topicNormalizers[ token.topic ] = 1.0 / 
-              (temp_vocabularySize * temp_topicWordSmoothing +
-              temp_tokensPerTopic[ token.topic ]);
+              (this._vocabularySize * this._topicWordSmoothing +
+              this._tokensPerTopic[ token.topic ]);
           }
         }
     
         console.log("sweep in " + (Date.now() - startTime) + " ms");
     
-        this.tokenPerTopic = temp_tokensPerTopic;
-        this.topicWeight = temp_topicWeights;
+        this.tokenPerTopic = this._tokensPerTopic;
+        this.topicWeight = this._topicWeights;
         this.completeSweeps += 1;    
 
         // TODO: Update completed sweeps outside of this function
         d3.select("#iters").text(this.completeSweeps);
     
         if (this.completeSweeps >= this.requestedSweeps) {
-          this.tokensPerTopic = temp_tokensPerTopic;
-          this.topicWeights = temp_topicWeights;
           this.update = true;
-
           this.sortTopicWords();
           this.timer.stop();
           this.sweeps = 0;
@@ -365,10 +352,10 @@ class LDAModel {
             // We want to find the subset of topics that occur with non-trivial concentration in this document.
             // Only consider topics with at least the minimum number of tokens that are at least 5% of the doc.
             var documentTopics = [];
-            var tokenCutoff = Math.max(this.state.correlationMinTokens,
-                this.state.correlationMinProportion * d.tokens.length);
+            var tokenCutoff = Math.max(this.correlationMinTokens,
+                this.correlationMinProportion * d.tokens.length);
 
-            for (let topic = 0; topic < this.state.numTopics; topic++) {
+            for (let topic = 0; topic < this.numTopics; topic++) {
                 if (d.topicCounts[topic] >= tokenCutoff) {
                     documentTopics.push(topic);
                     topicProbabilities[topic]++; // Count the number of docs with this topic
@@ -384,11 +371,11 @@ class LDAModel {
             }
         });
 
-        for (let t1 = 0; t1 < this.state.numTopics - 1; t1++) {
-            for (let t2 = t1 + 1; t2 < this.state.numTopics; t2++) {
-                correlationMatrix[t1][t2] = Math.log((this.state.documents.length * correlationMatrix[t1][t2]) /
+        for (let t1 = 0; t1 < this.numTopics - 1; t1++) {
+            for (let t2 = t1 + 1; t2 < this.numTopics; t2++) {
+                correlationMatrix[t1][t2] = Math.log((this.documents.length * correlationMatrix[t1][t2]) /
                     (topicProbabilities[t1] * topicProbabilities[t2]));
-                correlationMatrix[t2][t1] = Math.log((this.state.documents.length * correlationMatrix[t2][t1]) /
+                correlationMatrix[t2][t1] = Math.log((this.documents.length * correlationMatrix[t2][t1]) /
                     (topicProbabilities[t1] * topicProbabilities[t2]));
             }
         }
@@ -402,10 +389,8 @@ class LDAModel {
 
         if (this._sweeps === 0) {
             this._sweeps = 1;
-            // this.topicWeight = this.state.topicWeights; I don't think this is necessary anymore
-            // this.tokenPerTopic = this.state.tokensPerTopic;
             this.timer = d3.timer(this._sweep);
-            console.log("Requested Sweeps Now: " + this.state.requestedSweeps);
+            console.log("Requested Sweeps Now: " + this.requestedSweeps);
         }
     }
 }
