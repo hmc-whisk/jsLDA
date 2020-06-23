@@ -215,7 +215,6 @@ class App extends Component {
           selectedTopic={this.state.selectedTopic} 
           documents={this.state.documents} 
           sortVocabByTopic={this.state.sortVocabByTopic} 
-          truncate={this.state.truncate}
           numTopics={this.state.numTopics}
           onDocumentFileChange={this.onDocumentFileChange}
           onStopwordFileChange={this.onStopwordFileChange}
