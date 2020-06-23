@@ -1,6 +1,8 @@
 
-import {zeros, getObjectKeys, truncate} from '../../funcs/utilityFunctions'
+import {zeros, getObjectKeys, truncate} from '../funcs/utilityFunctions'
 import * as d3 from 'd3';
+var XRegExp = require('xregexp');
+
 // This adds the Object.keys() function to some old browsers that don't support it
 if (!Object.keys) {
     Object.keys = (getObjectKeys());
@@ -19,9 +21,9 @@ class LDAModel {
         this._correlationMinTokens = 2;
         this._correlationMinProportion = 0.05;
 
-        this._vocabularyCounts = {};
+        this.vocabularyCounts = {};
 
-        this._sortVocabByTopic = false;
+        this.sortVocabByTopic = false;
         this._specificityScale = d3.scaleLinear().domain([0, 1]).range(["#ffffff", "#99d8c9"]);
 
         this._wordPattern = XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g");
@@ -30,20 +32,20 @@ class LDAModel {
 
         this.numTopics = numTopics;
 
-        this._stopwords = {};
+        this.stopwords = {};
 
         this._completeSweeps = 0;
         this._requestedSweeps = 0;
 
-        _selectedTopic = 0;
+        this.selectedTopic = 0;
 
-        this._wordTopicCounts = {};
+        this.wordTopicCounts = {};
 
-        this._topicWordCounts = [];
+        this.topicWordCounts = [];
 
-        this._tokensPerTopic = zeros(this.numTopics); // set to zeros(numTopics)
+        this.tokensPerTopic = zeros(this.numTopics);
 
-        this._topicWeights = zeros(this.numTopics); // set to zeros(numTopics)
+        this._topicWeights = zeros(this.numTopics);
 
         // Array of dictionaries with keys 
         // {"originalOrder", "id", "date", "originalText", "tokens", "topicCounts", "metadata"}
@@ -54,10 +56,20 @@ class LDAModel {
         this._topicWordSmoothing = 0.01; // (used by sweep)
 
         this._sweeps = 0; // (used by addSweepRequest) for finding whether an additional sweep call should be called
+
+        this.documentType = "text/csv";
     }
 
-    getDocuments() {
-        return this.documents
+    // Used by sidebar to change selectedTopic and sortVocabByTopic
+    selectedTopicChange(topic) {
+        this.selectedTopic = topic;
+        if (topic === -1) {
+            this.sortVocabByTopic = false;
+        }
+    }
+
+    sortbyTopicChange(sort) {
+        this.sortVocabByTopic = sort
     }
 
     /**
@@ -65,7 +77,7 @@ class LDAModel {
      * @param {Object} a 
      * @param {Object} b 
      */
-    _byCountDescending(a, b) { return b.count - a.count; };
+    byCountDescending(a, b) { return b.count - a.count; };
 
     /**
      * @summary Resets data members in preperation
@@ -73,16 +85,16 @@ class LDAModel {
      */
     _reset() {
         this._vocabularySize = 0;
-        this._vocabularyCounts = {};
-        this._sortVocabByTopic = false;
+        this.vocabularyCounts = {};
+        this.sortVocabByTopic = false;
         this._specificityScale = d3.scaleLinear().domain([0,1]).range(["#ffffff", "#99d8c9"]);
-        this._stopwords = {};
+        this.stopwords = {};
         this._completeSweeps = 0;
         this._requestedSweeps = 0;
-        this._selectedTopic = -1;
-        this._wordTopicCounts = {};
-        this._topicWordCounts = [];
-        this._tokensPerTopic = zeros(this.numTopics);
+        this.selectedTopic = -1;
+        this.wordTopicCounts = {};
+        this.topicWordCounts = [];
+        this.tokensPerTopic = zeros(this.numTopics);
         this._topicWeights = zeros(this.numTopics);
         this.documents = [];
     }
@@ -101,12 +113,12 @@ class LDAModel {
             throw error;
         } else {
             // Create the stoplist
-            stops.split(/\s+/).forEach((w) => {this._stopwords[w] = 1; });
+            stops.split(/\s+/).forEach((w) => {this.stopwords[w] = 1; });
         
             // Load documents and populate the vocabulary
             this._parseDoc(doc);
         
-            this._sortTopicWords();
+            this.sortTopicWords();
         }
     }
 
@@ -123,7 +135,7 @@ class LDAModel {
      * "text/csv" then it will assume it is a tsv.
      */
     _parseDoc = (docText) => {
-        tokensPerTopic = zeros(this.numTopics);
+        this.tokensPerTopic = zeros(this.numTopics);
 
         var parsedDoc
         if(this.documentType === "text/csv") { // TODO: make sure this gets updated
@@ -178,7 +190,7 @@ class LDAModel {
                     }
                 }
                 else {
-                    _tokensPerTopic[topic]++;
+                    this._tokensPerTopic[topic]++;
                     if (! this._wordTopicCounts[word]) {
                     this._wordTopicCounts[word] = {};
                     this._vocabularySize++;
@@ -218,7 +230,7 @@ class LDAModel {
 
     }
 
-    _sortTopicWords() {
+    sortTopicWords() {
             this.topicWordCounts = [];
             for (let topic = 0; topic < this.numTopics; topic++) {
                 this.topicWordCounts[topic] = [];
@@ -272,17 +284,17 @@ class LDAModel {
      */
     changeNumTopics(numTopics) {
         this.numTopics = numTopics;
-        this._selectedTopic = -1;
-        this._topicWordCounts = [];
-        this._tokensPerTopic = zeros(this.numTopics);
+        this.selectedTopic = -1;
+        this.topicWordCounts = [];
+        this.tokensPerTopic = zeros(this.numTopics);
         this._topicWeights = zeros(this.numTopics);
-        this._wordTopicCounts = {};
+        this.wordTopicCounts = {};
         this._completeSweeps = 0;
         this._requestedSweeps = 0;
 
         d3.select("#iters").text(this._completeSweeps);
         
-        Object.keys(this._vocabularyCounts).forEach(function (word) { this._wordTopicCounts[word] = {} });
+        Object.keys(this.vocabularyCounts).forEach(function (word) { this._wordTopicCounts[word] = {} });
 
         this.documents.forEach(( currentDoc, i ) => {
             currentDoc.topicCounts = zeros(this.numTopics);
@@ -291,12 +303,12 @@ class LDAModel {
                 token.topic = Math.floor(Math.random() * this.numTopics);
                 
                 if (! token.isStopword) {
-                    this._tokensPerTopic[token.topic]++;
-                if (! this._wordTopicCounts[token.word][token.topic]) {
-                    this._wordTopicCounts[token.word][token.topic] = 1;
+                    this.tokensPerTopic[token.topic]++;
+                if (! this.wordTopicCounts[token.word][token.topic]) {
+                    this.wordTopicCounts[token.word][token.topic] = 1;
                 }
                 else {
-                    this._wordTopicCounts[token.word][token.topic] += 1;
+                    this.wordTopicCounts[token.word][token.topic] += 1;
                 }
                 currentDoc.topicCounts[token.topic] += 1;
                 }
@@ -316,7 +328,7 @@ class LDAModel {
         for (let topic = 0; topic < this.numTopics; topic++) {
           topicNormalizers[topic] = 1.0 / 
           (this._vocabularySize * this._topicWordSmoothing + 
-            this._tokensPerTopic[topic]);
+            this.tokensPerTopic[topic]);
         }
     
         for (let doc = 0; doc < this.documents.length; doc++) {
@@ -327,15 +339,15 @@ class LDAModel {
             let token = currentDoc.tokens[position];
             if (token.isStopword) { continue; }
     
-            this._tokensPerTopic[ token.topic ]--;
-            let currentWordTopicCounts = this._wordTopicCounts[ token.word ];
+            this.tokensPerTopic[ token.topic ]--;
+            let currentWordTopicCounts = this.wordTopicCounts[ token.word ];
             currentWordTopicCounts[ token.topic ]--;
             if (currentWordTopicCounts[ token.topic ] === 0) {
             }
             docTopicCounts[ token.topic ]--;
             topicNormalizers[ token.topic ] = 1.0 / 
               (this._vocabularySize * this._topicWordSmoothing +
-                this._tokensPerTopic[ token.topic ]);
+                this.tokensPerTopic[ token.topic ]);
     
             let sum = 0.0;
             for (let topic = 0; topic < this.numTopics; topic++) {
@@ -365,7 +377,7 @@ class LDAModel {
             }
             token.topic = i;
     
-            this._tokensPerTopic[ token.topic ]++;
+            this.tokensPerTopic[ token.topic ]++;
     
             if (! currentWordTopicCounts[ token.topic ]) {
               currentWordTopicCounts[ token.topic ] = 1;
@@ -377,7 +389,7 @@ class LDAModel {
     
             topicNormalizers[ token.topic ] = 1.0 / 
               (this._vocabularySize * this._topicWordSmoothing +
-              this._tokensPerTopic[ token.topic ]);
+              this.tokensPerTopic[ token.topic ]);
           }
         }
     
@@ -400,9 +412,9 @@ class LDAModel {
      * @param {String} word the word to be added to stoplist
      */
     addStop = (word) => {  
-        this._stopwords[word] = 1;
+        this.stopwords[word] = 1;
         this._vocabularySize--;
-        delete this._wordTopicCounts[word];
+        delete this.wordTopicCounts[word];
 
         this.documents.forEach( function( currentDoc, i ) {
             var docTopicCounts = currentDoc.topicCounts;
@@ -423,10 +435,10 @@ class LDAModel {
      * @param {String} word the word to remove
      */
     removeStop = (word) => {
-        delete this._stopwords[word];
+        delete this.stopwords[word];
         this._vocabularySize++;
-        this._wordTopicCounts[word] = {};
-        var currentWordTopicCounts = this._wordTopicCounts[ word ];
+        this.wordTopicCounts[word] = {};
+        var currentWordTopicCounts = this.wordTopicCounts[ word ];
         
         this.documents.forEach( function( currentDoc, i ) {
             var docTopicCounts = currentDoc.topicCounts;
@@ -445,7 +457,7 @@ class LDAModel {
                 }
             }
         });
-        this._sortTopicWords();
+        this.sortTopicWords();
     }
 
     /**
@@ -502,7 +514,6 @@ class LDAModel {
         return correlationMatrix;
     }
 
-    
     /**
      * @summary Adds the appropirate number of sweeps to be performed
      * @param {Number} numRequests number of iterations to be requested
@@ -516,6 +527,13 @@ class LDAModel {
             this._timer = d3.timer(this._sweep);
             console.log("Requested Sweeps Now: " + this._requestedSweeps);
         }
+    }
+
+    /**
+     * @summary Stops the model from continuing it's sweeps
+     */
+    stopSweeps(){
+        this._requestedSweeps = this._completeSweeps + 1;
     }
 }
 
