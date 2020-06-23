@@ -836,7 +836,6 @@ class App extends Component {
 
     });
     // TODO: Cottect Beginning of iteration
-    // TODO: Change these things to states
     if (this.sweeps === 0) {
       this.sweeps = 1;
       this.topicWeight = this.state.topicWeights;
