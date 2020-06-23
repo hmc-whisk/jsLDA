@@ -120,6 +120,13 @@ class Correlation extends Component {
         this.plotMatrix();
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+      if (nextProps.update === false) {
+          return false
+      }
+      return true
+  }
+
     render() {
       return (
       <div id="corr-page" className="page">

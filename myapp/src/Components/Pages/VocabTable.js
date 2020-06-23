@@ -130,6 +130,13 @@ class VocabTable extends Component {
         this.setUp();
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+      if (nextProps.update === false) {
+          return false
+      }
+      return true
+    }
+
     render() {
         return (
             <div id="vocab-page" className="page">
