@@ -13,6 +13,9 @@ import TopBar from '../Header/TopBar';
 import DLPage from '../Pages/DLPage';
 import HomePage from '../Pages/HomePage';
 
+import defaultDoc from '../../defaultDocs/documents.csv'
+import defaultStops from '../../defaultDocs/stoplist.txt'
+
 var XRegExp = require('xregexp')
 
 // This adds the Object.keys() function to some old browsers that don't support it
@@ -36,8 +39,8 @@ class App extends Component {
     vocabularySize: 0,
 
     // The file location of default files
-    documentsURL: process.env.PUBLIC_URL + "/documents.txt",
-    stopwordsURL: process.env.PUBLIC_URL + "/stoplist.txt",
+    documentsURL: defaultDoc,
+    stopwordsURL: defaultStops,
 
     // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
     correlationMinTokens: 2,
@@ -196,7 +199,7 @@ class App extends Component {
    */
   getDocsUpload = () => (new Promise((resolve) => {
     if (this.state.documentsFileArray.length === 0) {
-      this.setState({ documentType: "text/plain"});
+      this.setState({ documentType: "text/csv"});
       resolve(d3.text(this.state.documentsURL));
     } else {
       const fileSelection = this.state.documentsFileArray[0].slice();
@@ -324,10 +327,47 @@ class App extends Component {
   }
 
   /**
+   * @summary Parses column names to get column index info
+   * @param {Array<String>} header an array of column names
+   * @returns {Object} {"id":index, "text":index, "date_tag":index, 
+   *  "metadata": {"columnName1":index,..."columnNameN":index}}
+   */
+  getColumnInfo(header) {
+    console.log(header)
+    let columnInfo = {"metadata":{}};
+    let lookFor = ["id","text","date_tag"]; // special columns
+    let columnIsMetadata = Array(header.length).fill(true);
+    header = header.map((s) => s.toLocaleLowerCase());
+
+    // Process special columns
+    for (let columnName of lookFor){
+      let index = header.indexOf(columnName);
+      columnInfo[columnName] = index;
+
+      if(index !== -1) {
+        columnIsMetadata[index] = false; 
+      }
+    }
+    console.log(columnIsMetadata)
+    // Process metadata
+    for (let i = 0; i < header.length; i++) {
+      if(columnIsMetadata[i]) {
+        // Add this column to metadata object
+        columnInfo["metadata"][header[i]]=i;
+      }
+    }
+    console.log(columnInfo);
+    return columnInfo;
+  }
+
+  /**
    * @summary Processes document text to set up topic model
    * @param docText {String} a string of a tsv or csv file
-   *  - Without column names
-   *  - In format [ID],[TAG],[TEXT] or [TEXT]
+   *  - With column names
+   *    - a "text" column with the document text is required
+   *    - an "id" column will be used for document ids
+   *    - a "tag" column will be used to sort/group documents by date
+   *    - all other columns are assumed to be metadata
    * This function calles upon the documentType state member
    * to determine whether docText is a csv or tsv. If it isnt
    * "text/csv" then it will assume it is a tsv.
@@ -342,23 +382,37 @@ class App extends Component {
     let temp_documents = this.state.documents.slice();
     let numTopics = this.state.numTopics;
 
-    if(this.state.documentType == "text/csv") {
-      var parsedDoc = d3.csvParseRows(docText);
+    var parsedDoc
+    if(this.state.documentType === "text/csv") {
+      parsedDoc = d3.csvParseRows(docText);
     } else {
-      var parsedDoc = d3.tsvParseRows(docText);
+      parsedDoc = d3.tsvParseRows(docText);
+    }
+    
+    // Handle empty documents
+    if(parsedDoc.length===0){
+      alert("Document file is empty");
+      return;
     }
 
-    for(let i = 0; i < parsedDoc.length; i++) {
-      let fields = parsedDoc[i];
-      var docID = this.state.documents.length;
-      var docDate = "";
+    let columnInfo = this.getColumnInfo(parsedDoc[0]);
 
-      var text = fields[0];  // Assume there's just one field, the text
-      if (fields.length === 3) {  // If it's in [ID]\t[TAG]\t[TEXT] format...
-        docID = fields[0];
-        docDate = fields[1]; // do not interpret date as anything but a string
-        text = fields[2];
-      }
+    // Handle no text colunm
+    if(columnInfo["text"] === -1) {
+      alert("No text column found in document file");
+      return;
+    }
+
+    for(let i = 1; i < parsedDoc.length; i++) {
+      let fields = parsedDoc[i];
+      // Set fields based on whether they exist
+      var docID = columnInfo.id === -1 ? 
+        this.state.documents.length : 
+        fields[columnInfo.id];
+      var docDate = columnInfo.date_tag === -1 ? 
+        "" : 
+        fields[columnInfo.date_tag];
+      var text = fields[columnInfo.text];
     
       var tokens = [];
       var rawTokens = text.toLowerCase().match(XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g"));
@@ -397,13 +451,20 @@ class App extends Component {
           tokens.push({"word":word, "topic":topic, "isStopword":isStopword });
         }
       });
+
+      let metadata = {}
+      for (const [key, index] of Object.entries(columnInfo["metadata"])) {
+        metadata[key] = fields[index];
+      }
+
       temp_documents.push({ 
         "originalOrder" : temp_documents.length,
         "id" : docID,
         "date" : docDate,
         "originalText" : text,
         "tokens" : tokens,
-        "topicCounts" : topicCounts
+        "topicCounts" : topicCounts,
+        "metadata" : metadata
       });
 
       // Need to move this selection and adding to #docs-page into a different component
