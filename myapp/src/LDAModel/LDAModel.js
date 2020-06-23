@@ -1,5 +1,5 @@
 
-import {zeros, getObjectKeys} from '../../funcs/utilityFunctions'
+import {zeros, getObjectKeys, truncate} from '../../funcs/utilityFunctions'
 import * as d3 from 'd3';
 // This adds the Object.keys() function to some old browsers that don't support it
 if (!Object.keys) {
@@ -11,55 +11,43 @@ if (!Object.keys) {
  */
 class LDAModel {
     constructor() {
-        // Needed by reset & parseline
+
         this._vocabularySize = 0;
 
-        // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
+        // Constants for calculating topic correlation. 
+        // A doc with 5% or more tokens in a topic is "about" that topic.
         this._correlationMinTokens = 2;
         this._correlationMinProportion = 0.05;
 
-
-        // needed by reset & parseline, changeNumTopics
         this._vocabularyCounts = {};
 
-        //needed by reset
         this._sortVocabByTopic = false;
-        this._this.specificityScale = d3.scaleLinear().domain([0, 1]).range(["#ffffff", "#99d8c9"]);
+        this._specificityScale = d3.scaleLinear().domain([0, 1]).range(["#ffffff", "#99d8c9"]);
 
         this._wordPattern = XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g");
 
         // Topic model parameters
 
-        // needed by reset & sortTopicWords, changeNumTopics
-        this._numTopics = 0; // run findNumTopics upon mount
+        this.numTopics = 0; // run findNumTopics upon mount
 
-        // required by reset & ready & parseline
         this._stopwords = {};
 
-        // required by reset, changeNumTopics
         this._completeSweeps = 0;
         this._requestedSweeps = 0;
 
-        // in reset, changeNumTopics
-
         _selectedTopic = 0;
 
-        // Needed by reset & parseline & sortTopicWords, changeNumTopics
         this._wordTopicCounts = {};
 
-        // Needed by reset & sortTopicWords, changeNumTopics
         this._topicWordCounts = [];
 
-        // Needed by reset & parseline, changeNumTopics
         this._tokensPerTopic = []; // set to zeros(numTopics)
 
-        // in reset, changeNumTopics
         this._topicWeights = []; // set to zeros(numTopics)
 
         // Array of dictionaries with keys 
-        // {"originalOrder", "id", "date", "originalText", "tokens", "topicCounts"}
-        // used by reset & parseline, changeNumTopics
-        this._documents = [];
+        // {"originalOrder", "id", "date", "originalText", "tokens", "topicCounts", "metadata"}
+        this.documents = [];
 
         this._timer = 0; // used in sweep
         this._documentTopicSmoothing = 0.1; // (used by sweep)
@@ -68,20 +56,16 @@ class LDAModel {
         this._sweeps = 0; // (used by addSweepRequest) for finding whether an additional sweep call should be called
     }
 
+    getDocuments() {
+        return this.documents
+    }
+
     /**
      * @summary function to sort by Object's count attribute
      * @param {Object} a 
      * @param {Object} b 
      */
     _byCountDescending(a, b) { return b.count - a.count; };
-
-    /**
-     * @summary Truncates s to <= 300 characters
-     * @param {String} s text to be truncated
-     */
-    _truncate(s) { 
-        return s.length > 300 ? s.substring(0, 299) + "..." : s; 
-    };
 
     /**
      * @summary Resets data members in preperation
@@ -98,13 +82,13 @@ class LDAModel {
         this._selectedTopic = -1;
         this._wordTopicCounts = {};
         this._topicWordCounts = [];
-        this._tokensPerTopic = zeros(this._numTopics);
-        this._topicWeights = zeros(this._numTopics);
-        this._documents = [];
+        this._tokensPerTopic = zeros(this.numTopics);
+        this._topicWeights = zeros(this.numTopics);
+        this.documents = [];
     }
 
     /**
-     * @summary Sets up state from document/stopword info
+     * @summary Sets up model from document/stopword info
      * @param {Error} error
      * @param {String} stops string of stop words with one per line
      * @param {String} doc string of documents in tsv or csv format
@@ -134,15 +118,15 @@ class LDAModel {
      *    - an "id" column will be used for document ids
      *    - a "tag" column will be used to sort/group documents by date
      *    - all other columns are assumed to be metadata
-     * This function calles upon the documentType state member
+     * This function calles upon the documentType object member
      * to determine whether docText is a csv or tsv. If it isnt
      * "text/csv" then it will assume it is a tsv.
      */
     _parseDoc = (docText) => {
-        tokensPerTopic = zeros(this.state.numTopics);
+        tokensPerTopic = zeros(this.numTopics);
 
         var parsedDoc
-        if(this.state.documentType === "text/csv") {
+        if(this.documentType === "text/csv") { // TODO: make sure this gets updated
             parsedDoc = d3.csvParseRows(docText);
         } else {
             parsedDoc = d3.tsvParseRows(docText);
@@ -166,7 +150,7 @@ class LDAModel {
             let fields = parsedDoc[i];
             // Set fields based on whether they exist
             var docID = columnInfo.id === -1 ? 
-                this._documents.length : 
+                this.documents.length : 
                 fields[columnInfo.id];
             var docDate = columnInfo.date_tag === -1 ? 
                 "" : 
@@ -174,9 +158,9 @@ class LDAModel {
             var text = fields[columnInfo.text];
             
             var tokens = [];
-            var rawTokens = text.toLowerCase().match(XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g"));
+            var rawTokens = text.toLowerCase().match(this._wordPattern);
             if (rawTokens == null) { continue; }
-            var topicCounts = zeros(this._numTopics);
+            var topicCounts = zeros(this.numTopics);
             rawTokens.forEach(function (word) {
                 if (word !== "") {
                 var topic = Math.floor(Math.random() * (this._numTopics));
@@ -216,8 +200,8 @@ class LDAModel {
                 metadata[key] = fields[index];
             }
 
-            this._documents.push({ 
-                "originalOrder" : this._documents.length,
+            this.documents.push({ 
+                "originalOrder" : this.documents.length,
                 "id" : docID,
                 "date" : docDate,
                 "originalText" : text,
@@ -229,7 +213,7 @@ class LDAModel {
             // Need to move this selection and adding to #docs-page into a different component
             d3.select("div#docs-page").append("div")
                 .attr("class", "document")
-                .text("[" + docID + "] " + this.truncate(text));
+                .text("[" + docID + "] " + truncate(text));
         }
 
     }
@@ -287,24 +271,24 @@ class LDAModel {
      * @param {Number} numTopics new number of topics
      */
     changeNumTopics(numTopics) {
-        this._numTopics = numTopics;
+        this.numTopics = numTopics;
         this._selectedTopic = -1;
         this._topicWordCounts = [];
-        this._tokensPerTopic = zeros(this._numTopics);
-        this._topicWeights = zeros(this._numTopics);
+        this._tokensPerTopic = zeros(this.numTopics);
+        this._topicWeights = zeros(this.numTopics);
         this._wordTopicCounts = {};
         this._completeSweeps = 0;
         this._requestedSweeps = 0;
 
         d3.select("#iters").text(this._completeSweeps);
         
-        Object.keys(this.state.vocabularyCounts).forEach(function (word) { this._wordTopicCounts[word] = {} });
+        Object.keys(this._vocabularyCounts).forEach(function (word) { this._wordTopicCounts[word] = {} });
 
-        this._documents.forEach(( currentDoc, i ) => {
-            currentDoc.topicCounts = zeros(this._numTopics);
+        this.documents.forEach(( currentDoc, i ) => {
+            currentDoc.topicCounts = zeros(this.numTopics);
             for (let position = 0; position < currentDoc.tokens.length; position++) {
                 let token = currentDoc.tokens[position];
-                token.topic = Math.floor(Math.random() * this._numTopics);
+                token.topic = Math.floor(Math.random() * this.numTopics);
                 
                 if (! token.isStopword) {
                     this._tokensPerTopic[token.topic]++;
@@ -328,15 +312,15 @@ class LDAModel {
     _sweep() {
         var startTime = Date.now();
     
-        var topicNormalizers = zeros(this._numTopics);
-        for (let topic = 0; topic < this._numTopics; topic++) {
+        var topicNormalizers = zeros(this.numTopics);
+        for (let topic = 0; topic < this.numTopics; topic++) {
           topicNormalizers[topic] = 1.0 / 
           (this._vocabularySize * this._topicWordSmoothing + 
             this._tokensPerTopic[topic]);
         }
     
-        for (let doc = 0; doc < this._documents.length; doc++) {
-          let currentDoc = this._documents[doc];
+        for (let doc = 0; doc < this.documents.length; doc++) {
+          let currentDoc = this.documents[doc];
           let docTopicCounts = currentDoc.topicCounts;
     
           for (let position = 0; position < currentDoc.tokens.length; position++) {
@@ -354,7 +338,7 @@ class LDAModel {
                 this._tokensPerTopic[ token.topic ]);
     
             let sum = 0.0;
-            for (let topic = 0; topic < this._numTopics; topic++) {
+            for (let topic = 0; topic < this.numTopics; topic++) {
               if (currentWordTopicCounts[ topic ]) {
                 this._topicWeights[topic] =
                   (this._documentTopicSmoothing + docTopicCounts[topic]) *
@@ -420,7 +404,7 @@ class LDAModel {
         this._vocabularySize--;
         delete this._wordTopicCounts[word];
 
-        this._documents.forEach( function( currentDoc, i ) {
+        this.documents.forEach( function( currentDoc, i ) {
             var docTopicCounts = currentDoc.topicCounts;
             for (var position = 0; position < currentDoc.tokens.length; position++) {
                 var token = currentDoc.tokens[position];
@@ -444,7 +428,7 @@ class LDAModel {
         this._wordTopicCounts[word] = {};
         var currentWordTopicCounts = this._wordTopicCounts[ word ];
         
-        this._documents.forEach( function( currentDoc, i ) {
+        this.documents.forEach( function( currentDoc, i ) {
             var docTopicCounts = currentDoc.topicCounts;
             for (var position = 0; position < currentDoc.tokens.length; position++) {
                 var token = currentDoc.tokens[position];
@@ -465,16 +449,21 @@ class LDAModel {
     }
 
     /**
-     * @summary Returns a matrix containing the topic correlations
+     * @summary This function will compute pairwise correlations between topics.
+     * @returns {Array<Array<Number>>} 2d array of correlation values
+     * @description Unlike the correlated topic model (CTM) LDA doesn't have 
+     * parameters that represent topic correlations. But that doesn't mean that
+     * topics are not correlated, it just means we have to estimate those values
+     * by measuring which topics appear in documents together.
      */
     getTopicCorrelations() {
         // initialize the matrix
-        let correlationMatrix = [this._numTopics];
-        for (var t1 = 0; t1 < this._numTopics; t1++) {
-            correlationMatrix[t1] = zeros(this._numTopics);
+        let correlationMatrix = [this.numTopics];
+        for (var t1 = 0; t1 < this.numTopics; t1++) {
+            correlationMatrix[t1] = zeros(this.numTopics);
         }
 
-        var topicProbabilities = zeros(this._numTopics);
+        var topicProbabilities = zeros(this.numTopics);
 
         // iterate once to get mean log topic proportions
         this.documents.forEach((d, i) => {
@@ -485,7 +474,7 @@ class LDAModel {
             var tokenCutoff = Math.max(this._correlationMinTokens,
                 this.correlationMinProportion * d.tokens.length);
 
-            for (let topic = 0; topic < this._numTopics; topic++) {
+            for (let topic = 0; topic < this.numTopics; topic++) {
                 if (d.topicCounts[topic] >= tokenCutoff) {
                     documentTopics.push(topic);
                     topicProbabilities[topic]++; // Count the number of docs with this topic
@@ -501,11 +490,11 @@ class LDAModel {
             }
         });
 
-        for (let t1 = 0; t1 < this._numTopics - 1; t1++) {
-            for (let t2 = t1 + 1; t2 < this._numTopics; t2++) {
-                correlationMatrix[t1][t2] = Math.log((this._documents.length * correlationMatrix[t1][t2]) /
+        for (let t1 = 0; t1 < this.numTopics - 1; t1++) {
+            for (let t2 = t1 + 1; t2 < this.numTopics; t2++) {
+                correlationMatrix[t1][t2] = Math.log((this.documents.length * correlationMatrix[t1][t2]) /
                     (topicProbabilities[t1] * topicProbabilities[t2]));
-                correlationMatrix[t2][t1] = Math.log((this._documents.length * correlationMatrix[t2][t1]) /
+                correlationMatrix[t2][t1] = Math.log((this.documents.length * correlationMatrix[t2][t1]) /
                     (topicProbabilities[t1] * topicProbabilities[t2]));
             }
         }
