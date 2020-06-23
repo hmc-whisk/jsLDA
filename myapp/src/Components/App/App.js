@@ -51,9 +51,7 @@ class App extends Component {
   this.addSweepRequests = this.addSweepRequests.bind(this);
   this.changeSweepAmount = this.changeSweepAmount.bind(this);
   };
-  sweeps = 0; //Used for finding whether an additional sweep call should be called
-  topicWeight = []; // temp storage for data in sweep
-  tokenPerTopic = [];
+
 
   changeTab = (tabID) => {
     this.setState({
@@ -166,9 +164,6 @@ class App extends Component {
       .catch(err => this.ready(err, null, null));
   }
   
-
-
-  truncate (s) { return s.length > 300 ? s.substring(0, 299) + "..." : s; }
 
   // This function is the callback for "input", it changes as we move the slider
   //  without releasing it.
