@@ -11,54 +11,42 @@ if (!Object.keys) {
  */
 class LDAModel {
     constructor() {
-        // Needed by reset & parseline
+
         this._vocabularySize = 0;
 
-        // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
+        // Constants for calculating topic correlation. 
+        // A doc with 5% or more tokens in a topic is "about" that topic.
         this._correlationMinTokens = 2;
         this._correlationMinProportion = 0.05;
 
-
-        // needed by reset & parseline, changeNumTopics
         this._vocabularyCounts = {};
 
-        //needed by reset
         this._sortVocabByTopic = false;
-        this._this.specificityScale = d3.scaleLinear().domain([0, 1]).range(["#ffffff", "#99d8c9"]);
+        this._specificityScale = d3.scaleLinear().domain([0, 1]).range(["#ffffff", "#99d8c9"]);
 
         this._wordPattern = XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g");
 
         // Topic model parameters
 
-        // needed by reset & sortTopicWords, changeNumTopics
         this._numTopics = 0; // run findNumTopics upon mount
 
-        // required by reset & ready & parseline
         this._stopwords = {};
 
-        // required by reset, changeNumTopics
         this._completeSweeps = 0;
         this._requestedSweeps = 0;
 
-        // in reset, changeNumTopics
-
         _selectedTopic = 0;
 
-        // Needed by reset & parseline & sortTopicWords, changeNumTopics
         this._wordTopicCounts = {};
 
-        // Needed by reset & sortTopicWords, changeNumTopics
         this._topicWordCounts = [];
 
-        // Needed by reset & parseline, changeNumTopics
         this._tokensPerTopic = []; // set to zeros(numTopics)
 
-        // in reset, changeNumTopics
         this._topicWeights = []; // set to zeros(numTopics)
 
         // Array of dictionaries with keys 
-        // {"originalOrder", "id", "date", "originalText", "tokens", "topicCounts"}
-        // used by reset & parseline, changeNumTopics
+        // {"originalOrder", "id", "date", "originalText", "tokens", "topicCounts", "metadata"}
         this._documents = [];
 
         this._timer = 0; // used in sweep
@@ -174,7 +162,7 @@ class LDAModel {
             var text = fields[columnInfo.text];
             
             var tokens = [];
-            var rawTokens = text.toLowerCase().match(XRegExp("\\p{L}[\\p{L}\\p{P}]*\\p{L}", "g"));
+            var rawTokens = text.toLowerCase().match(this._wordPattern);
             if (rawTokens == null) { continue; }
             var topicCounts = zeros(this._numTopics);
             rawTokens.forEach(function (word) {
@@ -451,6 +439,14 @@ class LDAModel {
         this._sortTopicWords();
     }
 
+    /**
+     * @summary This function will compute pairwise correlations between topics.
+     * @returns {Array<Array<Number>>} 2d array of correlation values
+     * @description Unlike the correlated topic model (CTM) LDA doesn't have 
+     * parameters that represent topic correlations. But that doesn't mean that
+     * topics are not correlated, it just means we have to estimate those values
+     * by measuring which topics appear in documents together.
+     */
     getTopicCorrelations() {
         // initialize the matrix
         let correlationMatrix = [this._numTopics];
@@ -497,8 +493,11 @@ class LDAModel {
         return correlationMatrix;
     }
 
+    /**
+     * @summary Asks the model to do complete sweeps
+     * @param {Number} parameter number of sweeps to complete
+     */
     addSweepRequest(parameter) {
-
         this._requestedSweeps += parameter
 
         if (this._sweeps === 0) {
