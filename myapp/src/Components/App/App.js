@@ -44,17 +44,21 @@ class App extends Component {
       stoplistFileArray: [],
 
       selectedTab: "home-tab",
+      sweepParameter: 50,
 
-      update: true,
-    };
-    
-    this.changeTab = this.changeTab.bind(this);
-    // TODO Moved to LDAModel, need new function to replace
-    // this.addSweepRequests = this.addSweepRequests.bind(this);
-    this.changeSweepAmount = this.changeSweepAmount.bind(this);
+    update: true,
+  };
+  // TODO make consistent with arrow functions instead of bindings
+  this.changeTab = this.changeTab.bind(this);
+  // TODO Moved to LDAModel, need new function to replace
+  // this.addSweepRequests = this.addSweepRequests.bind(this);
+  this.changeSweepAmount = this.changeSweepAmount.bind(this);
+  this.runIterationsClick = this.runIterationsClick.bind(this);
   };
 
-
+  /**
+   * @summary Update the page/tab user is looking at, causing rerender of components
+   */
   changeTab = (tabID) => {
     this.setState({
       selectedTab: tabID
@@ -155,13 +159,16 @@ class App extends Component {
   }
   
 
-  // This function is the callback for "input", it changes as we move the slider
-  //  without releasing it.
+  /**
+   * @summary This function is the callback for "input", it changes as we move the slider without releasing it.
+   */
   updateTopicCount(input) {
     d3.select("#num_topics_display").text(input.value);
   }
 
-  // This function is the callback for "change"
+  /**
+   * @summary This function is the callback for "change"
+   */
   onTopicsChange = (val) => {
     console.log("Changing # of topics: " + val);
     
@@ -172,20 +179,33 @@ class App extends Component {
   }
 
   componentDidMount() {
+    // TODO turn d3 into react
     // Set upon initialisation, changed to new numTopics in reset
     d3.select("#num-topics-input").attr("value", this.state.ldaModel.numTopics);
     this.queueLoad();
   }
 
+  /**
+   * @summary Callback function for pressing the run iterations button
+   */
   changeSweepAmount(val) {
     this.setState( {
       sweepParameter: parseInt(val, 10)
     })
   }
 
+  /**
+   * @summary Callback function for pressing the stop button
+   */
   stopButtonClick = () => {
     this.state.ldaModel.stopSweeps();
   }
+
+  runIterationsClick = () => {
+    this.state.ldaModel.addSweepRequest(this.state.sweepParameter);
+  }
+
+
   
   render() {
     var DisplayPage;
@@ -262,18 +282,13 @@ class App extends Component {
       <TopBar completeSweeps={this.state.ldaModel.completeSweeps} 
             requestedSweeps = {this.state.ldaModel.requestedSweeps} 
             numTopics={this.state.ldaModel.numTopics} 
-            onClick={this.state.ldaModel.addSweepRequests} 
+            onClick={this.runIterationsClick} 
             updateNumTopics={this.onTopicsChange} 
             sweepParameter={this.state.sweepParameter}
             onChange={this.changeSweepAmount}
             stopButtonClick={this.state.ldaModel.stopSweeps}
             />
-      {/* <div id="form" className="top">
-        <button id="sweep">Run 50 iterations</button>
-        Iterations: <span id="iters">0</span>
 
-      <span id="num_topics_control">Train with <input id="num-topics-input" type="range" name="topics" value="25" min="3" max="100" onInput="updateTopicCount(this)" onChange="onTopicsChange(this)"/> <span id="num_topics_display">25</span> topics</span>
-      </div> */}
 
       <SideBar selectedTopic={this.state.ldaModel.selectedTopic} 
                sortVocabByTopic={this.state.ldaModel.sortVocabByTopic} 
