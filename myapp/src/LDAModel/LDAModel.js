@@ -454,7 +454,7 @@ class LDAModel {
         this.wordTopicCounts[word] = {};
         var currentWordTopicCounts = this.wordTopicCounts[ word ];
         
-        this.documents.forEach( function( currentDoc, i ) {
+        this.documents.forEach(( currentDoc, i ) => {
             var docTopicCounts = currentDoc.topicCounts;
             for (var position = 0; position < currentDoc.tokens.length; position++) {
                 var token = currentDoc.tokens[position];
