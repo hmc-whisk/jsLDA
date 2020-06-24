@@ -203,6 +203,7 @@ class App extends Component {
 
   runIterationsClick = () => {
     this.state.ldaModel.addSweepRequest(this.state.sweepParameter);
+    console.log(this.state.sweepParameter);
   }
 
 
