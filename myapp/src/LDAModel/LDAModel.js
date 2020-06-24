@@ -255,7 +255,7 @@ class LDAModel {
             for (let topic = 0; topic < this.numTopics; topic++) {
                 this.topicWordCounts[topic].sort(this.byCountDescending);
             }
-        
+        this.updateWebpage();
     }
 
     /**
@@ -430,7 +430,7 @@ class LDAModel {
         this._vocabularySize--;
         delete this.wordTopicCounts[word];
 
-        this.documents.forEach( function( currentDoc, i ) {
+        this.documents.forEach(( currentDoc, i ) => {
             var docTopicCounts = currentDoc.topicCounts;
             for (var position = 0; position < currentDoc.tokens.length; position++) {
                 var token = currentDoc.tokens[position];
