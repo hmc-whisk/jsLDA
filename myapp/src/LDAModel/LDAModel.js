@@ -394,16 +394,17 @@ class LDAModel {
         }
     
         console.log("sweep in " + (Date.now() - startTime) + " ms");
-        this.completeSweeps += 1;    
+        this._completeSweeps += 1;    
 
         // TODO: Update completed sweeps outside of this function
-        d3.select("#iters").text(this.completeSweeps);
+        // console.log(this.completeSweeps)
+        d3.select("#iters").text(this._completeSweeps);
     
-        if (this.completeSweeps >= this.requestedSweeps) {
+        if (this._completeSweeps >= this._requestedSweeps) {
           this.update = true;
           this.sortTopicWords();
-          this.timer.stop();
-          this.sweeps = 0;
+          this._timer.stop();
+          this._sweeps = 0;
         }
     }
 
