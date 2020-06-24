@@ -294,7 +294,7 @@ class LDAModel {
 
         d3.select("#iters").text(this._completeSweeps);
         
-        Object.keys(this.vocabularyCounts).forEach(function (word) { this.wordTopicCounts[word] = {} });
+        Object.keys(this.vocabularyCounts).forEach((word) => { this.wordTopicCounts[word] = {} });
 
         this.documents.forEach(( currentDoc, i ) => {
             currentDoc.topicCounts = zeros(this.numTopics);
@@ -422,7 +422,7 @@ class LDAModel {
                 var token = currentDoc.tokens[position];
                 if (token.word === word) {
                     token.isStopword = true;
-                    this._tokensPerTopic[ token.topic ]--;
+                    this.tokensPerTopic[ token.topic ]--;
                     docTopicCounts[ token.topic ]--;
                 }
             }
@@ -446,7 +446,7 @@ class LDAModel {
                 var token = currentDoc.tokens[position];
                 if (token.word === word) {
                     token.isStopword = false;
-                    this._tokensPerTopic[ token.topic ]++;
+                    this.tokensPerTopic[ token.topic ]++;
                     docTopicCounts[ token.topic ]++;
                     if (! currentWordTopicCounts[ token.topic ]) {
                         currentWordTopicCounts[ token.topic ] = 1;
