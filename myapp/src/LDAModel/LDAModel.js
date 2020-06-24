@@ -321,9 +321,9 @@ class LDAModel {
     /**
      * @summary completes one training iteration
      */
-    _sweep() {
+    _sweep = () => {
         var startTime = Date.now();
-    
+        console.log(this.numTopics);
         var topicNormalizers = zeros(this.numTopics);
         for (let topic = 0; topic < this.numTopics; topic++) {
           topicNormalizers[topic] = 1.0 / 
