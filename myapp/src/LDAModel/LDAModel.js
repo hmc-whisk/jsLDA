@@ -83,7 +83,7 @@ class LDAModel {
      * @summary Resets data members in preperation
      * for new documents to be processed
      */
-    _reset() {
+    reset() {
         this._vocabularySize = 0;
         this.vocabularyCounts = {};
         this.sortVocabByTopic = false;
@@ -150,7 +150,7 @@ class LDAModel {
             return;
         }
 
-        let columnInfo = this.getColumnInfo(parsedDoc[0]);
+        let columnInfo = this._getColumnInfo(parsedDoc[0]);
 
         // Handle no text colunm
         if(columnInfo["text"] === -1) {
@@ -173,34 +173,34 @@ class LDAModel {
             var rawTokens = text.toLowerCase().match(this._wordPattern);
             if (rawTokens == null) { continue; }
             var topicCounts = zeros(this.numTopics);
-            rawTokens.forEach(function (word) {
+            rawTokens.forEach((word) => {
                 if (word !== "") {
-                var topic = Math.floor(Math.random() * (this._numTopics));
+                var topic = Math.floor(Math.random() * (this.numTopics));
             
-                if (word.length <= 2) { this._stopwords[word] = 1; }
+                if (word.length <= 2) { this.stopwords[word] = 1; }
             
-                var isStopword = this._stopwords[word];
+                var isStopword = this.stopwords[word];
                 if (isStopword) {
                     // Record counts for stopwords, but nothing else
-                    if (! this._vocabularyCounts[word]) {
-                    this._vocabularyCounts[word] = 1;
+                    if (! this.vocabularyCounts[word]) {
+                    this.vocabularyCounts[word] = 1;
                     }
                     else {
-                    this._vocabularyCounts[word] += 1;
+                    this.vocabularyCounts[word] += 1;
                     }
                 }
                 else {
-                    this._tokensPerTopic[topic]++;
-                    if (! this._wordTopicCounts[word]) {
-                    this._wordTopicCounts[word] = {};
+                    this.tokensPerTopic[topic]++;
+                    if (! this.wordTopicCounts[word]) {
+                    this.wordTopicCounts[word] = {};
                     this._vocabularySize++;
-                    this._vocabularyCounts[word] = 0;
+                    this.vocabularyCounts[word] = 0;
                     }
-                    if (!this._wordTopicCounts[word][topic]) {
-                    this._wordTopicCounts[word][topic] = 0;
+                    if (!this.wordTopicCounts[word][topic]) {
+                    this.wordTopicCounts[word][topic] = 0;
                     }
-                    this._wordTopicCounts[word][topic] += 1;
-                    this._vocabularyCounts[word] += 1;
+                    this.wordTopicCounts[word][topic] += 1;
+                    this.vocabularyCounts[word] += 1;
                     topicCounts[topic] += 1;
                 }
                 tokens.push({"word":word, "topic":topic, "isStopword":isStopword });
@@ -294,7 +294,7 @@ class LDAModel {
 
         d3.select("#iters").text(this._completeSweeps);
         
-        Object.keys(this.vocabularyCounts).forEach(function (word) { this._wordTopicCounts[word] = {} });
+        Object.keys(this.vocabularyCounts).forEach(function (word) { this.wordTopicCounts[word] = {} });
 
         this.documents.forEach(( currentDoc, i ) => {
             currentDoc.topicCounts = zeros(this.numTopics);
@@ -321,9 +321,9 @@ class LDAModel {
     /**
      * @summary completes one training iteration
      */
-    _sweep() {
+    _sweep = () => {
         var startTime = Date.now();
-    
+        console.log(this.numTopics);
         var topicNormalizers = zeros(this.numTopics);
         for (let topic = 0; topic < this.numTopics; topic++) {
           topicNormalizers[topic] = 1.0 / 

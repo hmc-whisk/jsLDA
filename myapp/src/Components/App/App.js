@@ -44,6 +44,7 @@ class App extends Component {
       stoplistFileArray: [],
 
       selectedTab: "home-tab",
+      sweepParameter: 50,
 
     update: true,
   };
@@ -52,6 +53,7 @@ class App extends Component {
   // TODO Moved to LDAModel, need new function to replace
   // this.addSweepRequests = this.addSweepRequests.bind(this);
   this.changeSweepAmount = this.changeSweepAmount.bind(this);
+  this.runIterationsClick = this.runIterationsClick.bind(this);
   };
 
   /**
@@ -178,9 +180,9 @@ class App extends Component {
 
   componentDidMount() {
     // TODO turn d3 into react
+    // Set upon initialisation, changed to new numTopics in reset
     d3.select("#num-topics-input").attr("value", this.state.ldaModel.numTopics);
     this.queueLoad();
-    
   }
 
   /**
@@ -197,6 +199,10 @@ class App extends Component {
    */
   stopButtonClick = () => {
     this.state.ldaModel.stopSweeps();
+  }
+
+  runIterationsClick = () => {
+    this.state.ldaModel.addSweepRequest(this.state.sweepParameter);
   }
 
 
@@ -273,22 +279,22 @@ class App extends Component {
 
       <div id="main">
 
-      <TopBar completeSweeps={this.state.completeSweeps} 
-            requestedSweeps = {this.state.requestedSweeps} 
-            numTopics={this.state.tempNumTopics} 
-            onClick={this.addSweepRequests} 
+      <TopBar completeSweeps={this.state.ldaModel.completeSweeps} 
+            requestedSweeps = {this.state.ldaModel.requestedSweeps} 
+            numTopics={this.state.ldaModel.numTopics} 
+            onClick={this.runIterationsClick} 
             updateNumTopics={this.onTopicsChange} 
             sweepParameter={this.state.sweepParameter}
             onChange={this.changeSweepAmount}
-            stopButtonClick={this.stopButtonClick}
+            stopButtonClick={this.state.ldaModel.stopSweeps}
             />
 
 
-      <SideBar selectedTopic={this.state.selectedTopic} 
-               sortVocabByTopic={this.state.sortVocabByTopic} 
-               numTopics={this.state.numTopics} 
-               topicWordCounts={this.state.topicWordCounts}
-               selectedTopicChange = {this.selectedTopicChange}
+      <SideBar selectedTopic={this.state.ldaModel.selectedTopic} 
+               sortVocabByTopic={this.state.ldaModel.sortVocabByTopic} 
+               numTopics={this.state.ldaModel.numTopics} 
+               topicWordCounts={this.state.ldaModel.topicWordCounts}
+               selectedTopicChange = {this.state.ldaModel.selectedTopicChange}
                />
 
       <div id="tabwrapper">
