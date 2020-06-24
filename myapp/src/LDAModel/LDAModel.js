@@ -546,7 +546,7 @@ class LDAModel {
     /**
      * @summary Stops the model from continuing it's sweeps
      */
-    stopSweeps(){
+    stopSweeps = () => {
         this._requestedSweeps = this._completeSweeps + 1;
     }
 }
