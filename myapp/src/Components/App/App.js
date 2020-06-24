@@ -272,8 +272,6 @@ class App extends Component {
         break;
     }
 
-    console.log(this.state.ldaModel)
-
     return (
       <div id="app">
       <div id="tooltip"></div>

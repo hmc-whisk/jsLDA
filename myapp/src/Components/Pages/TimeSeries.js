@@ -53,6 +53,8 @@ class TimeSeries extends Component {
      * @summary Updates the info in the timeseries graphs
      */
     timeSeries() {
+        console.log("numTopics: " + this.props.numTopics);
+        console.log(this.state.topicTimeGroups);
         for (var topic = 0; topic < this.props.numTopics; topic++) {
             var topicProportions = this.props.documents
                 .map(function (d) { 
