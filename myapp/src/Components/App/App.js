@@ -33,7 +33,7 @@ class App extends Component {
     let startingNumTopics = 25;
 
     this.state = {
-      ldaModel: new LDAModel(startingNumTopics),
+      ldaModel: new LDAModel(startingNumTopics, () => {this.forceUpdate(); console.log("Forced Update")}),
 
       // The file location of default files
       documentsURL: defaultDoc,

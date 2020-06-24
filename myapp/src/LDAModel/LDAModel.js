@@ -10,9 +10,17 @@ if (!Object.keys) {
 
 /**
  * @summary Creates/maintains a topic model over a corpus
+ * @param {Number} numTopics the starting 
+ * @param {Function} forceUpdate callback that updates the webpage
  */
 class LDAModel {
-    constructor(numTopics) {
+    // Duplicate docstrings so my IDE shows it on hover
+    /**
+     * @summary Creates/maintains a topic model over a corpus
+     * @param {Number} numTopics the starting number of topics
+     * @param {Function} forceUpdate callback that updates the webpage
+     */
+    constructor(numTopics, forceUpdate) {
 
         this._vocabularySize = 0;
 
@@ -31,6 +39,8 @@ class LDAModel {
         // Topic model parameters
 
         this.numTopics = numTopics;
+
+        this.updateWebpage = forceUpdate
 
         this.stopwords = {};
 
@@ -120,6 +130,7 @@ class LDAModel {
         
             this.sortTopicWords();
         }
+        this.updateWebpage();
     }
 
     /**
@@ -315,7 +326,8 @@ class LDAModel {
             }
         });
  
-        this.sortTopicWords()
+        this.sortTopicWords();
+        this.updateWebpage();
     }
 
     /**
@@ -405,6 +417,7 @@ class LDAModel {
           this.sortTopicWords();
           this._timer.stop();
           this._sweeps = 0;
+          this.updateWebpage();
         }
     }
 
