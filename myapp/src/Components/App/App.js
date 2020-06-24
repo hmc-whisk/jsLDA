@@ -259,14 +259,14 @@ class App extends Component {
 
       <div id="main">
 
-      <TopBar completeSweeps={this.state.completeSweeps} 
-            requestedSweeps = {this.state.requestedSweeps} 
-            numTopics={this.state.tempNumTopics} 
-            onClick={this.addSweepRequests} 
+      <TopBar completeSweeps={this.state.ldaModel.completeSweeps} 
+            requestedSweeps = {this.state.ldaModel.requestedSweeps} 
+            numTopics={this.state.ldaModel.numTopics} 
+            onClick={this.state.ldaModel.addSweepRequests} 
             updateNumTopics={this.onTopicsChange} 
             sweepParameter={this.state.sweepParameter}
             onChange={this.changeSweepAmount}
-            stopButtonClick={this.stopButtonClick}
+            stopButtonClick={this.state.ldaModel.stopSweeps}
             />
       {/* <div id="form" className="top">
         <button id="sweep">Run 50 iterations</button>
