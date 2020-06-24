@@ -172,11 +172,9 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.findNumTopics();
     // Set upon initialisation, changed to new numTopics in reset
     d3.select("#num-topics-input").attr("value", this.state.ldaModel.numTopics);
     this.queueLoad();
-    
   }
 
   changeSweepAmount(val) {
@@ -277,11 +275,11 @@ class App extends Component {
       <span id="num_topics_control">Train with <input id="num-topics-input" type="range" name="topics" value="25" min="3" max="100" onInput="updateTopicCount(this)" onChange="onTopicsChange(this)"/> <span id="num_topics_display">25</span> topics</span>
       </div> */}
 
-      <SideBar selectedTopic={this.state.selectedTopic} 
-               sortVocabByTopic={this.state.sortVocabByTopic} 
-               numTopics={this.state.numTopics} 
-               topicWordCounts={this.state.topicWordCounts}
-               selectedTopicChange = {this.selectedTopicChange}
+      <SideBar selectedTopic={this.state.ldaModel.selectedTopic} 
+               sortVocabByTopic={this.state.ldaModel.sortVocabByTopic} 
+               numTopics={this.state.ldaModel.numTopics} 
+               topicWordCounts={this.state.ldaModel.topicWordCounts}
+               selectedTopicChange = {this.state.ldaModel.selectedTopicChange}
                />
 
       <div id="tabwrapper">
