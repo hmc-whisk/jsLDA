@@ -1,6 +1,6 @@
 import React, { Component } from 'react'; 
 import * as d3 from 'd3';
-import {topNWords} from '../../funcs/utilityFunctions'
+import {topNWords} from '../../funcs/utilityFunctions';
 
 class TimeSeries extends Component {
     constructor(props) {
@@ -53,8 +53,6 @@ class TimeSeries extends Component {
      * @summary Updates the info in the timeseries graphs
      */
     timeSeries() {
-        console.log("numTopics: " + this.props.numTopics);
-        console.log(this.state.topicTimeGroups);
         for (var topic = 0; topic < this.props.numTopics; topic++) {
             var topicProportions = this.props.documents
                 .map(function (d) { 
@@ -98,7 +96,10 @@ class TimeSeries extends Component {
         this.timeSeries();
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps) {
+        if(prevProps.numTopics !== this.props.numTopics) {
+            this.createTimeSVGs();
+        }
         this.timeSeries();
     }
 
