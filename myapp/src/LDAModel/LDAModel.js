@@ -71,11 +71,12 @@ class LDAModel {
     }
 
     // Used by sidebar to change selectedTopic and sortVocabByTopic
-    selectedTopicChange(topic) {
+    selectedTopicChange = (topic) => {
         this.selectedTopic = topic;
         if (topic === -1) {
             this.sortVocabByTopic = false;
         }
+        this.updateWebpage();
     }
 
     sortbyTopicChange(sort) {

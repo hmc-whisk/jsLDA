@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import * as d3 from 'd3';
 import {truncate} from '../../funcs/utilityFunctions'
 
-/////@TODO rename this file to TopicDoc.js?/////
 /*
  * @todo give this class doc strings
 **/
@@ -58,7 +57,7 @@ class TopicDoc extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        this.reorderDocuments();
+      this.reorderDocuments();
     }
 
     shouldComponentUpdate(nextProps, nextState) {
