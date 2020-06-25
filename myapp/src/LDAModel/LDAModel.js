@@ -483,12 +483,24 @@ class LDAModel {
      * topics are not correlated, it just means we have to estimate those values
      * by measuring which topics appear in documents together.
      */
-    getTopicCorrelations() {
+    getTopicCorrelations = () => {
         // initialize the matrix
-        let correlationMatrix = [this.numTopics];
+        var correlationMatrix = new Array(this.numTopics);
+        console.log("Initialization");
+        console.log(correlationMatrix);
+
+
         for (var t1 = 0; t1 < this.numTopics; t1++) {
+            console.log("Iter: " + t1);
+            console.log("Before: ");
+            console.log(correlationMatrix[t1]);
             correlationMatrix[t1] = zeros(this.numTopics);
+            console.log("After: ");
+            console.log(correlationMatrix[t1]);
         }
+
+        console.log("After filling:");
+        console.log(correlationMatrix);
 
         var topicProbabilities = zeros(this.numTopics);
 
@@ -499,7 +511,7 @@ class LDAModel {
             // Only consider topics with at least the minimum number of tokens that are at least 5% of the doc.
             var documentTopics = [];
             var tokenCutoff = Math.max(this._correlationMinTokens,
-                this.correlationMinProportion * d.tokens.length);
+                this._correlationMinProportion * d.tokens.length);
 
             for (let topic = 0; topic < this.numTopics; topic++) {
                 if (d.topicCounts[topic] >= tokenCutoff) {
@@ -525,7 +537,6 @@ class LDAModel {
                     (topicProbabilities[t1] * topicProbabilities[t2]));
             }
         }
-
         return correlationMatrix;
     }
 
