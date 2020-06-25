@@ -109,6 +109,7 @@ class LDAModel {
         this.tokensPerTopic = zeros(this.numTopics);
         this._topicWeights = zeros(this.numTopics);
         this.documents = [];
+        d3.select("#iters").text(this._completeSweeps);
     }
 
     /**
@@ -305,7 +306,7 @@ class LDAModel {
         this._completeSweeps = 0;
         this._requestedSweeps = 0;
 
-        d3.select("#iters").text(this._completeSweeps);
+        //d3.select("#iters").text(this._completeSweeps);
         
         Object.keys(this.vocabularyCounts).forEach((word) => { this.wordTopicCounts[word] = {} });
 
@@ -420,6 +421,10 @@ class LDAModel {
           this._sweeps = 0;
           this.updateWebpage();
         }
+    }
+
+    get iterations() {
+        return this._completeSweeps;
     }
 
     /**
@@ -546,7 +551,12 @@ class LDAModel {
      */
     addSweepRequest(numRequests) {
 
-        this._requestedSweeps += numRequests
+        // Protect against stopSweeps messing up _requestedSweeps
+        if(this._requestedSweeps < this._completeSweeps) {
+            this._requestedSweeps = this._completeSweeps;
+        }
+
+        this._requestedSweeps += numRequests 
 
         if (this._sweeps === 0) {
             this._sweeps = 1;
@@ -559,7 +569,7 @@ class LDAModel {
      * @summary Stops the model from continuing it's sweeps
      */
     stopSweeps = () => {
-        this._requestedSweeps = this._completeSweeps + 1;
+        this._requestedSweeps = this._completeSweeps;
     }
 }
 
