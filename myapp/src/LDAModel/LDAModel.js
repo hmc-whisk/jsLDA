@@ -81,6 +81,7 @@ class LDAModel {
 
     sortbyTopicChange = (sort) => {
         this.sortVocabByTopic = sort
+        this.updateWebpage();
     }
 
     /**
@@ -336,7 +337,6 @@ class LDAModel {
      */
     _sweep = () => {
         var startTime = Date.now();
-        console.log(this.numTopics);
         var topicNormalizers = zeros(this.numTopics);
         for (let topic = 0; topic < this.numTopics; topic++) {
           topicNormalizers[topic] = 1.0 / 
