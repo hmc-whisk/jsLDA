@@ -21,10 +21,6 @@ class Correlation extends Component {
         correlationMinProportion: 0.05,
       };
 
-    // vis = d3.select("#corr-page")
-    // .append("svg")
-    // .attr("width", this.state.w)
-    // .attr("height", this.state.h);
     }
 
 
