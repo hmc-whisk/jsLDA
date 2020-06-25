@@ -217,9 +217,6 @@ class App extends Component {
           documents={this.state.ldaModel.documents} 
           sortVocabByTopic={this.state.ldaModel.sortVocabByTopic} 
           numTopics={this.state.ldaModel.numTopics}
-          onDocumentFileChange={this.onDocumentFileChange}
-          onStopwordFileChange={this.onStopwordFileChange}
-          onFileUpload = {this.queueLoad}
           update = {this.state.update}/>;
         break;
       case "corr-tab":
