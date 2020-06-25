@@ -21,10 +21,6 @@ class Correlation extends Component {
         correlationMinProportion: 0.05,
       };
 
-    // vis = d3.select("#corr-page")
-    // .append("svg")
-    // .attr("width", this.state.w)
-    // .attr("height", this.state.h);
     }
 
 
@@ -83,11 +79,11 @@ class Correlation extends Component {
           .style("top", (tooltipY-10)+"px").style("left",(tooltipX+20)+"px")
           .text(correlationGraph.nodes[link.target].words + " / " + correlationGraph.nodes[link.source].words);
         })
-     
         .on("mouseout", function () {
           var tooltip = d3.select("#tooltip");
           tooltip.style("visibility", "hidden");
         });
+
       }
     
 
@@ -107,24 +103,27 @@ class Correlation extends Component {
             }
           }
         }
+        console.log(correlationMatrix);
         return graph;
       }
 
     componentDidMount() {
       this.vis = d3.select("#corr-page").append("svg").attr("width", this.state.w).attr("height", this.state.h);
 
+      console.log("Initial Matrix Plot");
       this.plotMatrix();
     }
 
     componentDidUpdate(prevProps) {
+        console.log("Updateing Matrix");
         this.plotMatrix();
     }
 
     shouldComponentUpdate(nextProps, nextState) {
       if (nextProps.update === false) {
-          return false
+          return false;
       }
-      return true
+      return true;
   }
 
     render() {
