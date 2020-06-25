@@ -283,6 +283,7 @@ class App extends Component {
             sweepParameter={this.state.sweepParameter}
             onChange={this.changeSweepAmount}
             stopButtonClick={this.state.ldaModel.stopSweeps}
+            iter={this.state.ldaModel._completeSweeps}
             />
 
 
