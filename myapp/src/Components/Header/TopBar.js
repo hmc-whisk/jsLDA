@@ -24,8 +24,8 @@ class TopBar extends React.Component {
         });
     }
     handleChange(e) {
-        // Either value number or 0 (avoids NaN)
-        const val = e.target.value || 0;
+        // Either value number or 1 (avoids NaN)
+        const val = e.target.value || 1;
 
         this.props.onChange(val);
     }
