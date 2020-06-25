@@ -1,6 +1,6 @@
 import React, { Component } from 'react'; 
 import * as d3 from 'd3';
-import {topNWords} from '../../funcs/utilityFunctions'
+import {topNWords} from '../../funcs/utilityFunctions';
 
 class TimeSeries extends Component {
     constructor(props) {
@@ -96,7 +96,10 @@ class TimeSeries extends Component {
         this.timeSeries();
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps) {
+        if(prevProps.numTopics !== this.props.numTopics) {
+            this.createTimeSVGs();
+        }
         this.timeSeries();
     }
 
