@@ -53,6 +53,9 @@ class TimeSeries extends Component {
      * @summary Updates the info in the timeseries graphs
      */
     timeSeries() {
+        let maxTopicMean = 0;
+        let allTopicMeans = []
+
         for (var topic = 0; topic < this.props.numTopics; topic++) {
             var topicProportions = this.props.documents
                 .map(function (d) { 
@@ -68,12 +71,25 @@ class TimeSeries extends Component {
                     .mean(d, function (x) {return x.p}); })
                 .entries(topicProportions);
 
+            let thisMaxTopicMean = Math.max(...topicMeans.map(function (d) {
+                return d.value
+            }));
+            if (thisMaxTopicMean > maxTopicMean) {
+                maxTopicMean = thisMaxTopicMean;
+            }
+
+            allTopicMeans.push(topicMeans);
+        }
+
+        for (var topic = 0; topic < this.props.numTopics; topic++) {
+            topicMeans = allTopicMeans[topic];
+
             var xScale = d3.scaleLinear()
                 .domain([0, topicMeans.length])
                 .range([0, this.state.timeSeriesWidth]);
             var yScale = d3
                 .scaleLinear()
-                .domain([0, 0.2])
+                .domain([0, maxTopicMean])
                 .range([this.state.timeSeriesHeight, 0]);
             var area = d3.area()
                 .x(function (d, i) { return xScale(i); })
@@ -88,7 +104,7 @@ class TimeSeries extends Component {
                     .select("text")
                     .text(topNWords(this.props.topicWordCounts[topic], 3));
             }
-        } 
+        }
     }
   
     componentDidMount() {
