@@ -79,7 +79,7 @@ class LDAModel {
         this.updateWebpage();
     }
 
-    sortbyTopicChange(sort) {
+    sortbyTopicChange = (sort) => {
         this.sortVocabByTopic = sort
     }
 
