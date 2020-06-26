@@ -496,12 +496,7 @@ class LDAModel {
 
 
         for (var t1 = 0; t1 < this.numTopics; t1++) {
-            console.log("Iter: " + t1);
-            console.log("Before: ");
-            console.log(correlationMatrix[t1]);
             correlationMatrix[t1] = zeros(this.numTopics);
-            console.log("After: ");
-            console.log(correlationMatrix[t1]);
         }
 
         console.log("After filling:");
