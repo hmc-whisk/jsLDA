@@ -15,7 +15,7 @@ import TopBar from '../Header/TopBar';
 import DLPage from '../Pages/DLPage';
 import HomePage from '../Pages/HomePage';
 
-import defaultDoc from '../../defaultDocs/documents.csv'
+import defaultDoc from '../../defaultDocs/wikiMoviePlots.csv'
 import defaultStops from '../../defaultDocs/stoplist.txt'
 
 
