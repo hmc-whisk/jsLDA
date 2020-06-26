@@ -491,16 +491,10 @@ class LDAModel {
     getTopicCorrelations = () => {
         // initialize the matrix
         var correlationMatrix = new Array(this.numTopics);
-        console.log("Initialization");
-        console.log(correlationMatrix);
-
-
+        
         for (var t1 = 0; t1 < this.numTopics; t1++) {
             correlationMatrix[t1] = zeros(this.numTopics);
         }
-
-        console.log("After filling:");
-        console.log(correlationMatrix);
 
         var topicProbabilities = zeros(this.numTopics);
 
