@@ -56,8 +56,6 @@ class SideBar extends Component {
         d3.selectAll("div.topicwords").attr("class", function(d, i) { return i === topic ? "topicwords selected" : "topicwords"; });
         this.selectedTopicChange(topic);
         }
-        // reorderDocuments();
-        // vocabTable();
     }
     
     componentDidMount() {

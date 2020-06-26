@@ -1,7 +1,7 @@
 import React, { Component } from 'react'; 
 import * as d3 from 'd3';
+import {truncate} from '../../funcs/utilityFunctions'
 
-/////@TODO rename this file to TopicDoc.js?/////
 /*
  * @todo give this class doc strings
 **/
@@ -19,14 +19,13 @@ class TopicDoc extends Component {
         let selectedTopic = this.props.selectedTopic;
         let docSortSmoothing = this.state.docSortSmoothing;
         let documents = this.props.documents;
-        let truncate = this.props.truncate;
         let sumDocSortSmoothing = this.state.docSortSmoothing * this.props.numTopics;
       
         if (this.props.selectedTopic === -1) {
           this.props.documents.sort(function(a, b) { return d3.ascending(a.originalOrder, b.originalOrder); });
           d3.selectAll("div.document").data(this.props.documents)
             .style("display", "block")
-            .text((d) => { return "[" + d.id + "] " + this.props.truncate(d.originalText); });
+            .text((d) => { return "[" + d.id + "] " + truncate(d.originalText); });
         }
         else {
           var scores = this.props.documents.map(function (doc, i) {
@@ -49,7 +48,6 @@ class TopicDoc extends Component {
     
     
     componentDidMount() {
-      let truncate = this.props.truncate;
       this.props.documents.forEach(function (d) {
         d3.select("div#docs-page").append("div")
         .attr("class", "document")
@@ -59,7 +57,7 @@ class TopicDoc extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        this.reorderDocuments();
+      this.reorderDocuments();
     }
 
     shouldComponentUpdate(nextProps, nextState) {
