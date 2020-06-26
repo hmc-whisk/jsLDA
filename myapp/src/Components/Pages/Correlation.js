@@ -103,19 +103,15 @@ class Correlation extends Component {
             }
           }
         }
-        console.log(correlationMatrix);
         return graph;
       }
 
     componentDidMount() {
       this.vis = d3.select("#corr-page").append("svg").attr("width", this.state.w).attr("height", this.state.h);
-
-      console.log("Initial Matrix Plot");
       this.plotMatrix();
     }
 
     componentDidUpdate(prevProps) {
-        console.log("Updateing Matrix");
         this.plotMatrix();
     }
 

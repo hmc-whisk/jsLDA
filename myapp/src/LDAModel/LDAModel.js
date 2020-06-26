@@ -411,7 +411,6 @@ class LDAModel {
         this._completeSweeps += 1;    
 
         // TODO: Update completed sweeps outside of this function
-        // console.log(this.completeSweeps)
         d3.select("#iters").text(this._completeSweeps);
     
         if (this._completeSweeps >= this._requestedSweeps) {
@@ -491,21 +490,9 @@ class LDAModel {
     getTopicCorrelations = () => {
         // initialize the matrix
         var correlationMatrix = new Array(this.numTopics);
-        console.log("Initialization");
-        console.log(correlationMatrix);
-
-
         for (var t1 = 0; t1 < this.numTopics; t1++) {
-            console.log("Iter: " + t1);
-            console.log("Before: ");
-            console.log(correlationMatrix[t1]);
             correlationMatrix[t1] = zeros(this.numTopics);
-            console.log("After: ");
-            console.log(correlationMatrix[t1]);
         }
-
-        console.log("After filling:");
-        console.log(correlationMatrix);
 
         var topicProbabilities = zeros(this.numTopics);
 
