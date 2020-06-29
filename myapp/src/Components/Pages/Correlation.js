@@ -14,11 +14,12 @@ class Correlation extends Component {
     constructor(props) {
       super(props);
       this.state = {
-        w: 650,
-        h: 650,
+        w: 900,
+        h: 900,
         // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
         correlationMinTokens: 2,
         correlationMinProportion: 0.05,
+        hover: false
       };
 
     }
@@ -28,9 +29,9 @@ class Correlation extends Component {
 
     plotMatrix = () => {
         var left = 50;
-        var right = 500;
+        var right = 600;
         var top = 50;
-        var bottom = 500;
+        var bottom = 600;
 
 
         var correlationMatrix = this.props.getTopicCorrelations();
@@ -47,7 +48,7 @@ class Correlation extends Component {
 
       
         horizontalTopics
-          .attr("x", right + 10)
+          .attr("x", right + 50)
           .attr("y", function(node) { return topicScale(node.name); })
           .text(function(node) { return node.words; });
       
@@ -59,8 +60,8 @@ class Correlation extends Component {
       
         verticalTopics
           .attr("x", function(node) { return topicScale(node.name); })
-          .attr("y", bottom + 10)
-          .attr("transform", function(node) { return "rotate(90," + topicScale(node.name) + "," + (bottom + 10) + ")"; })
+          .attr("y", bottom + 50)
+          .attr("transform", function(node) { return "rotate(90," + topicScale(node.name) + "," + (bottom + 50) + ")"; })
           .text(function(node) { return node.words; });
       
         var circles = this.vis.selectAll("circle").data(correlationGraph.links);
@@ -126,10 +127,97 @@ class Correlation extends Component {
       return true;
   }
 
+  
+    overlayStyle = {
+    position: 'fixed',
+      display: 'none',
+      width: '100%',
+      height: '100%',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      zIndex: 2,
+      cursor: 'pointer',
+    }
+
+    textstyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    fontSize: '50px',
+    color: 'white',
+    transform: 'translate(-50%,-50%)',
+    msTransform: 'translate(-50%,-50%)',
+    }
+
+    overlayOn = () => {
+      if (document.getElementById("overlay")) {
+      document.getElementById("overlay").style.display = "block";}
+    }
+  
+    overlayOff = () => {
+      if (document.getElementById("overlay")) {
+      document.getElementById("overlay").style.display = "none";}
+    }
+
+    toggleHover = () => {
+      this.setState({hover: !this.state.hover})
+    }
+
     render() {
+      let buttonstyle = {}
+      if (this.state.hover) {
+        buttonstyle = {
+        border: 'solid #ddd 2px',
+        margin:'0 2px 0 0',
+        padding:'7px 10px',
+        display:'block',
+        position:'relative',
+        left: '800',
+        fontSize : '1em',
+        color:'#333',
+        webkitUserSelect:'none',
+        mozUserSelect:'none',
+        userSelect: 'none',
+        mozBorderRadius: '4px',
+        borderRadius: '4px',
+        background: '#ddd',
+        cursor:'pointer'}
+      }
+      else {
+        buttonstyle = {
+        border: 'solid #ddd 2px',
+        margin:'0 2px 0 0',
+        padding:'7px 10px',
+        display:'block',
+        position: 'relative',
+        left: '800',
+        fontSize : '1em',
+        color:'#333',
+        webkitUserSelect:'none',
+        mozUserSelect:'none',
+        userSelect: 'none',
+        mozBorderRadius: '4px',
+        borderRadius: '4px',
+        background: '#FFFFFF',
+        cursor:'auto'
+      }
+    }
+
       return (
-      <div id="corr-page" className="page">
-        <div className="help">Topics that occur together more than expected are blue, topics that occur together less than expected are red.</div>
+        <div>
+        <div id="corr-page" className="page">
+        <div className="help">Point mutual information is used as a measure of correlation between topics.</div>
+        <div id="overlay" style= {this.overlayStyle} onClick={this.overlayOff}>
+        <div id="text" style= {this.textstyle}>  <img src= {this.props.tooltip} class="media-object" alt="Sample Image" draggable= 'false'/></div>
+        </div>
+
+        <div style={{padding:'2px'}}>
+        <button onClick={this.overlayOn} style= {buttonstyle} onMouseEnter={this.toggleHover} onMouseLeave={this.toggleHover}>Tooltip</button>
+        </div>
+      </div>
       </div>
       )
     }

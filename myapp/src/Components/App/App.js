@@ -17,6 +17,7 @@ import HomePage from '../Pages/HomePage';
 
 import defaultDoc from '../../defaultDocs/documents.csv'
 import defaultStops from '../../defaultDocs/stoplist.txt'
+import corrTooltip from '../../Tooltip/corrTooltip.png'
 
 
 // This adds the Object.keys() function to some old browsers that don't support it
@@ -225,6 +226,7 @@ class App extends Component {
           numTopics={this.state.ldaModel.numTopics} 
           documents={this.state.ldaModel.documents}
           getTopicCorrelations={this.state.ldaModel.getTopicCorrelations}
+          tooltip = {corrTooltip}
           update = {this.state.update}/>;
         break;
       case "vocab-tab":
