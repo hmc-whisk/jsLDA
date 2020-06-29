@@ -2,11 +2,11 @@ import React, { Component } from 'react';
 import './App.css';
 import * as d3 from 'd3';
 
-import {zeros, getQueryString, getObjectKeys} from '../../funcs/utilityFunctions'
+import {getQueryString, getObjectKeys} from '../../funcs/utilityFunctions'
 import LDAModel from '../../LDAModel/LDAModel'
 
 import Correlation from '../Pages/Correlation';
-import TopicDoc from '../Pages/NewTopicDoc/TopicDoc';
+import TopicDoc from '../Pages/TopicDoc/TopicDoc';
 import SideBar from '../SideBar';
 import VocabTable from '../Pages/VocabTable';
 import TimeSeries from '../Pages/TimeSeries';

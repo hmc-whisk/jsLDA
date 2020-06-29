@@ -1,7 +1,6 @@
 import React, { Component } from 'react'; 
 import PageController from './PageController';
 import DocAccordion from './DocAccordion';
-import {format as d3Format} from 'd3';
 
 /**
  * @summary A page that displays the documents in the model
@@ -23,7 +22,6 @@ class TopicDoc extends Component {
      * of the selected topic
      */
     get sortedDocuments() {
-        const format = d3Format(".2g");
         const selectedTopic = this.props.selectedTopic;
         const sumDocSortSmoothing = TopicDoc.DOC_SORT_SMOOTHING * this.props.numTopics;
         let sortedDocuments = this.props.documents;
