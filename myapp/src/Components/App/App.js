@@ -256,7 +256,7 @@ class App extends Component {
           onDocumentFileChange={this.onDocumentFileChange}
           onStopwordFileChange={this.onStopwordFileChange}
           onFileUpload = {this.queueLoad}
-          
+          modelIsRunning = {this.state.ldaModel.modelIsRunning}
           />
         break;
       default:
