@@ -14,6 +14,7 @@ class VocabTable extends Component {
 
       // used by toggleTopicDocuments in topicdocuments, ready, changeNumTopics in processing, sweep in sweep
     vocabTable() {
+      var shouldDisable = this.props.modelIsRunning || null; 
       var format = d3.format(".2g");
       var wordFrequencies = this.mostFrequentWords(this.state.displayingStopwords, this.props.sortVocabByTopic).slice(0, 499);
       var table = d3.select("#vocab-table tbody");
@@ -40,7 +41,8 @@ class VocabTable extends Component {
           if (! isStopword) { addStop(d.word); }
           else { removeStop(d.word); }
 
-        });
+        })
+        .attr("disabled", shouldDisable);
       });
     }
   

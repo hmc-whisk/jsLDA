@@ -68,6 +68,7 @@ class LDAModel {
         this._sweeps = 0; // (used by addSweepRequest) for finding whether an additional sweep call should be called
 
         this.documentType = "text/csv";
+        this.modelIsRunning = false;
     }
 
     // Used by sidebar to change selectedTopic and sortVocabByTopic
@@ -96,6 +97,7 @@ class LDAModel {
      * for new documents to be processed
      */
     reset() {
+        this.modelIsRunning = false;
         this._vocabularySize = 0;
         this.vocabularyCounts = {};
         this.sortVocabByTopic = false;
@@ -419,6 +421,7 @@ class LDAModel {
           this.sortTopicWords();
           this._timer.stop();
           this._sweeps = 0;
+          this.modelIsRunning = false;
           this.updateWebpage();
         }
     }
@@ -539,6 +542,8 @@ class LDAModel {
      * @param {Number} numRequests number of iterations to be requested
      */
     addSweepRequest(numRequests) {
+        this.modelIsRunning = true;
+        this.updateWebpage();
 
         // Protect against stopSweeps messing up _requestedSweeps
         if(this._requestedSweeps < this._completeSweeps) {
@@ -552,6 +557,10 @@ class LDAModel {
             this._timer = d3.timer(this._sweep);
             console.log("Requested Sweeps Now: " + this._requestedSweeps);
         }
+
+        console.log("Has sweeped")
+        
+        
     }
 
     /**
