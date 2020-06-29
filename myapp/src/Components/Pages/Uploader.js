@@ -36,7 +36,7 @@ export function Uploader(props) {
                 onChange={(event) => props.onStopwordFileChange(event)} size="10"/>
             </div>
             <div>
-                <input type="submit" id="load-inputs" value="Upload"/>
+                <input type="submit" id="load-inputs" value="Upload" />
 
             </div>
         </form>

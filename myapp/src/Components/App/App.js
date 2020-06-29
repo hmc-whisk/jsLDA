@@ -47,12 +47,7 @@ class App extends Component {
       sweepParameter: 50,
 
       update: true,
-      modelIsRunning: false,
   };
-  // TODO make consistent with arrow functions instead of bindings
-  // this.changeTab = this.changeTab.bind(this);
-  // this.changeSweepAmount = this.changeSweepAmount.bind(this);
-  // this.runIterationsClick = this.runIterationsClick.bind(this);
   };
 
   /**
@@ -235,7 +230,9 @@ class App extends Component {
           byCountDescending={this.state.ldaModel.byCountDescending}
           addStop = {this.state.ldaModel.addStop}
           removeStop = {this.state.ldaModel.removeStop}
-          update = {this.state.update}/>;
+          update = {this.state.update}
+          modelIsRunning = {this.state.ldaModel.modelIsRunning}/>;
+          
         break;
       case "ts-tab":
         DisplayPage = <TimeSeries 
@@ -258,7 +255,9 @@ class App extends Component {
         DisplayPage = <HomePage
           onDocumentFileChange={this.onDocumentFileChange}
           onStopwordFileChange={this.onStopwordFileChange}
-          onFileUpload = {this.queueLoad}/>
+          onFileUpload = {this.queueLoad}
+          
+          />
         break;
       default:
         DisplayPage = null;
@@ -280,7 +279,7 @@ class App extends Component {
             onChange={this.changeSweepAmount}
             stopButtonClick={this.state.ldaModel.stopSweeps}
             iter={this.state.ldaModel._completeSweeps}
-            modelIsRunning = {this.state.modelIsRunning}
+            modelIsRunning = {this.state.ldaModel.modelIsRunning}
             />
 
 
