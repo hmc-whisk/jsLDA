@@ -24,6 +24,10 @@ class DocCard extends React.Component {
             </Card>
         )
     }
+
+    get metaInfo() {
+        
+    }
 }
 
 export default DocCard;

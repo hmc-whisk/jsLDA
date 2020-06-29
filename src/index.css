@@ -26,7 +26,6 @@ div.accordion div.collapse.show {
 div.accordion div.card-header {
   padding: 8px 16px;
   display: block;
-  /* border-bottom: 2px solid #ddd; */
 }
 
 div.accordion div.card-header:hover{background-color: #ddd;}
