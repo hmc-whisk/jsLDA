@@ -26,7 +26,7 @@ div.accordion div.collapse.show {
 div.accordion div.card-header {
   padding: 8px 16px;
   display: block;
-  border-bottom: 2px solid #ddd;
+  /* border-bottom: 2px solid #ddd; */
 }
 
 div.accordion div.card-header:hover{background-color: #ddd;}
@@ -34,6 +34,11 @@ div.accordion div.card-header:hover{background-color: #ddd;}
 div.accordion div.card {
   display: block;
   border: 2px solid #ddd;
+  border-bottom: 0px
+}
+
+div.accordion div.card:last-child {
+  border-bottom: 2px solid #ddd;
 }
 
 div.accordion {

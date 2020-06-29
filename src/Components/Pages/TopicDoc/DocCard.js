@@ -11,12 +11,12 @@ class DocCard extends React.Component {
             <Card>
                 <Accordion.Toggle as={Card.Header} eventKey={document.originalOrder}>
                     <b>ID: </b>{document.id} 
-                    <div>
+                    <span style={{float:"right"}}>
                         <b> Topic Score: </b>
                         {this.props.isTopicSelected ? 
                             format(document.score * 100): 
                             "No topic selected"}
-                    </div>
+                    </span>
                 </Accordion.Toggle>
                 <Accordion.Collapse eventKey={document.originalOrder}>
                     <Card.Body>{document.originalText}</Card.Body>
