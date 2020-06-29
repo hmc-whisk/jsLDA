@@ -23,13 +23,13 @@ class DLPage extends React.Component {
                 <div id="dl-page" className="page">
                     <div className="help">Each file is in comma-separated format.</div>
                     <ul>
-                        <li><a id="doctopics-dl" href="#" download="doctopics.csv" onClick={() => this.saveDocTopics()}>Document topics</a></li>
-                        <li><a id="topicwords-dl" href="#" download="topicwords.csv" onClick={() => this.saveTopicWords()}>Topic words</a></li>
-                        <li><a id="keys-dl" href="#" download="keys.csv" onClick={() => this.saveTopicKeys()}>Topic summaries</a></li>
-                        <li><a id="topictopic-dl" href="#" download="topictopic.csv" onClick={() => this.saveTopicPMI()}>Topic-topic connections</a></li>
-                        <li><a id="graph-dl" href="#" download="gephi.csv" onClick={() => this.saveGraph()}>Doc-topic graph file (for Gephi)</a></li>
-                        <li><a id="state-dl" href="#" download="state.csv" onClick={() => this.saveState()}>Complete sampling state</a></li>
-                        <li><a id="topicstime-dl" href="#" download="topicstime.csv" onClick={() => this.saveTopicsTime()}>Topic values over time</a></li>
+                        <li><a id="doctopics-dl" href="/" download="doctopics.csv" onClick={() => this.saveDocTopics()}>Document topics</a></li>
+                        <li><a id="topicwords-dl" href="/" download="topicwords.csv" onClick={() => this.saveTopicWords()}>Topic words</a></li>
+                        <li><a id="keys-dl" href="/" download="keys.csv" onClick={() => this.saveTopicKeys()}>Topic summaries</a></li>
+                        <li><a id="topictopic-dl" href="/" download="topictopic.csv" onClick={() => this.saveTopicPMI()}>Topic-topic connections</a></li>
+                        <li><a id="graph-dl" href="/" download="gephi.csv" onClick={() => this.saveGraph()}>Doc-topic graph file (for Gephi)</a></li>
+                        <li><a id="state-dl" href="/" download="state.csv" onClick={() => this.saveState()}>Complete sampling state</a></li>
+                        <li><a id="topicstime-dl" href="/" download="topicstime.csv" onClick={() => this.saveTopicsTime()}>Topic values over time</a></li>
                     </ul>
                 </div>
 
@@ -130,7 +130,7 @@ class DLPage extends React.Component {
     saveTopicKeys = () => {
         var keysCSV = "Topic,TokenCount,Words\n";
       
-        if (this.props.topicWordCounts.length == 0) { this.props.sortTopicWords(); }
+        if (this.props.topicWordCounts.length === 0) { this.props.sortTopicWords(); }
       
             for (var topic = 0; topic < this.props.numTopics; topic++) {
                 keysCSV += topic + "," + this.props.tokensPerTopic[topic] + 
@@ -154,7 +154,6 @@ class DLPage extends React.Component {
       
     saveGraph = () => {
         var graphCSV = "Source,Target,Weight,Type\n";
-        var topicProbabilities = zeros(this.props.numTopics);
       
         this.props.documents.forEach((d, i) => {
             d.topicCounts.forEach((x, topic) => {
