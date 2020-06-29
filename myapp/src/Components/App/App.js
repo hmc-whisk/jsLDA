@@ -46,14 +46,13 @@ class App extends Component {
       selectedTab: "home-tab",
       sweepParameter: 50,
 
-    update: true,
+      update: true,
+      modelIsRunning: false,
   };
   // TODO make consistent with arrow functions instead of bindings
-  this.changeTab = this.changeTab.bind(this);
-  // TODO Moved to LDAModel, need new function to replace
-  // this.addSweepRequests = this.addSweepRequests.bind(this);
-  this.changeSweepAmount = this.changeSweepAmount.bind(this);
-  this.runIterationsClick = this.runIterationsClick.bind(this);
+  // this.changeTab = this.changeTab.bind(this);
+  // this.changeSweepAmount = this.changeSweepAmount.bind(this);
+  // this.runIterationsClick = this.runIterationsClick.bind(this);
   };
 
   /**
@@ -188,7 +187,7 @@ class App extends Component {
   /**
    * @summary Callback function for pressing the run iterations button
    */
-  changeSweepAmount(val) {
+  changeSweepAmount = (val) => {
     this.setState( {
       sweepParameter: parseInt(val, 10)
     })
@@ -203,11 +202,8 @@ class App extends Component {
 
   runIterationsClick = () => {
     this.state.ldaModel.addSweepRequest(this.state.sweepParameter);
-    console.log(this.state.sweepParameter);
   }
 
-
-  
   render() {
     var DisplayPage;
     switch (this.state.selectedTab) {
@@ -284,6 +280,7 @@ class App extends Component {
             onChange={this.changeSweepAmount}
             stopButtonClick={this.state.ldaModel.stopSweeps}
             iter={this.state.ldaModel._completeSweeps}
+            modelIsRunning = {this.state.modelIsRunning}
             />
 
 

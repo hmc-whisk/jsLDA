@@ -23,6 +23,7 @@ class NumTopicSlider extends React.Component {
                         min="3" max="100" 
                         onMouseUp={(e) => this.handleChange(e)}
                         onInput={(e) => this.props.onInput(e)}
+                        disabled = {this.props.modelIsRnning}
                         /> 
                     <span id="num_topics_display"> </span>  
                     {this.props.sliderValue} Topics
