@@ -45,7 +45,7 @@ class TopBar extends React.Component {
                 <form onSubmit = {this.handleSubmit}>
                     <label for="number">Enter Number of Iterations: &nbsp;</label>
 
-                    <input onChange = {this.handleChange} id="number" type="number" placeholder="50" min="1" max="100000" id="number" required></input>
+                    <input onChange = {this.handleChange} id="number" type="number" placeholder="50" min="1" max="100000" required></input>
 
                     <button type = "submit" id="sweep" >Run {this.props.sweepParameter} iterations</button>
 
