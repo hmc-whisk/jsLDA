@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import React, { Component } from 'react'; 
 import {topNWords} from '../../funcs/utilityFunctions'
+import Tooltip from '../Tooltip';
 
 /* This function will compute pairwise correlations between topics.
  * Unlike the correlated topic model (CTM) LDA doesn't have parameters
@@ -14,8 +15,8 @@ class Correlation extends Component {
     constructor(props) {
       super(props);
       this.state = {
-        w: 900,
-        h: 900,
+        w: 800,
+        h: 800,
         // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
         correlationMinTokens: 2,
         correlationMinProportion: 0.05,
@@ -29,9 +30,9 @@ class Correlation extends Component {
 
     plotMatrix = () => {
         var left = 50;
-        var right = 600;
+        var right = 550;
         var top = 50;
-        var bottom = 600;
+        var bottom = 550;
 
 
         var correlationMatrix = this.props.getTopicCorrelations();
@@ -227,16 +228,9 @@ class Correlation extends Component {
         Previous versions of this script calculated correlations on logratios; PMI is simpler to calculate.
         <a href="https://en.wikipedia.org/wiki/Pointwise_mutual_information" style={{color:'blue'}} >Wikipedia article</a> 
 </div>
-        <div id="overlay" style= {this.overlayStyle} onClick={this.overlayOff}>
-        <div id="text" style= {this.textstyle}>  <img src= {this.props.tooltip} class="media-object"
-        alt="The two axes represent each of the generated topics. Negative pointwise mutual information is represented in red, positive is in blue.
-        On hover, the two topics for which the hovered circle represents is shown."
-        draggable= 'false'/></div>
-        </div>
-
-        <div style={{padding:'2px'}}>
-        <button onClick={this.overlayOn} style= {buttonstyle} onMouseEnter={this.toggleHover} onMouseLeave={this.toggleHover}>Help</button>
-        </div>
+        <Tooltip  tooltip = {this.props.tooltip}
+                  altText = {"The two axes represent each of the generated topics. Negative pointwise mutual \
+                  information is represented in red, positive is in blue. On hover over a circle, the two topics that the circle represents are shown."}/>
       </div>
       </div>
       )
