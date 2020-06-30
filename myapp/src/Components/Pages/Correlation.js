@@ -209,13 +209,14 @@ class Correlation extends Component {
       return (
         <div>
         <div id="corr-page" className="page">
-        <div className="help">Point mutual information is used as a measure of correlation between topics.</div>
+        <div className="help">Topic correlations are actually pointwise mutual information scores. This score measures whether two topics occur in the same document more often than we would expect by chance. Previous versions of this script calculated correlations on logratios; PMI is simpler to calculate. <a href="https://en.wikipedia.org/wiki/Pointwise_mutual_information" style={{color:'blue'}} >Wikipedia article</a> 
+</div>
         <div id="overlay" style= {this.overlayStyle} onClick={this.overlayOff}>
         <div id="text" style= {this.textstyle}>  <img src= {this.props.tooltip} class="media-object" alt="Sample Image" draggable= 'false'/></div>
         </div>
 
         <div style={{padding:'2px'}}>
-        <button onClick={this.overlayOn} style= {buttonstyle} onMouseEnter={this.toggleHover} onMouseLeave={this.toggleHover}>Tooltip</button>
+        <button onClick={this.overlayOn} style= {buttonstyle} onMouseEnter={this.toggleHover} onMouseLeave={this.toggleHover}>Help</button>
         </div>
       </div>
       </div>
