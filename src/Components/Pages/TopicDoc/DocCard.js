@@ -2,6 +2,7 @@ import React from 'react';
 import Card from 'react-bootstrap/Card'
 import Accordion from 'react-bootstrap/Accordion'
 import {format as d3Format} from 'd3';
+import {truncate} from '../../../funcs/utilityFunctions'
 
 class DocCard extends React.Component {
     render() {
@@ -17,16 +18,36 @@ class DocCard extends React.Component {
                             format(document.score * 100): 
                             "No topic selected"}
                     </span>
+                    <div>{this.metaInfo}</div>
                 </Accordion.Toggle>
                 <Accordion.Collapse eventKey={document.originalOrder}>
-                    <Card.Body>{document.originalText}</Card.Body>
+                    <span>
+                        <div class={"preview"}>{truncate(document.originalText,100)}</div>
+                        <Card.Body>{document.originalText}</Card.Body>
+                    </span>
                 </Accordion.Collapse>
             </Card>
         )
     }
 
+    /**
+     * @summary Metadata info from document in displayable jsx form
+     */
     get metaInfo() {
-        
+        const document = this.props.document;
+        let metaInfo = [this.formatInfo("Date",document.date)]
+        for (const [key, value] of Object.entries(document.metadata)) {
+            metaInfo.push(this.formatInfo(key,value))
+        }
+        return metaInfo;
+    }
+
+    formatInfo(key,value){
+        return (
+            <div key={key} style={{}}>
+                <b>{key}: </b> {value + "  "}
+            </div>
+        )
     }
 }
 

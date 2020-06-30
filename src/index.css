@@ -13,13 +13,21 @@ code {
 }
 
 /**** Accordion Styling ****/
-div.accordion div.collapse {
+div.accordion div.collapse:not(.show) .card-body{
   display: none;
+}
+
+div.accordion div.collapse .preview{
+  padding: 8px 16px;
 }
 
 div.accordion div.collapse.show {
   display: block;
   padding: 8px 16px;
+}
+
+div.accordion .collapse.show .preview {
+  display: none;
 }
 
 
