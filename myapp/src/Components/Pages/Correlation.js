@@ -46,23 +46,36 @@ class Correlation extends Component {
           .attr("class", "hor")
         .merge(horizontalTopics);
 
-      
-        horizontalTopics
-          .attr("x", right + 50)
-          .attr("y", function(node) { return topicScale(node.name); })
-          .text(function(node) { return node.words; });
-      
         var verticalTopics = this.vis.selectAll("text.ver").data(correlationGraph.nodes);
         verticalTopics.exit().remove();
         verticalTopics = verticalTopics.enter().append("text")
           .attr("class", "ver")
         .merge(verticalTopics);
-      
+
+        if (this.props.numTopics > 50){
+        horizontalTopics
+          .attr("x", right + 50)
+          .attr("y", function(node) { return topicScale(node.name); })
+          .text(function(node) { if (node.name%5 == 0) return node.name; });
+        
         verticalTopics
           .attr("x", function(node) { return topicScale(node.name); })
           .attr("y", bottom + 50)
           .attr("transform", function(node) { return "rotate(90," + topicScale(node.name) + "," + (bottom + 50) + ")"; })
-          .text(function(node) { return node.words; });
+          .text(function(node) { if (node.name%5 == 0) return node.name; });}
+        else {
+          horizontalTopics
+            .attr("x", right + 50)
+            .attr("y", function(node) { return topicScale(node.name); })
+            .text(function(node) { return '[' + node.name + '] ' + node.words; });   
+          verticalTopics
+            .attr("x", function(node) { return topicScale(node.name); })
+            .attr("y", bottom + 50)
+            .attr("transform", function(node) { return "rotate(90," + topicScale(node.name) + "," + (bottom + 50) + ")"; })
+            .text(function(node) { return '[' + node.name + '] ' + node.words; });
+        }
+      
+
       
         var circles = this.vis.selectAll("circle").data(correlationGraph.links);
         circles.exit().remove();
@@ -78,7 +91,7 @@ class Correlation extends Component {
           var tooltipY = this.getBoundingClientRect().y;
           tooltip.style("visibility", "visible")
           .style("top", (tooltipY-10)+"px").style("left",(tooltipX+20)+"px")
-          .text(correlationGraph.nodes[link.target].words + " / " + correlationGraph.nodes[link.source].words);
+          .text('[' + correlationGraph.nodes[link.target].name + '] ' + correlationGraph.nodes[link.target].words + " / " + '[' + correlationGraph.nodes[link.source].name + '] ' + correlationGraph.nodes[link.source].words);
         })
         .on("mouseout", function () {
           var tooltip = d3.select("#tooltip");
@@ -209,10 +222,16 @@ class Correlation extends Component {
       return (
         <div>
         <div id="corr-page" className="page">
-        <div className="help">Topic correlations are actually pointwise mutual information scores. This score measures whether two topics occur in the same document more often than we would expect by chance. Previous versions of this script calculated correlations on logratios; PMI is simpler to calculate. <a href="https://en.wikipedia.org/wiki/Pointwise_mutual_information" style={{color:'blue'}} >Wikipedia article</a> 
+        <div className="help">Topic correlations are actually pointwise mutual information scores.
+        This score measures whether two topics occur in the same document more often than we would expect by chance.
+        Previous versions of this script calculated correlations on logratios; PMI is simpler to calculate.
+        <a href="https://en.wikipedia.org/wiki/Pointwise_mutual_information" style={{color:'blue'}} >Wikipedia article</a> 
 </div>
         <div id="overlay" style= {this.overlayStyle} onClick={this.overlayOff}>
-        <div id="text" style= {this.textstyle}>  <img src= {this.props.tooltip} class="media-object" alt="Sample Image" draggable= 'false'/></div>
+        <div id="text" style= {this.textstyle}>  <img src= {this.props.tooltip} class="media-object"
+        alt="The two axes represent each of the generated topics. Negative pointwise mutual information is represented in red, positive is in blue.
+        On hover, the two topics for which the hovered circle represents is shown."
+        draggable= 'false'/></div>
         </div>
 
         <div style={{padding:'2px'}}>
