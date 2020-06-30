@@ -1,7 +1,7 @@
 jsLDA
 =====
 
-An implementation of latent Dirichlet allocation in javascript. This version is an adaptation of David Mimno's [original jsLDA](http://mimno.infosci.cornell.edu/jsLDA/jslda.html). The code has been refactored for maintainability and to make adding features easier. Several features have also been added to extend the use of this tool past an LDA tutorial to something suited for serious analysis.
+An implementation of latent Dirichlet allocation in javascript. This version is an adaptation of David Mimno's [original jsLDA](http://mimno.infosci.cornell.edu/jsLDA/jslda.html). The code has been refactored for maintainability and to make adding features easier. Several features have  been added to streamline serious analysis endevores especially by people without a strong background in computer science. This includes making file formatting more fexible, allowing a custom number of itterations to be specified, and timeseries information to be downloaded. The topic document page has also been revamped, and metadata support is being added.
 
 Instructions:
 ------------
