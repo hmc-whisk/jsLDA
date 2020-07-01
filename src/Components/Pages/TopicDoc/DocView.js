@@ -64,11 +64,9 @@ class DocView extends React.Component {
      */
     getWordTopicValue(w) {
         w = this.stripWord(w);
-        if(!this.props.wordTopicCounts[w]) return 0; // If word isn't token
-        const numTopicWords = this.props.wordTopicCounts[w][this.props.selectedTopic];
-        if(!numTopicWords) return 0; // If word isn't assigned to topic
-        // Return proportion of topic explained by word
-        return numTopicWords/this.props.tokensPerTopic[this.props.selectedTopic];
+        console.log(w)
+        console.log(this.props.topicSaliency(w,this.props.selectedTopic));
+        return this.props.topicSaliency(w,this.props.selectedTopic);
     }
 
     get maxTopicValue() {
