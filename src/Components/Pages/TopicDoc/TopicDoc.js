@@ -85,6 +85,10 @@ class TopicDoc extends Component {
                     startDoc = {this.startDoc}
                     endDoc = {this.endDoc}
                     isTopicSelected = {this.props.selectedTopic !== -1}
+                    selectedTopic = {this.props.selectedTopic}
+                    tokensPerTopic = {this.props.tokensPerTopic}
+                    wordTopicCounts = {this.props.wordTopicCounts}
+                    highestWordTopicCount = {this.props.highestWordTopicCount}
                 />
             </div>
         )
