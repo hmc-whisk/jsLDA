@@ -14,6 +14,7 @@ class TopicDoc extends Component {
         super (props);
         this.state = {
             currentPage: 1,
+            showMetaData: false,
         }
     }
 
@@ -72,6 +73,13 @@ class TopicDoc extends Component {
         })
     }
 
+    toggleMetaData = () => {
+        console.log("Toggled")
+        this.setState({
+            showMetaData: !this.state.showMetaData
+        })
+    }
+
     render() {
         return(
             <div>
@@ -80,6 +88,10 @@ class TopicDoc extends Component {
                     changePage = {this.changePage}
                     lastPage = {this.lastPage}
                 />
+                <button type="button" id="metaDataButton" 
+                onClick={() => this.toggleMetaData()}>
+                    Show Metadata
+                </button>
                 <DocAccordion
                     documents = {this.sortedDocuments}
                     startDoc = {this.startDoc}
@@ -89,8 +101,20 @@ class TopicDoc extends Component {
                     tokensPerTopic = {this.props.tokensPerTopic}
                     wordTopicCounts = {this.props.wordTopicCounts}
                     highestWordTopicCount = {this.props.highestWordTopicCount}
+                    showMetaData = {this.state.showMetaData}
                 />
             </div>
+        )
+    }
+
+    toggleMetaDataButton() {
+        let message = "Show Metadata"
+        if(this.state.showMetaData) message = "Hide Metadata"
+        return(
+            <button type="button" id="metaDataButton" 
+            onClick={() => this.toggleMetaData()}>
+                {message}
+            </button>
         )
     }
 
