@@ -64,9 +64,9 @@ class DocView extends React.Component {
      */
     getWordTopicValue(w) {
         w = this.stripWord(w);
-        console.log(w)
-        console.log(this.props.topicSaliency(w,this.props.selectedTopic));
-        return this.props.topicSaliency(w,this.props.selectedTopic);
+        let salience = this.props.topicSaliency(w,this.props.selectedTopic);
+        if(salience < 0) salience = 0;
+        return salience;
     }
 
     get maxTopicValue() {
