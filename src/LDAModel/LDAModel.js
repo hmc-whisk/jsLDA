@@ -312,7 +312,8 @@ class LDAModel {
      * a given topic, by the probability that any given word in a topic is w.
      */
     topicSaliency = (w,t) => {
-        return this.topicDistinctiveness(w,t)*this.pWordGivenTopic(w,t)
+        if(this.stopwords[w]===1) return 0;
+        return this.topicDistinctiveness(w,t)*this.pWordGivenTopic(w,t);
     }
 
     /**
@@ -328,6 +329,7 @@ class LDAModel {
      * receive a low distinctiveness score."
      */
     topicDistinctiveness = (w,t) => {
+        if(this.stopwords[w]===1) return 0;
         return this.pTopicGivenWord(w,t)*Math.log(
             this.pTopicGivenWord(w,t)/this.pTopic(t))
     }
@@ -339,9 +341,11 @@ class LDAModel {
      */
     pTopicGivenWord = (w,t) => {
         let smoother = 1;
+        if(!this.wordTopicCounts[w]) return 0; // If it isnt a token
         let numWInT = this.wordTopicCounts[w][t];
         if(!numWInT) numWInT = 0;
-        let totalWs = Math.sum(this.wordTopicCounts[w]);
+        let totalWs = Object.keys(this.wordTopicCounts[w])
+            .reduce((sum,key)=>sum+parseFloat(this.wordTopicCounts[w][key]||0),0);
 
         return (numWInT + smoother)/(totalWs + this.numTopics*smoother);
     }
@@ -352,7 +356,9 @@ class LDAModel {
      * @param {Number} t Topic to analyze
      */
     pWordGivenTopic = (w,t) => {
+        if(!this.wordTopicCounts[w]) return 0; // If it isnt a token
         let numWInT = this.wordTopicCounts[w][t];
+        if(!numWInT) numWInT = 0;
         let numTokensInT = this.tokensPerTopic[t];
         return numWInT/numTokensInT;
     }
