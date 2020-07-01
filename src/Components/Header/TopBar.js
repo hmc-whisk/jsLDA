@@ -5,8 +5,8 @@ class TopBar extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = { sliderValue: 25 };
-
+        this.state = { sliderValue: 25, formValue: 50 };
+    
     }
 
     handleSubmit = (event) => {
@@ -28,14 +28,15 @@ class TopBar extends React.Component {
     }
     handleChange = (event) => {
         // Either value number or 1 (avoids NaN)
-        const val = event.target.value||0;
         
-        // if (val === NaN || val === 0) {
-        //     val = 1;
-        //     console.log("val is now " + val)
-        // }
+        const val = event.target.value;  
+        this.setState({formValue: val});
+        if(val == "")      
+            this.props.onChange(0);  
+        else
+            this.props.onChange(val);  
 
-        this.props.onChange(val);
+        
     }
 
 
@@ -45,7 +46,7 @@ class TopBar extends React.Component {
                 <form onSubmit = {this.handleSubmit}>
                     <label for="number">Enter Number of Iterations: &nbsp;</label>
 
-                    <input onChange = {this.handleChange} id="number" type="number" placeholder="50" min="1" max="100000" required></input>
+                    <input onChange = {this.handleChange} id="number" type="number" value = {this.state.formValue} placeholder="# Sweeps" min="1" max="100000" required></input>
 
                     <button type = "submit" id="sweep" >Run {this.props.sweepParameter} iterations</button>
 

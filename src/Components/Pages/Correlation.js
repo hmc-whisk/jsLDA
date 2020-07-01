@@ -14,13 +14,21 @@ class Correlation extends Component {
     constructor(props) {
       super(props);
       this.state = {
-        w: 650,
-        h: 650,
+        w: window.innerWidth*.8,
+        h: window.innerWidth*.8,
         // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
         correlationMinTokens: 2,
         correlationMinProportion: 0.05,
       };
 
+
+    }
+
+    updateDimensions = () => {
+      this.setState({
+        h: window.innerHeight*.8, 
+        w: window.innerWidth*.8
+      });
     }
 
 
@@ -28,10 +36,11 @@ class Correlation extends Component {
 
     plotMatrix = () => {
         var left = 50;
-        var right = 500;
+        var right = this.state.w*.5;
         var top = 50;
-        var bottom = 500;
-
+        var bottom = this.state.h*.5;
+        // variable for dynamic font size
+        var fontSize = this.props.numTopics*-.2+30; 
 
         var correlationMatrix = this.props.getTopicCorrelations();
         var correlationGraph = this.getCorrelationGraph(correlationMatrix, -100.0);
@@ -43,7 +52,8 @@ class Correlation extends Component {
         horizontalTopics.exit().remove();
         horizontalTopics = horizontalTopics.enter().append("text")
           .attr("class", "hor")
-        .merge(horizontalTopics);
+        .merge(horizontalTopics)
+        .style("font-size", fontSize);
 
       
         horizontalTopics
@@ -54,8 +64,9 @@ class Correlation extends Component {
         var verticalTopics = this.vis.selectAll("text.ver").data(correlationGraph.nodes);
         verticalTopics.exit().remove();
         verticalTopics = verticalTopics.enter().append("text")
-          .attr("class", "ver")
-        .merge(verticalTopics);
+        .attr("class", "ver")
+        .merge(verticalTopics)
+        .style("font-size", fontSize);
       
         verticalTopics
           .attr("x", function(node) { return topicScale(node.name); })
@@ -83,7 +94,6 @@ class Correlation extends Component {
           var tooltip = d3.select("#tooltip");
           tooltip.style("visibility", "hidden");
         });
-
       }
     
 
@@ -107,6 +117,7 @@ class Correlation extends Component {
       }
 
     componentDidMount() {
+      window.addEventListener("resize", this.updateDimensions);
       this.vis = d3.select("#corr-page").append("svg").attr("width", this.state.w).attr("height", this.state.h);
       this.plotMatrix();
     }
@@ -121,6 +132,11 @@ class Correlation extends Component {
       }
       return true;
   }
+  // componentWillUnmount() {
+  //   window.removeEventListener("resize", this.updateDimensions);
+  //   this.plotMatrix();
+  //   console.log(this.state)
+  // }
 
     render() {
       return (

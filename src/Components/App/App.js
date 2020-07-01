@@ -216,7 +216,8 @@ class App extends Component {
           numTopics={this.state.ldaModel.numTopics} 
           documents={this.state.ldaModel.documents}
           getTopicCorrelations={this.state.ldaModel.getTopicCorrelations}
-          update = {this.state.update}/>;
+          update = {this.state.update}
+          numTopics={this.state.ldaModel.numTopics}/>;
         break;
       case "vocab-tab":
         DisplayPage = <VocabTable 
