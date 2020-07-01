@@ -304,6 +304,68 @@ class LDAModel {
     }
 
     /**
+     * @summary Computes the salience score of a word for a topic
+     * @param {String} w Word to analyze
+     * @param {Number} t Topic to analyze
+     * @description This calculation is an adaptation of Chuang et al's 2012 
+     * work. It is calculated by multiplying the distinctiveness of a word in
+     * a given topic, by the probability that any given word in a topic is w.
+     */
+    topicSaliency(w,t) {
+        return this.topicDistinctiveness(w,t)*this.pWordGivenTopic(w,t)
+    }
+
+    /**
+     * @summary Computes the distinctiveness of a word for a topic
+     * @param {String} w Word to analyze
+     * @param {Number} t Topic to analyze
+     * @description This calculation is an adaptation of Chuang et al's 2012 
+     * work. It is described by them as "This formulation describes (in an 
+     * information-theoretic sense) how informative the specific term w is 
+     * for determining the generating topic, versus a randomly-selected term w.
+     * For example, if a word w occurs in all topics, observing the word tells
+     * us little about the document’s topical mixture; thus the word would 
+     * receive a low distinctiveness score."
+     */
+    topicDistinctiveness(w,t) {
+        return this.pTopicGivenWord(w,t)*Math.log(
+            this.pTopicGivenWord(w,t)/this.pTopic(t))
+    }
+
+    /**
+     * @summary the probability of a topic given a word
+     * @param {String} w Word to analyze
+     * @param {Number} t Topic to analyze
+     */
+    pTopicGivenWord(w,t) {
+        let smoother = 1;
+        let numWInT = this.wordTopicCounts[w][t];
+        if(!numWInT) numWInT = 0;
+        let totalWs = Math.sum(this.wordTopicCounts[w]);
+
+        return (numWInT + smoother)/(totalWs + this.numTopics*smoother);
+    }
+
+    /**
+     * @summary the probability of a word given a topic
+     * @param {String} w Word to analyze
+     * @param {Number} t Topic to analyze
+     */
+    pWordGivenTopic(w,t) {
+        let numWInT = this.wordTopicCounts[w][t];
+        let numTokensInT = this.tokensPerTopic[t];
+        return numWInT/numTokensInT;
+    }
+
+    /**
+     * @summary The probability of any word being assigned to topic t
+     * @param {Number} t Topic to analyze
+     */
+    pTopic(t) {
+        return 1/this.numTopics;
+    }
+
+    /**
      * @summary Shifts model to have a dif number of topics
      * @param {Number} numTopics new number of topics
      */
