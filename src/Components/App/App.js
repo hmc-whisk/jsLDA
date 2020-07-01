@@ -17,6 +17,7 @@ import HomePage from '../Pages/HomePage';
 
 import defaultDoc from '../../defaultDocs/wikiMoviePlots.csv'
 import defaultStops from '../../defaultDocs/stoplist.txt'
+import corrTooltip from '../Tooltip/corrTooltip.png'
 
 
 // This adds the Object.keys() function to some old browsers that don't support it
@@ -217,7 +218,9 @@ class App extends Component {
           documents={this.state.ldaModel.documents}
           getTopicCorrelations={this.state.ldaModel.getTopicCorrelations}
           update = {this.state.update}
-          numTopics={this.state.ldaModel.numTopics}/>;
+          numTopics={this.state.ldaModel.numTopics}
+          tooltip = {corrTooltip}
+          update = {this.state.update}/>;
         break;
       case "vocab-tab":
         DisplayPage = <VocabTable 
@@ -292,7 +295,6 @@ class App extends Component {
                />
 
       <div id="tabwrapper">
-
       <NavBar onClick={this.changeTab}/>
       <div id="pages">
 
