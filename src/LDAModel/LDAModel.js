@@ -295,6 +295,15 @@ class LDAModel {
     }
 
     /**
+     * @summary returns the number of time the word most assigned to
+     * the selected topic was assigned
+     */
+    get highestWordTopicCount() {
+        if(this.selectedTopic===-1) return 0;
+        return this.topicWordCounts[this.selectedTopic][0]["count"]
+    }
+
+    /**
      * @summary Shifts model to have a dif number of topics
      * @param {Number} numTopics new number of topics
      */
@@ -330,7 +339,7 @@ class LDAModel {
                 }
             }
         });
- 
+        console.log(this.wordTopicCounts)
         this.sortTopicWords();
         this.updateWebpage();
     }
