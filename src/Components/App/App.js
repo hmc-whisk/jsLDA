@@ -208,7 +208,11 @@ class App extends Component {
           documents={this.state.ldaModel.documents} 
           sortVocabByTopic={this.state.ldaModel.sortVocabByTopic} 
           numTopics={this.state.ldaModel.numTopics}
-          update = {this.state.update}/>;
+          update = {this.state.update}
+          tokensPerTopic = {this.state.ldaModel.tokensPerTopic}
+          wordTopicCounts = {this.state.ldaModel.wordTopicCounts}
+          highestWordTopicCount = {this.state.ldaModel.highestWordTopicCount}
+        />;
         break;
       case "corr-tab":
         DisplayPage = <Correlation 
