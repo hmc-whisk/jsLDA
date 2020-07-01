@@ -11,3 +11,102 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+#metaDataButton {
+  float: right;
+  background-color: white;
+  border: 1px solid #ddd;
+}
+#metaDataButton:hover {
+  background-color: #ddd;
+}
+
+/**** Accordion Styling ****/
+div.accordion div.collapse:not(.show) .card-body{
+  display: none;
+}
+
+div.accordion div.collapse .preview{
+  padding: 8px 16px;
+}
+
+div.accordion div.collapse.show {
+  display: block;
+  padding: 8px 16px;
+}
+
+div.accordion .collapse.show .preview {
+  display: none;
+}
+
+
+div.accordion div.card-header {
+  padding: 8px 16px;
+  display: block;
+  background-color: #ddd
+}
+
+
+div.accordion div.card-header:hover{background-color: rgb(196, 196, 196);}
+
+div.accordion div.card {
+  display: block;
+  border: 2px solid #ddd;
+  border-bottom: 0px
+}
+
+div.accordion div.card:last-child {
+  border-bottom: 2px solid #ddd;
+}
+
+div.accordion {
+  display: block;
+  position: relative;
+  clear: right;
+}
+
+/**** Pagination Styling ****/
+
+.pagination a {
+  color: black;
+  text-decoration: none;
+}
+
+.pagination li:first-child {
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+
+.pagination li:last-child {
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.pagination li {
+  display: inline-block;
+  border: 2px solid #ddd;
+}
+
+.pagination li:not(.active) a {
+  display: inline-block;
+  padding: 8px 16px;
+}
+
+.pagination li:hover:not(.active) {background-color: #ddd;}
+
+.pagination li.page-item.active {
+  background-color: #0066ff;
+  color: white;
+  text-decoration: none;
+  border: 2px solid #ddd;
+  padding: 8px 16px;
+}
+
+.pagination span.sr-only {
+  display: none
+}
+
+.pagination {
+  display: block;
+}
+

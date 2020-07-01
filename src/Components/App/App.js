@@ -6,7 +6,7 @@ import {zeros, getQueryString, getObjectKeys} from '../../funcs/utilityFunctions
 import LDAModel from '../../LDAModel/LDAModel'
 
 import Correlation from '../Pages/Correlation';
-import TopicDoc from '../Pages/TopicDoc';
+import TopicDoc from '../Pages/TopicDoc/TopicDoc';
 import SideBar from '../SideBar';
 import VocabTable from '../Pages/VocabTable';
 import TimeSeries from '../Pages/TimeSeries';
@@ -209,7 +209,11 @@ class App extends Component {
           documents={this.state.ldaModel.documents} 
           sortVocabByTopic={this.state.ldaModel.sortVocabByTopic} 
           numTopics={this.state.ldaModel.numTopics}
-          update = {this.state.update}/>;
+          update = {this.state.update}
+          tokensPerTopic = {this.state.ldaModel.tokensPerTopic}
+          wordTopicCounts = {this.state.ldaModel.wordTopicCounts}
+          highestWordTopicCount = {this.state.ldaModel.highestWordTopicCount}
+        />;
         break;
       case "corr-tab":
         DisplayPage = <Correlation 
