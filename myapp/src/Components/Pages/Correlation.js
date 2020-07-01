@@ -57,13 +57,13 @@ class Correlation extends Component {
         horizontalTopics
           .attr("x", right + 50)
           .attr("y", function(node) { return topicScale(node.name); })
-          .text(function(node) { if (node.name%5 == 0) return node.name; });
+          .text(function(node) { if (node.name%5 == 0) return '[' + node.name + '] '; });
         
         verticalTopics
           .attr("x", function(node) { return topicScale(node.name); })
           .attr("y", bottom + 50)
           .attr("transform", function(node) { return "rotate(90," + topicScale(node.name) + "," + (bottom + 50) + ")"; })
-          .text(function(node) { if (node.name%5 == 0) return node.name; });}
+          .text(function(node) { if (node.name%5 == 0) return '[' + node.name + '] '; });}
         else {
           horizontalTopics
             .attr("x", right + 50)
