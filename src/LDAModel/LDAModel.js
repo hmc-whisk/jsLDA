@@ -311,7 +311,7 @@ class LDAModel {
      * work. It is calculated by multiplying the distinctiveness of a word in
      * a given topic, by the probability that any given word in a topic is w.
      */
-    topicSaliency(w,t) {
+    topicSaliency = (w,t) => {
         return this.topicDistinctiveness(w,t)*this.pWordGivenTopic(w,t)
     }
 
@@ -327,7 +327,7 @@ class LDAModel {
      * us little about the document’s topical mixture; thus the word would 
      * receive a low distinctiveness score."
      */
-    topicDistinctiveness(w,t) {
+    topicDistinctiveness = (w,t) => {
         return this.pTopicGivenWord(w,t)*Math.log(
             this.pTopicGivenWord(w,t)/this.pTopic(t))
     }
@@ -337,7 +337,7 @@ class LDAModel {
      * @param {String} w Word to analyze
      * @param {Number} t Topic to analyze
      */
-    pTopicGivenWord(w,t) {
+    pTopicGivenWord = (w,t) => {
         let smoother = 1;
         let numWInT = this.wordTopicCounts[w][t];
         if(!numWInT) numWInT = 0;
@@ -351,7 +351,7 @@ class LDAModel {
      * @param {String} w Word to analyze
      * @param {Number} t Topic to analyze
      */
-    pWordGivenTopic(w,t) {
+    pWordGivenTopic = (w,t) => {
         let numWInT = this.wordTopicCounts[w][t];
         let numTokensInT = this.tokensPerTopic[t];
         return numWInT/numTokensInT;
@@ -361,7 +361,7 @@ class LDAModel {
      * @summary The probability of any word being assigned to topic t
      * @param {Number} t Topic to analyze
      */
-    pTopic(t) {
+    pTopic = (t) => {
         return 1/this.numTopics;
     }
 
