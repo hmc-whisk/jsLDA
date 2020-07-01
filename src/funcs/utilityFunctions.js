@@ -93,7 +93,8 @@ export function getObjectKeys() {
 /**
  * @summary Truncates s to <= 300 characters
  * @param {String} s text to be truncated
+ * @param {Number} n length of string to return
  */
-export function truncate(s) { 
-  return s.length > 300 ? s.substring(0, 299) + "..." : s; 
+export function truncate(s, n=300) { 
+  return s.length > n ? s.substring(0, n-1) + "..." : s; 
 }
