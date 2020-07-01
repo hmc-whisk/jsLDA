@@ -15,8 +15,8 @@ class Correlation extends Component {
     constructor(props) {
       super(props);
       this.state = {
-        w: document.getElementById("tabwrapper").clientWidth,
-        h: document.getElementById("tabwrapper").clientWidth,
+        w: document.getElementById("tabwrapper").clientWidth*.9,
+        h: document.getElementById("tabwrapper").clientWidth*.9,
         // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
         correlationMinTokens: 2,
         correlationMinProportion: 0.05,
@@ -28,8 +28,8 @@ class Correlation extends Component {
 
     updateDimensions = () => {
       this.setState({
-        h: document.getElementById("tabwrapper").clientWidth, 
-        w: document.getElementById("tabwrapper").clientWidth
+        h: document.getElementById("tabwrapper").clientWidth*.9, 
+        w: document.getElementById("tabwrapper").clientWidth*.9
       });
       console.log("Updating Canvas");
       this.vis.style("width", this.state.w)
