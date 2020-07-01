@@ -88,10 +88,7 @@ class TopicDoc extends Component {
                     changePage = {this.changePage}
                     lastPage = {this.lastPage}
                 />
-                <button type="button" id="metaDataButton" 
-                onClick={() => this.toggleMetaData()}>
-                    Show Metadata
-                </button>
+                {this.toggleMetaDataButton()}
                 <DocAccordion
                     documents = {this.sortedDocuments}
                     startDoc = {this.startDoc}
@@ -108,8 +105,8 @@ class TopicDoc extends Component {
     }
 
     toggleMetaDataButton() {
-        let message = "Show Metadata"
-        if(this.state.showMetaData) message = "Hide Metadata"
+        let message = this.state.showMetaData ? 
+            "Hide Metadata" : "Show Metadata";
         return(
             <button type="button" id="metaDataButton" 
             onClick={() => this.toggleMetaData()}>
