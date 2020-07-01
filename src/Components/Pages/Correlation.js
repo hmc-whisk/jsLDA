@@ -31,6 +31,9 @@ class Correlation extends Component {
         h: document.getElementById("tabwrapper").clientWidth, 
         w: document.getElementById("tabwrapper").clientWidth
       });
+      console.log("Updating Canvas");
+      this.vis.style("width", this.state.w)
+      this.vis.style("height", this.state.h)
     }
 
 
@@ -38,9 +41,9 @@ class Correlation extends Component {
 
     plotMatrix = () => {
         var left = 50;
-        var right = this.state.w*.4;
+        var right = this.state.w*.5;
         var top = 50;
-        var bottom = this.state.h*.4;
+        var bottom = this.state.h*.5;
         var fontSize = this.props.numTopics*-.2+26; 
 
 
@@ -143,8 +146,9 @@ class Correlation extends Component {
     }
 
     componentDidUpdate(prevProps) {
+      console.log(document.getElementById("tabwrapper").clientWidth);
+      console.log("page updating")
         window.addEventListener("resize", this.updateDimensions);
-
         this.plotMatrix();
     }
 
