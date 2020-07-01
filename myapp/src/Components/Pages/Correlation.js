@@ -223,9 +223,9 @@ class Correlation extends Component {
       return (
         <div>
         <div id="corr-page" className="page">
-        <div className="help">Topic correlations are actually pointwise mutual information scores.
+        <div className="help">Topic correlations are pointwise mutual information scores.
         This score measures whether two topics occur in the same document more often than we would expect by chance.
-        Previous versions of this script calculated correlations on logratios; PMI is simpler to calculate.
+        Previous versions of this script calculated correlations on log ratios.
         <a href="https://en.wikipedia.org/wiki/Pointwise_mutual_information" style={{color:'blue'}} >Wikipedia article</a> 
 </div>
         <Tooltip  tooltip = {this.props.tooltip}
