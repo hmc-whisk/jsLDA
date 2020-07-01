@@ -41,6 +41,7 @@ class DocCard extends React.Component {
      * @summary Metadata info from document in displayable jsx form
      */
     get metaInfo() {
+        if(!this.props.showMetaData) return null;
         const document = this.props.document;
         let metaInfo = [this.formatInfo("Date",document.date)]
         for (const [key, value] of Object.entries(document.metadata)) {

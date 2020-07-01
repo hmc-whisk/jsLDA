@@ -17,6 +17,7 @@ class DocAccordion extends React.Component {
                             wordTopicCounts = {this.props.wordTopicCounts}
                             selectedTopic={this.props.selectedTopic}
                             highestWordTopicCount = {this.props.highestWordTopicCount}
+                            showMetaData = {this.props.showMetaData}
                         />
                     }
                 )}
