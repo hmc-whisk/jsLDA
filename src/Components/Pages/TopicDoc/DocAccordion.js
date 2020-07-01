@@ -13,6 +13,10 @@ class DocAccordion extends React.Component {
                             document = {document}
                             isTopicSelected = {this.props.isTopicSelected}
                             key = {document.originalOrder}
+                            tokensPerTopic = {this.props.tokensPerTopic}
+                            wordTopicCounts = {this.props.wordTopicCounts}
+                            selectedTopic={this.props.selectedTopic}
+                            highestWordTopicCount = {this.props.highestWordTopicCount}
                         />
                     }
                 )}

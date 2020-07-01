@@ -3,6 +3,7 @@ import Card from 'react-bootstrap/Card'
 import Accordion from 'react-bootstrap/Accordion'
 import {format as d3Format} from 'd3';
 import {truncate} from '../../../funcs/utilityFunctions'
+import DocView from './DocView'
 
 class DocCard extends React.Component {
     render() {
@@ -23,7 +24,13 @@ class DocCard extends React.Component {
                 <Accordion.Collapse eventKey={document.originalOrder}>
                     <span>
                         <div class={"preview"}>{truncate(document.originalText,100)}</div>
-                        <Card.Body>{document.originalText}</Card.Body>
+                        <DocView 
+                            document = {this.props.document}
+                            tokensPerTopic = {this.props.tokensPerTopic}
+                            wordTopicCounts = {this.props.wordTopicCounts}
+                            selectedTopic = {this.props.selectedTopic}
+                            highestWordTopicCount = {this.props.highestWordTopicCount}
+                        />
                     </span>
                 </Accordion.Collapse>
             </Card>
