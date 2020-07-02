@@ -15,24 +15,27 @@ class Correlation extends Component {
     constructor(props) {
       super(props);
       this.state = {
-        w: 800,
-        h: 800,
+        w: 1000,
+        h: 1000,
         // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
         correlationMinTokens: 2,
         correlationMinProportion: 0.05,
         hover: false
       };
 
+
     }
-
-
-
 
     plotMatrix = () => {
         var left = 50;
-        var right = 550;
-        var top = 50;
-        var bottom = 550;
+        // var top = 50;
+        // right and bottom found by trial and error
+        // originally set to 550
+
+        var right = this.props.numTopics*4.6+430;
+        var bottom = this.props.numTopics*4.6+430;
+        console.log()
+        var fontSize = this.props.numTopics*-.3+25; 
 
 
         var correlationMatrix = this.props.getTopicCorrelations();
@@ -45,30 +48,36 @@ class Correlation extends Component {
         horizontalTopics.exit().remove();
         horizontalTopics = horizontalTopics.enter().append("text")
           .attr("class", "hor")
-        .merge(horizontalTopics);
+        .merge(horizontalTopics)
+        .style("font-size", fontSize);
 
         var verticalTopics = this.vis.selectAll("text.ver").data(correlationGraph.nodes);
         verticalTopics.exit().remove();
         verticalTopics = verticalTopics.enter().append("text")
           .attr("class", "ver")
-        .merge(verticalTopics);
+        .merge(verticalTopics)
+        .style("font-size", fontSize);
 
         if (this.props.numTopics > 50){
         horizontalTopics
           .attr("x", right + 50)
           .attr("y", function(node) { return topicScale(node.name); })
-          .text(function(node) { if (node.name%5 == 0) return '[' + node.name + '] '; });
+          .text(function(node) { if (node.name%5 == 0) return '[' + node.name + '] '; })
+          .style("font-size", 16);
         
         verticalTopics
           .attr("x", function(node) { return topicScale(node.name); })
           .attr("y", bottom + 50)
           .attr("transform", function(node) { return "rotate(90," + topicScale(node.name) + "," + (bottom + 50) + ")"; })
-          .text(function(node) { if (node.name%5 == 0) return '[' + node.name + '] '; });}
+          .text(function(node) { if (node.name%5 == 0) return '[' + node.name + '] '; })
+          .style("font-size", 16);
+        }
         else {
           horizontalTopics
             .attr("x", right + 50)
             .attr("y", function(node) { return topicScale(node.name); })
-            .text(function(node) { return '[' + node.name + '] ' + node.words; });   
+            .text(function(node) { return '[' + node.name + '] ' + node.words; })
+            .style("font-size", fontSize);   
           verticalTopics
             .attr("x", function(node) { return topicScale(node.name); })
             .attr("y", bottom + 50)
@@ -92,13 +101,16 @@ class Correlation extends Component {
           var tooltipY = this.getBoundingClientRect().y;
           tooltip.style("visibility", "visible")
           .style("top", (tooltipY-10)+"px").style("left",(tooltipX+20)+"px")
-          .text('[' + correlationGraph.nodes[link.target].name + '] ' + correlationGraph.nodes[link.target].words + " / " + '[' + correlationGraph.nodes[link.source].name + '] ' + correlationGraph.nodes[link.source].words);
+          .text('[' + correlationGraph.nodes[link.target].name + '] ' 
+                    + correlationGraph.nodes[link.target].words + " / " 
+                    + '[' + correlationGraph.nodes[link.source].name + '] ' 
+                    + correlationGraph.nodes[link.source].words
+                    + ": " + link.value.toFixed(3));
         })
         .on("mouseout", function () {
           var tooltip = d3.select("#tooltip");
           tooltip.style("visibility", "hidden");
         });
-
       }
     
 
@@ -136,6 +148,7 @@ class Correlation extends Component {
       }
       return true;
   }
+
 
   
     overlayStyle = {
@@ -177,45 +190,6 @@ class Correlation extends Component {
     }
 
     render() {
-      let buttonstyle = {}
-      if (this.state.hover) {
-        buttonstyle = {
-        border: 'solid #ddd 2px',
-        margin:'0 2px 0 0',
-        padding:'7px 10px',
-        display:'block',
-        position:'relative',
-        left: '800',
-        fontSize : '1em',
-        color:'#333',
-        webkitUserSelect:'none',
-        mozUserSelect:'none',
-        userSelect: 'none',
-        mozBorderRadius: '4px',
-        borderRadius: '4px',
-        background: '#ddd',
-        cursor:'pointer'}
-      }
-      else {
-        buttonstyle = {
-        border: 'solid #ddd 2px',
-        margin:'0 2px 0 0',
-        padding:'7px 10px',
-        display:'block',
-        position: 'relative',
-        left: '800',
-        fontSize : '1em',
-        color:'#333',
-        webkitUserSelect:'none',
-        mozUserSelect:'none',
-        userSelect: 'none',
-        mozBorderRadius: '4px',
-        borderRadius: '4px',
-        background: '#FFFFFF',
-        cursor:'auto'
-      }
-    }
-
       return (
         <div>
         <div id="corr-page" className="page">
@@ -223,10 +197,11 @@ class Correlation extends Component {
         This score measures whether two topics occur in the same document more often than we would expect by chance.
         Previous versions of this script calculated correlations on log ratios.
         <a href="https://en.wikipedia.org/wiki/Pointwise_mutual_information" style={{color:'blue'}} >Wikipedia article</a> 
-</div>
         <Tooltip  tooltip = {this.props.tooltip}
                   altText = {"The two axes represent each of the generated topics. Negative pointwise mutual \
                   information is represented in red, positive is in blue. On hover over a circle, the two topics that the circle represents are shown."}/>
+</div>
+        
       </div>
       </div>
       )
