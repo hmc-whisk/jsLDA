@@ -372,6 +372,30 @@ class LDAModel {
     }
 
     /**
+     * @summary calculates the highest salience value for all tokens of topic t
+     * @param {Number} t Topic to analyze
+     * @description Parses at most the most common 1000 tokens in topic t
+     * and returns the value of the highest salience.
+     */
+    maxTopicSaliency = (t) => {
+        if (t===-1) return 0; // If no topic selected
+
+        // Set to at most 1000
+        let endIndex = 1000;
+        if(endIndex > this.topicWordCounts[t].length) {
+            endIndex = this.topicWordCounts[t].length;
+        }
+        // Calculate max Saliency
+        let maxS = 0;
+        for(let i = 0; i < endIndex; i++) {
+            let salience = this.topicSaliency(this.topicWordCounts[t][i]["word"],t);
+            if (salience > maxS) maxS = salience;
+        }
+        console.log("Calculated a maximum saliency of: " + maxS);
+        return maxS;
+    }
+
+    /**
      * @summary Shifts model to have a dif number of topics
      * @param {Number} numTopics new number of topics
      */
