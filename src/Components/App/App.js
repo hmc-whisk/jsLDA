@@ -15,9 +15,10 @@ import TopBar from '../Header/TopBar';
 import DLPage from '../Pages/DLPage';
 import HomePage from '../Pages/HomePage';
 
-import defaultDoc from '../../defaultDocs/wikiMoviePlots.csv'
-import defaultStops from '../../defaultDocs/stoplist.txt'
-import corrTooltip from '../Tooltip/corrTooltip.png'
+import stateOfUnionDocs from '../../defaultDocs/stateOfUnionDocs.txt';
+import moviePlotsDocs from '../../defaultDocs/wikiMoviePlots.csv';
+import defaultStops from '../../defaultDocs/stoplist.txt';
+import corrTooltip from '../Tooltip/corrTooltip.png';
 
 
 // This adds the Object.keys() function to some old browsers that don't support it
@@ -32,13 +33,14 @@ class App extends Component {
     super(props)
 
     let startingNumTopics = 25;
-
     this.state = {
       ldaModel: new LDAModel(startingNumTopics, () => {this.forceUpdate(); console.log("Forced Update")}),
 
       // The file location of default files
-      documentsURL: defaultDoc,
+      docName: "Movie Plots",
+      documentsURL: moviePlotsDocs,
       stopwordsURL: defaultStops,
+      defaultExt: "text/csv",
 
       // Location to store uploaded files
       documentsFileArray: [],
@@ -61,6 +63,35 @@ class App extends Component {
 
     console.log("Tab   is now: " + tabID)
   }
+
+  /**
+   * @summary Load in new default document
+   */
+  onDefaultDocChange = (event) => {
+    event.preventDefault();
+
+    let docName = event.target.value;
+    this.setState({
+      docName: docName
+    });
+    
+    if(docName === "State Of The Union")
+      {
+      this.setState({
+        documentsURL: stateOfUnionDocs,
+        defaultExt: "text/txt"
+      });
+      }
+    else if(docName=== "Movie Plots")
+    {
+      this.setState({
+        documentsURL: moviePlotsDocs,
+        defaultExt: "text/csv"
+      });
+    }
+  }
+
+  
 
   /**
    * @summary Retrieve doc files from upload component and set documentType
@@ -129,7 +160,7 @@ class App extends Component {
    */
   getDocsUpload = () => (new Promise((resolve) => {
     if (this.state.documentsFileArray.length === 0) {
-      this.state.ldaModel.documentType = "text/csv";
+      this.state.ldaModel.documentType = this.state.defaultExt;
       resolve(d3.text(this.state.documentsURL));
     } else {
       const fileSelection = this.state.documentsFileArray[0].slice();
@@ -221,6 +252,8 @@ class App extends Component {
           numTopics={this.state.ldaModel.numTopics} 
           documents={this.state.ldaModel.documents}
           getTopicCorrelations={this.state.ldaModel.getTopicCorrelations}
+          update = {this.state.update}
+          numTopics={this.state.ldaModel.numTopics}
           tooltip = {corrTooltip}
           update = {this.state.update}/>;
         break;
@@ -263,6 +296,8 @@ class App extends Component {
           onStopwordFileChange={this.onStopwordFileChange}
           onFileUpload = {this.queueLoad}
           modelIsRunning = {this.state.ldaModel.modelIsRunning}
+          onDefaultDocChange = {this.onDefaultDocChange}
+          docName = {this.state.docName}
           />
         break;
       default:
@@ -297,7 +332,6 @@ class App extends Component {
                />
 
       <div id="tabwrapper">
-
       <NavBar onClick={this.changeTab}/>
       <div id="pages">
 
