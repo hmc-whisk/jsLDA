@@ -8,7 +8,7 @@ import * as d3 from 'd3';
  */
 class DocView extends React.Component {
     static minHighlight = "#ffffff"
-    static maxHighlight = "#4f9eff"
+    static maxHighlight = "#005eff"
 
     render() {
         return(
@@ -65,12 +65,12 @@ class DocView extends React.Component {
     getWordTopicValue(w) {
         w = this.stripWord(w);
         let salience = this.props.topicSaliency(w,this.props.selectedTopic);
-        if(salience < 0) salience = 0;
+        if(salience < 0) {salience = 0};
         return salience;
     }
 
     get maxTopicValue() {
-        return this.props.highestWordTopicCount/this.props.tokensPerTopic[this.props.selectedTopic];
+        return this.props.maxTopicSaliency;
     }
 
 }

@@ -213,6 +213,7 @@ class App extends Component {
           wordTopicCounts = {this.state.ldaModel.wordTopicCounts}
           highestWordTopicCount = {this.state.ldaModel.highestWordTopicCount}
           topicSaliency = {this.state.ldaModel.topicSaliency}
+          maxTopicSaliency = {this.state.ldaModel.maxTopicSaliency}
         />;
         break;
       case "corr-tab":
