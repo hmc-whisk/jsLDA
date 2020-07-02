@@ -317,7 +317,7 @@ class LDAModel {
         this._completeSweeps = 0;
         this._requestedSweeps = 0;
 
-        //d3.select("#iters").text(this._completeSweeps);
+        d3.select("#iters").text(this._completeSweeps);
         
         Object.keys(this.vocabularyCounts).forEach((word) => { this.wordTopicCounts[word] = {} });
 
