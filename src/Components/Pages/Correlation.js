@@ -204,45 +204,6 @@ class Correlation extends Component {
     }
 
     render() {
-      let buttonstyle = {}
-      if (this.state.hover) {
-        buttonstyle = {
-        border: 'solid #ddd 2px',
-        margin:'0 2px 0 0',
-        padding:'7px 10px',
-        display:'block',
-        position:'relative',
-        left: '800',
-        fontSize : '1em',
-        color:'#333',
-        webkitUserSelect:'none',
-        mozUserSelect:'none',
-        userSelect: 'none',
-        mozBorderRadius: '4px',
-        borderRadius: '4px',
-        background: '#ddd',
-        cursor:'pointer'}
-      }
-      else {
-        buttonstyle = {
-        border: 'solid #ddd 2px',
-        margin:'0 2px 0 0',
-        padding:'7px 10px',
-        display:'block',
-        position: 'relative',
-        left: '800',
-        fontSize : '1em',
-        color:'#333',
-        webkitUserSelect:'none',
-        mozUserSelect:'none',
-        userSelect: 'none',
-        mozBorderRadius: '4px',
-        borderRadius: '4px',
-        background: '#FFFFFF',
-        cursor:'auto'
-      }
-    }
-
       return (
         <div>
         <div id="corr-page" className="page">

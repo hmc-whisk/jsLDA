@@ -4,11 +4,23 @@ class Tooltip extends Component {
     constructor(props) {
       super(props);
       this.state = {
-        hover: false
+        hover: false,
+        width: window.innerWidth,
+        height: window.innerHeight
       };
 
+      
+
     }
-  
+    
+    componentDidMount() {
+      window.addEventListener("resize", this.updateDimensions);
+    }
+    updateDimensions = () => {
+      this.setState({ width: window.innerWidth, height: window.innerHeight })
+      console.log(this.state.width, this.state.height)
+    }
+
     overlayStyle = {
     position: 'fixed',
       display: 'none',
@@ -55,8 +67,7 @@ class Tooltip extends Component {
         margin:'0 2px 0 0',
         padding:'7px 10px',
         display:'block',
-        position:'relative',
-        left: '800',
+        float:'right',
         fontSize : '1em',
         color:'#333',
         webkitUserSelect:'none',
@@ -73,8 +84,7 @@ class Tooltip extends Component {
         margin:'0 2px 0 0',
         padding:'7px 10px',
         display:'block',
-        position: 'relative',
-        left: '800',
+        float: 'right',
         fontSize : '1em',
         color:'#333',
         webkitUserSelect:'none',
@@ -88,11 +98,12 @@ class Tooltip extends Component {
     }
 
       return (
-        <div>
+        <div > 
         <div id="overlay" style= {this.overlayStyle} onClick={this.overlayOff}>
-        <div id="text" style= {this.textstyle}>  <img src= {this.props.tooltip} class="media-object"
-        alt={this.props.altText}
-        draggable= 'false'/></div>
+        <div id="text" style= {this.textstyle}> 
+        <img src= {this.props.tooltip} class="media-object"
+          alt={this.props.altText} height = {'auto'} width = {this.state.width*0.8}
+          draggable= 'false'/></div>
         </div>
 
         <div style={{padding:'2px'}}>
