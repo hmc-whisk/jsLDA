@@ -70,10 +70,10 @@ class Tooltip extends Component {
         float:'right',
         fontSize : '1em',
         color:'#333',
-        webkitUserSelect:'none',
-        mozUserSelect:'none',
+        WebkitUserSelect:'none',
+        MozUserSelect:'none',
         userSelect: 'none',
-        mozBorderRadius: '4px',
+        MozBorderRadius: '4px',
         borderRadius: '4px',
         background: '#ddd',
         cursor:'pointer'}
@@ -87,10 +87,10 @@ class Tooltip extends Component {
         float: 'right',
         fontSize : '1em',
         color:'#333',
-        webkitUserSelect:'none',
-        mozUserSelect:'none',
+        WebkitUserSelect:'none',
+        MozUserSelect:'none',
         userSelect: 'none',
-        mozBorderRadius: '4px',
+        MozBorderRadius: '4px',
         borderRadius: '4px',
         background: '#FFFFFF',
         cursor:'auto'
@@ -101,7 +101,7 @@ class Tooltip extends Component {
         <div > 
         <div id="overlay" style= {this.overlayStyle} onClick={this.overlayOff}>
         <div id="text" style= {this.textstyle}> 
-        <img src= {this.props.tooltip} class="media-object"
+        <img src= {this.props.tooltip} className="media-object"
           alt={this.props.altText} height = {'auto'} width = {this.state.width*0.8}
           draggable= 'false'/></div>
         </div>
