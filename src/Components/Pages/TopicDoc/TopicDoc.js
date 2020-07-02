@@ -7,7 +7,7 @@ import DocAccordion from './DocAccordion';
  */
 class TopicDoc extends Component {
 
-    static DOCS_PER_PAGE = 1;
+    static DOCS_PER_PAGE = 20;
     static DOC_SORT_SMOOTHING = 10.0;
 
     constructor(props) {

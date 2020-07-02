@@ -8,7 +8,7 @@ import * as d3 from 'd3';
  */
 class DocView extends React.Component {
     static minHighlight = "#ffffff"
-    static maxHighlight = "#005eff"
+    static maxHighlight = "#00ff34"
 
     render() {
         return(
