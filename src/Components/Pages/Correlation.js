@@ -15,8 +15,10 @@ class Correlation extends Component {
     constructor(props) {
       super(props);
       this.state = {
-        w: document.getElementById("tabwrapper").clientWidth*.9,
-        h: document.getElementById("tabwrapper").clientWidth*.9,
+        // .75 was determined by trying various values
+        // originally set to 800
+        w: document.getElementById("tabwrapper").clientWidth*.75,
+        h: document.getElementById("tabwrapper").clientWidth*.75,
         // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
         correlationMinTokens: 2,
         correlationMinProportion: 0.05,
@@ -28,10 +30,11 @@ class Correlation extends Component {
 
     updateDimensions = () => {
       this.setState({
-        h: document.getElementById("tabwrapper").clientWidth*.9, 
-        w: document.getElementById("tabwrapper").clientWidth*.9
+        // since corr-page is rendered in this component, we use tab-wrapper to determin the canvas size
+        h: document.getElementById("tabwrapper").clientWidth*.75, 
+        w: document.getElementById("tabwrapper").clientWidth*.75
       });
-      console.log("Updating Canvas");
+        // reset the dimentions of the svg
       this.vis.style("width", this.state.w)
       this.vis.style("height", this.state.h)
     }
@@ -41,8 +44,10 @@ class Correlation extends Component {
 
     plotMatrix = () => {
         var left = 50;
+        // var top = 50;
+        // right and bottom found by trial and error
+        // originally set to 550
         var right = this.state.w*.5;
-        var top = 50;
         var bottom = this.state.h*.5;
         var fontSize = this.props.numTopics*-.2+26; 
 
@@ -139,15 +144,14 @@ class Correlation extends Component {
       }
 
     componentDidMount() {
-      console.log(document.getElementById("tabwrapper").clientWidth);
+      // console.log(document.getElementById("tabwrapper").clientWidth);
       window.addEventListener("resize", this.updateDimensions);
       this.vis = d3.select("#corr-page").append("svg").attr("width", this.state.w).attr("height", this.state.h);
       this.plotMatrix();
     }
 
     componentDidUpdate(prevProps) {
-      console.log(document.getElementById("tabwrapper").clientWidth);
-      console.log("page updating")
+      // console.log(document.getElementById("tabwrapper").clientWidth);
         window.addEventListener("resize", this.updateDimensions);
         this.plotMatrix();
     }
@@ -158,11 +162,7 @@ class Correlation extends Component {
       }
       return true;
   }
-  // componentWillUnmount() {
-  //   window.removeEventListener("resize", this.updateDimensions);
-  //   this.plotMatrix();
-  //   console.log(this.state)
-  // }
+
 
   
     overlayStyle = {
