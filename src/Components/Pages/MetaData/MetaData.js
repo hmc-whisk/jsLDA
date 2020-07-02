@@ -1,4 +1,5 @@
 import React, { Component } from 'react'; 
+import Plot from './Plot';
 
 class MetaData extends Component {
     render() {
@@ -12,7 +13,9 @@ class MetaData extends Component {
     }
 
     get plot() {
-        return null
+        return <Plot
+            data={this.props.documents}
+        />
     }
 
     get plotSelector() {
