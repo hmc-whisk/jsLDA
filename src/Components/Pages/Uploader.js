@@ -24,7 +24,7 @@ export function Uploader(props) {
         <div className="upload">
             <div>
             <form onSubmit={(event) => { event.preventDefault(); props.onFileUpload(); }}>
-                    <label>Default Documents</label>
+                    <label>Default Documents: </label>
                     <select id="defaultDoc" onChange = {(event) => props.onDefaultDocChange(event)} value = {props.docName}>
                         <option value="Movie Plots">Movie Plots</option>
                         <option value="State Of The Union">State Of The Union</option>
@@ -36,12 +36,12 @@ export function Uploader(props) {
             <form onSubmit={(event) => { event.preventDefault(); props.onFileUpload(); }}>
                 <div>Or use a custon collection:</div>
                 <div>
-                    <label htmlFor="docs-file-input">Documents</label>
+                    <label htmlFor="docs-file-input">Documents: </label>
                     <input id="docs-file-input" type="file"
                         onChange={(event) => props.onDocumentFileChange(event)} size="10" />
                 </div>
                 <div>
-                    <label htmlFor="stops-file-input" >Stoplist</label>
+                    <label htmlFor="stops-file-input" >Stoplist: </label>
                     <input id="stops-file-input" type="file"
                         onChange={(event) => props.onStopwordFileChange(event)} size="10" />
                 </div>
