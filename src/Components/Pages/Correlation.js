@@ -15,10 +15,8 @@ class Correlation extends Component {
     constructor(props) {
       super(props);
       this.state = {
-        // .75 was determined by trying various values
-        // originally set to 800
-        w: document.getElementById("tabwrapper").clientWidth*.75,
-        h: document.getElementById("tabwrapper").clientWidth*.75,
+        w: 1000,
+        h: 1000,
         // Constants for calculating topic correlation. A doc with 5% or more tokens in a topic is "about" that topic.
         correlationMinTokens: 2,
         correlationMinProportion: 0.05,
@@ -28,28 +26,16 @@ class Correlation extends Component {
 
     }
 
-    updateDimensions = () => {
-      this.setState({
-        // since corr-page is rendered in this component, we use tab-wrapper to determin the canvas size
-        h: document.getElementById("tabwrapper").clientWidth*.75, 
-        w: document.getElementById("tabwrapper").clientWidth*.75
-      });
-        // reset the dimentions of the svg
-      this.vis.style("width", this.state.w)
-      this.vis.style("height", this.state.h)
-    }
-
-
-
-
     plotMatrix = () => {
         var left = 50;
         // var top = 50;
         // right and bottom found by trial and error
         // originally set to 550
-        var right = this.state.w*.5;
-        var bottom = this.state.h*.5;
-        var fontSize = this.props.numTopics*-.2+26; 
+
+        var right = this.props.numTopics*4.6+430;
+        var bottom = this.props.numTopics*4.6+430;
+        console.log()
+        var fontSize = this.props.numTopics*-.3+25; 
 
 
         var correlationMatrix = this.props.getTopicCorrelations();
@@ -76,18 +62,22 @@ class Correlation extends Component {
         horizontalTopics
           .attr("x", right + 50)
           .attr("y", function(node) { return topicScale(node.name); })
-          .text(function(node) { if (node.name%5 == 0) return '[' + node.name + '] '; });
+          .text(function(node) { if (node.name%5 == 0) return '[' + node.name + '] '; })
+          .style("font-size", 16);
         
         verticalTopics
           .attr("x", function(node) { return topicScale(node.name); })
           .attr("y", bottom + 50)
           .attr("transform", function(node) { return "rotate(90," + topicScale(node.name) + "," + (bottom + 50) + ")"; })
-          .text(function(node) { if (node.name%5 == 0) return '[' + node.name + '] '; });}
+          .text(function(node) { if (node.name%5 == 0) return '[' + node.name + '] '; })
+          .style("font-size", 16);
+        }
         else {
           horizontalTopics
             .attr("x", right + 50)
             .attr("y", function(node) { return topicScale(node.name); })
-            .text(function(node) { return '[' + node.name + '] ' + node.words; });   
+            .text(function(node) { return '[' + node.name + '] ' + node.words; })
+            .style("font-size", fontSize);   
           verticalTopics
             .attr("x", function(node) { return topicScale(node.name); })
             .attr("y", bottom + 50)
@@ -144,15 +134,11 @@ class Correlation extends Component {
       }
 
     componentDidMount() {
-      // console.log(document.getElementById("tabwrapper").clientWidth);
-      window.addEventListener("resize", this.updateDimensions);
       this.vis = d3.select("#corr-page").append("svg").attr("width", this.state.w).attr("height", this.state.h);
       this.plotMatrix();
     }
 
     componentDidUpdate(prevProps) {
-      // console.log(document.getElementById("tabwrapper").clientWidth);
-        window.addEventListener("resize", this.updateDimensions);
         this.plotMatrix();
     }
 
