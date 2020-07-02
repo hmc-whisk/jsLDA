@@ -6,7 +6,7 @@ An implementation of latent Dirichlet allocation in javascript. This version is 
 Instructions:
 ------------
 
-When you first load the page, it will request a file containing documents and a file containing stopwords. The default example is a corpus of movie plot summaries from wikipedia.
+When you first load the page, you will notice a grey box with options to choose a set of documents and stopwords to work with. You can either upload your own files, or choose from a set of default corpuses.
 
 Click the "Run 50 iterations" button to start training. The browser may appear to freeze for a while.
 Initially all words have been assigned randomly to topics.
@@ -15,7 +15,7 @@ An "iteration" corresponds to one pass through the documents.
 
 The topics on the left side of the page should now look more interesting. Run more iterations if you would like -- there's probably still a lot of room for improvement after only 50 iterations.
 
-Once you're satisfied with the model, you can go to the "Topic Documents" tab and click on a topic from the list on the right to sort documents in descending order by their use of that topic. Proportions are weighted so that longer documents will come first.
+Once you're satisfied with the model, you can go to the "Topic Documents" tab and click on a topic from the list on the right to sort documents in descending order by their use of that topic. Proportions are weighted so that longer documents will come first. By clicking on the document header, you view the entire document. When the document is extended, you will notice that some words are highlighted. This highlighting is based on a metric called salience. First theorized by [Chuang et al](https://www.researchgate.net/profile/Jason_Chuang2/publication/254004974_Termite_Visualization_Techniques_for_Assessing_Textual_Topic_Models/links/0deec53acbd8f46c95000000.pdf), this metric indicates both how prevalent the word is in the topic and how unique it is to that topic.
 
 You can also explore correlations between topics by clicking the "Topic Correlations" tab. This view shows a force directed layout with connections between topics that have correlations above a certain threshold.
 
