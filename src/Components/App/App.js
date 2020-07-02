@@ -14,6 +14,7 @@ import NavBar from '../Header/NavBar';
 import TopBar from '../Header/TopBar';
 import DLPage from '../Pages/DLPage';
 import HomePage from '../Pages/HomePage';
+import MetaData from '../Pages/MetaData/MetaData';
 
 import stateOfUnionDocs from '../../defaultDocs/stateOfUnionDocs.txt';
 import moviePlotsDocs from '../../defaultDocs/wikiMoviePlots.csv';
@@ -299,6 +300,10 @@ class App extends Component {
           onDefaultDocChange = {this.onDefaultDocChange}
           docName = {this.state.docName}
           />
+        break;
+      case "meta-tab":
+        DisplayPage = <MetaData
+          documents={this.state.ldaModel.documents}/>
         break;
       default:
         DisplayPage = null;
