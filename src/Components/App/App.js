@@ -37,6 +37,7 @@ class App extends Component {
       ldaModel: new LDAModel(startingNumTopics, () => {this.forceUpdate(); console.log("Forced Update")}),
 
       // The file location of default files
+      docName: "Movie Plots",
       documentsURL: moviePlotsDocs,
       stopwordsURL: defaultStops,
       defaultExt: "text/csv",
@@ -70,6 +71,9 @@ class App extends Component {
     event.preventDefault();
 
     let docName = event.target.value;
+    this.setState({
+      docName: docName
+    });
     
     if(docName === "State Of The Union")
       {
@@ -78,7 +82,7 @@ class App extends Component {
         defaultExt: "text/txt"
       });
       }
-    else if(docName === "Movie Plots")
+    else if(docName=== "Movie Plots")
     {
       this.setState({
         documentsURL: moviePlotsDocs,
@@ -293,6 +297,7 @@ class App extends Component {
           onFileUpload = {this.queueLoad}
           modelIsRunning = {this.state.ldaModel.modelIsRunning}
           onDefaultDocChange = {this.onDefaultDocChange}
+          docName = {this.state.docName}
           />
         break;
       default:

@@ -25,7 +25,7 @@ export function Uploader(props) {
             <div>
             <form onSubmit={(event) => { event.preventDefault(); props.onFileUpload(); }}>
                     <label>Default Documents</label>
-                    <select id="defaultDoc" onChange = {(event) => props.onDefaultDocChange(event)}>
+                    <select id="defaultDoc" onChange = {(event) => props.onDefaultDocChange(event)} value = {props.docName}>
                         <option value="Movie Plots">Movie Plots</option>
                         <option value="State Of The Union">State Of The Union</option>
                     </select>
