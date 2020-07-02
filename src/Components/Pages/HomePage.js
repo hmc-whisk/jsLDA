@@ -11,6 +11,7 @@ class HomePage extends React.Component {
                     onStopwordFileChange = {this.props.onStopwordFileChange}
                     onFileUpload = {this.props.onFileUpload}
                     modelIsRunning = {this.props.modelIsRunning}
+                    onDefaultDocChange = {this.props.onDefaultDocChange}
                 />
                 <p>Info stuff here. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed pharetra rutrum magna, ac egestas lorem convallis at. In hac habitasse platea dictumst. Morbi id eros pulvinar, varius ipsum nec, porta lorem. Aenean eu rhoncus tellus, sed elementum dui. Curabitur maximus ornare vulputate. Vestibulum imperdiet consectetur consequat. Phasellus venenatis, erat vel semper interdum, mauris augue volutpat dui, et consequat urna tortor ultricies nisl. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed pharetra rutrum magna, ac egestas lorem convallis at. In hac habitasse platea dictumst. Morbi id eros pulvinar, varius ipsum nec, porta lorem. Aenean eu rhoncus tellus, sed elementum dui. Curabitur maximus ornare vulputate. Vestibulum imperdiet consectetur consequat. Phasellus venenatis, erat vel semper interdum, mauris augue volutpat dui, et consequat urna tortor ultricies nisl.</p>
                 
