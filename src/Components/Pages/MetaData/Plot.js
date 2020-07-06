@@ -6,9 +6,9 @@ import { select } from 'd3-selection'
  * @description As is, this plot only prints the data it was
  * passed as a prop. The purpose of this class is for it
  * to be extended by other classes who override the createPlot
- * function to display whatever they desire. The data, height,
- * and width getter functions can also be overridden for added
- * functionality
+ * function to display whatever they desire. The height,
+ * and width datafields can also be overridden for custom 
+ * plot size
  */
 class Plot extends Component {
 
@@ -26,14 +26,55 @@ class Plot extends Component {
     }
 
     createPlot() {
+        this.createAxis()
+    }
+
+    axisLineStyle = "stroke: #ddd; stroke-width: 2px"
+    xLabel = "Some Value"
+    yLabel = "Some Value"
+
+    createAxis() {
         const node = this._rootNode;
+        // Create x axis line
         select(node)
-            .selectAll("text")
-            .data(this.data)
-            .enter()
+            .append("line")
+            .attr("x1",this.width*this.proportionLabels)
+            .attr("y1",0)
+            .attr("x2",this.width*this.proportionLabels)
+            .attr("y2",this.height - this.height*this.proportionLabels)
+            .attr("style",this.axisLineStyle)
+        // Create y axis line
+        select(node)
+            .append("line")
+            .attr("x1",this.width)
+            .attr("y1",this.height-this.height*this.proportionLabels)
+            .attr("x2",this.width*this.proportionLabels)
+            .attr("y2",this.height - this.height*this.proportionLabels)
+            .attr("style",this.axisLineStyle)
+        
+        // Create a box for the bars
+        select(node)
+            .append("svg")
+            .attr("width",this.width-this.width*this.proportionLabels)
+            .attr("height",this.height-this.height*this.proportionLabels)
+            .attr("x", this.proportionLabels*this.height)
+            .attr("y", 0)
+        
+        // Add a x label
+        select(node)
             .append("text")
-            .text((d) => d)
-            .attr("y",(d,i) => i*12)
+            .text(this.xLabel)
+            .attr("x","50%")
+            .attr("y",100*(1-this.proportionLabels)+5+"%")
+
+        // Add a y label
+        select(node)
+            .append("text")
+            .text(this.yLabel)
+            .attr("transform","rotate(-90)")
+            .attr("x","-50%")
+            .attr("y","10%")
+            .text(this.yLabel)
     }
 
     _setRef(componentNode) {
@@ -47,10 +88,6 @@ class Plot extends Component {
             </svg>
         )
         
-    }
-
-    get data() {
-        return this.props.data;
     }
 
     get width() {

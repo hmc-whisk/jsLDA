@@ -1,5 +1,5 @@
 import React, { Component } from 'react'; 
-import Plot from './Plot';
+import BarPlot from './BarPlot';
 
 class MetaData extends Component {
     render() {
@@ -13,7 +13,7 @@ class MetaData extends Component {
     }
 
     get plot() {
-        return <Plot
+        return <BarPlot
             data={this.props.documents}
         />
     }
