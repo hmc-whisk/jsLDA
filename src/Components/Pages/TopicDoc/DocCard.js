@@ -30,6 +30,8 @@ class DocCard extends React.Component {
                             wordTopicCounts = {this.props.wordTopicCounts}
                             selectedTopic = {this.props.selectedTopic}
                             highestWordTopicCount = {this.props.highestWordTopicCount}
+                            topicSaliency = {this.props.topicSaliency}
+                            maxTopicSaliency = {this.props.maxTopicSaliency}
                         />
                     </span>
                 </Accordion.Collapse>
