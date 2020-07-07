@@ -135,7 +135,6 @@ class LDAModel {
         
             this.sortTopicWords();
         }
-        this.updateWebpage();
     }
 
     /**
@@ -154,7 +153,7 @@ class LDAModel {
         this.tokensPerTopic = zeros(this.numTopics);
 
         var parsedDoc
-        if(this.documentType === "text/csv") { // TODO: make sure this gets updated
+        if(this.documentType === "text/csv") {
             parsedDoc = d3.csvParseRows(docText);
         } else {
             parsedDoc = d3.tsvParseRows(docText);
@@ -575,6 +574,78 @@ class LDAModel {
      */
     stopSweeps = () => {
         this._requestedSweeps = this._completeSweeps;
+    }
+
+    /**
+     * @summary a list of the metadata fields in the model
+     */
+    get metaFields(){
+        if(!this.documents[0]){
+            throw(Error("No documents in model"));
+        }
+        
+        let fields = []
+        for (const [key,_] of Object.entries(this.documents[0].metadata)){
+            fields.push(key)
+        }
+
+        return fields
+    }
+
+    /**
+     * @summary Returns all values in a metadata field
+     * @param {String} field 
+     * @returns {Array} Values in field
+     */
+    metaValues(field) {
+        if(!this.metaFields.includes(field)){
+            throw(Error("Given metadata field is not in model"))
+        }
+
+        // Reduce to unique values
+        return this.documents.reduce((values,doc) => {
+            if(!values.includes(doc.metadata[field])) {
+                values.push(doc.metadata[field])
+            }
+            return values
+        },[])
+    }
+
+    /**
+     * @summary Calculates the average topic value for every value 
+     * in a metadata field
+     * @param {String} field metadata field to get summary of
+     * @param {*} topic topic number to get summary of
+     */
+    metaTopicAverages(field,topic) {
+        if(!this.metaFields.includes(field)){
+            throw(Error("Given metadata field is not in model"))
+        }
+
+        // Grab relavent info from this.documents
+        const documents = this.documents.map((doc) =>{
+            return({
+                metaValue: doc.metadata[field],
+                topicValue: doc.topicCounts[topic]/doc.tokens.length
+            })
+        })
+
+        const metaValues = this.metaValues(field)
+        let averages = {}
+        for(let value of metaValues) {
+            // Reduce to scores of documents with this metadata value
+            let topicScores = documents.reduce((scores,doc) => {
+                if(doc.metaValue === value){
+                    scores.push(doc.topicValue)
+                }
+                return scores
+            },[]);
+
+            const valueAverage = topicScores.reduce((a,b) => a + b, 0) / topicScores.length
+
+            averages[value] = valueAverage;
+        }
+        return averages;
     }
 }
 
