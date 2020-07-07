@@ -97,8 +97,8 @@ class Correlation extends Component {
         .style("fill", function (link) { return link.value > 0.0 ? "#88f" : "#f88"; })
         .on("mouseover", function (link) {
           var tooltip = d3.select("#tooltip");
-          var tooltipX = this.getBoundingClientRect().x;
-          var tooltipY = this.getBoundingClientRect().y;
+          var tooltipX = this.getBoundingClientRect().x + window.scrollX;
+          var tooltipY = this.getBoundingClientRect().y + window.scrollY ;
           tooltip.style("visibility", "visible")
           .style("top", (tooltipY-10)+"px").style("left",(tooltipX+20)+"px")
           .text('[' + correlationGraph.nodes[link.target].name + '] ' 

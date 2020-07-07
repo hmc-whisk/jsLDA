@@ -93,6 +93,7 @@ class VocabTable extends Component {
       let sortVocabByTopic = this.props.sortVocabByTopic;
       let setDisplay = this.setDisplay;
       let setSort = this.props.sortbyTopicChange;
+      let selectedTopic = this.props.selectedTopic;
 
       d3.select("#showStops").on("click", function () {
         if (displayingStopwords) {
@@ -108,17 +109,23 @@ class VocabTable extends Component {
       });
       
       d3.select("#sortVocabByTopic").on("click", function () {
-        if (sortVocabByTopic) {
-          this.innerText = "Sort by topic";
-          setSort(false);
-        //   vocabTable();
+        console.log(selectedTopic);
+        if(selectedTopic === -1) {
+          alert("Please first select a topic from the left.")
         }
         else {
-          this.innerText = "Sort by frequency";
-          setSort(true);
-        //   vocabTable();
+          if (sortVocabByTopic) {
+            this.innerText = "Sort by topic";
+            setSort(false);
+          //   vocabTable();
+          }
+          else {
+            this.innerText = "Sort by frequency";
+            setSort(true);
+          //   vocabTable();
+          }
         }
-      });;
+      });
 
     }
   
