@@ -95,10 +95,11 @@ class Correlation extends Component {
         .attr("cy", function(link) { return topicScale(link.target); })
         .attr("r", function (link) { return radiusScale(Math.abs(link.value)); })
         .style("fill", function (link) { return link.value > 0.0 ? "#88f" : "#f88"; })
-        .on("mouseover", function (link) {
+        .on("mouseover", function (link, event) {
+          console.log(event);
           var tooltip = d3.select("#tooltip");
-          var tooltipX = this.getBoundingClientRect().x;
-          var tooltipY = this.getBoundingClientRect().y;
+          var tooltipX = this.getBoundingClientRect().x + window.scrollX;
+          var tooltipY = this.getBoundingClientRect().y + window.scrollY ;
           tooltip.style("visibility", "visible")
           .style("top", (tooltipY-10)+"px").style("left",(tooltipX+20)+"px")
           .text('[' + correlationGraph.nodes[link.target].name + '] ' 
