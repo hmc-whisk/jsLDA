@@ -304,6 +304,98 @@ class LDAModel {
     }
 
     /**
+     * @summary Computes the salience score of a word for a topic
+     * @param {String} w Word to analyze
+     * @param {Number} t Topic to analyze
+     * @description This calculation is an adaptation of Chuang et al's 2012 
+     * work. It is calculated by multiplying the distinctiveness of a word in
+     * a given topic, by the probability that any given word in a topic is w.
+     */
+    topicSaliency = (w,t) => {
+        if(this.stopwords[w]===1) return 0;
+        return this.topicDistinctiveness(w,t)*this.pWordGivenTopic(w,t);
+    }
+
+    /**
+     * @summary Computes the distinctiveness of a word for a topic
+     * @param {String} w Word to analyze
+     * @param {Number} t Topic to analyze
+     * @description This calculation is an adaptation of Chuang et al's 2012 
+     * work. It is described by them as "This formulation describes (in an 
+     * information-theoretic sense) how informative the specific term w is 
+     * for determining the generating topic, versus a randomly-selected term w.
+     * For example, if a word w occurs in all topics, observing the word tells
+     * us little about the document’s topical mixture; thus the word would 
+     * receive a low distinctiveness score."
+     */
+    topicDistinctiveness = (w,t) => {
+        if(this.stopwords[w]===1) return 0;
+        return this.pTopicGivenWord(w,t)*Math.log(
+            this.pTopicGivenWord(w,t)/this.pTopic(t))
+    }
+
+    /**
+     * @summary the probability of a topic given a word
+     * @param {String} w Word to analyze
+     * @param {Number} t Topic to analyze
+     */
+    pTopicGivenWord = (w,t) => {
+        let smoother = 1;
+        if(!this.wordTopicCounts[w]) return 0; // If it isnt a token
+        let numWInT = this.wordTopicCounts[w][t];
+        if(!numWInT) numWInT = 0;
+        let totalWs = Object.keys(this.wordTopicCounts[w])
+            .reduce((sum,key)=>sum+parseFloat(this.wordTopicCounts[w][key]||0),0);
+
+        return (numWInT + smoother)/(totalWs + this.numTopics*smoother);
+    }
+
+    /**
+     * @summary the probability of a word given a topic
+     * @param {String} w Word to analyze
+     * @param {Number} t Topic to analyze
+     */
+    pWordGivenTopic = (w,t) => {
+        if(!this.wordTopicCounts[w]) return 0; // If it isnt a token
+        let numWInT = this.wordTopicCounts[w][t];
+        if(!numWInT) numWInT = 0;
+        let numTokensInT = this.tokensPerTopic[t];
+        return numWInT/numTokensInT;
+    }
+
+    /**
+     * @summary The probability of any word being assigned to topic t
+     * @param {Number} t Topic to analyze
+     */
+    pTopic = (t) => {
+        return 1/this.numTopics;
+    }
+
+    /**
+     * @summary calculates the highest salience value for all tokens of topic t
+     * @param {Number} t Topic to analyze
+     * @description Parses at most the most common 1000 tokens in topic t
+     * and returns the value of the highest salience.
+     */
+    maxTopicSaliency = (t) => {
+        if (t===-1) return 0; // If no topic selected
+
+        // Set to at most 1000
+        let endIndex = 1000;
+        if(endIndex > this.topicWordCounts[t].length) {
+            endIndex = this.topicWordCounts[t].length;
+        }
+        // Calculate max Saliency
+        let maxS = 0;
+        for(let i = 0; i < endIndex; i++) {
+            let salience = this.topicSaliency(this.topicWordCounts[t][i]["word"],t);
+            if (salience > maxS) maxS = salience;
+        }
+        console.log("Calculated a maximum saliency of: " + maxS);
+        return maxS;
+    }
+
+    /**
      * @summary Shifts model to have a dif number of topics
      * @param {Number} numTopics new number of topics
      */

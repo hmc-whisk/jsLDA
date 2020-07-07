@@ -99,6 +99,8 @@ class TopicDoc extends Component {
                     wordTopicCounts = {this.props.wordTopicCounts}
                     highestWordTopicCount = {this.props.highestWordTopicCount}
                     showMetaData = {this.state.showMetaData}
+                    topicSaliency = {this.props.topicSaliency}
+                    maxTopicSaliency = {this.props.maxTopicSaliency(this.props.selectedTopic)}
                 />
             </div>
         )
