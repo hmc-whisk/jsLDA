@@ -25,6 +25,9 @@ class Plot extends Component {
         this.createPlot()
     }
 
+    /**
+     * @summary draws the plot
+     */
     createPlot() {
         this.createAxis()
     }
@@ -59,6 +62,8 @@ class Plot extends Component {
             .attr("height",this.height-this.height*this.proportionLabels)
             .attr("x", this.proportionLabels*this.height)
             .attr("y", 0)
+            .attr("overflow", "visible")
+            .attr("id", "barBox")
         
         // Add a x label
         select(node)
@@ -84,7 +89,8 @@ class Plot extends Component {
     render() {
         return (
             <svg ref={this._setRef.bind(this)}
-                width={this.width} height={this.height}>
+                width={this.width} height={this.height}
+                overflow={"auto"}>
             </svg>
         )
         
@@ -96,6 +102,10 @@ class Plot extends Component {
 
     get height() {
         return 500;
+    }
+
+    get data() {
+        return this.props.data
     }
 }
 

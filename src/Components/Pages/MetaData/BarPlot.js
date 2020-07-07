@@ -1,5 +1,5 @@
 import Plot from './Plot'
-import { select, mouse } from 'd3-selection'
+import { select, mouse, event } from 'd3-selection'
 import {scaleLinear} from 'd3-scale'
 
 class BarPlot extends Plot {
@@ -28,20 +28,16 @@ class BarPlot extends Plot {
             .domain([0,Math.max(...values)])
             .range([maxHeight,0]);
         
-        var Tooltip = select(node)
-            .append("g")
-            .attr("class", "tooltip")
+        var Tooltip = select("body")
+            .append("div")
             .style("opacity", 0)
-            .style("position", "fixed")
-
-        Tooltip.append("rect")
+            .attr("class", "tooltip")
             .style("background-color", "white")
             .style("border", "solid")
             .style("border-width", "2px")
             .style("border-radius", "5px")
             .style("padding", "5px")
-           
-        Tooltip.append("text")
+            .style("position", "fixed")
 
         // Three function that change the tooltip when user hover / move / leave a cell
         var mouseover = function(d) {
@@ -52,15 +48,10 @@ class BarPlot extends Plot {
                 .style("opacity", 1)
         }
         var mousemove = function(d) {
-            const svg = this.parentElement.parentElement
-            const x = mouse(svg)[0]+70
-            const y = mouse(svg)[1]
-            Tooltip.select("text")
-                .html("Value: " + d)
-            
             Tooltip
-                .attr("transform", "translate(" + x + "," + y + ")")
-                .attr("y", (mouse(svg)[1]) + "px")
+                .html("Value: " + d)
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY-5) + "px")
         }
         var mouseleave = function(d) {
             Tooltip

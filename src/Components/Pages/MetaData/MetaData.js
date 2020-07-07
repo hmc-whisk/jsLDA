@@ -4,7 +4,7 @@ import BarPlot from './BarPlot';
 class MetaData extends Component {
     render() {
         return(
-            <div>
+            <div id="meta-page">
                 {this.plotSelector}
                 {this.metaDataSelector}
                 {this.plot}
@@ -14,7 +14,8 @@ class MetaData extends Component {
 
     get plot() {
         return <BarPlot
-            data={this.props.documents}
+            //data={this.props.documents}
+            data={[{"label": "foo", "value": 1},{"label": "bar", "value": 2}]}
         />
     }
 
