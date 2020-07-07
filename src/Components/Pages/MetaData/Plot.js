@@ -29,33 +29,13 @@ class Plot extends Component {
      * @summary draws the plot
      */
     createPlot() {
-        this.createAxis()
+        this.setupPlot()
     }
 
-    axisLineStyle = "stroke: #ddd; stroke-width: 2px"
-    xLabel = "Some Value"
-    yLabel = "Some Value"
-
-    createAxis() {
+    setupPlot() {
         const node = this._rootNode;
-        // Create x axis line
-        select(node)
-            .append("line")
-            .attr("x1",this.width*this.proportionLabels)
-            .attr("y1",0)
-            .attr("x2",this.width*this.proportionLabels)
-            .attr("y2",this.height - this.height*this.proportionLabels)
-            .attr("style",this.axisLineStyle)
-        // Create y axis line
-        select(node)
-            .append("line")
-            .attr("x1",this.width)
-            .attr("y1",this.height-this.height*this.proportionLabels)
-            .attr("x2",this.width*this.proportionLabels)
-            .attr("y2",this.height - this.height*this.proportionLabels)
-            .attr("style",this.axisLineStyle)
         
-        // Create a box for the bars
+        // Create a box for the data
         select(node)
             .append("svg")
             .attr("width",this.width-this.width*this.proportionLabels)
@@ -64,22 +44,6 @@ class Plot extends Component {
             .attr("y", 0)
             .attr("overflow", "visible")
             .attr("id", "barBox")
-        
-        // Add a x label
-        select(node)
-            .append("text")
-            .text(this.xLabel)
-            .attr("x","50%")
-            .attr("y",100*(1-this.proportionLabels)+5+"%")
-
-        // Add a y label
-        select(node)
-            .append("text")
-            .text(this.yLabel)
-            .attr("transform","rotate(-90)")
-            .attr("x","-50%")
-            .attr("y","10%")
-            .text(this.yLabel)
     }
 
     _setRef(componentNode) {
@@ -87,11 +51,20 @@ class Plot extends Component {
     }
 
     render() {
+        let divStyle = {
+            width: this.width,
+            height: this.height,
+            overflowX: "scroll",
+            overflowY: "hidden",
+        }
         return (
-            <svg ref={this._setRef.bind(this)}
-                width={this.width} height={this.height}
-                overflow={"auto"}>
-            </svg>
+            <div style = {divStyle}>
+                <svg ref={this._setRef.bind(this)}
+                    width={this.svgWidth} height={this.svgHeight}
+                    overflow={"visible"}>
+                </svg>
+            </div>
+
         )
         
     }
@@ -104,6 +77,17 @@ class Plot extends Component {
         return 500;
     }
 
+    get svgWidth() {
+        return 500;
+    }
+
+    get svgHeight() {
+        return 500;
+    }
+
+    /**
+     * @summary the data to draw the graph with
+     */
     get data() {
         return this.props.data
     }
