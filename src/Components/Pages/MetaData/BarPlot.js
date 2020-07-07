@@ -1,29 +1,35 @@
 import Plot from './Plot'
 import { select, mouse, event } from 'd3-selection'
 import {scaleLinear} from 'd3-scale'
+import {axisLeft, axisBottom} from 'd3-axis'
 
 class BarPlot extends Plot {
     proportionLabels = .2
     barWidth = this.width/8;
+    xLabel = null;
+    barSeperation = 1.5;
+    yTicks = 10;
 
     // Override Plot's functions to render a plot
     createPlot() {
-        super.createPlot()
-        this.createBars(this.data)
+        super.createPlot();
+        this.createBars();
+        this.createAxis();
     }
 
     /**
-     * @summary Creates bars from the data
-     * @param {Array<{"label":String,"value":Number}>} data 
+     * @summary Adds bars, tooltips, and bar labels
+     * @prop {Array<{"label":String,"value":Number}>} data 
      * The data to display
      */
-    createBars(data) {
+    createBars() {
+        const data = this.data;
         const node = this._rootNode;
         const barBox = select(node).select("#barBox");
         const maxHeight = this.height * (1 - this.proportionLabels);
         const labels = data.map((d) => d["label"]);
         const values = data.map((d) => d["value"]);
-        const barSeperation = 1.5;
+        const barSeperation = this.barSeperation;
         const scaleBars = scaleLinear()
             .domain([0,Math.max(...values)])
             .range([maxHeight,0]);
@@ -56,10 +62,13 @@ class BarPlot extends Plot {
         var mouseleave = function(d) {
             Tooltip
                 .style("opacity", 0)
+                .style("left", "0px")
+                .style("top","0px")
             select(this)
                 .style("stroke", "none")
                 .style("opacity", 0.8)
         }
+
         // Create bars
         barBox.selectAll("rect")
             .data(values)
@@ -77,10 +86,40 @@ class BarPlot extends Plot {
             .on("mouseleave", mouseleave)
         
         // Add labels
-        barBox.selectAll("rect")
-            .append("text")
+        barBox.selectAll("text")
             .data(labels)
+            .enter()
+            .append("text")
             .text(d => d)
+            .attr("transform", (_,i) =>{
+                let t = "translate(";
+                let x = i*barSeperation*this.barWidth + this.barWidth;
+                let y = this.height*(1-this.proportionLabels)+20;
+                t += x + "," + y + "),rotate(45)";
+                return t;
+            })
+    }
+
+    createAxis() {
+        const data = this.data;
+        const node = this._rootNode;
+        const barBox = select(node).select("#barBox");
+        const values = data.map((d) => d["value"]);
+
+        const scale = scaleLinear()
+            .domain([Math.min(...values),Math.max(...values)])
+            .range([this.height*(1-this.proportionLabels),0])
+        
+        var y_axis = axisLeft()
+            .scale(scale)
+
+        barBox.append("g")
+            .call(y_axis)
+    }
+
+    get svgWidth() {
+        // Width of bars + width of labels
+        return this.data.length*this.barWidth*this.barSeperation+this.height*this.proportionLabels;
     }
 }
 

@@ -1,5 +1,6 @@
 import React, { Component } from 'react'; 
 import BarPlot from './BarPlot';
+import OrderedBarPlot from './OrderedBarPlot'
 
 class MetaData extends Component {
     render() {
@@ -13,9 +14,9 @@ class MetaData extends Component {
     }
 
     get plot() {
-        return <BarPlot
+        return <OrderedBarPlot
             //data={this.props.documents}
-            data={[{"label": "foo", "value": 1},{"label": "bar", "value": 2}]}
+            data={[{"label": "foo", "value": 1},{"label": "bar", "value": 2.5},{"label": "bar", "value": 10},{"label": "bar", "value": 5},{"label": "bar", "value": 2},{"label": "bar", "value": 2},{"label": "bar", "value": 2},{"label": "bar", "value": 2},{"label": "bar", "value": 2},{"label": "bar", "value": 2},{"label": "bar", "value": 2}]}
         />
     }
 
