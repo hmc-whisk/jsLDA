@@ -1,13 +1,40 @@
 import React, { Component } from 'react'; 
-import BarPlot from './BarPlot';
 import OrderedBarPlot from './OrderedBarPlot'
+import SortedBarPlot from './SortedBarPlot'
+import BarPlot from './BarPlot'
+import ScatterPlot from './ScatterPlot'
 
 class MetaData extends Component {
+    plots = [
+        {
+            element: this.orderedBarPlot,
+            name: "Ordered Bar Plot",
+        },
+        {
+            element: this.sortedBarPlot,
+            name: "Sorted Bar Plot",
+        },
+        {
+            element: this.topicBarPlot,
+            name:"Topic Bar Plot",
+        },
+        {
+            element: this.scatterPlot,
+            name: "Scatter Plot",
+        }
+    ]
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            plotType: "Ordered Bar Plot"
+        }
+    }
+
     render() {
         return(
             <div id="meta-page">
-                {this.plotSelector}
-                {this.metaDataSelector}
+                {this.plotOptions}
                 {this.plot}
             </div>
         )
@@ -20,12 +47,25 @@ class MetaData extends Component {
         />
     }
 
-    get plotSelector() {
-        return null
-    }
+    get plotOptions() {
+        return (
+            <form id = {"plot-options"} onSubmit={this.handleSubmit}>
+                <label for="plotChooser">Choose a plot:</label>
+                <select name="plotChooser">
+                    {this.plots.map((plot => {
+                        return <option key = {plot.name} value = {plot}>
+                            {plot.name}
+                        </option>
+                    }))}
+                </select>
 
-    get metaDataSelector() {
-        return null
+                <label for="metaChooser">Choose a metadata field:</label>
+                <select name="metaChooser">
+
+                </select>
+                <input type="submit" value="Render Plot"/>
+            </form>
+        )
     }
 }
 

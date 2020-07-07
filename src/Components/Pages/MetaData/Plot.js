@@ -58,7 +58,7 @@ class Plot extends Component {
             overflowY: "hidden",
         }
         return (
-            <div style = {divStyle}>
+            <div style = {divStyle} class = {"plot"}>
                 <svg ref={this._setRef.bind(this)}
                     width={this.svgWidth} height={this.svgHeight}
                     overflow={"visible"}>
