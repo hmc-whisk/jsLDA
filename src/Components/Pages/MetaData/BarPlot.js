@@ -1,7 +1,7 @@
 import Plot from './Plot'
-import { select, mouse, event } from 'd3-selection'
+import { select, event } from 'd3-selection'
 import {scaleLinear} from 'd3-scale'
-import {axisLeft, axisBottom} from 'd3-axis'
+import {axisLeft} from 'd3-axis'
 
 class BarPlot extends Plot {
     proportionLabels = .2
@@ -25,7 +25,7 @@ class BarPlot extends Plot {
     createBars() {
         const data = this.data;
         const node = this._rootNode;
-        const barBox = select(node).select("#barBox");
+        const barBox = select(node).select("#dataBox");
         const maxHeight = this.svgHeight * (1 - this.proportionLabels);
         const labels = data.map((d) => d["label"]);
         const values = data.map((d) => d["value"]);
@@ -47,8 +47,12 @@ class BarPlot extends Plot {
 
         // Three function that change the tooltip when user hover / move / leave a cell
         var mouseover = function(d) {
+            let y = event.pageY - window.scrollY // Control for scrolling
             Tooltip
                 .style("opacity", 1)
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", y + "px")
+                .html("Value: " + d)
             select(this)
                 .style("stroke", "black")
                 .style("opacity", 1)
@@ -105,7 +109,7 @@ class BarPlot extends Plot {
     createAxis() {
         const data = this.data;
         const node = this._rootNode;
-        const barBox = select(node).select("#barBox");
+        const barBox = select(node).select("#dataBox");
         const values = data.map((d) => d["value"]);
 
         const scale = scaleLinear()
