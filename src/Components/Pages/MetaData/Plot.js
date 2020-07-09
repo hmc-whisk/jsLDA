@@ -11,6 +11,7 @@ import { select } from 'd3-selection'
  * plot size
  */
 class Plot extends Component {
+    proportionLabels = .2
 
     constructor(props){
         super(props)
@@ -24,6 +25,7 @@ class Plot extends Component {
     componentDidUpdate() {
         this.createPlot()
     }
+
 
     /**
      * @summary draws the plot
@@ -44,12 +46,16 @@ class Plot extends Component {
             .attr("x", this.proportionLabels*this.svgHeight)
             .attr("y", 0)
             .attr("overflow", "visible")
-            .attr("id", "barBox")
+            .attr("id", "dataBox")
 
         // Add Y Label
-        select(node).select("svg").append("text")
-            .style("transform", "rotate(270deg) translate(-16%,-18%)")
+        select(node).select("#dataBox").append("text")
+            .style("transform", "rotate(270deg) translate(-250px,-18%)")
             .text(this.props.yLabel);
+        
+        select(node).select("#dataBox").append("text")
+            .style("transform", "translate(50%,118%)")
+            .text(this.props.xLabel);
     }
 
     _setRef(componentNode) {

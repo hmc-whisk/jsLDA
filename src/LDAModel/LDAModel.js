@@ -93,7 +93,7 @@ class LDAModel {
     byCountDescending(a, b) { return b.count - a.count; };
 
     /**
-     * @summary Resets data members in preperation
+     * @summary Resets data members in preparation
      * for new documents to be processed
      */
     reset() {
@@ -145,8 +145,8 @@ class LDAModel {
      *    - an "id" column will be used for document ids
      *    - a "tag" column will be used to sort/group documents by date
      *    - all other columns are assumed to be metadata
-     * This function calles upon the documentType object member
-     * to determine whether docText is a csv or tsv. If it isnt
+     * This function calls upon the documentType object member
+     * to determine whether docText is a csv or tsv. If it isn't
      * "text/csv" then it will assume it is a tsv.
      */
     _parseDoc = (docText) => {
@@ -167,7 +167,7 @@ class LDAModel {
 
         let columnInfo = this._getColumnInfo(parsedDoc[0]);
 
-        // Handle no text colunm
+        // Handle no text column
         if(columnInfo["text"] === -1) {
             alert("No text column found in document file");
             return;
@@ -544,7 +544,7 @@ class LDAModel {
     }
 
     /**
-     * @summary Adds the appropirate number of sweeps to be performed
+     * @summary Adds the appropriate number of sweeps to be performed
      * @param {Number} numRequests number of iterations to be requested
      */
     addSweepRequest(numRequests) {
@@ -631,16 +631,16 @@ class LDAModel {
     }
 
     /**
-     * @summary Calculates the average calue of a topic in a metadata catagory
-     * @param {String} field The metavalue field catagory is in
-     * @param {String} catagory The catagory to get average of
+     * @summary Calculates the average value of a topic in a metadata category
+     * @param {String} field The metavalue field category is in
+     * @param {String} category The category to get average of
      * @param {Number} topic The number of the topic to get average of
      */
-    averageTopicValInCatagory = (field, catagory, topic) => {
+    averageTopicValInCatagory = (field, category, topic) => {
         // Reduce to scores of documents with this metadata value
         let topicScores = this.documents.reduce((scores,doc) => {
-            // If in catagory add topic average
-            if(doc.metadata[field] === catagory){
+            // If in category add topic average
+            if(doc.metadata[field] === category){
                 scores.push(doc.topicCounts[topic]/doc.tokens.length)
             }
             return scores
@@ -651,15 +651,15 @@ class LDAModel {
     }
 
     /**
-     * @summary The average topic values in a matadata catagory
-     * @param {String} field Metadata field to catagory is in
-     * @param {String} catagory Metadata catagory to analyze
+     * @summary The average topic values in a metadata category
+     * @param {String} field Metadata field to category is in
+     * @param {String} category Metadata category to analyze
      * @returns {Array<Number>} Average topic vals with index matching topic num
      */
-    topicAvgsForCatagory = (field,catagory) => {
+    topicAvgsForCatagory = (field,category) => {
         let averages = []
         for(let topic = 0; topic < this.numTopics; topic++) {
-            averages.push(this.averageTopicValInCatagory(field,catagory,topic))
+            averages.push(this.averageTopicValInCatagory(field,category,topic))
         }
         return averages;
     }
