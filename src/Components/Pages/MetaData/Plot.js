@@ -34,16 +34,22 @@ class Plot extends Component {
 
     setupPlot() {
         const node = this._rootNode;
+        select(node).selectAll("*").remove()
         
         // Create a box for the data
         select(node)
             .append("svg")
-            .attr("width",this.width-this.width*this.proportionLabels)
-            .attr("height",this.height-this.height*this.proportionLabels)
-            .attr("x", this.proportionLabels*this.height)
+            .attr("width",this.svgWidth-this.svgWidth*this.proportionLabels)
+            .attr("height",this.svgHeight-this.svgHeight*this.proportionLabels)
+            .attr("x", this.proportionLabels*this.svgHeight)
             .attr("y", 0)
             .attr("overflow", "visible")
             .attr("id", "barBox")
+
+        // Add Y Label
+        select(node).select("svg").append("text")
+            .style("transform", "rotate(270deg) translate(-16%,-18%)")
+            .text(this.props.yLabel);
     }
 
     _setRef(componentNode) {
@@ -55,26 +61,31 @@ class Plot extends Component {
             width: this.width,
             height: this.height,
             overflowX: "scroll",
-            overflowY: "hidden",
+            overflowY: "scroll",
         }
         return (
-            <div style = {divStyle} class = {"plot"}>
-                <svg ref={this._setRef.bind(this)}
-                    width={this.svgWidth} height={this.svgHeight}
-                    overflow={"visible"}>
-                </svg>
-            </div>
+            <>
+                <div style={{transform:"translate(25%,0%)"}}>
+                    <h3>{this.props.title}</h3>
+                </div>
+                <div style = {divStyle} class = {"plot"}>
+                    <svg ref={this._setRef.bind(this)}
+                        width={this.svgWidth} height={this.svgHeight}
+                        overflow={"visible"}>
+                    </svg>
+                </div>
+            </>
 
         )
         
     }
 
     get width() {
-        return 500;
+        return 700;
     }
 
     get height() {
-        return 500;
+        return 700;
     }
 
     get svgWidth() {

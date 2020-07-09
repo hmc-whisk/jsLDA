@@ -5,7 +5,7 @@ import {axisLeft, axisBottom} from 'd3-axis'
 
 class BarPlot extends Plot {
     proportionLabels = .2
-    barWidth = this.width/8;
+    barWidth = 50;
     xLabel = null;
     barSeperation = 1.5;
     yTicks = 10;
@@ -26,7 +26,7 @@ class BarPlot extends Plot {
         const data = this.data;
         const node = this._rootNode;
         const barBox = select(node).select("#barBox");
-        const maxHeight = this.height * (1 - this.proportionLabels);
+        const maxHeight = this.svgHeight * (1 - this.proportionLabels);
         const labels = data.map((d) => d["label"]);
         const values = data.map((d) => d["value"]);
         const barSeperation = this.barSeperation;
@@ -54,10 +54,11 @@ class BarPlot extends Plot {
                 .style("opacity", 1)
         }
         var mousemove = function(d) {
+            let y = event.pageY - window.scrollY // Control for scrolling
             Tooltip
                 .html("Value: " + d)
                 .style("left", (event.pageX + 10) + "px")
-                .style("top", (event.pageY-5) + "px")
+                .style("top", y + "px")
         }
         var mouseleave = function(d) {
             Tooltip
@@ -86,15 +87,16 @@ class BarPlot extends Plot {
             .on("mouseleave", mouseleave)
         
         // Add labels
-        barBox.selectAll("text")
+        barBox.selectAll(".barLabel")
             .data(labels)
             .enter()
             .append("text")
+            .attr("class","barLabel")
             .text(d => d)
             .attr("transform", (_,i) =>{
                 let t = "translate(";
                 let x = i*barSeperation*this.barWidth + this.barWidth;
-                let y = this.height*(1-this.proportionLabels)+20;
+                let y = this.svgHeight*(1-this.proportionLabels)+20;
                 t += x + "," + y + "),rotate(45)";
                 return t;
             })
@@ -108,18 +110,18 @@ class BarPlot extends Plot {
 
         const scale = scaleLinear()
             .domain([Math.min(...values),Math.max(...values)])
-            .range([this.height*(1-this.proportionLabels),0])
+            .range([this.svgHeight*(1-this.proportionLabels),0]);
         
         var y_axis = axisLeft()
-            .scale(scale)
+            .scale(scale);
 
         barBox.append("g")
-            .call(y_axis)
+            .call(y_axis);
     }
 
     get svgWidth() {
-        // Width of bars + width of labels
-        return this.data.length*this.barWidth*this.barSeperation+this.height*this.proportionLabels;
+        // Width of bars + width of y labels
+        return (this.data.length+1)*this.barWidth*this.barSeperation+this.svgHeight*this.proportionLabels;
     }
 }
 

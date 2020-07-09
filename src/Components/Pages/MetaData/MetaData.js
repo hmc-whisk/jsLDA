@@ -1,71 +1,121 @@
 import React, { Component } from 'react'; 
 import OrderedBarPlot from './OrderedBarPlot'
 import SortedBarPlot from './SortedBarPlot'
-import BarPlot from './BarPlot'
 import ScatterPlot from './ScatterPlot'
+import PlotChooser from './PlotChooser'
+import Plot from './Plot';
+import { isElementOfType } from 'react-dom/test-utils';
 
 class MetaData extends Component {
-    plots = [
-        {
-            element: this.orderedBarPlot,
-            name: "Ordered Bar Plot",
-        },
-        {
-            element: this.sortedBarPlot,
-            name: "Sorted Bar Plot",
-        },
-        {
-            element: this.topicBarPlot,
-            name:"Topic Bar Plot",
-        },
-        {
-            element: this.scatterPlot,
-            name: "Scatter Plot",
-        }
-    ]
 
     constructor(props) {
         super(props);
         this.state = {
-            plotType: "Ordered Bar Plot"
+            plot: this.plots[0],
+            metaField: this.props.metaFields[0],
         }
     }
 
     render() {
         return(
-            <div id="meta-page">
-                {this.plotOptions}
+            <div id="meta-page" style={{marginTop:"2%"}}>
+                <PlotChooser
+                    plots={this.plots}
+                    metaFields={this.props.metaFields}
+                    changePlot={this.changePlot}
+                />
                 {this.plot}
             </div>
         )
     }
 
     get plot() {
+        if(!this.state.metaField) {
+            return <h3>No Metadata Found</h3>
+        }
+        return this.state.plot.element();
+    }
+
+    orderedBarPlot = () => {
+        if(this.props.selectedTopic===-1){
+            return <div><h3>
+                Please select a topic
+            </h3></div>
+        }
+
+        let averages = this.props.metaTopicAverages(
+            this.state.metaField,this.props.selectedTopic);
+        let data = []
+        for(let [key,value] of Object.entries(averages)){
+            data.push({"label":key,"value":value})
+        }
         return <OrderedBarPlot
-            //data={this.props.documents}
-            data={[{"label": "foo", "value": 1},{"label": "bar", "value": 2.5},{"label": "bar", "value": 10},{"label": "bar", "value": 5},{"label": "bar", "value": 2},{"label": "bar", "value": 2},{"label": "bar", "value": 2},{"label": "bar", "value": 2},{"label": "bar", "value": 2},{"label": "bar", "value": 2},{"label": "bar", "value": 2}]}
+            data={data}
+            yLabel={"Average Topic " + this.props.selectedTopic + " Value"}
+            title={"Average Topic " + this.props.selectedTopic + " Value per " + this.state.metaField}
         />
     }
 
-    get plotOptions() {
-        return (
-            <form id = {"plot-options"} onSubmit={this.handleSubmit}>
-                <label for="plotChooser">Choose a plot:</label>
-                <select name="plotChooser">
-                    {this.plots.map((plot => {
-                        return <option key = {plot.name} value = {plot}>
-                            {plot.name}
-                        </option>
-                    }))}
-                </select>
+    sortedBarPlot = () => {
+        if(this.props.selectedTopic===-1){
+            return <div><h3>
+                Please select a topic
+            </h3></div>
+        }
 
-                <label for="metaChooser">Choose a metadata field:</label>
-                <select name="metaChooser">
+        let averages = this.props.metaTopicAverages(
+            this.state.metaField,this.props.selectedTopic);
+        let data = []
+        for(let [key,value] of Object.entries(averages)){
+            data.push({"label":key,"value":value})
+        }
+        return <SortedBarPlot
+            data={data}
+            yLabel={"Average Topic " + this.props.selectedTopic + " Value"}
+            title={"Average Topic " + this.props.selectedTopic + " Value per " + this.state.metaField}
+        />
+    }
 
-                </select>
-                <input type="submit" value="Render Plot"/>
-            </form>
-        )
+
+
+    plots = ((_this) => [
+        {
+            element: _this.orderedBarPlot,
+            name: "Ordered Bar Plot",
+        },
+        {
+            element: _this.sortedBarPlot,
+            name: "Sorted Bar Plot",
+        },
+        {
+            element: _this.topicBarPlot,
+            name:"Topic Bar Plot",
+        },
+        {
+            element: _this.scatterPlot,
+            name: "Scatter Plot",
+        }
+    ])(this)
+
+    /**
+     * @summary Changes the plot to match params
+     * @param {String} plotName name of plot to use
+     * @param {String} field name of metafield to use
+     */
+    changePlot = (plotName,field) => {
+        // Get plot object from plot name
+        let plot = this.plots.reduce((plot,thisPlot) => {
+            if(thisPlot.name===plotName){
+                plot = thisPlot;
+            }
+            return plot
+        },this.plots[0]);
+        this.setState({ 
+            plot:plot,
+            metaField:field,
+        }
+    )
+
     }
 }
 
