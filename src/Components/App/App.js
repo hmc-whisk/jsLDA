@@ -303,7 +303,10 @@ class App extends Component {
         break;
       case "meta-tab":
         DisplayPage = <MetaData
-          documents={this.state.ldaModel.documents}/>
+          metaTopicAverages={this.state.ldaModel.metaTopicAverages}
+          metaFields={this.state.ldaModel.metaFields}
+          selectedTopic={this.state.ldaModel.selectedTopic}
+          />
         break;
       default:
         DisplayPage = null;
