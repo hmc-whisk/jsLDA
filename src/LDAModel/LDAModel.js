@@ -663,6 +663,20 @@ class LDAModel {
         }
         return averages;
     }
+
+    /**
+     * @summary The topic and metadata[field] values for every document
+     * @param {String} field Meta field to pull values of
+     * @param {Number} topic Topic to pull values from
+     * @returns {Array<{topicVal:Number,label:String,metaVal:any}>}
+     */
+    docTopicMetaValues = (field, topic) => {
+        return this.documents.map((doc) => { return {
+            topicVal:doc.topicCounts[topic]/doc.tokens.length,
+            label: doc.id,
+            metaVal: doc.metadata[field]
+        }})
+    }
 }
 
 export default LDAModel;
