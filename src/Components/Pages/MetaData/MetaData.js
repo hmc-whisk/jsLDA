@@ -13,6 +13,7 @@ class MetaData extends Component {
         this.state = {
             plot: this.plots[0],
             metaField: this.props.metaFields[0],
+            catagory: null
         }
     }
 
@@ -23,6 +24,7 @@ class MetaData extends Component {
                     plots={this.plots}
                     metaFields={this.props.metaFields}
                     changePlot={this.changePlot}
+                    metaValues={this.props.metaValues}
                 />
                 {this.plot}
             </div>
@@ -52,7 +54,8 @@ class MetaData extends Component {
         return <OrderedBarPlot
             data={data}
             yLabel={"Average Topic " + this.props.selectedTopic + " Value"}
-            title={"Average Topic " + this.props.selectedTopic + " Value per " + this.state.metaField}
+            title={"Average Topic " + this.props.selectedTopic +
+                " Value per " + this.state.metaField}
         />
     }
 
@@ -72,7 +75,34 @@ class MetaData extends Component {
         return <SortedBarPlot
             data={data}
             yLabel={"Average Topic " + this.props.selectedTopic + " Value"}
-            title={"Average Topic " + this.props.selectedTopic + " Value per " + this.state.metaField}
+            title={"Average Topic " + this.props.selectedTopic +
+                " Value per " + this.state.metaField}
+        />
+    }
+
+    topicBarPlot = () => {
+        // Protec
+        if(this.props.catagory===null){
+            return <div><h3>
+                Please select a catagory
+            </h3></div>
+        }
+
+        // Get/format data
+        let averages = this.props.topicAvgsForCatagory(
+            this.state.metaField,this.state.catagory);
+
+        let data = []
+        for(let [key,value] of Object.entries(averages)){
+            data.push({"label":key,"value":value})
+        }
+
+        // Attac (throw plot at em)
+        return <SortedBarPlot
+            data={data}
+            yLabel={"Average Topic Value"}
+            title={"Average Topic Values for Documents with " +
+                this.state.catagory + " " + this.state.metaField}
         />
     }
 
@@ -102,7 +132,7 @@ class MetaData extends Component {
      * @param {String} plotName name of plot to use
      * @param {String} field name of metafield to use
      */
-    changePlot = (plotName,field) => {
+    changePlot = (plotName,field, catagory) => {
         // Get plot object from plot name
         let plot = this.plots.reduce((plot,thisPlot) => {
             if(thisPlot.name===plotName){
@@ -113,6 +143,7 @@ class MetaData extends Component {
         this.setState({ 
             plot:plot,
             metaField:field,
+            catagory:catagory,
         }
     )
 

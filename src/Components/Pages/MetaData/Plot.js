@@ -65,7 +65,7 @@ class Plot extends Component {
         }
         return (
             <>
-                <div style={{transform:"translate(25%,0%)"}}>
+                <div style={{transform:"translate(5%,0%)"}}>
                     <h3>{this.props.title}</h3>
                 </div>
                 <div style = {divStyle} class = {"plot"}>
