@@ -33,6 +33,7 @@ class BarPlot extends Plot {
         const scaleBars = scaleLinear()
             .domain([0,Math.max(...values)])
             .range([maxHeight,0]);
+        const barFill = "#00b9c9";
         
         var Tooltip = select("body")
             .append("div")
@@ -54,7 +55,6 @@ class BarPlot extends Plot {
                 .style("top", y + "px")
                 .html("Value: " + d)
             select(this)
-                .style("stroke", "black")
                 .style("opacity", 1)
         }
         var mousemove = function(d) {
@@ -70,7 +70,6 @@ class BarPlot extends Plot {
                 .style("left", "0px")
                 .style("top","0px")
             select(this)
-                .style("stroke", "none")
                 .style("opacity", 0.8)
         }
 
@@ -85,6 +84,7 @@ class BarPlot extends Plot {
             .attr("y", (d) => scaleBars(d))
             .attr("height", (d) => maxHeight-scaleBars(d))
             .attr("class", "plot-bar")
+            .style("fill", barFill)
             .style("opacity",0.8)
             .on("mouseover", mouseover)
             .on("mousemove", mousemove)

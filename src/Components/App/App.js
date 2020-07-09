@@ -308,6 +308,7 @@ class App extends Component {
           selectedTopic={this.state.ldaModel.selectedTopic}
           topicAvgsForCatagory={this.state.ldaModel.topicAvgsForCatagory}
           metaValues={this.state.ldaModel.metaValues}
+          docTopicMetaValues={this.state.ldaModel.docTopicMetaValues}
           />
         break;
       default:
