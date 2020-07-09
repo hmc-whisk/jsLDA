@@ -597,7 +597,7 @@ class LDAModel {
      * @param {String} field 
      * @returns {Array} Values in field
      */
-    metaValues(field) {
+    metaValues = (field) => {
         if(!this.metaFields.includes(field)){
             throw(Error("Given metadata field is not in model"))
         }
@@ -617,33 +617,49 @@ class LDAModel {
      * @param {String} field metadata field to get summary of
      * @param {*} topic topic number to get summary of
      */
-    metaTopicAverages(field,topic) {
+    metaTopicAverages = (field,topic) => {
         if(!this.metaFields.includes(field)){
             throw(Error("Given metadata field is not in model"))
         }
 
-        // Grab relavent info from this.documents
-        const documents = this.documents.map((doc) =>{
-            return({
-                metaValue: doc.metadata[field],
-                topicValue: doc.topicCounts[topic]/doc.tokens.length
-            })
-        })
-
         const metaValues = this.metaValues(field)
         let averages = {}
         for(let value of metaValues) {
-            // Reduce to scores of documents with this metadata value
-            let topicScores = documents.reduce((scores,doc) => {
-                if(doc.metaValue === value){
-                    scores.push(doc.topicValue)
-                }
-                return scores
-            },[]);
+            averages[value] = this.averageTopicValInCatagory(field,value,topic)
+        }
+        return averages;
+    }
 
-            const valueAverage = topicScores.reduce((a,b) => a + b, 0) / topicScores.length
+    /**
+     * @summary Calculates the average calue of a topic in a metadata catagory
+     * @param {String} field The metavalue field catagory is in
+     * @param {String} catagory The catagory to get average of
+     * @param {Number} topic The number of the topic to get average of
+     */
+    averageTopicValInCatagory = (field, catagory, topic) => {
+        // Reduce to scores of documents with this metadata value
+        let topicScores = this.documents.reduce((scores,doc) => {
+            // If in catagory add topic average
+            if(doc.metadata[field] === catagory){
+                scores.push(doc.topicCounts[topic]/doc.tokens.length)
+            }
+            return scores
+        },[]);
 
-            averages[value] = valueAverage;
+        // Return the average
+        return topicScores.reduce((a,b) => a + b, 0) / topicScores.length
+    }
+
+    /**
+     * @summary The average topic values in a matadata catagory
+     * @param {String} field Metadata field to catagory is in
+     * @param {String} catagory Metadata catagory to analyze
+     * @returns {Array<Number>} Average topic vals with index matching topic num
+     */
+    topicAvgsForCatagory = (field,catagory) => {
+        let averages = []
+        for(let topic = 0; topic < this.numTopics; topic++) {
+            averages.push(this.averageTopicValInCatagory(field,catagory,topic))
         }
         return averages;
     }

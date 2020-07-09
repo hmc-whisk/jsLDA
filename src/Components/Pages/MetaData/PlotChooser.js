@@ -6,6 +6,7 @@ class PlotChooser extends Component {
         this.state = {
             plot: this.props.plots[0],
             metaField: this.props.metaFields[0],
+            catagory: null,
         }
     }
 
@@ -32,15 +33,35 @@ class PlotChooser extends Component {
                             </option>
                         })}
                     </select>
+                    {this.catagoryOptions}
                     <input type="submit" value="Render Plot"/>
                 </form>
             </div>
         )
     }
 
+    get catagoryOptions() {
+        console.log(this.state.plot)
+        if(this.state.plot!=="Topic Bar Plot") return null;
+        return (
+            <div>
+                <label for="catagoryChooser">Choose a catagory:</label>
+                <select name="catagoryChooser" onChange={(event) => this.handleCatagoryChange(event)}>
+                    {this.props.metaValues(this.state.metaField).map((catagory => {
+                        return <option key = {catagory} value = {catagory}>
+                            {catagory}
+                        </option>
+                    }))}
+                </select>
+            </div>
+        )
+    }
+
     handleSubmit = (event) => {
         event.preventDefault();
-        this.props.changePlot(this.state.plot,this.state.metaField)
+        this.props.changePlot(
+            this.state.plot,this.state.metaField,this.state.catagory
+        )
     }
 
     handlePlotChange = (event) => {
@@ -55,6 +76,14 @@ class PlotChooser extends Component {
         event.preventDefault();
         this.setState({
             metaField:event.target.value
+        })
+
+    }
+
+    handleCatagoryChange = (event) => {
+        event.preventDefault();
+        this.setState({
+            catagory:event.target.value
         })
 
     }

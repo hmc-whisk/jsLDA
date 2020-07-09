@@ -306,6 +306,8 @@ class App extends Component {
           metaTopicAverages={this.state.ldaModel.metaTopicAverages}
           metaFields={this.state.ldaModel.metaFields}
           selectedTopic={this.state.ldaModel.selectedTopic}
+          topicAvgsForCatagory={this.state.ldaModel.topicAvgsForCatagory}
+          metaValues={this.state.ldaModel.metaValues}
           />
         break;
       default:
@@ -343,7 +345,7 @@ class App extends Component {
       <NavBar onClick={this.changeTab}/>
       <div id="pages">
 
-      {this.state.ldaModel.topicWordCounts.length === 0 ? null : DisplayPage}
+      {!this.state.ldaModel.documents[0] ? null : DisplayPage}
 
 
       </div>
