@@ -97,13 +97,21 @@ class MetaData extends Component {
             data.push({"label":key,"value":value})
         }
 
-        // Attac (throw plot at em)
+        // Attac (return plot)
         return <SortedBarPlot
             data={data}
             yLabel={"Average Topic Value"}
             title={"Average Topic Values for Documents with " +
                 this.state.catagory + " " + this.state.metaField}
         />
+    }
+
+    scatterPlot() {
+        let data = [{x:1,y:2,label:"foo"},{x:3,y:1,label:"bar"},{x:5,y:7,label:"barfoo"}]
+        return <ScatterPlot 
+            data={data}
+            xLabel={"X Label"}
+            yLabel={"Topic Document Value"}/>
     }
 
 
