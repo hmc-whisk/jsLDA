@@ -106,11 +106,22 @@ class MetaData extends Component {
         />
     }
 
-    scatterPlot() {
-        let data = [{x:1,y:2,label:"foo"},{x:3,y:1,label:"bar"},{x:5,y:7,label:"barfoo"}]
+    scatterPlot = () => {
+        if(this.props.selectedTopic===-1){
+            return <div><h3>
+                Please select a topic
+            </h3></div>
+        }
+        let data = this.props
+            .docTopicMetaValues(this.state.metaField,this.props.selectedTopic)
+            .map((doc) => { return {
+                y: doc.topicVal,
+                x: Number(doc.metaVal),
+                label: doc.label
+            }})
         return <ScatterPlot 
             data={data}
-            xLabel={"X Label"}
+            xLabel={this.state.metaField}
             yLabel={"Topic Document Value"}/>
     }
 
@@ -118,12 +129,12 @@ class MetaData extends Component {
 
     plots = ((_this) => [
         {
-            element: _this.orderedBarPlot,
-            name: "Ordered Bar Plot",
-        },
-        {
             element: _this.sortedBarPlot,
             name: "Sorted Bar Plot",
+        },
+        {
+            element: _this.orderedBarPlot,
+            name: "Ordered Bar Plot",
         },
         {
             element: _this.topicBarPlot,
