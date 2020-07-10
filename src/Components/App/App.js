@@ -14,6 +14,7 @@ import NavBar from '../Header/NavBar';
 import TopBar from '../Header/TopBar';
 import DLPage from '../Pages/DLPage';
 import HomePage from '../Pages/HomePage';
+import MetaData from '../Pages/MetaData/MetaData';
 
 import stateOfUnionDocs from '../../defaultDocs/stateOfUnionDocs.txt';
 import moviePlotsDocs from '../../defaultDocs/wikiMoviePlots.csv';
@@ -301,6 +302,17 @@ class App extends Component {
           docName = {this.state.docName}
           />
         break;
+      case "meta-tab":
+        DisplayPage = <MetaData
+          metaTopicAverages={this.state.ldaModel.metaTopicAverages}
+          metaFields={this.state.ldaModel.metaFields}
+          selectedTopic={this.state.ldaModel.selectedTopic}
+          topicAvgsForCatagory={this.state.ldaModel.topicAvgsForCatagory}
+          metaValues={this.state.ldaModel.metaValues}
+          docTopicMetaValues={this.state.ldaModel.docTopicMetaValues}
+          topicWordCounts={this.state.ldaModel.topicWordCounts}
+          />
+        break;
       default:
         DisplayPage = null;
         break;
@@ -336,7 +348,7 @@ class App extends Component {
       <NavBar onClick={this.changeTab}/>
       <div id="pages">
 
-      {this.state.ldaModel.topicWordCounts.length === 0 ? null : DisplayPage}
+      {!this.state.ldaModel.documents[0] ? null : DisplayPage}
 
 
       </div>
