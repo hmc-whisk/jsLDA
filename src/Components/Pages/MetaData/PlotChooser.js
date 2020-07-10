@@ -9,41 +9,42 @@ class PlotChooser extends Component {
             catagory: this.props.metaValues(this.props.metaFields[0])[0],
         }
     }
+    
+    optionStyle = {padding:"6px"}
 
     render() {
         return (
             <div>
-                <form id = {"plot-options"} onSubmit={(event) => 
-                        this.handleSubmit(event)
-                    }>
-                    <label for="plotChooser">Choose a plot:</label>
-                    <select name="plotChooser" onChange={(event) => this.handlePlotChange(event)}>
-                        {this.props.plots.map((plot => {
-                            return <option key = {plot.name} value = {plot.name}>
-                                {plot.name}
-                            </option>
-                        }))}
-                    </select>
-
-                    <label for="metaChooser">{" Choose a metadata field:"}</label>
-                    <select name="metaChooser" onChange={(event) => this.handleMetaChange(event)}>
-                        {this.props.metaFields.map(field => {
-                            return <option key={field} value={field}>
-                                {field}
-                            </option>
-                        })}
-                    </select>
+                <form id = {"plot-options"}>
+                    <div style={this.optionStyle}>
+                        {this.plotOptions}
+                        {this.metaOptions}
+                    </div>
                     {this.catagoryOptions}
-                    <input type="submit" value="Render Plot"/>
                 </form>
             </div>
+        )
+    }
+
+    get plotOptions() {
+        return(
+            <>
+                <label for="plotChooser">Choose a plot:</label>
+                <select name="plotChooser" onChange={(event) => this.handlePlotChange(event)}>
+                    {this.props.plots.map((plot => {
+                        return <option key = {plot.name} value = {plot.name}>
+                            {plot.name}
+                        </option>
+                    }))}
+                </select>
+            </>
         )
     }
 
     get catagoryOptions() {
         if(this.state.plot!=="Topic Bar Plot") return null;
         return (
-            <div>
+            <div style={this.optionStyle}>
                 <label for="categoryChooser">Choose a catagory:</label>
                 <select name="categoryChooser" onChange={(event) => this.handleCatagoryChange(event)}>
                     {this.props.metaValues(this.state.metaField).map((catagory => {
@@ -56,36 +57,48 @@ class PlotChooser extends Component {
         )
     }
 
-    handleSubmit = (event) => {
-        event.preventDefault();
-        this.props.changePlot(
-            this.state.plot,this.state.metaField,this.state.catagory
+    get metaOptions() {
+        return(
+            <>
+                <label for="metaChooser">{" Choose a metadata field:"}</label>
+                <select name="metaChooser" onChange={(event) => this.handleMetaChange(event)}>
+                    {this.props.metaFields.map(field => {
+                        return <option key={field} value={field}>
+                            {field}
+                        </option>
+                    })}
+                </select>
+            </>
         )
     }
 
     handlePlotChange = (event) => {
         event.preventDefault();
+        let newPlot = event.target.value
         this.setState({
-            plot: event.target.value
+            plot: newPlot,
         })
-
+        this.props.changePlot(newPlot,this.state.metaField,this.state.catagory)
     }
 
     handleMetaChange = (event) => {
         event.preventDefault();
+        let newMetaField = event.target.value
+        let newCatagory = this.props.metaValues(event.target.value)[0]
         this.setState({
-            metaField:event.target.value,
-            catagory: this.props.metaValues(event.target.value)[0]
+            metaField:newMetaField,
+            catagory: newCatagory,
         })
-
+        this.props.changePlot(this.state.plot,newMetaField,newCatagory);
     }
 
     handleCatagoryChange = (event) => {
         event.preventDefault();
+        let newCatagory = event.target.value
         this.setState({
-            catagory:event.target.value
+            catagory:newCatagory
         })
-
+        this.props.changePlot(this.state.plot,this.state.metaField,newCatagory)
     }
 }
 export default PlotChooser
