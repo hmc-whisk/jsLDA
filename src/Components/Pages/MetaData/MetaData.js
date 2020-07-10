@@ -3,8 +3,8 @@ import OrderedBarPlot from './OrderedBarPlot'
 import SortedBarPlot from './SortedBarPlot'
 import ScatterPlot from './ScatterPlot'
 import PlotChooser from './PlotChooser'
-import Plot from './Plot';
-import { isElementOfType } from 'react-dom/test-utils';
+import {topNWords} from '../../../funcs/utilityFunctions'
+
 
 class MetaData extends Component {
 
@@ -93,8 +93,10 @@ class MetaData extends Component {
             this.state.metaField,this.state.catagory);
 
         let data = []
-        for(let [key,value] of Object.entries(averages)){
-            data.push({"label":key,"value":value})
+        for(let [topic,value] of Object.entries(averages)){
+            let topicLabel = "[" + topic + "] " + topNWords(
+                this.props.topicWordCounts[topic],3);
+            data.push({"label":topicLabel,"value":value})
         }
 
         // Attac (return plot)
@@ -120,6 +122,7 @@ class MetaData extends Component {
                 label: doc.label
             }})
         return <ScatterPlot 
+            title={"Topic Document Values over " + this.state.metaField}
             data={data}
             xLabel={this.state.metaField}
             yLabel={"Topic Document Value"}/>
@@ -130,11 +133,11 @@ class MetaData extends Component {
     plots = ((_this) => [
         {
             element: _this.sortedBarPlot,
-            name: "Sorted Bar Plot",
+            name: "Bar Plot [Order By Value]",
         },
         {
             element: _this.orderedBarPlot,
-            name: "Ordered Bar Plot",
+            name: "Bar Plot [Order By Label]",
         },
         {
             element: _this.topicBarPlot,
