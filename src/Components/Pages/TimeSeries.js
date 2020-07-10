@@ -86,7 +86,7 @@ class TimeSeries extends Component {
         let maxTopicMean = 0;
         let allTopicMeans = []
 
-        for (var topic = 0; topic < this.props.numTopics; topic++) {
+        for (let topic = 0; topic < this.props.numTopics; topic++) {
             var topicProportions = this.props.documents
                 .map(function (d) { 
                     return {
@@ -111,18 +111,19 @@ class TimeSeries extends Component {
             allTopicMeans.push(topicMeans);
         }
 
-        for (var topic = 0; topic < this.props.numTopics; topic++) {
+        for (let topic = 0; topic < this.props.numTopics; topic++) {
             topicMeans = allTopicMeans[topic];
 
-            var xScale = d3.scaleLinear()
-                .domain([0, topicMeans.length])
-                .range([0, this.state.timeSeriesWidth]);
-            var yScale = d3
+            // var xScale = d3.scaleLinear()
+            //     .domain([0, topicMeans.length])
+            //     .range([0, this.state.timeSeriesWidth]);
+
+            let yScale = d3
                 .scaleLinear()
                 .domain([0, maxTopicMean])
                 .range([this.state.timeSeriesHeight, 0]);
 
-            var scale = d3.scaleLinear()
+            let scale = d3.scaleLinear()
                 .domain([topicMeans[0].key, topicMeans[topicMeans.length-1].key])
                 .range([0, this.state.timeSeriesWidth]);
 
@@ -178,9 +179,10 @@ class TimeSeries extends Component {
             maxTopicMean = thisMaxTopicMean;
         }
 
-        var xScale = d3.scaleLinear()
-            .domain([0, topicMeans.length])
-            .range([0, this.state.timeSeriesWidth-50]);
+        // var xScale = d3.scaleLinear()
+        //     .domain([0, topicMeans.length])
+        //     .range([0, this.state.timeSeriesWidth-50]);
+
         var yScale = d3
             .scaleLinear()
             .domain([0, maxTopicMean])
@@ -296,7 +298,7 @@ class TimeSeries extends Component {
     }
   
     componentDidMount() {
-        if (this.props.selectedTopic == -1) {
+        if (this.props.selectedTopic === -1) {
             this.createTimeSVGs();
             this.timeSeries0()
         }
@@ -310,7 +312,7 @@ class TimeSeries extends Component {
         if(prevProps.numTopics !== this.props.numTopics) {
             this.createTimeSVGs();
         }
-        if (this.props.selectedTopic == -1) {
+        if (this.props.selectedTopic === -1) {
             this.createTimeSVGs();
             this.timeSeries0()
         }
