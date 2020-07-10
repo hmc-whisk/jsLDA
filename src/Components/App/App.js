@@ -280,6 +280,7 @@ class App extends Component {
           numTopics={this.state.ldaModel.numTopics}
           documents={this.state.ldaModel.documents}
           topicWordCounts={this.state.ldaModel.topicWordCounts}
+          selectedTopic={this.state.ldaModel.selectedTopic}
           update = {this.state.update}/>;
         break;
       case "dl-tab":
