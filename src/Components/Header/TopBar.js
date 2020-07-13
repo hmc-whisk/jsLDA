@@ -31,7 +31,7 @@ class TopBar extends React.Component {
         
         const val = event.target.value;  
         this.setState({formValue: val});
-        if(val == "")      
+        if(val === "")      
             this.props.onChange(0);  
         else
             this.props.onChange(val);  
