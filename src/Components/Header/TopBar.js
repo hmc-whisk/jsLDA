@@ -9,16 +9,25 @@ class TopBar extends React.Component {
     
     }
 
+    /**
+     * @summary 
+     */
     handleSubmit = (event) => {
+        //  TODO Check back with onClick, can it be reduces to songle function, or renate
         this.props.onClick();
         event.preventDefault();
     }
 
+    /**
+     * @summary Calls the function that will stop the model 
+     */
     handleClick = (event) => {
         this.props.stopButtonClick();
         event.preventDefault();
     }
-
+    /**
+     * @summary This function updates the value being displayed on slider as user drags it around
+     */
     updateNumDisplay = (event) => {
         if (!event.target.value) { return }
         let val = event.target.value;
@@ -26,9 +35,12 @@ class TopBar extends React.Component {
             sliderValue: val
         });
     }
+    /**
+     * @summary This value sets the display used for the run # iteratison
+     */
     handleChange = (event) => {
-        // Either value number or 1 (avoids NaN)
-        
+
+        // Forces display value number or 0 (avoids NaN) on run button  
         const val = event.target.value;  
         this.setState({formValue: val});
         if(val === "")      
@@ -37,6 +49,22 @@ class TopBar extends React.Component {
             this.props.onChange(val);  
 
         
+    }
+    /**
+     * @summary This function handles reseting the entire model
+     * as well as moving slider if the user does not wish to reset the model.
+     */
+    confirmUpdate = (val) => {
+        // does not use confrimReset bc of the slider needs to reset to original positions
+        if (window.confirm('This will cause your model to reset.')) {
+            this.props.updateNumTopics(val);
+        }
+        else{
+            this.setState({
+                sliderValue: this.props.numTopics
+            });
+        }
+
     }
 
 
@@ -57,7 +85,7 @@ class TopBar extends React.Component {
                     <NumTopicSlider
                         onChange={this.updateNumDisplay}
                         sliderValue={this.state.sliderValue}
-                        updateNumTopics={this.props.updateNumTopics}
+                        updateNumTopics={this.confirmUpdate}
                         onInput={(event) => this.updateNumDisplay(event)}
                         modelIsRunning={this.props.modelIsRunning}
                     />
@@ -69,6 +97,9 @@ class TopBar extends React.Component {
     }
 
 }
+
+// 
+
 
 export default TopBar;
 
