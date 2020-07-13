@@ -27,7 +27,6 @@ if (!Object.keys) {
   Object.keys = (getObjectKeys());
 }
 
-var QueryString = getQueryString();
 
 class App extends Component {
   constructor(props) {
