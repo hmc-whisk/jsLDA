@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import * as d3 from 'd3';
 
-import {getQueryString, getObjectKeys} from '../../funcs/utilityFunctions'
+import {getObjectKeys} from '../../funcs/utilityFunctions'
 import LDAModel from '../../LDAModel/LDAModel'
 
 import Correlation from '../Pages/Correlation';
