@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import * as d3 from 'd3';
 
-import {zeros, getQueryString, getObjectKeys} from '../../funcs/utilityFunctions'
+import {getObjectKeys} from '../../funcs/utilityFunctions'
 import LDAModel from '../../LDAModel/LDAModel'
 
 import Correlation from '../Pages/Correlation';
@@ -27,7 +27,6 @@ if (!Object.keys) {
   Object.keys = (getObjectKeys());
 }
 
-var QueryString = getQueryString();
 
 class App extends Component {
   constructor(props) {
@@ -73,7 +72,7 @@ class App extends Component {
 
     let docName = event.target.value;
     this.setState({
-      docName: docName
+      docName: docName,
     });
     
     if(docName === "State Of The Union")
@@ -123,16 +122,6 @@ class App extends Component {
     });
 
   }
-
-  // TODO: figure out what is going on here
-  findNumTopics() {
-    this.setState({numTopics: QueryString.topics ? parseInt(QueryString.topics) : 25});
-    if (isNaN(this.state.numTopics)) {
-    alert("The requested number of topics [" + QueryString.topics + "] couldn't be interpreted as a number");
-    this.setState({numTopics:25});
-    }
-  }
-
 
   /**
    * @summary Returns a promise of the correct stopword text
@@ -197,12 +186,13 @@ class App extends Component {
    * @summary This function is the callback for "change"
    */
   onTopicsChange = (val) => {
-    console.log("Changing # of topics: " + val);
+      console.log("Changing # of topics: " + val);
+      
+      var newNumTopics = Number(val);
+      if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.state.ldaModel.numTopics) {
+        this.state.ldaModel.changeNumTopics(Number(val));
+      }
     
-    var newNumTopics = Number(val);
-    if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.state.ldaModel.numTopics) {
-      this.state.ldaModel.changeNumTopics(Number(val));
-    }
   }
 
   componentDidMount() {
@@ -332,7 +322,7 @@ class App extends Component {
             sweepParameter={this.state.sweepParameter}
             onChange={this.changeSweepAmount}
             stopButtonClick={this.state.ldaModel.stopSweeps}
-            iter={this.state.ldaModel._completeSweeps}
+            iter={this.state.ldaModel.completeSweeps}
             modelIsRunning = {this.state.ldaModel.modelIsRunning}
             />
 
