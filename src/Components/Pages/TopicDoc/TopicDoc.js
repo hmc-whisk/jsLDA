@@ -89,6 +89,7 @@ class TopicDoc extends Component {
                     lastPage = {this.lastPage}
                 />
                 {this.toggleMetaDataButton()}
+
                 <DocAccordion
                     documents = {this.sortedDocuments}
                     startDoc = {this.startDoc}
@@ -109,10 +110,48 @@ class TopicDoc extends Component {
     toggleMetaDataButton() {
         let message = this.state.showMetaData ? 
             "Hide Metadata" : "Show Metadata";
+        let buttonstyle = {}
+        if (this.state.showMetaData) {
+            buttonstyle = {
+            border: 'solid #ddd 2px',
+            margin:'0 2px 0 0',
+            padding:'7px 10px',
+            display:'block',
+            float:'right',
+            fontSize : '1em',
+            color:'#333',
+            WebkitUserSelect:'none',
+            MozUserSelect:'none',
+            userSelect: 'none',
+            MozBorderRadius: '4px',
+            borderRadius: '4px',
+            background: '#ddd',
+            cursor:'pointer'}
+        }
+        else {
+            buttonstyle = {
+            border: 'solid #ddd 2px',
+            margin:'0 2px 0 0',
+            padding:'7px 10px',
+            display:'block',
+            float: 'right',
+            fontSize : '1em',
+            color:'#333',
+            WebkitUserSelect:'none',
+            MozUserSelect:'none',
+            userSelect: 'none',
+            MozBorderRadius: '4px',
+            borderRadius: '4px',
+            background: '#FFFFFF',
+            cursor:'auto'
+            }
+        }
+      
         return(
-            <button type="button" id="metaDataButton" 
-            onClick={() => this.toggleMetaData()}>
+            <button type="button" style= {buttonstyle} id="metaDataButton" 
+            onClick={() => this.toggleMetaData()} >
                 {message}
+            
             </button>
         )
     }
