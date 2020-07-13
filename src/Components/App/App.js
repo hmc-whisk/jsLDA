@@ -198,17 +198,13 @@ class App extends Component {
    * @summary This function is the callback for "change"
    */
   onTopicsChange = (val) => {
-    if (window.confirm('This will cause your model to reset.')) {
       console.log("Changing # of topics: " + val);
       
       var newNumTopics = Number(val);
       if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.state.ldaModel.numTopics) {
         this.state.ldaModel.changeNumTopics(Number(val));
       }
-    }
-    else {
-      console.log("Model Not Reset")
-    }
+    
   }
 
   componentDidMount() {
