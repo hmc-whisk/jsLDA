@@ -1,7 +1,6 @@
 import React from 'react';
 import defaultDoc from '../../defaultDocs/wikiMoviePlots.csv'
 import {confirmReset} from '../../funcs/utilityFunctions'
-console.log(defaultDoc)
 
 /**
  * @summary An upload component
@@ -18,6 +17,9 @@ console.log(defaultDoc)
  * @prop { onFileUpload() }
  *      - The function to be called when
  *        the upload button is pressed
+ * @prop { modelIsRunning }
+ *      - The boolean dictating whetherc
+ *        certain elements should be disabled
  * 
  */
 
