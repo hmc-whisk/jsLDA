@@ -20,6 +20,7 @@ import stateOfUnionDocs from '../../defaultDocs/stateOfUnionDocs.txt';
 import moviePlotsDocs from '../../defaultDocs/wikiMoviePlots.csv';
 import defaultStops from '../../defaultDocs/stoplist.txt';
 import corrTooltip from '../Tooltip/corrTooltip.png';
+import {confirmReset} from '../../funcs/utilityFunctions'
 
 
 // This adds the Object.keys() function to some old browsers that don't support it
@@ -197,11 +198,16 @@ class App extends Component {
    * @summary This function is the callback for "change"
    */
   onTopicsChange = (val) => {
-    console.log("Changing # of topics: " + val);
-    
-    var newNumTopics = Number(val);
-    if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.state.ldaModel.numTopics) {
-      this.state.ldaModel.changeNumTopics(Number(val));
+    if (window.confirm('This will cause your model to reset.')) {
+      console.log("Changing # of topics: " + val);
+      
+      var newNumTopics = Number(val);
+      if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.state.ldaModel.numTopics) {
+        this.state.ldaModel.changeNumTopics(Number(val));
+      }
+    }
+    else {
+      console.log("Model Not Reset")
     }
   }
 
