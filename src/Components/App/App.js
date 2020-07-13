@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import * as d3 from 'd3';
 
-import {zeros, getQueryString, getObjectKeys} from '../../funcs/utilityFunctions'
+import {getQueryString, getObjectKeys} from '../../funcs/utilityFunctions'
 import LDAModel from '../../LDAModel/LDAModel'
 
 import Correlation from '../Pages/Correlation';
@@ -20,7 +20,6 @@ import stateOfUnionDocs from '../../defaultDocs/stateOfUnionDocs.txt';
 import moviePlotsDocs from '../../defaultDocs/wikiMoviePlots.csv';
 import defaultStops from '../../defaultDocs/stoplist.txt';
 import corrTooltip from '../Tooltip/corrTooltip.png';
-import {confirmReset} from '../../funcs/utilityFunctions'
 
 
 // This adds the Object.keys() function to some old browsers that don't support it
@@ -124,16 +123,6 @@ class App extends Component {
     });
 
   }
-
-  // TODO: figure out what is going on here
-  findNumTopics() {
-    this.setState({numTopics: QueryString.topics ? parseInt(QueryString.topics) : 25});
-    if (isNaN(this.state.numTopics)) {
-    alert("The requested number of topics [" + QueryString.topics + "] couldn't be interpreted as a number");
-    this.setState({numTopics:25});
-    }
-  }
-
 
   /**
    * @summary Returns a promise of the correct stopword text
