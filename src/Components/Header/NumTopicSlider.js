@@ -1,4 +1,5 @@
 import React from "react";
+import {confirmReset} from '../../funcs/utilityFunctions'
 
 class NumTopicSlider extends React.Component {
 
