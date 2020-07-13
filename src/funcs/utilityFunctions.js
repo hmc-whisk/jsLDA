@@ -98,3 +98,15 @@ export function getObjectKeys() {
 export function truncate(s, n=300) { 
   return s.length > n ? s.substring(0, n-1) + "..." : s; 
 }
+
+/**
+ * @summary This function wraps event handlers to confirm that the model will be reset.
+ */
+export function confirmReset(event, callback){
+  if (window.confirm('This will cause your model to reset.')) {
+      event.preventDefault(); 
+      callback();
+  }
+  else 
+      event.preventDefault();
+}

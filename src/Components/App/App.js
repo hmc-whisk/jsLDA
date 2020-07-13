@@ -72,7 +72,7 @@ class App extends Component {
 
     let docName = event.target.value;
     this.setState({
-      docName: docName
+      docName: docName,
     });
     
     if(docName === "State Of The Union")
@@ -254,8 +254,6 @@ class App extends Component {
           numTopics={this.state.ldaModel.numTopics} 
           documents={this.state.ldaModel.documents}
           getTopicCorrelations={this.state.ldaModel.getTopicCorrelations}
-          update = {this.state.update}
-          numTopics={this.state.ldaModel.numTopics}
           tooltip = {corrTooltip}
           update = {this.state.update}/>;
         break;
@@ -321,7 +319,7 @@ class App extends Component {
             sweepParameter={this.state.sweepParameter}
             onChange={this.changeSweepAmount}
             stopButtonClick={this.state.ldaModel.stopSweeps}
-            iter={this.state.ldaModel._completeSweeps}
+            iter={this.state.ldaModel.completeSweeps}
             modelIsRunning = {this.state.ldaModel.modelIsRunning}
             />
 
