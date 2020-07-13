@@ -691,7 +691,7 @@ class LDAModel {
      */
     metaValues = (field) => {
         if(!this.metaFields.includes(field)){
-            throw(Error("Given metadata field is not in model"))
+            console.log("Given metadata field is not in model");
         }
 
         // Reduce to unique values
