@@ -18,6 +18,7 @@ import MetaData from '../Pages/MetaData/MetaData';
 
 import stateOfUnionDocs from '../../defaultDocs/stateOfUnionDocs.txt';
 import moviePlotsDocs from '../../defaultDocs/wikiMoviePlots.csv';
+import yelpReviews from '../../defaultDocs/yelpReviews.csv';
 import defaultStops from '../../defaultDocs/stoplist.txt';
 import corrTooltip from '../Tooltip/corrTooltip.png';
 
@@ -87,6 +88,13 @@ class App extends Component {
     {
       this.setState({
         documentsURL: moviePlotsDocs,
+        defaultExt: "text/csv"
+      });
+    }
+    else if(docName=== "Yelp Reviews")
+    {
+      this.setState({
+        documentsURL: yelpReviews,
         defaultExt: "text/csv"
       });
     }
