@@ -110,7 +110,15 @@ div.accordion {
   display: block;
 }
 
-button { 
+.lightButton { 
+  border: solid #bbbbbb 2px; 
+  margin:0 2px 0 0; 
+  padding:7px 10px; 
+  -webkit-user-select: none; -moz-user-select: none; user-select: none; -moz-border-radius: 4px; 
+  border-radius: 4px; 
+  background: #FFFFFF; }
+
+.darkButton { 
   border: solid #ddd 2px; 
   margin:0 2px 0 0; 
   padding:7px 10px; 
