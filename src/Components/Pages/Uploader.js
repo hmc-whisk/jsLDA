@@ -1,6 +1,6 @@
 import React from 'react';
 import defaultDoc from '../../defaultDocs/wikiMoviePlots.csv'
-console.log(defaultDoc)
+import {confirmReset} from '../../funcs/utilityFunctions'
 
 /**
  * @summary An upload component
@@ -17,13 +17,20 @@ console.log(defaultDoc)
  * @prop { onFileUpload() }
  *      - The function to be called when
  *        the upload button is pressed
+ * @prop { modelIsRunning }
+ *      - The boolean dictating whetherc
+ *        certain elements should be disabled
  * 
  */
+
+
+
+
 export function Uploader(props) {
     return (
         <div className="upload">
             <div>
-            <form onSubmit={(event) => { event.preventDefault(); props.onFileUpload(); }}>
+            <form onSubmit={(event) => { confirmReset(event, props.onFileUpload); } }>
                     <label>Default Documents: </label>
                     <select id="defaultDoc" onChange = {(event) => props.onDefaultDocChange(event)} value = {props.docName}>
                         <option value="Movie Plots">Movie Plots</option>
@@ -33,7 +40,7 @@ export function Uploader(props) {
                 </form>
             </div>
 
-            <form onSubmit={(event) => { event.preventDefault(); props.onFileUpload(); }}>
+            <form onSubmit={(event) => { confirmReset(event, props.onFileUpload); }}>
                 <div>Or use a custon collection:</div>
                 <div>
                     <label htmlFor="docs-file-input">Documents: </label>
@@ -49,6 +56,7 @@ export function Uploader(props) {
                     <input type="submit" id="load-inputs" value="Upload" disabled={props.modelIsRunning} />
 
                 </div>
+                
             </form>
         </div>
     )
