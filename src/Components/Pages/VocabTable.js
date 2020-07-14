@@ -150,10 +150,12 @@ class VocabTable extends Component {
         return (
             <div id="vocab-page" className="page">
                 <div className="help">Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0.
-                    <button id="showStops">Show stopwords</button>
-                    <button id="sortVocabByTopic">Sort by topic</button>
                 </div>
-                <table id="vocab-table">
+                <div className = "center" className = "help">
+                  <button id="showStops">Show stopwords</button>
+                  <button id="sortVocabByTopic">Sort by topic</button>
+                </div>
+                <table id="vocab-table" className="center">
                     <thead><tr><th>Word</th><th>Frequency</th><th>Topic Specificity</th><th>Stoplist</th></tr></thead>
                     <tbody></tbody>
                 </table>

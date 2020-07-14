@@ -12,11 +12,11 @@ code {
     monospace;
 }
 
-#metaDataButton {
-  float: right;
+/* #metaDataButton {
+  float: left;
   background-color: white;
   border: 1px solid #ddd;
-}
+} */
 #metaDataButton:hover {
   background-color: #ddd;
 }
@@ -110,3 +110,15 @@ div.accordion {
   display: block;
 }
 
+button { 
+  border: solid #ddd 2px; 
+  margin:0 2px 0 0; 
+  padding:7px 10px; 
+  -webkit-user-select: none; -moz-user-select: none; user-select: none; -moz-border-radius: 4px; 
+  border-radius: 4px; 
+  background: #FFFFFF; }
+
+.centerNotice {
+  font-size: large;
+  text-align: center;
+}
