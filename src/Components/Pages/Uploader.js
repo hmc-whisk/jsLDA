@@ -1,5 +1,4 @@
 import React from 'react';
-import defaultDoc from '../../defaultDocs/wikiMoviePlots.csv'
 import {confirmReset} from '../../funcs/utilityFunctions'
 
 /**
@@ -41,7 +40,7 @@ export function Uploader(props) {
             </div>
 
             <form onSubmit={(event) => { confirmReset(event, props.onFileUpload); }}>
-                <div>Or use a custon collection:</div>
+                <div>Or use a custom collection:</div>
                 <div>
                     <label htmlFor="docs-file-input">Documents: </label>
                     <input id="docs-file-input" type="file" 
