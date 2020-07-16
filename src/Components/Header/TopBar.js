@@ -71,14 +71,14 @@ class TopBar extends React.Component {
     render() {
         return (
             <div id="form" className="top">
-                <form onSubmit = {this.handleSubmit}>
+                <form onSubmit = {this.handleSubmit} className = "topForm">
                     <label for="number">Enter Number of Iterations: &nbsp;</label>
 
                     <input onChange = {this.handleChange} id="number" type="number" value = {this.state.formValue} placeholder="# Sweeps" min="1" max="100000" required></input>
 
-                    <button type = "submit" id="sweep" >Run {this.props.sweepParameter} iterations</button>
+                    <button type = "submit" id="sweep" className="darkButton">Run {this.props.sweepParameter} iterations</button>
 
-                    <button id="stopSweep" onClick={this.handleClick} disabled={!this.props.modelIsRunning}>Stop</button>
+                    <button id="stopSweep" onClick={this.handleClick} className="darkButton" disabled={!this.props.modelIsRunning}>Stop</button>
 
                 Iterations:<span id="iters" > {this.props.iter} </span>
 
