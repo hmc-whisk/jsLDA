@@ -33,14 +33,14 @@ class MetaData extends Component {
 
     get plot() {
         if(!this.state.metaField) {
-            return <h3>No Metadata Found</h3>
+            return <div className = "centerNotice"><h3>No Metadata Found</h3></div>
         }
         return this.state.plot.element();
     }
 
     orderedBarPlot = () => {
         if(this.props.selectedTopic===-1){
-            return <div><h3>
+            return <div className = "centerNotice"><h3>
                 Please select a topic
             </h3></div>
         }
@@ -61,7 +61,7 @@ class MetaData extends Component {
 
     sortedBarPlot = () => {
         if(this.props.selectedTopic===-1){
-            return <div><h3>
+            return <div className = "centerNotice"><h3>
                 Please select a topic
             </h3></div>
         }
@@ -110,7 +110,7 @@ class MetaData extends Component {
 
     scatterPlot = () => {
         if(this.props.selectedTopic===-1){
-            return <div><h3>
+            return <div className = "centerNotice"><h3>
                 Please select a topic
             </h3></div>
         }
