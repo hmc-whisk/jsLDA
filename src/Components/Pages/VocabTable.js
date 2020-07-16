@@ -35,7 +35,7 @@ class VocabTable extends Component {
         row.append("td").text(d.count);
         row.append("td").text(isStopword ? "NA" : format(score))
         .style("background-color", specificityScale(score));
-        row.append("td").append("button").text(stopwords[d.word] ? "unstop" : "stop")
+        row.append("td").append("button").text(stopwords[d.word] ? "unstop" : "stop").attr("class","lightButton")
         .on("click", function () {
           console.log(d.word);
           if (! isStopword) { addStop(d.word); }
@@ -150,10 +150,12 @@ class VocabTable extends Component {
         return (
             <div id="vocab-page" className="page">
                 <div className="help">Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0.
-                    <button id="showStops">Show stopwords</button>
-                    <button id="sortVocabByTopic">Sort by topic</button>
                 </div>
-                <table id="vocab-table">
+                <div className = "center" className = "help">
+                  <button id="showStops" className = "lightButton">Show stopwords</button>
+                  <button id="sortVocabByTopic" className = "lightButton">Sort by topic</button>
+                </div>
+                <table id="vocab-table" className="center">
                     <thead><tr><th>Word</th><th>Frequency</th><th>Topic Specificity</th><th>Stoplist</th></tr></thead>
                     <tbody></tbody>
                 </table>
