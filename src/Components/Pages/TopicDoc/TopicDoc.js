@@ -83,12 +83,15 @@ class TopicDoc extends Component {
     render() {
         return(
             <div>
+                <div className = "docNav">
                 <PageController
                     currentPage = {this.state.currentPage}
                     changePage = {this.changePage}
                     lastPage = {this.lastPage}
                 />
                 {this.toggleMetaDataButton()}
+                </div>
+
                 <DocAccordion
                     documents = {this.sortedDocuments}
                     startDoc = {this.startDoc}
@@ -111,7 +114,7 @@ class TopicDoc extends Component {
             "Hide Metadata" : "Show Metadata";
         return(
             <button type="button" id="metaDataButton" 
-            onClick={() => this.toggleMetaData()}>
+            onClick={() => this.toggleMetaData()} className = "lightButton">
                 {message}
             </button>
         )
