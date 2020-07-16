@@ -83,12 +83,14 @@ class TopicDoc extends Component {
     render() {
         return(
             <div>
+                <div className = "docNav">
                 <PageController
                     currentPage = {this.state.currentPage}
                     changePage = {this.changePage}
                     lastPage = {this.lastPage}
                 />
                 {this.toggleMetaDataButton()}
+                </div>
 
                 <DocAccordion
                     documents = {this.sortedDocuments}
@@ -148,8 +150,13 @@ class TopicDoc extends Component {
         }
       
         return(
+<<<<<<< HEAD
             <button type="button" style= {buttonstyle} id="metaDataButton" 
             onClick={() => this.toggleMetaData()} >
+=======
+            <button type="button" id="metaDataButton" 
+            onClick={() => this.toggleMetaData()} className = "lightButton">
+>>>>>>> origin/main
                 {message}
             
             </button>
