@@ -288,7 +288,9 @@ class App extends Component {
           documents={this.state.ldaModel.documents}
           topicWordCounts={this.state.ldaModel.topicWordCounts}
           selectedTopic={this.state.ldaModel.selectedTopic}
-          update = {this.state.update}/>;
+          update = {this.state.update}
+          topicTimeRollingAvg = {this.state.ldaModel.topicTimeRollingAvg}
+          />;
         break;
       case "dl-tab":
         DisplayPage = <DLPage
