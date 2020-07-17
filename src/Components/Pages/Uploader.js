@@ -34,6 +34,7 @@ export function Uploader(props) {
                     <select id="defaultDoc" onChange = {(event) => props.onDefaultDocChange(event)} value = {props.docName}>
                         <option value="Movie Plots">Movie Plots</option>
                         <option value="State Of The Union">State Of The Union</option>
+                        <option value="Yelp Reviews">Yelp Reviews</option>
                     </select>
                     <input type="submit" value="Reset" className="darkButton" disabled={props.modelIsRunning} />
                 </form>
