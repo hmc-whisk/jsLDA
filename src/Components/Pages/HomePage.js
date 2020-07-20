@@ -6,7 +6,7 @@ class HomePage extends React.Component {
     helpTextStyle = {
         backgroundColor: "#ffffff",
         position: "fixed",
-        top: "5%",
+        top: "10%",
         left: "10%",
         right:"10%",
         borderRadius: "20px 0px 0px 20px",
