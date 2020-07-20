@@ -150,13 +150,8 @@ class TopicDoc extends Component {
         }
       
         return(
-<<<<<<< HEAD
-            <button type="button" style= {buttonstyle} id="metaDataButton" 
-            onClick={() => this.toggleMetaData()} >
-=======
             <button type="button" id="metaDataButton" 
             onClick={() => this.toggleMetaData()} className = "lightButton">
->>>>>>> origin/main
                 {message}
             
             </button>
