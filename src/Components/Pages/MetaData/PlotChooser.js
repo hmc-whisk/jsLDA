@@ -46,7 +46,7 @@ class PlotChooser extends Component {
         return (
             <div style={this.optionStyle}>
                 <label for="categoryChooser">Choose a catagory:</label>
-                <select name="categoryChooser" onChange={(event) => this.handleCatagoryChange(event)}>
+                <select name="categoryChooser" onChange={(event) => this.handleCatagoryChange(event) } id = "categorySelect">
                     {this.props.metaValues(this.state.metaField).map((catagory => {
                         return <option key = {catagory} value = {catagory}>
                             {catagory}
@@ -61,7 +61,7 @@ class PlotChooser extends Component {
         return(
             <>
                 <label for="metaChooser">{" Choose a metadata field:"}</label>
-                <select name="metaChooser" onChange={(event) => this.handleMetaChange(event)}>
+                <select name="metaChooser" onChange={(event) => this.handleMetaChange(event)} >
                     {this.props.metaFields.map(field => {
                         return <option key={field} value={field}>
                             {field}
