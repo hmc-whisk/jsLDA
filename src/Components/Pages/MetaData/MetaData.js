@@ -164,8 +164,6 @@ class MetaData extends Component {
     }
 
     topicBarDownload = (data) => {
-        // console.log(this.props.metaValues);
-        console.log(data);
 
         // get the list of categories without needing to parse entire form again
         var sel = document.getElementById("categorySelect").options;
@@ -173,10 +171,9 @@ class MetaData extends Component {
         for(let i = 0; i < sel.length; i++) {
             categories.push(sel[i].text);
         }
-        console.log(categories);
 
         var barPlotCSV = "";
-        barPlotCSV += this.state.metaField;
+        barPlotCSV += "Topic Number";
         for (let i = 0; i < categories.length; i++) {
             barPlotCSV += ", " + categories[i];
         }

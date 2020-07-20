@@ -195,7 +195,7 @@ class Correlation extends Component {
         <div id="corr-page" className="page">
         <div className="help">Topic correlations are pointwise mutual information scores.
         This score measures whether two topics occur in the same document more often than we would expect by chance.
-        Previous versions of this script calculated correlations on log ratios.
+        Previous versions of this script calculated correlations on log ratios. Data is available in downloads page.
         <a href="https://en.wikipedia.org/wiki/Pointwise_mutual_information" style={{color:'blue'}} >Wikipedia article</a> 
         <Tooltip  tooltip = {this.props.tooltip}
                   altText = {"The two axes represent each of the generated topics. Negative pointwise mutual \
