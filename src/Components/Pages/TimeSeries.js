@@ -332,7 +332,7 @@ class TimeSeries extends Component {
     render() {
         return (
             <div id="ts-page" className="page" ref={this._setRef.bind(this)}>
-                <div className="help">Documents are grouped by their "date" field (the second column in the input file). These plots show the average document proportion of each topic at each date value. Date values are <i>not</i> parsed, but simply sorted in the order they appear in the input file.
+                <div className="help">Documents are grouped by their "date" field (the second column in the input file). These plots show the average document proportion of each topic at each date value. Date values are <i>not</i> parsed, but simply sorted in the order they appear in the input file. Data for plots are available in downloads page.
                 Hover only shows the time fields that are filled. Two consective time periods present in the data are connected with a straight line.</div>
                 <div className="help"></div>
             </div>        
