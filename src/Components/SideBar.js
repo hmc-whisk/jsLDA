@@ -18,6 +18,7 @@ class SideBar extends Component {
 
     // Used by ready, changeNumTopics in processing, addStop, removeStop in vocab, sweep in sweep
     displayTopicWords() {
+        console.log("displayTopicWords");
         var topicTopWords = [];
         let toggleTopicDocuments = this.toggleTopicDocuments;
         let changeAnnotation = this.props.changeAnnotation
@@ -27,6 +28,9 @@ class SideBar extends Component {
         if (this.props.topicWordCounts[topic]) {
         topicTopWords.push(topNWords(this.props.topicWordCounts[topic], 10));}
         }
+
+        // Hard reset sidebar
+        d3.select("div#topics").selectAll("div.topics").remove();
     
         var topicLines = d3.select("div#topics").selectAll("div.topics")
         .data(topicTopWords);
@@ -51,6 +55,7 @@ class SideBar extends Component {
           
         })
         .on("notesEdit", function(d, i) { this.innerText = "" } )
+        .text((d,i) => this.props.getAnnotation(i))
 
         if (this.reset ===1) {
             d3.select("div#topics").selectAll("div.textField").dispatch("notesEdit")
