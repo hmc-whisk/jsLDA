@@ -74,7 +74,16 @@ class App extends Component {
   }
 
   resetNotes = (i) => {
+    console.log("resetNotes");
     this.annotations = new Array(i);
+  }
+
+  /**
+   * @summary Gets the annotaion for a topic
+   * @param {Number} topic Number of topic to get annotations for
+   */
+  getAnnotation = (topic) => {
+    return this.annotations[topic];
   }
 
 
@@ -199,7 +208,7 @@ class App extends Component {
    * @summary Runs the document processing pipeline
    */
   queueLoad = () => {
-
+    this.resetNotes(this.state.ldaModel.numTopics)
     this.state.ldaModel.reset();
     Promise.all([this.getStoplistUpload(),this.getDocsUpload()])
       .then(([stops, lines]) => {this.state.ldaModel.ready(null, stops, lines)})
@@ -368,6 +377,7 @@ class App extends Component {
       <SideBar selectedTopic={this.state.ldaModel.selectedTopic} 
                changeAnnotation = {this.changeAnnotation}
                resetAnnotation = {this.resetNotes}
+               getAnnotation = {this.getAnnotation}
                sortVocabByTopic={this.state.ldaModel.sortVocabByTopic} 
                numTopics={this.state.ldaModel.numTopics} 
                topicWordCounts={this.state.ldaModel.topicWordCounts}
