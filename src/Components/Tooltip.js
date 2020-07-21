@@ -79,7 +79,6 @@ class Tooltip extends Component {
           </div>
           {this.props.displayElement}
         </div>
-
         <div style={{padding:'2px'}}>
         <button onClick={this.overlayOn}  class = "lightButton" onMouseEnter={this.toggleHover} onMouseLeave={this.toggleHover}>Help</button>
         </div>
