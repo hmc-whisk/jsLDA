@@ -64,7 +64,7 @@ class Plot extends Component {
 
     render() {
         let divStyle = {
-            // width: this.width,
+            width: this.width,
             height: this.height,
             overflowX: "scroll",
             overflowY: "scroll",
