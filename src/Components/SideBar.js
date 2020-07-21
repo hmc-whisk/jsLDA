@@ -8,6 +8,10 @@ class SideBar extends Component {
         this.state = {
         };
       }
+    
+    // Used for setting and resetting notes
+    numBefore = 0;
+    reset = 0;
 
 
     selectedTopicChange = this.props.selectedTopicChange;
@@ -16,26 +20,51 @@ class SideBar extends Component {
     displayTopicWords() {
         var topicTopWords = [];
         let toggleTopicDocuments = this.toggleTopicDocuments;
+        let changeAnnotation = this.props.changeAnnotation
 
     
-        for (var topic = 0; topic < this.props.numTopics; topic++) {
+        for (let topic = 0; topic < this.props.numTopics; topic++) {
         if (this.props.topicWordCounts[topic]) {
         topicTopWords.push(topNWords(this.props.topicWordCounts[topic], 10));}
         }
     
-        var topicLines = d3.select("div#topics").selectAll("div.topicwords")
+        var topicLines = d3.select("div#topics").selectAll("div.topics")
         .data(topicTopWords);
     
         topicLines.exit().remove();
         
-        topicLines = topicLines
-        .enter().append("div")
+        let topic = topicLines
+        .enter().append("div").attr("class","topics");
+
+        topic.append("foreignObject")
+        .append('xhtml:div')
+        .append('div')
+        .attr("class","textField")
+        .attr("style", "white-space: pre-line; background: #ECECEC; border-collapse: separate; border-radius: 3px; ")
+        .attr("dataText", "Enter annotation")
+        .attr("contentEditable", true)
+        .on("blur", function(d, i) {
+          var innerText = this.innerText 
+          if(innerText[innerText.length-1] === '\n'){
+            innerText = innerText.slice(0,-1)}    
+          changeAnnotation(innerText, i)
+          
+        })
+        .on("notesEdit", function(d, i) { this.innerText = "" } )
+
+        if (this.reset ===1) {
+            d3.select("div#topics").selectAll("div.textField").dispatch("notesEdit")
+            this.reset = 0
+        }
+
+        topicLines = topic.append("div")
         .attr("class", "topicwords")
         .on("click", function(d, i) { toggleTopicDocuments(i); })
+        .text(function(d, i) { return "[" + i + "] " + d; })
 
         .merge(topicLines);
         
-        topicLines.transition().text(function(d, i) { return "[" + i + "] " + d; });
+        // topicLines.transition().text(function(d, i) { return "[" + i + "] " + d; });
     
         return this.props.topicWordCounts;
     }
@@ -62,10 +91,13 @@ class SideBar extends Component {
         this.toggleTopicDocuments(0)
     }
 
-    static getDerivedStateFromProps(props, state) {
-    }
-
     componentDidUpdate() {
+        let resetAnnotation = this.props.resetAnnotation
+        if (this.numBefore != this.props.numTopics) {
+            this.numBefore = this.props.numTopics;
+            this.reset = 1;
+            resetAnnotation(this.props.numTopics);
+        }
         this.displayTopicWords();
     }
 
