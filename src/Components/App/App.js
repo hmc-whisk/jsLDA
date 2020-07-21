@@ -54,6 +54,17 @@ class App extends Component {
   };
   };
 
+  corNotes = ``;
+
+  changeNotes = (notes) => {
+    this.corNotes = notes;
+  }
+
+  provideNotes = () => {
+    return this.corNotes;
+  }
+
+
   /**
    * @summary Update the page/tab user is looking at, causing rerender of components
    */
@@ -253,6 +264,8 @@ class App extends Component {
           numTopics={this.state.ldaModel.numTopics} 
           documents={this.state.ldaModel.documents}
           getTopicCorrelations={this.state.ldaModel.getTopicCorrelations}
+          changeNotes = {this.changeNotes}
+          provideNotes = {this.provideNotes}
           tooltip = {corrTooltip}
           update = {this.state.update}/>;
         break;
