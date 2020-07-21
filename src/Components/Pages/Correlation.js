@@ -91,11 +91,14 @@ class Correlation extends Component {
         var circles = this.vis.selectAll("circle").data(correlationGraph.links);
         circles.exit().remove();
         circles = circles.enter().append("circle").merge(circles);
+
+        var posColor = getComputedStyle(document.documentElement).getPropertyValue('--color2');
+        var negColor = getComputedStyle(document.documentElement).getPropertyValue('--color4');
       
         circles.attr("cx", function(link) { return topicScale(link.source); })
         .attr("cy", function(link) { return topicScale(link.target); })
         .attr("r", function (link) { return radiusScale(Math.abs(link.value)); })
-        .style("fill", function (link) { return link.value > 0.0 ? "#88f" : "#f88"; })
+        .style("fill", function (link) { return link.value > 0.0 ? posColor : negColor; })
         .on("mouseover", function (link) {
           var tooltip = d3.select("#tooltip");
           var tooltipX = this.getBoundingClientRect().x + window.scrollX;
@@ -214,7 +217,7 @@ class Correlation extends Component {
         <div id="corr-page" className="page">
         <div className="help">Topic correlations are pointwise mutual information scores.
         This score measures whether two topics occur in the same document more often than we would expect by chance.
-        Previous versions of this script calculated correlations on log ratios.
+        Previous versions of this script calculated correlations on log ratios. Data for plot is available in downloads page.
         <a href="https://en.wikipedia.org/wiki/Pointwise_mutual_information" style={{color:'blue'}} >Wikipedia article</a> 
         <Tooltip  tooltip = {this.props.tooltip}
                   altText = {"The two axes represent each of the generated topics. Negative pointwise mutual \
