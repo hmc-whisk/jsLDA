@@ -57,8 +57,7 @@ class Tooltip extends Component {
     }
   
     overlayOff = () => {
-      // if (document.getElementById("overlay")) {
-      // document.getElementById("overlay").style.display = "none";}
+
       this.setState({
         display: false
       });
@@ -82,7 +81,7 @@ class Tooltip extends Component {
         </div>
 
         <div style={{padding:'2px'}}>
-        <button onClick={this.overlayOn} id = "metaDataButton" class = "lightButton" onMouseEnter={this.toggleHover} onMouseLeave={this.toggleHover}>Help</button>
+        <button onClick={this.overlayOn}  class = "lightButton" onMouseEnter={this.toggleHover} onMouseLeave={this.toggleHover}>Help</button>
         </div>
       </div>
       )
