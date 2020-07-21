@@ -9,9 +9,9 @@ class SideBar extends Component {
         };
       }
     
-    notes = new Array(this.props.numTopics);
-    numBefore = 0
-    reset = 0
+    // Used for setting and resetting notes
+    numBefore = 0;
+    reset = 0;
 
 
     selectedTopicChange = this.props.selectedTopicChange;
@@ -20,7 +20,7 @@ class SideBar extends Component {
     displayTopicWords() {
         var topicTopWords = [];
         let toggleTopicDocuments = this.toggleTopicDocuments;
-        let notes = this.notes;
+        let changeAnnotation = this.props.changeAnnotation
 
     
         for (let topic = 0; topic < this.props.numTopics; topic++) {
@@ -47,9 +47,8 @@ class SideBar extends Component {
           var innerText = this.innerText 
           if(innerText[innerText.length-1] === '\n'){
             innerText = innerText.slice(0,-1)}    
-          notes[i] = innerText;
-          console.log("blur")
-          console.log(notes)
+          changeAnnotation(innerText, i)
+          
         })
         .on("notesEdit", function(d, i) { this.innerText = "" } )
 
@@ -93,13 +92,13 @@ class SideBar extends Component {
     }
 
     componentDidUpdate() {
+        let resetAnnotation = this.props.resetAnnotation
         if (this.numBefore != this.props.numTopics) {
             this.numBefore = this.props.numTopics;
-            this.notes = new Array(this.props.numTopics);
             this.reset = 1;
+            resetAnnotation(this.props.numTopics);
         }
         this.displayTopicWords();
-        console.log(this.notes)
     }
 
     render() {
