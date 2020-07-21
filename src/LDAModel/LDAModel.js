@@ -234,7 +234,8 @@ class LDAModel {
                 "originalText" : text,
                 "tokens" : tokens,
                 "topicCounts" : topicCounts,
-                "metadata" : metadata
+                "metadata" : metadata,
+                "dateObject" : new Date(docDate)
             });
 
             // Need to move this selection and adding to #docs-page into a different component
@@ -430,7 +431,6 @@ class LDAModel {
                 }
             }
         });
-        console.log(this.wordTopicCounts)
         this.sortTopicWords();
         this.updateWebpage();
     }
@@ -768,6 +768,87 @@ class LDAModel {
             label: doc.id,
             metaVal: doc.metadata[field]
         }})
+    }
+
+    // /**
+    //  * @summary calculates binned average topic proportions over time
+    //  * @param {Number} topic number of topic to get values for
+    //  * @param {*} granularity number of bins to group times into
+    //  * @returns {Array<{date:Date,topicVal:Number}>} average topic proportion 
+    //  * for time bins. date is the average date in the bin, topicVal is the
+    //  * average topicValue for the bin.
+    //  */
+    // binnedTopicTimeMeans = (topic, granularity) => {
+    //     // Avoid coersing topics into bins if there is no need
+    //     let moreBinsThanTimes = true;
+    //     let uniqueTimes = []
+    //     for(let i = 0; i < this.documents.length; i++) {
+    //         let docTime = this.documents[i].dateObject.getTime();
+    //         if(!(docTime in uniqueTimes)){
+    //             uniqueTimes.push(docTime);
+    //         }
+    //         // Stop iterating if we know the answer
+    //         if(uniqueTimes.length > granularity){
+    //             moreBinsThanTimes = false;
+    //             break;
+    //         }
+    //     }
+    //     if(moreBinsThanTimes){
+    //         return this.topicTimeMeans(topic);
+    //     }
+
+    //     let docDates = this.documents.map(d => {
+    //         d.dateObject.getTime()
+    //     })
+    //     let minDate = new Date(Math.min(docDates));
+    //     let maxDate = new Date(Math.max(docDates));
+    //     let timeStep = (maxDate - minDate)/granularity; // size of bins
+    //     let bins = []
+    //     this.documents.forEach(d =>{
+    //         let binNum = (d.dateObject-minDate)/timeStep;
+
+    //     })
+    // }
+
+    /**
+     * @summary Calculates average topic value over numberToAvg closest
+     * documents and then combines documents with the same time value
+     * @param {Number} topic number of topic
+     * @param {Number} numberToAvg number of documents to average over
+     * @returns {Array<{key:Date,value:Number}>} rolling average topic
+     * value over time
+     */
+    topicTimeRollingAvg = (topic,numberToAvg) => {
+        // Sort documents by time
+        let documents = this.documents.sort((a,b) => a.dateObject-b.dateObject)
+
+        // Calculate rolling average
+        documents = documents.map((doc, i) => {
+            // Control for out of bounds
+            let startIndex = Math.max(0,Math.round(i-numberToAvg/2));
+            let endIndex = Math.min(documents.length,Math.round(i+numberToAvg/2));
+            // Gather values
+            let vals = [];
+            for(let j = startIndex; j < endIndex; j++) {
+                vals.push(documents[j].topicCounts[topic]/
+                    documents[j].tokens.length);
+            }
+            return {
+                rollingAvg: vals.reduce((a,b) => a+b)/vals.length,
+                date: doc.dateObject,
+            }
+        })
+
+        // Combine documents with the same time stamp
+        let topicMeans = d3
+            .nest()
+            .key(function (d) {return d.date; })
+            .rollup(function (d) {return d3
+                .mean(d, function (x) {return x.rollingAvg}); })
+            .entries(documents);
+
+        // Turn key back into Date object
+        return topicMeans.map((d)=>{return{key:new Date(d.key),value:d.value}})
     }
 }
 

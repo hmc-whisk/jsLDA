@@ -18,6 +18,7 @@ import MetaData from '../Pages/MetaData/MetaData';
 
 import stateOfUnionDocs from '../../defaultDocs/stateOfUnionDocs.txt';
 import moviePlotsDocs from '../../defaultDocs/wikiMoviePlots.csv';
+import yelpReviews from '../../defaultDocs/yelpReviews.csv';
 import defaultStops from '../../defaultDocs/stoplist.txt';
 import corrTooltip from '../Tooltip/corrTooltip.png';
 
@@ -53,6 +54,30 @@ class App extends Component {
   };
   };
 
+  // Default notes for correlation
+  corNotes = ``;
+
+  // Functions for notes in correlation
+  changeNotes = (notes) => {
+    this.corNotes = notes;
+  }
+
+  provideNotes = () => {
+    return this.corNotes;
+  }
+
+  // Data and functions for annotations in sidebar
+  annotations = [];
+
+  changeAnnotation = (text,i) => {
+    this.annotations[i] = text;
+  }
+
+  resetNotes = (i) => {
+    this.annotations = new Array(i);
+  }
+
+
   /**
    * @summary Update the page/tab user is looking at, causing rerender of components
    */
@@ -86,6 +111,13 @@ class App extends Component {
     {
       this.setState({
         documentsURL: moviePlotsDocs,
+        defaultExt: "text/csv"
+      });
+    }
+    else if(docName=== "Yelp Reviews")
+    {
+      this.setState({
+        documentsURL: yelpReviews,
         defaultExt: "text/csv"
       });
     }
@@ -245,6 +277,8 @@ class App extends Component {
           numTopics={this.state.ldaModel.numTopics} 
           documents={this.state.ldaModel.documents}
           getTopicCorrelations={this.state.ldaModel.getTopicCorrelations}
+          changeNotes = {this.changeNotes}
+          provideNotes = {this.provideNotes}
           tooltip = {corrTooltip}
           update = {this.state.update}/>;
         break;
@@ -270,12 +304,15 @@ class App extends Component {
           documents={this.state.ldaModel.documents}
           topicWordCounts={this.state.ldaModel.topicWordCounts}
           selectedTopic={this.state.ldaModel.selectedTopic}
-          update = {this.state.update}/>;
+          update = {this.state.update}
+          topicTimeRollingAvg = {this.state.ldaModel.topicTimeRollingAvg}
+          />;
         break;
       case "dl-tab":
         DisplayPage = <DLPage
           numTopics={this.state.ldaModel.numTopics}
           documents={this.state.ldaModel.documents}
+          annotations = {this.annotations}
           wordTopicCounts={this.state.ldaModel.wordTopicCounts}
           topicWordCounts={this.state.ldaModel.topicWordCounts}
           sortTopicWords={this.state.ldaModel.sortTopicWords}
@@ -329,6 +366,8 @@ class App extends Component {
 
 
       <SideBar selectedTopic={this.state.ldaModel.selectedTopic} 
+               changeAnnotation = {this.changeAnnotation}
+               resetAnnotation = {this.resetNotes}
                sortVocabByTopic={this.state.ldaModel.sortVocabByTopic} 
                numTopics={this.state.ldaModel.numTopics} 
                topicWordCounts={this.state.ldaModel.topicWordCounts}
