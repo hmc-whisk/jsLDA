@@ -10,7 +10,7 @@ div.upload { background-color: #ddd; float: right; padding-right: 20px; border-r
 div.upload div { margin: 8px; }
 
 
-div#topics div { color: #555; margin-bottom: 10px; padding: 5px; cursor: default;}
+div#topics div { color: #555; margin-bottom: 1px; padding: 1px; cursor: default;}
 div#topics div.selected { border-right: solid black 2px; font-weight: bold; }
 div#topics div:hover { background-color: #ccc; }
 
@@ -39,3 +39,10 @@ table th { font-weight: normal; padding: 10px 8px; border-bottom: 2px solid blac
 table td { text-align: right; padding: 9px 8px 0px 8px; }
 
 #tooltip { border: solid #ddd 2px; margin:0 2px 0 0; padding:7px 10px; color:#333; border-radius: 4px; background: #FFFFFF; position: absolute; z-index: 10; visibility: hidden; }
+
+/* For empty data field */
+div:empty:before {
+    content:attr(dataText);
+    color:gray;
+    font-style: italic;
+  }
