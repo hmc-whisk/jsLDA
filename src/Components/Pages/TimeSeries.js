@@ -13,7 +13,7 @@ class TimeSeries extends Component {
             timeSeriesHeightTopic: 300,
             numberToAvg: 5,
             fillColor: getComputedStyle(document.documentElement).getPropertyValue('--color2'),
-        strokeColor: getComputedStyle(document.documentElement).getPropertyValue('--color4'),
+            strokeColor: getComputedStyle(document.documentElement).getPropertyValue('--color4'),
         };
         
     }
