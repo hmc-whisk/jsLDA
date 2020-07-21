@@ -91,11 +91,14 @@ class Correlation extends Component {
         var circles = this.vis.selectAll("circle").data(correlationGraph.links);
         circles.exit().remove();
         circles = circles.enter().append("circle").merge(circles);
+
+        var posColor = getComputedStyle(document.documentElement).getPropertyValue('--color2');
+        var negColor = getComputedStyle(document.documentElement).getPropertyValue('--color4');
       
         circles.attr("cx", function(link) { return topicScale(link.source); })
         .attr("cy", function(link) { return topicScale(link.target); })
         .attr("r", function (link) { return radiusScale(Math.abs(link.value)); })
-        .style("fill", function (link) { return link.value > 0.0 ? "#88f" : "#f88"; })
+        .style("fill", function (link) { return link.value > 0.0 ? posColor : negColor; })
         .on("mouseover", function (link) {
           var tooltip = d3.select("#tooltip");
           var tooltipX = this.getBoundingClientRect().x + window.scrollX;

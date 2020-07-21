@@ -7,8 +7,8 @@ import * as d3 from 'd3';
  * based on topic values
  */
 class DocView extends React.Component {
-    static minHighlight = "#ffffff"
-    static maxHighlight = "#00ff34"
+    static minHighlight = getComputedStyle(document.documentElement).getPropertyValue('--color3');
+    static maxHighlight = getComputedStyle(document.documentElement).getPropertyValue('--color2');
 
     render() {
         return(
