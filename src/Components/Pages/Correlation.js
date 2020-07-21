@@ -25,6 +25,7 @@ class Correlation extends Component {
 
 
     }
+    notes = ``;
 
     plotMatrix = () => {
         var left = 50;
@@ -135,6 +136,24 @@ class Correlation extends Component {
 
     componentDidMount() {
       this.vis = d3.select("#corr-page").append("svg").attr("width", this.state.w).attr("height", this.state.h);
+      this.notes = this.props.provideNotes();
+      let notes = this.notes;
+      let changeNotes = this.props.changeNotes
+      d3.select("#corr-page").append("foreignObject")
+      .append('xhtml:div')
+      .append('div')
+      .attr("style", "white-space: pre-line; background: #ECECEC; border-collapse: separate; border-radius: 3px; ")
+      .attr("dataText", "Write your notes here")
+      .attr("contentEditable", true)
+      .on("blur", function() {
+        var innerText = this.innerText 
+        if(innerText[innerText.length-1] === '\n'){
+          innerText = innerText.slice(0,-1)}    
+        notes = innerText;
+        changeNotes(innerText);
+    })
+      .text(notes)
+
       this.plotMatrix();
     }
 
