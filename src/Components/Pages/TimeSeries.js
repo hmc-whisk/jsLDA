@@ -12,7 +12,10 @@ class TimeSeries extends Component {
             timeSeriesHeight: 75,
             timeSeriesHeightTopic: 300,
             numberToAvg: 5,
+            fillColor: getComputedStyle(document.documentElement).getPropertyValue('--color2'),
+        strokeColor: getComputedStyle(document.documentElement).getPropertyValue('--color4'),
         };
+        
     }
     topicTimeGroups = []
 
@@ -45,8 +48,8 @@ class TimeSeries extends Component {
                     .attr("transform", "translate(0," + ((this.state.timeSeriesHeight + this.graphMargin) * topic) + ")"));
             temp_topicTimeGroups[topic]
                 .append("path")
-                .style("fill", "#ccc")
-                .style("stroke", "#fff");
+                .style("fill", this.state.fillColor)
+                .style("stroke", this.state.strokeColor);
             temp_topicTimeGroups[topic].append("text").attr("transform", "translate(5,40)");
             temp_topicTimeGroups[topic].append("g");
         }
@@ -75,8 +78,8 @@ class TimeSeries extends Component {
                 .attr("transform", "translate(50,50)"));
         temp_topicTimeGroups[0]
             .append("path")
-            .style("fill", "#ccc")
-            .style("stroke", "#fff");
+            .style("fill", this.state.fillColor)
+            .style("stroke", this.state.strokeColor);
         temp_topicTimeGroups[0].append("text").attr("transform", "translate(5,20)");
 
         this.topicTimeGroups = temp_topicTimeGroups
@@ -343,7 +346,8 @@ class TimeSeries extends Component {
                 consective time periods present in the data are connected with
                  a straight line. The graphs use a rolling average to cut out 
                  noise. You can change the number of documents this average
-                is taken over by adjusting the graph smoothing parameter.</div>
+                is taken over by adjusting the graph smoothing parameter.
+                Data for plots are available in downloads page.</div>
                 <label for="numberToAvg">Graph Smoothing:</label>
                 <input 
                     onChange = {this.handleNumAvgChange} 

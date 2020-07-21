@@ -57,8 +57,7 @@ class Tooltip extends Component {
     }
   
     overlayOff = () => {
-      // if (document.getElementById("overlay")) {
-      // document.getElementById("overlay").style.display = "none";}
+
       this.setState({
         display: false
       });
@@ -69,43 +68,6 @@ class Tooltip extends Component {
     }
 
     render() {
-      let buttonstyle = {}
-      if (this.state.hover) {
-        buttonstyle = {
-          border: 'solid #ddd 2px',
-          margin:'0 2px 0 0',
-          padding:'7px 10px',
-          display:'block',
-          float: this.props.floatRight ? 'right' : 'none',
-          fontSize : '1em',
-          color:'#333',
-          WebkitUserSelect:'none',
-          MozUserSelect:'none',
-          userSelect: 'none',
-          MozBorderRadius: '4px',
-          borderRadius: '4px',
-          background: '#ddd',
-          cursor:'pointer'
-        }
-      }
-      else {
-        buttonstyle = {
-          border: 'solid #ddd 2px',
-          margin:'0 2px 0 0',
-          padding:'7px 10px',
-          display:'block',
-          float: this.props.floatRight ? 'right' : 'none',
-          fontSize : '1em',
-          color:'#333',
-          WebkitUserSelect:'none',
-          MozUserSelect:'none',
-          userSelect: 'none',
-          MozBorderRadius: '4px',
-          borderRadius: '4px',
-          background: '#FFFFFF',
-          cursor:'auto'
-        }
-      }
 
       return (
         <div > 
@@ -117,9 +79,8 @@ class Tooltip extends Component {
           </div>
           {this.props.displayElement}
         </div>
-
         <div style={{padding:'2px'}}>
-        <button onClick={this.overlayOn} style= {buttonstyle} onMouseEnter={this.toggleHover} onMouseLeave={this.toggleHover}>Help</button>
+        <button onClick={this.overlayOn}  class = "lightButton" onMouseEnter={this.toggleHover} onMouseLeave={this.toggleHover}>Help</button>
         </div>
       </div>
       )

@@ -33,7 +33,7 @@ class BarPlot extends Plot {
         const scaleBars = scaleLinear()
             .domain([0,Math.max(...values)])
             .range([maxHeight,0]);
-        const barFill = "#00b9c9";
+        const barFill = getComputedStyle(document.documentElement).getPropertyValue('--color2');
         
         var Tooltip = select("body")
             .append("div")
