@@ -2,10 +2,6 @@ import React from "react";
 
 class NumTopicSlider extends React.Component {
 
-    constructor(props) {
-        super(props);
-    }
-
 
     handleChange = (e) => {
         const val = e.target.value;

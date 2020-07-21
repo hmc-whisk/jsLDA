@@ -1,6 +1,5 @@
 import React from 'react';
-import defaultDoc from '../../defaultDocs/wikiMoviePlots.csv'
-console.log(defaultDoc)
+import {confirmReset} from '../../funcs/utilityFunctions'
 
 /**
  * @summary An upload component
@@ -17,38 +16,47 @@ console.log(defaultDoc)
  * @prop { onFileUpload() }
  *      - The function to be called when
  *        the upload button is pressed
+ * @prop { modelIsRunning }
+ *      - The boolean dictating whetherc
+ *        certain elements should be disabled
  * 
  */
+
+
+
+
 export function Uploader(props) {
     return (
         <div className="upload">
             <div>
-            <form onSubmit={(event) => { event.preventDefault(); props.onFileUpload(); }}>
+            <form onSubmit={(event) => { confirmReset(event, props.onFileUpload); } }>
                     <label>Default Documents: </label>
                     <select id="defaultDoc" onChange = {(event) => props.onDefaultDocChange(event)} value = {props.docName}>
                         <option value="Movie Plots">Movie Plots</option>
                         <option value="State Of The Union">State Of The Union</option>
+                        <option value="Yelp Reviews">Yelp Reviews</option>
                     </select>
-                    <input type="submit" value="Reset" disabled={props.modelIsRunning} />
+                    <input type="submit" value="Reset" className="darkButton" disabled={props.modelIsRunning} />
                 </form>
             </div>
 
-            <form onSubmit={(event) => { event.preventDefault(); props.onFileUpload(); }}>
-                <div>Or use a custon collection:</div>
+            <form onSubmit={(event) => { confirmReset(event, props.onFileUpload); }}>
+                <div>Or use a custom collection:</div>
                 <div>
                     <label htmlFor="docs-file-input">Documents: </label>
-                    <input id="docs-file-input" type="file"
+                    <input id="docs-file-input" type="file" 
                         onChange={(event) => props.onDocumentFileChange(event)} size="10" />
                 </div>
                 <div>
                     <label htmlFor="stops-file-input" >Stoplist: </label>
-                    <input id="stops-file-input" type="file"
+                    <input id="stops-file-input" type="file" 
                         onChange={(event) => props.onStopwordFileChange(event)} size="10" />
                 </div>
                 <div>
-                    <input type="submit" id="load-inputs" value="Upload" disabled={props.modelIsRunning} />
+                    <input type="submit" id="load-inputs" value="Upload" className="darkButton" disabled={props.modelIsRunning} />
 
                 </div>
+                
             </form>
         </div>
     )
