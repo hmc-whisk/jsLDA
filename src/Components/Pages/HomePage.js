@@ -2,9 +2,12 @@ import React from "react";
 import Uploader from './Uploader';
 import Tooltip from '../Tooltip'
 
+var backColor = getComputedStyle(document.documentElement).getPropertyValue('--color3');
+
+
 class HomePage extends React.Component {
     helpTextStyle = {
-        backgroundColor: "#ffffff",
+        backgroundColor: backColor,
         position: "fixed",
         top: "10%",
         left: "10%",
