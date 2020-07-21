@@ -10,6 +10,8 @@ class SideBar extends Component {
       }
     
     notes = new Array(this.props.numTopics);
+    numBefore = 0
+    reset = 0
 
 
     selectedTopicChange = this.props.selectedTopicChange;
@@ -21,7 +23,7 @@ class SideBar extends Component {
         let notes = this.notes;
 
     
-        for (var topic = 0; topic < this.props.numTopics; topic++) {
+        for (let topic = 0; topic < this.props.numTopics; topic++) {
         if (this.props.topicWordCounts[topic]) {
         topicTopWords.push(topNWords(this.props.topicWordCounts[topic], 10));}
         }
@@ -31,12 +33,13 @@ class SideBar extends Component {
     
         topicLines.exit().remove();
         
-        topic = topicLines
+        let topic = topicLines
         .enter().append("div").attr("class","topics");
 
         topic.append("foreignObject")
         .append('xhtml:div')
         .append('div')
+        .attr("class","textField")
         .attr("style", "white-space: pre-line; background: #ECECEC; border-collapse: separate; border-radius: 3px; ")
         .attr("dataText", "Enter annotation")
         .attr("contentEditable", true)
@@ -45,7 +48,15 @@ class SideBar extends Component {
           if(innerText[innerText.length-1] === '\n'){
             innerText = innerText.slice(0,-1)}    
           notes[i] = innerText;
+          console.log("blur")
+          console.log(notes)
         })
+        .on("notesEdit", function(d, i) { this.innerText = "" } )
+
+        if (this.reset ===1) {
+            d3.select("div#topics").selectAll("div.textField").dispatch("notesEdit")
+            this.reset = 0
+        }
 
         topicLines = topic.append("div")
         .attr("class", "topicwords")
@@ -81,12 +92,14 @@ class SideBar extends Component {
         this.toggleTopicDocuments(0)
     }
 
-    static getDerivedStateFromProps(props, state) {
-    }
-
     componentDidUpdate() {
-        this.notes = new Array(this.props.numTopics)
+        if (this.numBefore != this.props.numTopics) {
+            this.numBefore = this.props.numTopics;
+            this.notes = new Array(this.props.numTopics);
+            this.reset = 1;
+        }
         this.displayTopicWords();
+        console.log(this.notes)
     }
 
     render() {
