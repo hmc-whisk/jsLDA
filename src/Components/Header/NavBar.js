@@ -45,6 +45,12 @@ class NavBar extends React.Component {
 		} else {
 			this.setState({ home: "" });
 		}
+
+		if (id === "meta-tab") {
+			this.setState({ meta: "selected" });
+		} else {
+			this.setState({ meta: "" });
+		}
 	}
 
 
@@ -65,6 +71,7 @@ class NavBar extends React.Component {
 					<li id="docs-tab" className={this.state.docs} onClick={this.handleClick}>Topic Documents</li>
 					<li id="corr-tab" className={this.state.corr} onClick={this.handleClick} >Topic Correlations</li>
 					<li id="ts-tab" className={this.state.ts} onClick={this.handleClick} >Time Series</li>
+					<li id="meta-tab" className={this.state.meta} onClick={this.handleClick} >Metadata</li>
 
 					<li id="dl-tab" className={this.state.dl} onClick={this.handleClick} >Downloads</li>
 					<li id="vocab-tab" className={this.state.vocab} onClick={this.handleClick} >Vocabulary</li>

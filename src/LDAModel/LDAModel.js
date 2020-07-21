@@ -93,7 +93,7 @@ class LDAModel {
     byCountDescending(a, b) { return b.count - a.count; };
 
     /**
-     * @summary Resets data members in preperation
+     * @summary Resets data members in preparation
      * for new documents to be processed
      */
     reset() {
@@ -135,7 +135,6 @@ class LDAModel {
         
             this.sortTopicWords();
         }
-        this.updateWebpage();
     }
 
     /**
@@ -146,15 +145,15 @@ class LDAModel {
      *    - an "id" column will be used for document ids
      *    - a "tag" column will be used to sort/group documents by date
      *    - all other columns are assumed to be metadata
-     * This function calles upon the documentType object member
-     * to determine whether docText is a csv or tsv. If it isnt
+     * This function calls upon the documentType object member
+     * to determine whether docText is a csv or tsv. If it isn't
      * "text/csv" then it will assume it is a tsv.
      */
     _parseDoc = (docText) => {
         this.tokensPerTopic = zeros(this.numTopics);
 
         var parsedDoc
-        if(this.documentType === "text/csv") { // TODO: make sure this gets updated
+        if(this.documentType === "text/csv") {
             parsedDoc = d3.csvParseRows(docText);
         } else {
             parsedDoc = d3.tsvParseRows(docText);
@@ -168,7 +167,7 @@ class LDAModel {
 
         let columnInfo = this._getColumnInfo(parsedDoc[0]);
 
-        // Handle no text colunm
+        // Handle no text column
         if(columnInfo["text"] === -1) {
             alert("No text column found in document file");
             return;
@@ -235,7 +234,8 @@ class LDAModel {
                 "originalText" : text,
                 "tokens" : tokens,
                 "topicCounts" : topicCounts,
-                "metadata" : metadata
+                "metadata" : metadata,
+                "dateObject" : new Date(docDate)
             });
 
             // Need to move this selection and adding to #docs-page into a different component
@@ -431,7 +431,6 @@ class LDAModel {
                 }
             }
         });
-        console.log(this.wordTopicCounts)
         this.sortTopicWords();
         this.updateWebpage();
     }
@@ -637,7 +636,7 @@ class LDAModel {
     }
 
     /**
-     * @summary Adds the appropirate number of sweeps to be performed
+     * @summary Adds the appropriate number of sweeps to be performed
      * @param {Number} numRequests number of iterations to be requested
      */
     addSweepRequest(numRequests) {
@@ -667,6 +666,189 @@ class LDAModel {
      */
     stopSweeps = () => {
         this._requestedSweeps = this._completeSweeps;
+    }
+
+    /**
+     * @summary a list of the metadata fields in the model
+     */
+    get metaFields(){
+        if(!this.documents[0]){
+            throw(Error("No documents in model"));
+        }
+        
+        let fields = []
+        for (const [key,_] of Object.entries(this.documents[0].metadata)){
+            fields.push(key)
+        }
+
+        return fields
+    }
+
+    /**
+     * @summary Returns all values in a metadata field
+     * @param {String} field 
+     * @returns {Array} Values in field
+     */
+    metaValues = (field) => {
+        if(!this.metaFields.includes(field)){
+            console.log("Given metadata field is not in model");
+        }
+
+        // Reduce to unique values
+        return this.documents.reduce((values,doc) => {
+            if(!values.includes(doc.metadata[field])) {
+                values.push(doc.metadata[field])
+            }
+            return values
+        },[])
+    }
+
+    /**
+     * @summary Calculates the average topic value for every value 
+     * in a metadata field
+     * @param {String} field metadata field to get summary of
+     * @param {*} topic topic number to get summary of
+     */
+    metaTopicAverages = (field,topic) => {
+        if(!this.metaFields.includes(field)){
+            throw(Error("Given metadata field is not in model"))
+        }
+
+        const metaValues = this.metaValues(field)
+        let averages = {}
+        for(let value of metaValues) {
+            averages[value] = this.averageTopicValInCatagory(field,value,topic)
+        }
+        return averages;
+    }
+
+    /**
+     * @summary Calculates the average value of a topic in a metadata category
+     * @param {String} field The metavalue field category is in
+     * @param {String} category The category to get average of
+     * @param {Number} topic The number of the topic to get average of
+     */
+    averageTopicValInCatagory = (field, category, topic) => {
+        // Reduce to scores of documents with this metadata value
+        let topicScores = this.documents.reduce((scores,doc) => {
+            // If in category add topic average
+            if(doc.metadata[field] === category){
+                scores.push(doc.topicCounts[topic]/doc.tokens.length)
+            }
+            return scores
+        },[]);
+
+        // Return the average
+        return topicScores.reduce((a,b) => a + b, 0) / topicScores.length
+    }
+
+    /**
+     * @summary The average topic values in a metadata category
+     * @param {String} field Metadata field to category is in
+     * @param {String} category Metadata category to analyze
+     * @returns {Array<Number>} Average topic vals with index matching topic num
+     */
+    topicAvgsForCatagory = (field,category) => {
+        let averages = []
+        for(let topic = 0; topic < this.numTopics; topic++) {
+            averages.push(this.averageTopicValInCatagory(field,category,topic))
+        }
+        return averages;
+    }
+
+    /**
+     * @summary The topic and metadata[field] values for every document
+     * @param {String} field Meta field to pull values of
+     * @param {Number} topic Topic to pull values from
+     * @returns {Array<{topicVal:Number,label:String,metaVal:any}>}
+     */
+    docTopicMetaValues = (field, topic) => {
+        return this.documents.map((doc) => { return {
+            topicVal:doc.topicCounts[topic]/doc.tokens.length,
+            label: doc.id,
+            metaVal: doc.metadata[field]
+        }})
+    }
+
+    // /**
+    //  * @summary calculates binned average topic proportions over time
+    //  * @param {Number} topic number of topic to get values for
+    //  * @param {*} granularity number of bins to group times into
+    //  * @returns {Array<{date:Date,topicVal:Number}>} average topic proportion 
+    //  * for time bins. date is the average date in the bin, topicVal is the
+    //  * average topicValue for the bin.
+    //  */
+    // binnedTopicTimeMeans = (topic, granularity) => {
+    //     // Avoid coersing topics into bins if there is no need
+    //     let moreBinsThanTimes = true;
+    //     let uniqueTimes = []
+    //     for(let i = 0; i < this.documents.length; i++) {
+    //         let docTime = this.documents[i].dateObject.getTime();
+    //         if(!(docTime in uniqueTimes)){
+    //             uniqueTimes.push(docTime);
+    //         }
+    //         // Stop iterating if we know the answer
+    //         if(uniqueTimes.length > granularity){
+    //             moreBinsThanTimes = false;
+    //             break;
+    //         }
+    //     }
+    //     if(moreBinsThanTimes){
+    //         return this.topicTimeMeans(topic);
+    //     }
+
+    //     let docDates = this.documents.map(d => {
+    //         d.dateObject.getTime()
+    //     })
+    //     let minDate = new Date(Math.min(docDates));
+    //     let maxDate = new Date(Math.max(docDates));
+    //     let timeStep = (maxDate - minDate)/granularity; // size of bins
+    //     let bins = []
+    //     this.documents.forEach(d =>{
+    //         let binNum = (d.dateObject-minDate)/timeStep;
+
+    //     })
+    // }
+
+    /**
+     * @summary Calculates average topic value over numberToAvg closest
+     * documents and then combines documents with the same time value
+     * @param {Number} topic number of topic
+     * @param {Number} numberToAvg number of documents to average over
+     * @returns {Array<{key:Date,value:Number}>} rolling average topic
+     * value over time
+     */
+    topicTimeRollingAvg = (topic,numberToAvg) => {
+        // Sort documents by time
+        let documents = this.documents.sort((a,b) => a.dateObject-b.dateObject)
+
+        // Calculate rolling average
+        documents = documents.map((doc, i) => {
+            // Control for out of bounds
+            let startIndex = Math.max(0,Math.round(i-numberToAvg/2));
+            let endIndex = Math.min(documents.length,Math.round(i+numberToAvg/2));
+            // Gather values
+            let vals = [];
+            for(let j = startIndex; j < endIndex; j++) {
+                vals.push(documents[j].topicCounts[topic]/
+                    documents[j].tokens.length);
+            }
+            return {
+                rollingAvg: vals.reduce((a,b) => a+b)/vals.length,
+                date: doc.dateObject,
+            }
+        })
+
+        // Combine documents with the same time stamp
+        let topicMeans = d3
+            .nest()
+            .key(function (d) {return d.date; })
+            .rollup(function (d) {return d3
+                .mean(d, function (x) {return x.rollingAvg}); })
+            .entries(documents);
+
+        // Turn key back into Date object
+        return topicMeans.map((d)=>{return{key:new Date(d.key),value:d.value}})
     }
 }
 

@@ -11,11 +11,13 @@ import Pagination from 'react-bootstrap/Pagination';
 class PageController extends React.Component {
     render() {
         return(
+            <div>
             <Pagination>
                 {this.firstPageButtons}
                 {this.currentPageButtons}
                 {this.lastPageButtons}
             </Pagination>
+            </div>
         )
     }
 

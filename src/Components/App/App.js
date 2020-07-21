@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import * as d3 from 'd3';
 
-import {zeros, getQueryString, getObjectKeys} from '../../funcs/utilityFunctions'
+import {getObjectKeys} from '../../funcs/utilityFunctions'
 import LDAModel from '../../LDAModel/LDAModel'
 
 import Correlation from '../Pages/Correlation';
@@ -14,9 +14,11 @@ import NavBar from '../Header/NavBar';
 import TopBar from '../Header/TopBar';
 import DLPage from '../Pages/DLPage';
 import HomePage from '../Pages/HomePage';
+import MetaData from '../Pages/MetaData/MetaData';
 
 import stateOfUnionDocs from '../../defaultDocs/stateOfUnionDocs.txt';
 import moviePlotsDocs from '../../defaultDocs/wikiMoviePlots.csv';
+import yelpReviews from '../../defaultDocs/yelpReviews.csv';
 import defaultStops from '../../defaultDocs/stoplist.txt';
 import corrTooltip from '../Tooltip/corrTooltip.png';
 
@@ -26,7 +28,6 @@ if (!Object.keys) {
   Object.keys = (getObjectKeys());
 }
 
-var QueryString = getQueryString();
 
 class App extends Component {
   constructor(props) {
@@ -83,7 +84,7 @@ class App extends Component {
 
     let docName = event.target.value;
     this.setState({
-      docName: docName
+      docName: docName,
     });
     
     if(docName === "State Of The Union")
@@ -97,6 +98,13 @@ class App extends Component {
     {
       this.setState({
         documentsURL: moviePlotsDocs,
+        defaultExt: "text/csv"
+      });
+    }
+    else if(docName=== "Yelp Reviews")
+    {
+      this.setState({
+        documentsURL: yelpReviews,
         defaultExt: "text/csv"
       });
     }
@@ -133,16 +141,6 @@ class App extends Component {
     });
 
   }
-
-  // TODO: figure out what is going on here
-  findNumTopics() {
-    this.setState({numTopics: QueryString.topics ? parseInt(QueryString.topics) : 25});
-    if (isNaN(this.state.numTopics)) {
-    alert("The requested number of topics [" + QueryString.topics + "] couldn't be interpreted as a number");
-    this.setState({numTopics:25});
-    }
-  }
-
 
   /**
    * @summary Returns a promise of the correct stopword text
@@ -207,12 +205,13 @@ class App extends Component {
    * @summary This function is the callback for "change"
    */
   onTopicsChange = (val) => {
-    console.log("Changing # of topics: " + val);
+      console.log("Changing # of topics: " + val);
+      
+      var newNumTopics = Number(val);
+      if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.state.ldaModel.numTopics) {
+        this.state.ldaModel.changeNumTopics(Number(val));
+      }
     
-    var newNumTopics = Number(val);
-    if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.state.ldaModel.numTopics) {
-      this.state.ldaModel.changeNumTopics(Number(val));
-    }
   }
 
   componentDidMount() {
@@ -292,7 +291,9 @@ class App extends Component {
           documents={this.state.ldaModel.documents}
           topicWordCounts={this.state.ldaModel.topicWordCounts}
           selectedTopic={this.state.ldaModel.selectedTopic}
-          update = {this.state.update}/>;
+          update = {this.state.update}
+          topicTimeRollingAvg = {this.state.ldaModel.topicTimeRollingAvg}
+          />;
         break;
       case "dl-tab":
         DisplayPage = <DLPage
@@ -314,6 +315,17 @@ class App extends Component {
           docName = {this.state.docName}
           />
         break;
+      case "meta-tab":
+        DisplayPage = <MetaData
+          metaTopicAverages={this.state.ldaModel.metaTopicAverages}
+          metaFields={this.state.ldaModel.metaFields}
+          selectedTopic={this.state.ldaModel.selectedTopic}
+          topicAvgsForCatagory={this.state.ldaModel.topicAvgsForCatagory}
+          metaValues={this.state.ldaModel.metaValues}
+          docTopicMetaValues={this.state.ldaModel.docTopicMetaValues}
+          topicWordCounts={this.state.ldaModel.topicWordCounts}
+          />
+        break;
       default:
         DisplayPage = null;
         break;
@@ -333,7 +345,7 @@ class App extends Component {
             sweepParameter={this.state.sweepParameter}
             onChange={this.changeSweepAmount}
             stopButtonClick={this.state.ldaModel.stopSweeps}
-            iter={this.state.ldaModel._completeSweeps}
+            iter={this.state.ldaModel.completeSweeps}
             modelIsRunning = {this.state.ldaModel.modelIsRunning}
             />
 
@@ -349,7 +361,7 @@ class App extends Component {
       <NavBar onClick={this.changeTab}/>
       <div id="pages">
 
-      {this.state.ldaModel.topicWordCounts.length === 0 ? null : DisplayPage}
+      {!this.state.ldaModel.documents[0] ? null : DisplayPage}
 
 
       </div>

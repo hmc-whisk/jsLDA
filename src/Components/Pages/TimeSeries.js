@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import {topNWords} from '../../funcs/utilityFunctions';
 
 class TimeSeries extends Component {
+    graphMargin = 20;
     constructor(props) {
         super(props);
         this.state = {
@@ -10,6 +11,7 @@ class TimeSeries extends Component {
             timeSeriesWidth: 600, 
             timeSeriesHeight: 75,
             timeSeriesHeightTopic: 300,
+            numberToAvg: 5,
         };
     }
     topicTimeGroups = []
@@ -33,13 +35,14 @@ class TimeSeries extends Component {
         var tsSVG = tsPage
             .append("svg")
             .attr("height", height)
-            .attr("width", this.state.timeSeriesWidth);
+            .attr("width", this.state.timeSeriesWidth)
+            .style("overflow","visible");
         
         for (var topic = 0; topic < this.props.numTopics; topic++) {
             temp_topicTimeGroups
                 .push(tsSVG
                     .append("g")
-                    .attr("transform", "translate(0," + (this.state.timeSeriesHeight * topic) + ")"));
+                    .attr("transform", "translate(0," + ((this.state.timeSeriesHeight + this.graphMargin) * topic) + ")"));
             temp_topicTimeGroups[topic]
                 .append("path")
                 .style("fill", "#ccc")
@@ -84,22 +87,10 @@ class TimeSeries extends Component {
      */
     timeSeries0() {
         let maxTopicMean = 0;
-        let allTopicMeans = []
+        let allTopicMeans = [];
 
         for (let topic = 0; topic < this.props.numTopics; topic++) {
-            var topicProportions = this.props.documents
-                .map(function (d) { 
-                    return {
-                        date: d.date, 
-                        p: d.topicCounts[topic] / d.tokens.length
-                    }; 
-                });
-            var topicMeans = d3
-                .nest()
-                .key(function (d) {return d.date; })
-                .rollup(function (d) {return d3
-                    .mean(d, function (x) {return x.p}); })
-                .entries(topicProportions);
+            var topicMeans = this.props.topicTimeRollingAvg(topic,this.state.numberToAvg);
 
             let thisMaxTopicMean = Math.max(...topicMeans.map(function (d) {
                 return d.value
@@ -123,9 +114,10 @@ class TimeSeries extends Component {
                 .domain([0, maxTopicMean])
                 .range([this.state.timeSeriesHeight, 0]);
 
-            let scale = d3.scaleLinear()
+            var scale = d3.scaleTime()
                 .domain([topicMeans[0].key, topicMeans[topicMeans.length-1].key])
-                .range([0, this.state.timeSeriesWidth]);
+                .range([0, this.state.timeSeriesWidth])
+                .nice();
 
             var area = d3.area()
                 .x(function (d, i) { return scale(d.key); })
@@ -134,7 +126,6 @@ class TimeSeries extends Component {
 
             var x_axis = d3.axisBottom()
                 .scale(scale)
-                .tickFormat(d3.format("d"));
 
             if (this.topicTimeGroups[topic]) {
                 this.topicTimeGroups[topic]
@@ -147,6 +138,7 @@ class TimeSeries extends Component {
                     .select("g")
                     .attr("transform", "translate(0,75)")
                     .call(x_axis)
+                    .selectAll("text")
             }
         }
     }
@@ -158,19 +150,8 @@ class TimeSeries extends Component {
         let maxTopicMean = 0;
 
         let topic = this.props.selectedTopic;
-        var topicProportions = this.props.documents
-                .map(function (d) { 
-                    return {
-                        date: d.date, 
-                        p: d.topicCounts[topic] / d.tokens.length
-                    }; 
-                });
-        var topicMeans = d3
-            .nest()
-            .key(function (d) {return d.date; })
-            .rollup(function (d) {return d3
-                .mean(d, function (x) {return x.p}); })
-            .entries(topicProportions);
+
+        var topicMeans = this.props.topicTimeRollingAvg(topic,this.state.numberToAvg);
 
         let thisMaxTopicMean = Math.max(...topicMeans.map(function (d) {
             return d.value
@@ -188,7 +169,7 @@ class TimeSeries extends Component {
             .domain([0, maxTopicMean])
             .range([this.state.timeSeriesHeightTopic, 0]);
 
-        var scale = d3.scaleLinear()
+        var scale = d3.scaleTime()
             .domain([topicMeans[0].key, topicMeans[topicMeans.length-1].key])
             .range([0, this.state.timeSeriesWidth-50]);
 
@@ -199,7 +180,7 @@ class TimeSeries extends Component {
 
         var x_axis = d3.axisBottom()
             .scale(scale)
-            .tickFormat(d3.format("d"));
+            .tickFormat(d3.timeFormat("%Y-%m-%d"))
         
         var y_axis = d3.axisLeft()
             .scale(yScale);
@@ -221,6 +202,10 @@ class TimeSeries extends Component {
                 .append("g")
                 .attr("transform", "translate(0," + this.state.timeSeriesHeightTopic + ")")
                 .call(x_axis)
+                .selectAll("text")
+                    .attr("transform", "rotate(45)")
+                    .attr("dx", "3em")
+                    .attr("dy", ".1em");
             this.topicTimeGroups[0]
                 .append("g")
                 .call(y_axis)
@@ -234,7 +219,7 @@ class TimeSeries extends Component {
             this.topicTimeGroups[0]
                 .append("text")
                 .style("text-anchor", "middle")
-                .attr("transform", "translate(" + (this.state.timeSeriesWidth/2-20)+ "," + (this.state.timeSeriesHeightTopic+ 40 )+ ")")
+                .attr("transform", "translate(" + (this.state.timeSeriesWidth/2-20)+ "," + (this.state.timeSeriesHeightTopic+ 80)+ ")")
                 .text("Time")
                 .attr("font-weight", 'bold');;    
 
@@ -259,7 +244,7 @@ class TimeSeries extends Component {
     
             focus.append("text")
                 .attr("class", "tooltip-year")
-                .attr("x", 65)
+                .attr("x", 20)
                 .attr("y", -5)
                 .attr("font-weight", 'bold');
 
@@ -290,11 +275,19 @@ class TimeSeries extends Component {
                     d1 = topicMeans[i],
                     d = x0 - d0.key > d1.key - x0 ? d1 : d0;
                     focus.attr("transform", "translate(" + scale(d.key) + "," + yScale(d.value) + ")");
-                    focus.select(".tooltip-year").text(d.key);
+                    focus.select(".tooltip-year").text(d3.timeFormat("%Y-%m-%d")(d.key));
                     focus.select(".tooltip-prop").text(d.value.toPrecision(4));}
                 });
         }
         
+    }
+
+    /**
+     * @summary Returns date string in appropriate format
+     * @param {Date} date date to format
+     */
+    formatDate(date) {
+        return d3.timeFormat("%Y-%m-%d")(date);
     }
   
     componentDidMount() {
@@ -329,13 +322,40 @@ class TimeSeries extends Component {
         return true
     }
 
+    handleNumAvgChange = (event) => {
+        event.preventDefault();
+
+        if(!event.target.value) event.target.value = 1; // Protect from empty field
+
+        this.setState({
+            numberToAvg: event.target.value,
+        })
+    }
+
     render() {
         return (
-            <div id="ts-page" className="page" ref={this._setRef.bind(this)}>
-                <div className="help">Documents are grouped by their "date" field (the second column in the input file). These plots show the average document proportion of each topic at each date value. Date values are <i>not</i> parsed, but simply sorted in the order they appear in the input file.
-                Hover only shows the time fields that are filled. Two consective time periods present in the data are connected with a straight line.</div>
-                <div className="help"></div>
-            </div>        
+            <>
+                <div className="help">Documents are grouped by their "date" 
+                field (the second column in the input file). These plots 
+                show the average document proportion of each topic at each 
+                date value. Date values are parsed as ISO date time strings.
+                Hover only shows the time fields that are filled. Two 
+                consective time periods present in the data are connected with
+                 a straight line. The graphs use a rolling average to cut out 
+                 noise. You can change the number of documents this average
+                is taken over by adjusting the graph smoothing parameter.</div>
+                <label for="numberToAvg">Graph Smoothing:</label>
+                <input 
+                    onChange = {this.handleNumAvgChange} 
+                    type="number" id="numberToAvg" 
+                    value = {this.state.numberToAvg} 
+                    max="1000"
+                    min="5"
+                    step="5"
+                />
+                <div id="ts-page" className="page" ref={this._setRef.bind(this)}>
+                </div>    
+            </>    
         )
     }
 }
