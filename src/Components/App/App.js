@@ -54,14 +54,27 @@ class App extends Component {
   };
   };
 
+  // Default notes for correlation
   corNotes = ``;
 
+  // Functions for notes in correlation
   changeNotes = (notes) => {
     this.corNotes = notes;
   }
 
   provideNotes = () => {
     return this.corNotes;
+  }
+
+  // Data and functions for annotations in sidebar
+  annotations = [];
+
+  changeAnnotation = (text,i) => {
+    this.annotations[i] = text;
+  }
+
+  resetNotes = (i) => {
+    this.annotations = new Array(i);
   }
 
 
@@ -299,6 +312,7 @@ class App extends Component {
         DisplayPage = <DLPage
           numTopics={this.state.ldaModel.numTopics}
           documents={this.state.ldaModel.documents}
+          annotations = {this.annotations}
           wordTopicCounts={this.state.ldaModel.wordTopicCounts}
           topicWordCounts={this.state.ldaModel.topicWordCounts}
           sortTopicWords={this.state.ldaModel.sortTopicWords}
@@ -351,6 +365,8 @@ class App extends Component {
 
 
       <SideBar selectedTopic={this.state.ldaModel.selectedTopic} 
+               changeAnnotation = {this.changeAnnotation}
+               resetAnnotation = {this.resetNotes}
                sortVocabByTopic={this.state.ldaModel.sortVocabByTopic} 
                numTopics={this.state.ldaModel.numTopics} 
                topicWordCounts={this.state.ldaModel.topicWordCounts}

@@ -128,12 +128,13 @@ class DLPage extends React.Component {
     }
       
     saveTopicKeys = () => {
-        var keysCSV = "Topic,TokenCount,Words\n";
+        var keysCSV = "Topic,Annotation,TokenCount,Words\n";
       
         if (this.props.topicWordCounts.length == 0) { this.props.sortTopicWords(); }
       
             for (var topic = 0; topic < this.props.numTopics; topic++) {
-                keysCSV += topic + "," + this.props.tokensPerTopic[topic] + 
+                let annotation = this.props.annotations[topic] ? this.props.annotations[topic]: "";
+                keysCSV += topic + "," + annotation + "," + this.props.tokensPerTopic[topic] + 
                 ",\"" + topNWords(this.props.topicWordCounts[topic], 10)
                 + "\"\n";
             }
