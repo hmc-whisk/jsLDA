@@ -69,7 +69,9 @@ class SideBar extends Component {
 
         .merge(topicLines);
         
-        // topicLines.transition().text(function(d, i) { return "[" + i + "] " + d; });
+        // Format selected topic
+        d3.selectAll("div.topicwords").attr("class", (d, i) =>  
+            i === this.props.selectedTopic ? "topicwords selected" : "topicwords");
     
         return this.props.topicWordCounts;
     }
@@ -87,7 +89,6 @@ class SideBar extends Component {
         this.selectedTopicChange(-1);
         }
         else {
-        d3.selectAll("div.topicwords").attr("class", function(d, i) { return i === topic ? "topicwords selected" : "topicwords"; });
         this.selectedTopicChange(topic);
         }
     }
