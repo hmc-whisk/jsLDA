@@ -44,7 +44,7 @@ class SideBar extends Component {
         .append('xhtml:div')
         .append('div')
         .attr("class","textField")
-        .attr("style", "white-space: pre-line; background: #ECECEC; border-collapse: separate; border-radius: 3px; ")
+        .attr("style", "white-space: pre-line; background: var(--color3Dark); border-collapse: separate; border-radius: 3px; ")
         .attr("dataText", "Enter annotation")
         .attr("contentEditable", true)
         .on("blur", function(d, i) {

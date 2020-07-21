@@ -5,16 +5,17 @@ class VocabTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
-          displayingStopwords: false
+          displayingStopwords: false,
         };
-        var minHighlight = getComputedStyle(document.documentElement).getPropertyValue('--color3');
-    var maxHighlight = getComputedStyle(document.documentElement).getPropertyValue('--color2');
+        
       }
 
       
     
 
-    specificityScale = d3.scaleLinear().domain([0,1]).range([this.minHighlight, this.maxHighlight]);
+    specificityScale = d3.scaleLinear().domain([0,1]).range([
+      getComputedStyle(document.documentElement).getPropertyValue('--color3'), 
+      getComputedStyle(document.documentElement).getPropertyValue('--color2')]);
 
 
       // used by toggleTopicDocuments in topicdocuments, ready, changeNumTopics in processing, sweep in sweep
