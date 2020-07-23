@@ -160,12 +160,12 @@ class HomePage extends React.Component {
                 />
                 <span>
                     <p>
-                        This is a tool designed to train and investigate LDA topic
+                        This is a tool designed to train and investigate LDA (latent Dirichlet allocation) topic
                         models. You can begin by choosing a default dataset to 
                         work with, or by uploading your own dataset. If you are 
                         unfamiliar with topic models, reading <a href = "http://www.scottbot.net/HIAL/index.html@p=19113.html">this</a> is
                         a good place to start. For a more technical explanation 
-                        about LDA, you can look <a href="https://www.pnas.org/content/pnas/101/suppl_1/5228.full.pdf">here</a>.
+                        of LDA, you can look <a href="https://www.pnas.org/content/pnas/101/suppl_1/5228.full.pdf">here</a>.
                     </p>
 
                     <h3>Uploading your own files</h3>
@@ -177,13 +177,16 @@ class HomePage extends React.Component {
 
                     <h3>Training a Model</h3>
                         <p>
-                            Your topics will be meaningless until you spend some time training your model. 
+                            Your topics will start out totally random. To get meaningful topics,
+			    you can have the model run iterations of inference. 
                             Most of the controls for this can be found at the very top of the page.
                         </p>
                         {this.trainingHelp}
                     <h3>Analyzing a Model</h3>
-                        <p>Training a model is only half of the battle. After that, you'll need to figure out what your model has found. jsLDA 2.0 has a few different tools to help you do this.</p>
+                        <p>Once you've trained a model, you'll need to figure out what your model has found. jsLDA 2.0 has a few different tools to help you do this.</p>
                         {this.analyzingHelp}
+		    <h3>About</h3>
+			<p>jsLDA was originated by David Mimno at Cornell University. Further development was conducted at Harvey Mudd College by Alfredo Gomez, Tatsuke Kuze, Theo Bayard de Volo, and Xanda Schofield.</p>
                 </span>
                 
             </div>
