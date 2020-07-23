@@ -79,7 +79,7 @@ div.accordion div.card-header {
 }
 
 
-div.accordion div.card-header:hover{background-color:var(--color4);}
+div.accordion div.card-header:hover{background-color:var(--color1Dark);}
 
 div.accordion div.card {
   display: block;
@@ -189,7 +189,7 @@ div.upload { background-color: var(--color1); float: right; padding-right: 20px;
 div.upload div { margin: 8px; }
 
 
-div#topics div { color: #555; margin-bottom: 1px; padding: 1px; cursor: default;}
+div#topics div { color:var(--color4); margin-bottom: 1px; padding: 1px; cursor: default;}
 div#topics div.selected { border-right: solid black 2px; font-weight: bold; }
 div#topics div:hover { background-color: var(--color4); color: var(--color3) }
 
