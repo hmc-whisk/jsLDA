@@ -3,6 +3,12 @@ jsLDA
 
 An implementation of latent Dirichlet allocation in javascript. This version is an adaptation of David Mimno's [original jsLDA](http://mimno.infosci.cornell.edu/jsLDA/jslda.html). The code has been refactored for maintainability and to make adding features easier. Several features have  been added to streamline serious analysis endevores especially by people without a strong background in computer science. This includes making file formatting more fexible, allowing a custom number of itterations to be specified, and timeseries information to be downloaded. The topic document page has also been revamped, and metadata support is being added.
 
+Installation:
+------------
+
+You will need [npm](https://www.npmjs.com/) installed in order to build and run this code. After downloading the code, navigate to the home directory using the terminal and run `npm install`. To run a local test instance of a development server, run `npm start`. To create a deployable build of the current website, run `npm run build`. The `build/` directory can be copied to any location for use. 
+
+
 Instructions:
 ------------
 
