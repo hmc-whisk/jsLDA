@@ -338,10 +338,12 @@ class TimeSeries extends Component {
     render() {
         return (
             <>
-                <div className="help">Documents are grouped by their "date" 
-                field (the second column in the input file). These plots 
+                <div className="help">Documents are grouped by their "date_tag" 
+                field. These plots 
                 show the average document proportion of each topic at each 
                 date value. Date values are parsed as ISO date time strings.
+                When a topic is selected a more detailed graph of just that topic
+                is shown.
                 Hover only shows the time fields that are filled. Two 
                 consective time periods present in the data are connected with
                  a straight line. The graphs use a rolling average to cut out 
