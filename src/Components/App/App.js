@@ -54,7 +54,7 @@ class App extends Component {
   };
   };
 
-  // Default notes for correlation
+  // Default notes for correlation (placed here to avoid rerendering)
   corNotes = ``;
 
   // Functions for notes in correlation
@@ -66,7 +66,7 @@ class App extends Component {
     return this.corNotes;
   }
 
-  // Data and functions for annotations in sidebar
+  // Data and functions for annotations in sidebar (placed here instead of as a state to avoid re-rendering)
   annotations = [];
 
   changeAnnotation = (text,i) => {
