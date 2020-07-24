@@ -770,46 +770,6 @@ class LDAModel {
         }})
     }
 
-    // /**
-    //  * @summary calculates binned average topic proportions over time
-    //  * @param {Number} topic number of topic to get values for
-    //  * @param {*} granularity number of bins to group times into
-    //  * @returns {Array<{date:Date,topicVal:Number}>} average topic proportion 
-    //  * for time bins. date is the average date in the bin, topicVal is the
-    //  * average topicValue for the bin.
-    //  */
-    // binnedTopicTimeMeans = (topic, granularity) => {
-    //     // Avoid coersing topics into bins if there is no need
-    //     let moreBinsThanTimes = true;
-    //     let uniqueTimes = []
-    //     for(let i = 0; i < this.documents.length; i++) {
-    //         let docTime = this.documents[i].dateObject.getTime();
-    //         if(!(docTime in uniqueTimes)){
-    //             uniqueTimes.push(docTime);
-    //         }
-    //         // Stop iterating if we know the answer
-    //         if(uniqueTimes.length > granularity){
-    //             moreBinsThanTimes = false;
-    //             break;
-    //         }
-    //     }
-    //     if(moreBinsThanTimes){
-    //         return this.topicTimeMeans(topic);
-    //     }
-
-    //     let docDates = this.documents.map(d => {
-    //         d.dateObject.getTime()
-    //     })
-    //     let minDate = new Date(Math.min(docDates));
-    //     let maxDate = new Date(Math.max(docDates));
-    //     let timeStep = (maxDate - minDate)/granularity; // size of bins
-    //     let bins = []
-    //     this.documents.forEach(d =>{
-    //         let binNum = (d.dateObject-minDate)/timeStep;
-
-    //     })
-    // }
-
     /**
      * @summary Calculates average topic value over numberToAvg closest
      * documents and then combines documents with the same time value
@@ -819,6 +779,8 @@ class LDAModel {
      * value over time
      */
     topicTimeRollingAvg = (topic,numberToAvg) => {
+        numberToAvg = Math.max(numberToAvg,1);
+
         // Sort documents by time
         let documents = this.documents.sort((a,b) => a.dateObject-b.dateObject)
 
