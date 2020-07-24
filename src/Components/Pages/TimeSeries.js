@@ -331,7 +331,7 @@ class TimeSeries extends Component {
         if(!event.target.value) event.target.value = 1; // Protect from empty field
 
         this.setState({
-            numberToAvg: event.target.value,
+            numberToAvg: Math.max(1,event.target.value),
         })
     }
 
