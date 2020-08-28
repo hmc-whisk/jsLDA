@@ -23,19 +23,89 @@ class DLPage extends React.Component {
                 <div id="dl-page" className="page">
                     <div className="help">Each file is in comma-separated format.</div>
                     <ul>
-                        <li><a id="doctopics-dl" href="#" download="doctopics.csv" onClick={() => this.saveDocTopics()}>Document topics</a></li>
-                        <li><a id="topicwords-dl" href="#" download="topicwords.csv" onClick={() => this.saveTopicWords()}>Topic words</a></li>
-                        <li><a id="keys-dl" href="#" download="keys.csv" onClick={() => this.saveTopicKeys()}>Topic summaries</a></li>
-                        <li><a id="topictopic-dl" href="#" download="topictopic.csv" onClick={() => this.saveTopicPMI()}>Topic-topic Correlations</a></li>
-                        <li><a id="graph-dl" href="#" download="gephi.csv" onClick={() => this.saveGraph()}>Doc-topic graph file (for Gephi)</a></li>
-                        <li><a id="state-dl" href="#" download="state.csv" onClick={() => this.saveState()}>Complete sampling state</a></li>
-                        <li><a id="topicstime-dl" href="#" download="topicstime.csv" onClick={() => this.saveTopicsTime()}>Topic values over time</a></li>
+                        <li>{this.docTopics}</li>
+                        <li>{this.topicWords}</li>
+                        <li>{this.topicSummary}</li>
+                        <li>{this.topicPMI}</li>
+                        <li>{this.graphFile}</li>
+                        <li>{this.stateFile}</li>
+                        <li>{this.topicsTime}</li>
                     </ul>
                 </div>
 
             </div>
 
         );
+    }
+
+    get docTopics() {
+        let description = "Every topic value for every document."
+        return (
+            <>
+                <a id="doctopics-dl" href="#" download="doctopics.csv" onClick={() => this.saveDocTopics()}>Document topics</a>
+                : {description}
+            </>
+        )
+    }
+
+    get topicWords() {
+        let description = "The average topic value for every word type."
+        return (
+            <>
+                <a id="topicwords-dl" href="#" download="topicwords.csv" onClick={() => this.saveTopicWords()}>Topic words</a>
+                : {description}
+            </>
+        )
+    }
+
+    get topicSummary() {
+        let description = "The topic number, annotation, token count, and top 10 words for every topic."
+        return (
+            <>
+                <a id="keys-dl" href="#" download="keys.csv" onClick={() => this.saveTopicKeys()}>Topic summaries</a>
+                : {description}
+            </>
+        )
+    }
+
+    get topicPMI() {
+        let description = "The pointwise mutual information score between every pair of topics."
+        return (
+            <>
+                <a id="topictopic-dl" href="#" download="topictopic.csv" onClick={() => this.saveTopicPMI()}>Topic-topic Correlations</a>
+                : {description}
+            </>
+        )
+    }
+
+    get graphFile() {
+        let description = "Formatted to make graphs in Gephi."
+        return (
+            <>
+                <a id="graph-dl" href="#" download="gephi.csv" onClick={() => this.saveGraph()}>Doc-topic graph file</a>
+                : {description}
+            </>
+        )
+    }
+
+    get stateFile() {
+        let description = "The topic assignment for every token."
+        return (
+            <>
+                <a id="state-dl" href="#" download="state.csv" onClick={() => this.saveState()}>Complete sampling state</a>
+                : {description}
+            </>
+        )
+    }
+
+    get topicsTime() {
+        let description = "The proportion of tokens assigned to a topic at every time stamp."
+        return (
+            <>
+                <a id="topicstime-dl" href="#" download="topicstime.csv" onClick={() => this.saveTopicsTime()}>Topic values over time</a>
+                : {description}
+            </>
+        )
     }
 
 
