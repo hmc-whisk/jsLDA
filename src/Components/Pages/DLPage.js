@@ -21,7 +21,7 @@ class DLPage extends React.Component {
             <div id="pages">
 
                 <div id="dl-page" className="page">
-                    <div className="help">Each file is in comma-separated format.</div>
+                    <div className="help">Each file is in comma-separated format. Quotation marks are stripped from words upon download to avoid CSV errors.</div>
                     <ul>
                         <li>{this.docTopics}</li>
                         <li>{this.topicWords}</li>
@@ -108,6 +108,15 @@ class DLPage extends React.Component {
         )
     }
 
+    /**
+     * Function to prevent a word from messing up CSVs.
+     * Mostly, quotations need to be stripped.
+     * @param {String} w word to sterilize
+     */
+    sterilizeWord(w) {
+        return w.replace(/"/g,"");
+    }
+
 
     eightDigits = d3.format(".8");
 
@@ -170,28 +179,39 @@ class DLPage extends React.Component {
     }
 
     saveDocTopics = () => {
-        var docTopicsCSV = "";
+        // Set up header
+        var docTopicsCSV = "Document ID";
+        for(let i = 0; i < this.props.numTopics; i++) {
+            docTopicsCSV += "," + "Topic " + i;
+        }
+        docTopicsCSV += "\n";
       
+        // Add rows of each document's topic values
         this.props.documents.forEach(function(d, i) {
-            docTopicsCSV += d.id + "," + d.topicCounts.map((x) => { return d3.format(".8")(x / d.tokens.length); }).join(",") + "\n";
+            docTopicsCSV += '"' + d.id + '"' + "," + d.topicCounts.map((x) => { return d3.format(".8")(x / d.tokens.length); }).join(",") + "\n";
         });
       
+        // Make download link
         d3.select("#doctopics-dl").attr("href", this.toURL(docTopicsCSV, "text/csv"));
     }
       
     saveTopicWords = () => {
         var topicWordsCSV = "word," + d3
             .range(0, this.props.numTopics)
-            .map(function(t) {return "topic" + t; } )
+            .map(function(t) {return "Topic " + t; } )
             .join(",") + "\n";
         for (let word in this.props.wordTopicCounts) {
+            // Strip double quotes because CSV readers can't agree how to deal
+            // with them.
+            word = this.sterilizeWord(word);
+
             let topicProbabilities = zeros(this.props.numTopics);
             for (let topic in this.props.wordTopicCounts[word]) {
                 topicProbabilities[topic] = this.eightDigits(
                     this.props.wordTopicCounts[word][topic] / 
                     this.props.tokensPerTopic[topic]);
             }
-            topicWordsCSV += word + "," + topicProbabilities.join(",") + "\n";
+            topicWordsCSV += '"' + word + '",' + topicProbabilities.join(",") + "\n";
         }
       
         d3.select("#topicwords-dl").attr("href", this.toURL(topicWordsCSV, "text/csv"));
@@ -212,10 +232,23 @@ class DLPage extends React.Component {
         d3.select("#keys-dl").attr("href", this.toURL(keysCSV, "text/csv"));
     }
       
+    /**
+     * @summary downloads a csv of topic - topic pointwise mutual information.
+     */
     saveTopicPMI = () => {
-        var pmiCSV = "";
+        // Add top row of column names
+        var pmiCSV = "Topic Number";
+        for(let i = 0; i < this.props.numTopics; i++) {
+            pmiCSV += "," + i;
+        }
+        pmiCSV += "\n";
+
         var matrix = this.props.getTopicCorrelations();
-        matrix.forEach((row) => { 
+        matrix.forEach((row,i) => { 
+            // Insert topic number
+            pmiCSV += i + ",";
+
+            // Insert PMI values
             pmiCSV += row.map((x) => { 
                 return this.eightDigits(x); 
             }).join(",") + "\n"; 
@@ -225,12 +258,11 @@ class DLPage extends React.Component {
       
     saveGraph = () => {
         var graphCSV = "Source,Target,Weight,Type\n";
-        var topicProbabilities = zeros(this.props.numTopics);
       
         this.props.documents.forEach((d, i) => {
             d.topicCounts.forEach((x, topic) => {
                 if (x > 0.0) {
-                graphCSV += d.id + "," + topic + "," + this.eightDigits(x / d.tokens.length) + ",undirected\n";
+                graphCSV += '"' + d.id + '"' + "," + topic + "," + this.eightDigits(x / d.tokens.length) + ",undirected\n";
                 }
             });
         });
@@ -239,11 +271,11 @@ class DLPage extends React.Component {
     }
       
     saveState = () => {
-        var state = "DocID,Word,Topic";
+        var state = "DocID,Word,Topic\n";
         this.props.documents.forEach(function(d, docID) {
             d.tokens.forEach(function(token, position) {
                 if (! token.isStopword) {
-                    state += docID + ",\"" + token.word + "\"," + token.topic + "\n";
+                    state += docID + ",\"" + this.sterilizeWord(token.word) + "\"," + token.topic + "\n";
                 }
             });
         });
