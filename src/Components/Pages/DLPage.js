@@ -21,21 +21,100 @@ class DLPage extends React.Component {
             <div id="pages">
 
                 <div id="dl-page" className="page">
-                    <div className="help">Each file is in comma-separated format.</div>
+                    <div className="help">Each file is in comma-separated format. Quotation marks are stripped from words upon download to avoid CSV errors.</div>
                     <ul>
-                        <li><a id="doctopics-dl" href="#" download="doctopics.csv" onClick={() => this.saveDocTopics()}>Document topics</a></li>
-                        <li><a id="topicwords-dl" href="#" download="topicwords.csv" onClick={() => this.saveTopicWords()}>Topic words</a></li>
-                        <li><a id="keys-dl" href="#" download="keys.csv" onClick={() => this.saveTopicKeys()}>Topic summaries</a></li>
-                        <li><a id="topictopic-dl" href="#" download="topictopic.csv" onClick={() => this.saveTopicPMI()}>Topic-topic Correlations</a></li>
-                        <li><a id="graph-dl" href="#" download="gephi.csv" onClick={() => this.saveGraph()}>Doc-topic graph file (for Gephi)</a></li>
-                        <li><a id="state-dl" href="#" download="state.csv" onClick={() => this.saveState()}>Complete sampling state</a></li>
-                        <li><a id="topicstime-dl" href="#" download="topicstime.csv" onClick={() => this.saveTopicsTime()}>Topic values over time</a></li>
+                        <li>{this.docTopics}</li>
+                        <li>{this.topicWords}</li>
+                        <li>{this.topicSummary}</li>
+                        <li>{this.topicPMI}</li>
+                        <li>{this.graphFile}</li>
+                        <li>{this.stateFile}</li>
+                        <li>{this.topicsTime}</li>
                     </ul>
                 </div>
 
             </div>
 
         );
+    }
+
+    get docTopics() {
+        let description = "Every topic value for every document."
+        return (
+            <>
+                <a id="doctopics-dl" href="#" download="doctopics.csv" onClick={() => this.saveDocTopics()}>Document topics</a>
+                : {description}
+            </>
+        )
+    }
+
+    get topicWords() {
+        let description = "The average topic value for every word type."
+        return (
+            <>
+                <a id="topicwords-dl" href="#" download="topicwords.csv" onClick={() => this.saveTopicWords()}>Topic words</a>
+                : {description}
+            </>
+        )
+    }
+
+    get topicSummary() {
+        let description = "The topic number, annotation, token count, and top 10 words for every topic."
+        return (
+            <>
+                <a id="keys-dl" href="#" download="keys.csv" onClick={() => this.saveTopicKeys()}>Topic summaries</a>
+                : {description}
+            </>
+        )
+    }
+
+    get topicPMI() {
+        let description = "The pointwise mutual information score between every pair of topics."
+        return (
+            <>
+                <a id="topictopic-dl" href="#" download="topictopic.csv" onClick={() => this.saveTopicPMI()}>Topic-topic Correlations</a>
+                : {description}
+            </>
+        )
+    }
+
+    get graphFile() {
+        let description = "Formatted to make graphs in Gephi."
+        return (
+            <>
+                <a id="graph-dl" href="#" download="gephi.csv" onClick={() => this.saveGraph()}>Doc-topic graph file</a>
+                : {description}
+            </>
+        )
+    }
+
+    get stateFile() {
+        let description = "The topic assignment for every token."
+        return (
+            <>
+                <a id="state-dl" href="#" download="state.csv" onClick={() => this.saveState()}>Complete sampling state</a>
+                : {description}
+            </>
+        )
+    }
+
+    get topicsTime() {
+        let description = "The proportion of tokens assigned to a topic at every time stamp."
+        return (
+            <>
+                <a id="topicstime-dl" href="#" download="topicstime.csv" onClick={() => this.saveTopicsTime()}>Topic values over time</a>
+                : {description}
+            </>
+        )
+    }
+
+    /**
+     * Function to prevent a word from messing up CSVs.
+     * Mostly, quotations need to be stripped.
+     * @param {String} w word to sterilize
+     */
+    sterilizeWord(w) {
+        return w.replace(/"/g,"");
     }
 
 
@@ -100,28 +179,39 @@ class DLPage extends React.Component {
     }
 
     saveDocTopics = () => {
-        var docTopicsCSV = "";
+        // Set up header
+        var docTopicsCSV = "Document ID";
+        for(let i = 0; i < this.props.numTopics; i++) {
+            docTopicsCSV += "," + "Topic " + i;
+        }
+        docTopicsCSV += "\n";
       
+        // Add rows of each document's topic values
         this.props.documents.forEach(function(d, i) {
-            docTopicsCSV += d.id + "," + d.topicCounts.map((x) => { return d3.format(".8")(x / d.tokens.length); }).join(",") + "\n";
+            docTopicsCSV += '"' + d.id + '"' + "," + d.topicCounts.map((x) => { return d3.format(".8")(x / d.tokens.length); }).join(",") + "\n";
         });
       
+        // Make download link
         d3.select("#doctopics-dl").attr("href", this.toURL(docTopicsCSV, "text/csv"));
     }
       
     saveTopicWords = () => {
         var topicWordsCSV = "word," + d3
             .range(0, this.props.numTopics)
-            .map(function(t) {return "topic" + t; } )
+            .map(function(t) {return "Topic " + t; } )
             .join(",") + "\n";
         for (let word in this.props.wordTopicCounts) {
+            // Strip double quotes because CSV readers can't agree how to deal
+            // with them.
+            word = this.sterilizeWord(word);
+
             let topicProbabilities = zeros(this.props.numTopics);
             for (let topic in this.props.wordTopicCounts[word]) {
                 topicProbabilities[topic] = this.eightDigits(
                     this.props.wordTopicCounts[word][topic] / 
                     this.props.tokensPerTopic[topic]);
             }
-            topicWordsCSV += word + "," + topicProbabilities.join(",") + "\n";
+            topicWordsCSV += '"' + word + '",' + topicProbabilities.join(",") + "\n";
         }
       
         d3.select("#topicwords-dl").attr("href", this.toURL(topicWordsCSV, "text/csv"));
@@ -142,10 +232,23 @@ class DLPage extends React.Component {
         d3.select("#keys-dl").attr("href", this.toURL(keysCSV, "text/csv"));
     }
       
+    /**
+     * @summary downloads a csv of topic - topic pointwise mutual information.
+     */
     saveTopicPMI = () => {
-        var pmiCSV = "";
+        // Add top row of column names
+        var pmiCSV = "Topic Number";
+        for(let i = 0; i < this.props.numTopics; i++) {
+            pmiCSV += "," + i;
+        }
+        pmiCSV += "\n";
+
         var matrix = this.props.getTopicCorrelations();
-        matrix.forEach((row) => { 
+        matrix.forEach((row,i) => { 
+            // Insert topic number
+            pmiCSV += i + ",";
+
+            // Insert PMI values
             pmiCSV += row.map((x) => { 
                 return this.eightDigits(x); 
             }).join(",") + "\n"; 
@@ -155,12 +258,11 @@ class DLPage extends React.Component {
       
     saveGraph = () => {
         var graphCSV = "Source,Target,Weight,Type\n";
-        var topicProbabilities = zeros(this.props.numTopics);
       
         this.props.documents.forEach((d, i) => {
             d.topicCounts.forEach((x, topic) => {
                 if (x > 0.0) {
-                graphCSV += d.id + "," + topic + "," + this.eightDigits(x / d.tokens.length) + ",undirected\n";
+                graphCSV += '"' + d.id + '"' + "," + topic + "," + this.eightDigits(x / d.tokens.length) + ",undirected\n";
                 }
             });
         });
@@ -169,11 +271,11 @@ class DLPage extends React.Component {
     }
       
     saveState = () => {
-        var state = "DocID,Word,Topic";
+        var state = "DocID,Word,Topic\n";
         this.props.documents.forEach(function(d, docID) {
             d.tokens.forEach(function(token, position) {
                 if (! token.isStopword) {
-                    state += docID + ",\"" + token.word + "\"," + token.topic + "\n";
+                    state += docID + ",\"" + this.sterilizeWord(token.word) + "\"," + token.topic + "\n";
                 }
             });
         });
