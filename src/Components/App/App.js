@@ -178,6 +178,36 @@ class App extends Component {
   }
 
   /**
+   * @summary Retrieve model file from upload component
+   * @param {Event} event file change event
+   */
+  onModelFileChange = (event) => {
+    event.preventDefault();
+    
+    // Prevent empty file change errors
+    if(!event.target.files[0]){return;}
+
+    this.setState({
+      modelFileArray: [Array.prototype.slice.call(event.target.files)],
+    });
+  }
+
+  onModelUpload = () => {
+    let model = new Promise((resolve) => {
+      const fileSelection = this.state.modelFileArray[0].slice();
+      let reader = new FileReader();
+      reader.onload = function() {
+        resolve(Object.assign(new LDAModel,JSON.parse(reader.result)));
+      };
+      reader.readAsText(fileSelection[0]);
+    }).then((result) => this.setState({
+      ldaModel: result
+    }))
+
+    console.log(model)
+  }
+
+  /**
    * @summary Returns a promise of the correct stopword text
    * @returns {Promise<String>} stopword text
    *  - first document in documentsFileArray state if it exists
@@ -186,7 +216,7 @@ class App extends Component {
   getStoplistUpload = () => (new Promise((resolve) => {
     if (this.state.stoplistFileArray.length === 0) {
         resolve(d3.text(this.state.stopwordsURL));
-      } else {
+    } else {
       const fileSelection = this.state.stoplistFileArray[0].slice();
       let reader = new FileReader();
       reader.onload = function() {
@@ -346,10 +376,12 @@ class App extends Component {
         DisplayPage = <HomePage
           onDocumentFileChange={this.onDocumentFileChange}
           onStopwordFileChange={this.onStopwordFileChange}
-          onFileUpload = {this.queueLoad}
+          onModelFileChange={this.onModelFileChange}
+          onFileUpload={this.queueLoad}
+          onModelUpload={this.onModelUpload}
           modelIsRunning = {this.state.ldaModel.modelIsRunning}
           onDefaultDocChange = {this.onDefaultDocChange}
-          docName = {this.state.docName}
+          docName={this.state.docName}
           />
         break;
       case "meta-tab":
@@ -402,7 +434,7 @@ class App extends Component {
       <NavBar onClick={this.changeTab}/>
       <div id="pages">
 
-      {!this.state.ldaModel.documents[0] ? null : DisplayPage}
+      {!this.state.ldaModel ? null : DisplayPage}
 
       </div>
       </div>
