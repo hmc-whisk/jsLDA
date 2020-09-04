@@ -51,8 +51,21 @@ class App extends Component {
       sweepParameter: 50,
 
       update: true,
+    };
   };
-  };
+
+  downloadModel = () => {
+    const fileName = "jsLDA_Model";
+    const json = JSON.stringify(this.state.ldaModel);
+    const blob = new Blob([json],{type:'application/json'});
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = href;
+    link.download = fileName + ".json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);    
+  }
 
   // Default notes for correlation (placed here to avoid rerendering)
   corNotes = ``;
@@ -326,7 +339,8 @@ class App extends Component {
           topicWordCounts={this.state.ldaModel.topicWordCounts}
           sortTopicWords={this.state.ldaModel.sortTopicWords}
           getTopicCorrelations={this.state.ldaModel.getTopicCorrelations}
-          tokensPerTopic={this.state.ldaModel.tokensPerTopic}/>;
+          tokensPerTopic={this.state.ldaModel.tokensPerTopic}
+          downloadModel={this.downloadModel}/>;
         break;
       case "home-tab":
         DisplayPage = <HomePage
@@ -389,7 +403,6 @@ class App extends Component {
       <div id="pages">
 
       {!this.state.ldaModel.documents[0] ? null : DisplayPage}
-
 
       </div>
       </div>
