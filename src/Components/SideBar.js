@@ -86,10 +86,10 @@ class SideBar extends Component {
         //sortVocabByTopic = false;
         d3.select("#sortVocabByTopic").text("Sort by topic")
 
-        this.selectedTopicChange(-1);
+        this.props.selectedTopicChange(-1);
         }
         else {
-        this.selectedTopicChange(topic);
+        this.props.selectedTopicChange(topic);
         }
     }
     
