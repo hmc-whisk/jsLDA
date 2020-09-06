@@ -33,9 +33,8 @@ class App extends Component {
   constructor(props) {
     super(props)
 
-    let startingNumTopics = 25;
     this.state = {
-      ldaModel: new LDAModel(startingNumTopics, () => {this.forceUpdate(); console.log("Forced Update")}),
+      ldaModel: new LDAModel(this.startingNumTopics, this.modelForceUpdate),
 
       // The file location of default files
       docName: "Movie Plots",
@@ -53,6 +52,16 @@ class App extends Component {
       update: true,
     };
   };
+
+  startingNumTopics = 25;
+
+  /**
+   * @summary function used by model to force update of webpage
+   */
+  modelForceUpdate = () => {
+    this.forceUpdate(); 
+    console.log("Forced Update");
+  }
 
   downloadModel = () => {
     const fileName = "jsLDA_Model";
@@ -195,16 +204,19 @@ class App extends Component {
   onModelUpload = () => {
     let model = new Promise((resolve) => {
       const fileSelection = this.state.modelFileArray[0].slice();
+
+      // Read file
       let reader = new FileReader();
-      reader.onload = function() {
-        resolve(Object.assign(new LDAModel,JSON.parse(reader.result)));
+      reader.onload = () => {
+        // Create a new LDAModel to put uploaded info into
+        resolve(Object.assign(
+          new LDAModel(this.startingNumTopics, this.modelForceUpdate),
+          JSON.parse(reader.result)));
       };
       reader.readAsText(fileSelection[0]);
     }).then((result) => this.setState({
       ldaModel: result
     }))
-
-    console.log(model)
   }
 
   /**
