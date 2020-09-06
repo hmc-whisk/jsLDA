@@ -9,6 +9,17 @@ class TopBar extends React.Component {
     
     }
 
+    static getDerivedStateFromProps(props, state) {
+        if (props.numTopics !== state.sliderValue) {
+          return {
+            sliderValue: props.numTopics,
+          };
+        }
+        
+        // Return null if the state hasn't changed
+        return null;
+    }
+
     /**
      * @summary 
      */
