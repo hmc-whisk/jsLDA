@@ -33,9 +33,8 @@ class App extends Component {
   constructor(props) {
     super(props)
 
-    let startingNumTopics = 25;
     this.state = {
-      ldaModel: new LDAModel(startingNumTopics, () => {this.forceUpdate(); console.log("Forced Update")}),
+      ldaModel: new LDAModel(this.startingNumTopics, this.modelForceUpdate),
 
       // The file location of default files
       docName: "Movie Plots",
@@ -48,11 +47,34 @@ class App extends Component {
       stoplistFileArray: [],
 
       selectedTab: "home-tab",
-      sweepParameter: 50,
+      sweepParameter: 100,
 
       update: true,
+    };
   };
-  };
+
+  startingNumTopics = 25;
+
+  /**
+   * @summary function used by model to force update of webpage
+   */
+  modelForceUpdate = () => {
+    this.forceUpdate(); 
+    console.log("Forced Update");
+  }
+
+  downloadModel = () => {
+    const fileName = "jsLDA_Model";
+    const json = JSON.stringify(this.state.ldaModel);
+    const blob = new Blob([json],{type:'application/json'});
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = href;
+    link.download = fileName + ".json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);    
+  }
 
   // Default notes for correlation (placed here to avoid rerendering)
   corNotes = ``;
@@ -165,6 +187,39 @@ class App extends Component {
   }
 
   /**
+   * @summary Retrieve model file from upload component
+   * @param {Event} event file change event
+   */
+  onModelFileChange = (event) => {
+    event.preventDefault();
+    
+    // Prevent empty file change errors
+    if(!event.target.files[0]){return;}
+
+    this.setState({
+      modelFileArray: [Array.prototype.slice.call(event.target.files)],
+    });
+  }
+
+  onModelUpload = () => {
+    let model = new Promise((resolve) => {
+      const fileSelection = this.state.modelFileArray[0].slice();
+
+      // Read file
+      let reader = new FileReader();
+      reader.onload = () => {
+        // Create a new LDAModel to put uploaded info into
+        resolve(Object.assign(
+          new LDAModel(this.startingNumTopics, this.modelForceUpdate),
+          JSON.parse(reader.result)));
+      };
+      reader.readAsText(fileSelection[0]);
+    }).then((result) => this.setState({
+      ldaModel: result
+    }))
+  }
+
+  /**
    * @summary Returns a promise of the correct stopword text
    * @returns {Promise<String>} stopword text
    *  - first document in documentsFileArray state if it exists
@@ -173,7 +228,7 @@ class App extends Component {
   getStoplistUpload = () => (new Promise((resolve) => {
     if (this.state.stoplistFileArray.length === 0) {
         resolve(d3.text(this.state.stopwordsURL));
-      } else {
+    } else {
       const fileSelection = this.state.stoplistFileArray[0].slice();
       let reader = new FileReader();
       reader.onload = function() {
@@ -326,16 +381,19 @@ class App extends Component {
           topicWordCounts={this.state.ldaModel.topicWordCounts}
           sortTopicWords={this.state.ldaModel.sortTopicWords}
           getTopicCorrelations={this.state.ldaModel.getTopicCorrelations}
-          tokensPerTopic={this.state.ldaModel.tokensPerTopic}/>;
+          tokensPerTopic={this.state.ldaModel.tokensPerTopic}
+          downloadModel={this.downloadModel}/>;
         break;
       case "home-tab":
         DisplayPage = <HomePage
           onDocumentFileChange={this.onDocumentFileChange}
           onStopwordFileChange={this.onStopwordFileChange}
-          onFileUpload = {this.queueLoad}
+          onModelFileChange={this.onModelFileChange}
+          onFileUpload={this.queueLoad}
+          onModelUpload={this.onModelUpload}
           modelIsRunning = {this.state.ldaModel.modelIsRunning}
           onDefaultDocChange = {this.onDefaultDocChange}
-          docName = {this.state.docName}
+          docName={this.state.docName}
           />
         break;
       case "meta-tab":
@@ -361,15 +419,15 @@ class App extends Component {
 
       <div id="main">
 
-      <TopBar completeSweeps={this.state.ldaModel.completeSweeps} 
-            requestedSweeps = {this.state.ldaModel.requestedSweeps} 
+      <TopBar completeSweeps={this.state.ldaModel._completeSweeps} 
+            requestedSweeps = {this.state.ldaModel._requestedSweeps} 
             numTopics={this.state.ldaModel.numTopics} 
             onClick={this.runIterationsClick} 
             updateNumTopics={this.onTopicsChange} 
             sweepParameter={this.state.sweepParameter}
             onChange={this.changeSweepAmount}
             stopButtonClick={this.state.ldaModel.stopSweeps}
-            iter={this.state.ldaModel.completeSweeps}
+            iter={this.state.ldaModel._completeSweeps}
             modelIsRunning = {this.state.ldaModel.modelIsRunning}
             />
 
@@ -388,8 +446,7 @@ class App extends Component {
       <NavBar onClick={this.changeTab}/>
       <div id="pages">
 
-      {!this.state.ldaModel.documents[0] ? null : DisplayPage}
-
+      {!this.state.ldaModel ? null : DisplayPage}
 
       </div>
       </div>
