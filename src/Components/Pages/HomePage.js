@@ -153,7 +153,9 @@ class HomePage extends React.Component {
                 <Uploader 
                     onDocumentFileChange = {this.props.onDocumentFileChange}
                     onStopwordFileChange = {this.props.onStopwordFileChange}
-                    onFileUpload = {this.props.onFileUpload}
+                    onModelFileChange={this.props.onModelFileChange}
+                    onFileUpload={this.props.onFileUpload}
+                    onModelUpload={this.props.onModelUpload}
                     modelIsRunning = {this.props.modelIsRunning}
                     onDefaultDocChange = {this.props.onDefaultDocChange}
                     docName = {this.props.docName}

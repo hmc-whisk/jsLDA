@@ -7,24 +7,25 @@ import {confirmReset} from '../../funcs/utilityFunctions'
  * with a document and stopword file selector as well
  * as a upload button
  * 
- * @prop { onDocumentFileChange(event) }
+ * @prop {Function(Event)} onDocumentFileChange
  *      - The function to be called when
  *        the document file is changed
- * @prop { onStopwordFileChange(event) }
+ * @prop {Function(Event)} onStopwordFileChange
  *      - The function to be called when
  *        the stopword file is changed
- * @prop { onFileUpload() }
+ * @prop {Function(Event)} onFileUpload
  *      - The function to be called when
- *        the upload button is pressed
- * @prop { modelIsRunning }
+ *        the file upload button is pressed
+ * @prop {Boolean} modelIsRunning
  *      - The boolean dictating whetherc
  *        certain elements should be disabled
- * 
+ * @prop {Function(Event)} onModelFileChange
+ *      - The function to be called when the
+ *        model file has been changed
+ * @prop {Function(Event)} onFileUpload
+ *      - The function to be called when
+ *        the model upload button is pressed
  */
-
-
-
-
 export function Uploader(props) {
     return (
         <div className="upload">
@@ -56,7 +57,17 @@ export function Uploader(props) {
                     <input type="submit" id="load-inputs" value="Upload" className="darkButton" disabled={props.modelIsRunning} />
 
                 </div>
-                
+                <div>Or upload a previously generated model:</div>
+            </form>
+            <form onSubmit={(event) => { confirmReset(event, props.onModelUpload); }}>
+                <div>
+                    <label htmlFor="saved-model-input">Model: </label>
+                    <input id="saved-model-input" type="file" 
+                        onChange={(event) => props.onModelFileChange(event)} size="10" />
+                </div>
+                <div>
+                    <input type="submit" id="load-inputs" value="Upload" className="darkButton" disabled={props.modelIsRunning} />
+                </div>
             </form>
         </div>
     )
