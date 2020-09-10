@@ -5,17 +5,22 @@ class TopBar extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = { sliderValue: 25, formValue: 50 };
+        this.state = { 
+            sliderValue: props.numTopics, 
+            formValue: this.props.sweepParameter,
+            numTopics: props.numTopics,
+         };
     
     }
 
     static getDerivedStateFromProps(props, state) {
-        if (props.numTopics !== state.sliderValue) {
+        if (props.numTopics !== state.numTopics) {
           return {
             sliderValue: props.numTopics,
+            numTopics: props.numTopics
           };
         }
-        
+
         // Return null if the state hasn't changed
         return null;
     }
@@ -80,6 +85,7 @@ class TopBar extends React.Component {
 
 
     render() {
+        console.log(this.props.iter);
         return (
             <div id="form" className="top">
                 <form onSubmit = {this.handleSubmit} className = "topForm">
