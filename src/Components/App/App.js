@@ -47,7 +47,7 @@ class App extends Component {
       stoplistFileArray: [],
 
       selectedTab: "home-tab",
-      sweepParameter: 50,
+      sweepParameter: 100,
 
       update: true,
     };
@@ -419,15 +419,15 @@ class App extends Component {
 
       <div id="main">
 
-      <TopBar completeSweeps={this.state.ldaModel.completeSweeps} 
-            requestedSweeps = {this.state.ldaModel.requestedSweeps} 
+      <TopBar completeSweeps={this.state.ldaModel._completeSweeps} 
+            requestedSweeps = {this.state.ldaModel._requestedSweeps} 
             numTopics={this.state.ldaModel.numTopics} 
             onClick={this.runIterationsClick} 
             updateNumTopics={this.onTopicsChange} 
             sweepParameter={this.state.sweepParameter}
             onChange={this.changeSweepAmount}
             stopButtonClick={this.state.ldaModel.stopSweeps}
-            iter={this.state.ldaModel.completeSweeps}
+            iter={this.state.ldaModel._completeSweeps}
             modelIsRunning = {this.state.ldaModel.modelIsRunning}
             />
 
