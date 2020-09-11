@@ -219,9 +219,12 @@ class App extends Component {
         }
       };
       reader.readAsText(fileSelection[0]);
-    }).then((result) => this.setState({
-      ldaModel: result
-    }),(reject) => {
+    }).then((result) => {
+      this.setState({ldaModel: result});
+      // d3 controls itteration display, so this is the only
+      // way to update it.
+      d3.select("#iters").text(result._completeSweeps);
+    },(reject) => {
       alert(reject)
     })
   }
