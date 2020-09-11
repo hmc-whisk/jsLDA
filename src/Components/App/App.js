@@ -202,21 +202,28 @@ class App extends Component {
   }
 
   onModelUpload = () => {
-    let model = new Promise((resolve) => {
+    let model = new Promise((resolve, reject) => {
       const fileSelection = this.state.modelFileArray[0].slice();
 
       // Read file
       let reader = new FileReader();
       reader.onload = () => {
         // Create a new LDAModel to put uploaded info into
-        resolve(Object.assign(
-          new LDAModel(this.startingNumTopics, this.modelForceUpdate),
-          JSON.parse(reader.result)));
+        try {
+          resolve(Object.assign(
+            new LDAModel(this.startingNumTopics, this.modelForceUpdate),
+            JSON.parse(reader.result)));
+
+        } catch {
+          reject("Could not interpret model file.")
+        }
       };
       reader.readAsText(fileSelection[0]);
     }).then((result) => this.setState({
       ldaModel: result
-    }))
+    }),(reject) => {
+      alert(reject)
+    })
   }
 
   /**
