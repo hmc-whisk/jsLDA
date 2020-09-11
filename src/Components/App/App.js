@@ -215,7 +215,7 @@ class App extends Component {
             JSON.parse(reader.result)));
 
         } catch {
-          reject("Could not interpret model file.")
+          reject("Could not interpret model file. Upload canceled.")
         }
       };
       reader.readAsText(fileSelection[0]);
