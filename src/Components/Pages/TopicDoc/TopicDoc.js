@@ -218,7 +218,7 @@ class TopicDoc extends Component {
 
     toggleSalienceDataButton() {
         let message = this.state.useSalience ? 
-            "Use Topic Score" : "Use Salience";
+            "Use Topic Score" : "Use Saliency";
         let buttonstyle = {}
         if (this.state.showMetaData) {
             buttonstyle = {
