@@ -15,6 +15,7 @@ class TopicDoc extends Component {
         this.state = {
             currentPage: 1,
             showMetaData: false,
+            useSalience: false
         }
     }
 
@@ -40,6 +41,52 @@ class TopicDoc extends Component {
             return b.score - a.score;
         });
         return sortedDocuments;
+    }
+
+    get sortedDocumentsSalient() {
+        let sortedDocuments = this.props.documents;
+        let getWordTopicValue = this.getWordTopicValue;
+        // Return default order if no topic is selected
+        if (this.props.selectedTopic === -1) return sortedDocuments;
+
+        sortedDocuments = sortedDocuments.map(function (doc, i) {
+            let words = doc.originalText.split(" ");
+            let sal = words.map((word) => getWordTopicValue(word))
+            let salMod = sal.filter(function (value) {
+                return !Number.isNaN(value);
+            });
+            let total = salMod.length;
+            let totsaliency = salMod.reduce((a, b) => a + b, 0);
+            doc["score"] = totsaliency/total
+            return doc
+        });
+        sortedDocuments.sort(function(a, b) {
+            return b.score - a.score;
+        });
+        return sortedDocuments;
+    }
+
+
+    /**
+     * @summary returns a number indicating the prevalence 
+     * of w in the selected topic
+     * @param {String} w Word to get topic value of
+     */
+    getWordTopicValue = (w) => {
+        w = this.stripWord(w);
+        let salience = this.props.topicSaliency(w,this.props.selectedTopic);
+        if(salience < 0) {salience = 0};
+        return salience;
+    }
+
+    /**
+     * @summary makes a word only lowercase letters
+     * @param {String} w word to strip
+     */
+    stripWord = (w) => {
+        w = w.toLocaleLowerCase();
+        w = w.replace(/[^a-zA-Z]/g,"");
+        return w;
     }
 
     get lastPage() {
@@ -80,6 +127,13 @@ class TopicDoc extends Component {
         })
     }
 
+    toggleSalience = () => {
+        console.log("Toggled")
+        this.setState({
+            useSalience: !this.state.useSalience
+        })
+    }
+
     render() {
         return(
             <div>
@@ -89,11 +143,14 @@ class TopicDoc extends Component {
                     changePage = {this.changePage}
                     lastPage = {this.lastPage}
                 />
+                {this.toggleSalienceDataButton()}
                 {this.toggleMetaDataButton()}
                 </div>
 
                 <DocAccordion
-                    documents = {this.sortedDocuments}
+                    documents = {this.state.useSalience?
+                                    this.sortedDocumentsSalient:
+                                    this.sortedDocuments}
                     startDoc = {this.startDoc}
                     endDoc = {this.endDoc}
                     isTopicSelected = {this.props.selectedTopic !== -1}
@@ -102,6 +159,7 @@ class TopicDoc extends Component {
                     wordTopicCounts = {this.props.wordTopicCounts}
                     highestWordTopicCount = {this.props.highestWordTopicCount}
                     showMetaData = {this.state.showMetaData}
+                    useSalience = {this.state.useSalience}
                     topicSaliency = {this.props.topicSaliency}
                     maxTopicSaliency = {this.props.maxTopicSaliency(this.props.selectedTopic)}
                 />
@@ -152,6 +210,55 @@ class TopicDoc extends Component {
         return(
             <button type="button" id="metaDataButton" 
             onClick={() => this.toggleMetaData()} className = "lightButton">
+                {message}
+            
+            </button>
+        )
+    }
+
+    toggleSalienceDataButton() {
+        let message = this.state.useSalience ? 
+            "Use Topic Score" : "Use Salience";
+        let buttonstyle = {}
+        if (this.state.showMetaData) {
+            buttonstyle = {
+            border: 'solid #ddd 2px',
+            margin:'0 2px 0 0',
+            padding:'7px 10px',
+            display:'block',
+            float:'right',
+            fontSize : '1em',
+            color:'#333',
+            WebkitUserSelect:'none',
+            MozUserSelect:'none',
+            userSelect: 'none',
+            MozBorderRadius: '4px',
+            borderRadius: '4px',
+            background: '#ddd',
+            cursor:'pointer'}
+        }
+        else {
+            buttonstyle = {
+            border: 'solid #ddd 2px',
+            margin:'0 2px 0 0',
+            padding:'7px 10px',
+            display:'block',
+            float: 'right',
+            fontSize : '1em',
+            color:'#333',
+            WebkitUserSelect:'none',
+            MozUserSelect:'none',
+            userSelect: 'none',
+            MozBorderRadius: '4px',
+            borderRadius: '4px',
+            background: '#FFFFFF',
+            cursor:'auto'
+            }
+        }
+      
+        return(
+            <button type="button" id="metaDataButton" 
+            onClick={() => this.toggleSalience()} className = "lightButton">
                 {message}
             
             </button>
