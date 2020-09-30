@@ -52,11 +52,8 @@ class TopicDoc extends Component {
         sortedDocuments = sortedDocuments.map(function (doc, i) {
             let words = doc.originalText.split(" ");
             let sal = words.map((word) => getWordTopicValue(word))
-            let salMod = sal.filter(function (value) {
-                return !Number.isNaN(value);
-            });
-            let total = salMod.length;
-            let totsaliency = salMod.reduce((a, b) => a + b, 0);
+            let total = sal.length;
+            let totsaliency = sal.reduce((a, b) => a + b, 0);
             doc["score"] = totsaliency/total
             return doc
         });
