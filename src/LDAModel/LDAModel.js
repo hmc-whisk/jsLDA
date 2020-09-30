@@ -330,8 +330,9 @@ class LDAModel {
      */
     topicDistinctiveness = (w,t) => {
         if(this.stopwords[w]===1) return 0;
+        let sigma = 1e-50; // To avoid a log of 0
         return this.pTopicGivenWord(w,t)*Math.log(
-            this.pTopicGivenWord(w,t)/this.pTopic(t))
+            this.pTopicGivenWord(w,t)/this.pTopic(t)+sigma)
     }
 
     /**
