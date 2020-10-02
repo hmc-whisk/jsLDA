@@ -99,7 +99,7 @@ class SideBar extends Component {
 
     componentDidUpdate() {
         let resetAnnotation = this.props.resetAnnotation
-        if (this.numBefore != this.props.numTopics) {
+        if (this.numBefore !== this.props.numTopics) {
             this.numBefore = this.props.numTopics;
             this.reset = 1;
             resetAnnotation(this.props.numTopics);

@@ -168,7 +168,7 @@ class App extends Component {
     this.setState({
       documentsFileArray: [Array.prototype.slice.call(event.target.files)],
     });
-    this.state.ldaModel.documentType = event.target.files[0].type;
+    this.state.ldaModel.setDocumentType(event.target.files[0].type);
   }
 
   /**
@@ -202,7 +202,7 @@ class App extends Component {
   }
 
   onModelUpload = () => {
-    let model = new Promise((resolve, reject) => {
+    new Promise((resolve, reject) => {
       const fileSelection = this.state.modelFileArray[0].slice();
 
       // Read file
@@ -256,7 +256,7 @@ class App extends Component {
    */
   getDocsUpload = () => (new Promise((resolve) => {
     if (this.state.documentsFileArray.length === 0) {
-      this.state.ldaModel.documentType = this.state.defaultExt;
+      this.state.ldaModel.setDocumentType(this.state.defaultExt);
       resolve(d3.text(this.state.documentsURL));
     } else {
       const fileSelection = this.state.documentsFileArray[0].slice();

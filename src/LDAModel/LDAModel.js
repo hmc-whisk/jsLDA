@@ -71,6 +71,15 @@ class LDAModel {
         this.modelIsRunning = false;
     }
 
+    /**
+     * Used to set the type of file LDAModel will
+     * treat a documents file as
+     * @param {String} type 
+     */
+    setDocumentType = (type) => {
+        this.documentType = type;
+    }
+
     // Used by sidebar to change selectedTopic and sortVocabByTopic
     selectedTopicChange = (topic) => {
         this.selectedTopic = topic;
@@ -184,10 +193,10 @@ class LDAModel {
                 fields[columnInfo.date_tag];
             var text = fields[columnInfo.text];
             
-            var tokens = [];
+            let tokens = [];
             var rawTokens = text.toLowerCase().match(this._wordPattern);
             if (rawTokens == null) { continue; }
-            var topicCounts = zeros(this.numTopics);
+            let topicCounts = zeros(this.numTopics);
             rawTokens.forEach((word) => {
                 if (word !== "") {
                 var topic = Math.floor(Math.random() * (this.numTopics));
