@@ -43,7 +43,10 @@ class DLPage extends React.Component {
         let description = "A copy of your current model which you can upload to this website and continue working on."
         return (
             <>
-                <a id="model-dl" href="#" onClick={() => this.props.downloadModel()}>LDA Model</a>
+                <button id="model-dl"
+                    onClick={() => this.props.downloadModel()}>
+                    LDA Model
+                </button>
                 : {description}
             </>
         )
@@ -53,7 +56,10 @@ class DLPage extends React.Component {
         let description = "Every topic value for every document."
         return (
             <>
-                <a id="doctopics-dl" href="#" download="doctopics.csv" onClick={() => this.saveDocTopics()}>Document topics</a>
+                <button id="doctopics-dl"
+                    onClick={() => this.saveDocTopics()}>
+                    Document Topics
+                </button>
                 : {description}
             </>
         )
@@ -63,7 +69,10 @@ class DLPage extends React.Component {
         let description = "The average topic value for every word type."
         return (
             <>
-                <a id="topicwords-dl" href="#" download="topicwords.csv" onClick={() => this.saveTopicWords()}>Topic words</a>
+                <button id="topicwords-dl"
+                    onClick={() => this.saveTopicWords()}>
+                    Topic Words
+                </button>
                 : {description}
             </>
         )
@@ -73,7 +82,10 @@ class DLPage extends React.Component {
         let description = "The topic number, annotation, token count, and top 10 words for every topic."
         return (
             <>
-                <a id="keys-dl" href="#" download="keys.csv" onClick={() => this.saveTopicKeys()}>Topic summaries</a>
+                <button id="keys-dl"
+                    onClick={() => this.saveTopicKeys()}>
+                    Topic Summaries
+                </button>
                 : {description}
             </>
         )
@@ -83,7 +95,10 @@ class DLPage extends React.Component {
         let description = "The pointwise mutual information score between every pair of topics."
         return (
             <>
-                <a id="topictopic-dl" href="#" download="topictopic.csv" onClick={() => this.saveTopicPMI()}>Topic-topic Correlations</a>
+                <button id="topictopic-dl"
+                    onClick={() => this.saveTopicPMI()}>
+                    Topic-Topic Correlations
+                </button>
                 : {description}
             </>
         )
@@ -93,7 +108,10 @@ class DLPage extends React.Component {
         let description = "Formatted to make graphs in Gephi."
         return (
             <>
-                <a id="graph-dl" href="#" download="gephi.csv" onClick={() => this.saveGraph()}>Doc-topic graph file</a>
+                <button id="graph-dl"
+                    onClick={() => this.saveGraph()}>
+                    Doc-Topic Graph File
+                </button>
                 : {description}
             </>
         )
@@ -103,7 +121,10 @@ class DLPage extends React.Component {
         let description = "The topic assignment for every token."
         return (
             <>
-                <a id="state-dl" href="#" download="state.csv" onClick={() => this.saveState()}>Complete sampling state</a>
+                <button id="state-dl"
+                    onClick={() => this.saveState()}>
+                    Complete Sampling State
+                </button>
                 : {description}
             </>
         )
@@ -113,7 +134,10 @@ class DLPage extends React.Component {
         let description = "The proportion of tokens assigned to a topic at every time stamp."
         return (
             <>
-                <a id="topicstime-dl" href="#" download="topicstime.csv" onClick={() => this.saveTopicsTime()}>Topic values over time</a>
+                <button id="topicstime-dl"
+                    onClick={() => this.saveTopicsTime()}>
+                    Topic Values Over Time
+                </button>
                 : {description}
             </>
         )
@@ -186,7 +210,8 @@ class DLPage extends React.Component {
             topicTimeCSV = topicTimeCSV.slice(0,-1); // Remove last comma
             topicTimeCSV = topicTimeCSV += "\n";
         }
-        d3.select("#topicstime-dl").attr("href", this.toURL(topicTimeCSV, "text/csv"));
+
+        this.saveFile("topicsTime.csv",topicTimeCSV,"text/csv");
     }
 
     saveDocTopics = () => {
@@ -202,8 +227,8 @@ class DLPage extends React.Component {
             docTopicsCSV += '"' + d.id + '"' + "," + d.topicCounts.map((x) => { return d3.format(".8")(x / d.tokens.length); }).join(",") + "\n";
         });
       
-        // Make download link
-        d3.select("#doctopics-dl").attr("href", this.toURL(docTopicsCSV, "text/csv"));
+        // Download file
+        this.saveFile("docTopics.csv",docTopicsCSV,"text/csv");
     }
       
     saveTopicWords = () => {
@@ -225,7 +250,7 @@ class DLPage extends React.Component {
             topicWordsCSV += '"' + word + '",' + topicProbabilities.join(",") + "\n";
         }
       
-        d3.select("#topicwords-dl").attr("href", this.toURL(topicWordsCSV, "text/csv"));
+        this.saveFile("topicWords.csv",topicWordsCSV,"text/csv");
     }
       
     saveTopicKeys = () => {
@@ -240,7 +265,7 @@ class DLPage extends React.Component {
                 + "\"\n";
             }
       
-        d3.select("#keys-dl").attr("href", this.toURL(keysCSV, "text/csv"));
+        this.saveFile("topicKeys.csv",keysCSV,"text/csv")
     }
       
     /**
@@ -264,7 +289,8 @@ class DLPage extends React.Component {
                 return this.eightDigits(x); 
             }).join(",") + "\n"; 
         });
-        d3.select("#topictopic-dl").attr("href", this.toURL(pmiCSV, "text/csv"));
+
+        this.saveFile("topicCorrelations.csv",pmiCSV,"text/csv");
     }
       
     saveGraph = () => {
@@ -277,23 +303,39 @@ class DLPage extends React.Component {
                 }
             });
         });
-      
-        d3.select("#graph-dl").attr("href", this.toURL(graphCSV, "text/csv"));
+
+        this.saveFile("documentGraph.csv",graphCSV,"text/csv");
     }
       
     saveState = () => {
         var state = "DocID,Word,Topic\n";
-        this.props.documents.forEach(function(d, docID) {
-            d.tokens.forEach(function(token, position) {
+        this.props.documents.forEach((d, docID) => {
+            d.tokens.forEach((token, position) => {
                 if (! token.isStopword) {
                     state += docID + ",\"" + this.sterilizeWord(token.word) + "\"," + token.topic + "\n";
                 }
             });
         });
 
-        d3.select("#state-dl").attr("href", this.toURL(state, "text/csv"));
+        this.saveFile("state.csv",state,"text/csv");
     }
 
+    /**
+     * @summary Saves a given file to the user's computer.
+     * @param {String} fileName Name of file to be saved. Including extension
+     * @param {String} fileContents Contents of file to be saved
+     * @param {String} fileType Type of file to be saved
+     */
+    saveFile(fileName, fileContents, fileType) {
+        const blob = new Blob([fileContents],{type:fileType});
+        const href = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = href;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);    
+    }
 }
 
 export default DLPage;
