@@ -157,7 +157,7 @@ class VocabTable extends Component {
             <div id="vocab-page" className="page">
                 <div className="help">Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0.
                 </div>
-                <div className = "center" className = "help">
+                <div className = "help">
                   <button id="showStops" className = "lightButton">Show stopwords</button>
                   <button id="sortVocabByTopic" className = "lightButton">Sort by topic</button>
                 </div>
