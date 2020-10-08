@@ -686,7 +686,7 @@ class LDAModel {
         }
         
         let fields = []
-        for (const [key,_] of Object.entries(this.documents[0].metadata)){
+        for (const [key,] of Object.entries(this.documents[0].metadata)){
             fields.push(key)
         }
 
