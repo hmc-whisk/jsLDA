@@ -1,6 +1,6 @@
 import React from "react";
 import * as d3 from "d3"
-import {topNWords, zeros} from '../../funcs/utilityFunctions'
+import {topNWords, zeros, saveFile} from '../../funcs/utilityFunctions'
 
 /**
  * @summary Component for Download page
@@ -218,13 +218,13 @@ class DLPage extends React.Component {
         // Set up header
         var docTopicsCSV = "Document ID";
         for(let i = 0; i < this.props.numTopics; i++) {
-            docTopicsCSV += "," + "Topic " + i;
+            docTopicsCSV += ",Topic " + i;
         }
         docTopicsCSV += "\n";
       
         // Add rows of each document's topic values
         this.props.documents.forEach(function(d, i) {
-            docTopicsCSV += '"' + d.id + '"' + "," + d.topicCounts.map((x) => { return d3.format(".8")(x / d.tokens.length); }).join(",") + "\n";
+            docTopicsCSV += '"' + d.id + '",' + d.topicCounts.map((x) => { return d3.format(".8")(x / d.tokens.length); }).join(",") + "\n";
         });
       
         // Download file
@@ -256,7 +256,7 @@ class DLPage extends React.Component {
     saveTopicKeys = () => {
         var keysCSV = "Topic,Annotation,TokenCount,Words\n";
       
-        if (this.props.topicWordCounts.length == 0) { this.props.sortTopicWords(); }
+        if (this.props.topicWordCounts.length === 0) { this.props.sortTopicWords(); }
       
             for (var topic = 0; topic < this.props.numTopics; topic++) {
                 let annotation = this.props.annotations[topic] ? this.props.annotations[topic]: "";
@@ -299,7 +299,7 @@ class DLPage extends React.Component {
         this.props.documents.forEach((d, i) => {
             d.topicCounts.forEach((x, topic) => {
                 if (x > 0.0) {
-                graphCSV += '"' + d.id + '"' + "," + topic + "," + this.eightDigits(x / d.tokens.length) + ",undirected\n";
+                graphCSV += '"' + d.id + '",' + topic + "," + this.eightDigits(x / d.tokens.length) + ",undirected\n";
                 }
             });
         });
@@ -326,15 +326,8 @@ class DLPage extends React.Component {
      * @param {String} fileContents Contents of file to be saved
      * @param {String} fileType Type of file to be saved
      */
-    saveFile(fileName, fileContents, fileType) {
-        const blob = new Blob([fileContents],{type:fileType});
-        const href = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = href;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);    
+    saveFile(fileName, fileContents, fileType) {   
+        saveFile(fileName, fileContents, fileType);
     }
 }
 
