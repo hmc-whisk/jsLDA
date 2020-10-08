@@ -225,3 +225,7 @@ div:empty:before {
     color:gray;
     font-style: italic;
   }
+
+div#dl-page.page ul li {
+  margin-bottom: 10px;
+}

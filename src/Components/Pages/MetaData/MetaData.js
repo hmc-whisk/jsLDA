@@ -3,9 +3,7 @@ import OrderedBarPlot from './OrderedBarPlot'
 import SortedBarPlot from './SortedBarPlot'
 import ScatterPlot from './ScatterPlot'
 import PlotChooser from './PlotChooser'
-import { topNWords } from '../../../funcs/utilityFunctions'
-import * as d3 from "d3"
-import { packSiblings } from 'd3';
+import { topNWords, saveFile } from '../../../funcs/utilityFunctions'
 
 
 
@@ -48,22 +46,20 @@ class MetaData extends Component {
             </h3></div>
         }
 
-        var fileName = this.state.metaField + ".csv";
-
-
         let averages = this.props.metaTopicAverages(
             this.state.metaField, this.props.selectedTopic);
         let data = []
         for (let [key, value] of Object.entries(averages)) {
             data.push({ "label": key, "value": value })
         }
-        return <div><OrderedBarPlot
-            data={data}
-            yLabel={"Average Topic " + this.props.selectedTopic + " Value"}
-            title={"Average Topic " + this.props.selectedTopic +
-                " Value per " + this.state.metaField}
-        />
-            <a id="barPlot-dl" href="#" download={fileName} onClick={() => this.barPlotValueDownload()}>Download {this.state.metaField} data across all topics.</a>
+        return <div>
+            <button id="barPlot-dl" onClick={() => this.barPlotValueDownload()}>Download {this.state.metaField} data across all topics.</button>
+            <OrderedBarPlot
+                data={data}
+                yLabel={"Average Topic " + this.props.selectedTopic + " Value"}
+                title={"Average Topic " + this.props.selectedTopic +
+                    " Value per " + this.state.metaField}
+            />
         </div>
     }
 
@@ -75,21 +71,20 @@ class MetaData extends Component {
             </h3></div>
         }
 
-        var fileName = this.state.metaField + ".csv";
-
         let averages = this.props.metaTopicAverages(
             this.state.metaField, this.props.selectedTopic);
         let data = []
         for (let [key, value] of Object.entries(averages)) {
             data.push({ "label": key, "value": value })
         }
-        return <div><SortedBarPlot
-            data={data}
-            yLabel={"Average Topic " + this.props.selectedTopic + " Value"}
-            title={"Average Topic " + this.props.selectedTopic +
-                " Value per " + this.state.metaField}
-        />
-            <a id="barPlot-dl" href="#" download={fileName} onClick={() => this.barPlotValueDownload()}>Download {this.state.metaField} data across all topics.</a>
+        return <div>
+            <button id="barPlot-dl" onClick={() => this.barPlotValueDownload()}>Download {this.state.metaField} data across all topics.</button>
+            <SortedBarPlot
+                data={data}
+                yLabel={"Average Topic " + this.props.selectedTopic + " Value"}
+                title={"Average Topic " + this.props.selectedTopic +
+                    " Value per " + this.state.metaField}
+            />
         </div>
     }
 
@@ -114,7 +109,7 @@ class MetaData extends Component {
         var barPlotCSV = "";
         barPlotCSV += this.state.metaField;
         for (let i = 0; i < this.props.numTopics; i++) {
-            barPlotCSV += ", " + "topic " + i;
+            barPlotCSV += ", topic " + i;
         }
         barPlotCSV += "\n"
 
@@ -128,7 +123,10 @@ class MetaData extends Component {
             barPlotCSV += "\n"
         }
 
-        d3.select("#barPlot-dl").attr("href", this.toURL(barPlotCSV, "text/csv"));
+        // d3.select("#barPlot-dl").attr("href", this.toURL(barPlotCSV, "text/csv"));
+        var fileName = this.state.metaField + ".csv";
+        let fileType = "text/csv";
+        saveFile(fileName,barPlotCSV,fileType);
 
     }
 
@@ -139,8 +137,6 @@ class MetaData extends Component {
                 Please select a catagory
             </h3></div>
         }
-
-        var fileName = "barPlot.csv"
 
         // Get/format data
         let averages = this.props.topicAvgsForCatagory(
@@ -153,13 +149,14 @@ class MetaData extends Component {
             data.push({ "label": topicLabel, "value": value })
         }
         // Attac (return plot)
-        return <div><SortedBarPlot
-            data={data}
-            yLabel={"Average Topic Value"}
-            title={"Average Topic Values for Documents with " +
-                this.state.catagory + " " + this.state.metaField}
-        />
-        <a id="barPlot-dl" href="#" download={fileName} onClick={() => this.topicBarDownload(data)}>Download {this.state.metaField} Topic Values across all categories.</a>
+        return <div>
+            <button id="barPlot-dl" onClick={() => this.topicBarDownload(data)}>Download {this.state.metaField} Topic Values across all categories.</button>
+            <SortedBarPlot
+                data={data}
+                yLabel={"Average Topic Value"}
+                title={"Average Topic Values for Documents with " +
+                    this.state.catagory + " " + this.state.metaField}
+            />
         </div>
     }
 
@@ -204,7 +201,9 @@ class MetaData extends Component {
             }
             barPlotCSV += "\n"
         }
-        d3.select("#barPlot-dl").attr("href", this.toURL(barPlotCSV, "text/csv"));
+        var fileName = "barPlot.csv"
+        let fileType = "text/csv";
+        saveFile(fileName,barPlotCSV,fileType);
     }
 
     scatterPlot = () => {
