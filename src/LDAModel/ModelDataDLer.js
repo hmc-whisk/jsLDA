@@ -238,4 +238,107 @@ export default class LDAModelDataDLer {
         saveFile(fileName,json,fileType)   
     }
 
+    /**
+     * Downloads a CSV with the average topic value for every topic - catagory 
+     * pair in metaField
+     * @param {String} metaField The data field of interest
+     * 
+     * - Columns:
+     *  - Topic: the topic associated with a row
+     *  - For every catagory - catagory label: the average topic proportion for
+     *    documents with that label.
+     */
+    topicBarDownload = (metaField) => {
+        // get the list of categories without needing to parse entire form again
+        var sel = document.getElementById("categorySelect").options;
+
+        var categories = []
+        for(let i = 0; i < sel.length; i++) {
+            categories.push(sel[i].text);
+        }
+
+        var barPlotCSV = "";
+        barPlotCSV += "Topic";
+        for (let i = 0; i < categories.length; i++) {
+            barPlotCSV += ", " + categories[i];
+        }
+        barPlotCSV += "\n"
+
+        // First gather all the data for current md field.
+        let all_data = []
+        for (let i = 0; i < categories.length; i++) {
+            let averages = this._model.topicAvgsForCatagory(
+                metaField, categories[i]);
+    
+            let data = []
+            for (let [topic, value] of Object.entries(averages)) {
+                let topicLabel = "[" + topic + "] " + topNWords(
+                    this._model.topicWordCounts[topic], 3);
+                data.push({ "label": topicLabel, "value": value })
+            }
+            all_data.push(data)
+        }
+
+        // fill in data, by key
+        for (let j = 0; j < this._model.numTopics; j++) {
+            barPlotCSV += all_data[0][j]["label"];
+            for (let i = 0; i < categories.length; i++) {
+                barPlotCSV += ", " + all_data[i][j]["value"];
+
+            }
+            barPlotCSV += "\n"
+        }
+        var fileName = "barPlot.csv"
+        let fileType = "text/csv";
+        saveFile(fileName,barPlotCSV,fileType);
+    }
+
+    /**
+     * Downloads a CSV with the average topic value for every topic - catagory pair in
+     * metaField
+     * @param {String} metaField The data field of interest
+     * - Columns:
+     *  - [metaField]: The metaField catagory for the row
+     *  - for every topic - topic x: the the average proportion of that topic
+     *    over every document in that catagory.
+     */
+    barPlotValueDownload = (metaField) => {
+
+        // First gather all the data for current md field.
+        let all_data = []
+        for (let i = 0; i < this._model.numTopics; i++) {
+            let averages = this._model.metaTopicAverages(
+                metaField, i);
+            let data = []
+            for (let [key, value] of Object.entries(averages)) {
+                data.push({ "label": key, "value": value })
+
+
+            }
+            all_data.push(data)
+        }
+
+
+        // add heading to csv
+        var barPlotCSV = "";
+        barPlotCSV += metaField;
+        for (let i = 0; i < this._model.numTopics; i++) {
+            barPlotCSV += ", topic " + i;
+        }
+        barPlotCSV += "\n"
+
+        // fill in data, by key
+        for (let j = 0; j < all_data[0].length; j++) {
+            barPlotCSV += all_data[0][j]["label"];
+            for (let i = 0; i < this._model.numTopics; i++) {
+                barPlotCSV += ", " + all_data[i][j]["value"];
+            }
+            barPlotCSV += "\n"
+        }
+
+        var fileName = metaField + ".csv";
+        let fileType = "text/csv";
+        saveFile(fileName,barPlotCSV,fileType);
+
+    }
 }

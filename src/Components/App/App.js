@@ -31,8 +31,8 @@ if (!Object.keys) {
 
 
 class App extends Component {
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
 
     let ldaModel = new LDAModel(this.startingNumTopics, this.modelForceUpdate);
 
@@ -388,16 +388,7 @@ class App extends Component {
         break;
       case "dl-tab":
         DisplayPage = <DLPage
-          modelDataDLer={this.state.modelDataDLer}
-          numTopics={this.state.ldaModel.numTopics}
-          documents={this.state.ldaModel.documents}
-          annotations = {this.annotations}
-          wordTopicCounts={this.state.ldaModel.wordTopicCounts}
-          topicWordCounts={this.state.ldaModel.topicWordCounts}
-          sortTopicWords={this.state.ldaModel.sortTopicWords}
-          getTopicCorrelations={this.state.ldaModel.getTopicCorrelations}
-          tokensPerTopic={this.state.ldaModel.tokensPerTopic}
-          downloadModel={this.downloadModel}/>;
+          modelDataDLer={this.state.modelDataDLer}/>;
         break;
       case "home-tab":
         DisplayPage = <HomePage
@@ -420,8 +411,7 @@ class App extends Component {
           metaValues={this.state.ldaModel.metaValues}
           docTopicMetaValues={this.state.ldaModel.docTopicMetaValues}
           topicWordCounts={this.state.ldaModel.topicWordCounts}
-          numTopics={this.state.ldaModel.numTopics}
-          />
+          modelDataDLer={this.state.modelDataDLer}/>
         break;
       default:
         DisplayPage = null;
