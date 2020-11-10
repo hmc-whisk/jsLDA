@@ -3,7 +3,7 @@ import OrderedBarPlot from './OrderedBarPlot'
 import SortedBarPlot from './SortedBarPlot'
 import ScatterPlot from './ScatterPlot'
 import PlotChooser from './PlotChooser'
-import { topNWords, saveFile } from '../../../funcs/utilityFunctions'
+import { topNWords} from '../../../funcs/utilityFunctions'
 
 
 
@@ -89,45 +89,7 @@ class MetaData extends Component {
     }
 
     barPlotValueDownload = () => {
-
-        // First gather all the data for current md field.
-        let all_data = []
-        for (let i = 0; i < this.props.numTopics; i++) {
-            let averages = this.props.metaTopicAverages(
-                this.state.metaField, i);
-            let data = []
-            for (let [key, value] of Object.entries(averages)) {
-                data.push({ "label": key, "value": value })
-
-
-            }
-            all_data.push(data)
-        }
-
-
-        // add heading to csv
-        var barPlotCSV = "";
-        barPlotCSV += this.state.metaField;
-        for (let i = 0; i < this.props.numTopics; i++) {
-            barPlotCSV += ", topic " + i;
-        }
-        barPlotCSV += "\n"
-
-        // fill in data, by key
-        for (let j = 0; j < all_data[0].length; j++) {
-            barPlotCSV += all_data[0][j]["label"];
-            for (let i = 0; i < this.props.numTopics; i++) {
-                barPlotCSV += ", " + all_data[i][j]["value"];
-
-            }
-            barPlotCSV += "\n"
-        }
-
-        // d3.select("#barPlot-dl").attr("href", this.toURL(barPlotCSV, "text/csv"));
-        var fileName = this.state.metaField + ".csv";
-        let fileType = "text/csv";
-        saveFile(fileName,barPlotCSV,fileType);
-
+        this.props.modelDataDLer.barPlotValueDownload(this.state.metaField);
     }
 
     topicBarPlot = () => {
@@ -160,50 +122,8 @@ class MetaData extends Component {
         </div>
     }
 
-    topicBarDownload = (data) => {
-
-        // get the list of categories without needing to parse entire form again
-        var sel = document.getElementById("categorySelect").options;
-        var categories = []
-        for(let i = 0; i < sel.length; i++) {
-            categories.push(sel[i].text);
-        }
-
-        var barPlotCSV = "";
-        barPlotCSV += "Topic Number";
-        for (let i = 0; i < categories.length; i++) {
-            barPlotCSV += ", " + categories[i];
-        }
-        barPlotCSV += "\n"
-
-        // First gather all the data for current md field.
-        let all_data = []
-        for (let i = 0; i < categories.length; i++) {
-            let averages = this.props.topicAvgsForCatagory(
-                this.state.metaField, categories[i]);
-    
-            let data = []
-            for (let [topic, value] of Object.entries(averages)) {
-                let topicLabel = "[" + topic + "] " + topNWords(
-                    this.props.topicWordCounts[topic], 3);
-                data.push({ "label": topicLabel, "value": value })
-            }
-            all_data.push(data)
-        }
-        console.log(all_data)
-
-        // fill in data, by key
-        for (let j = 0; j < this.props.numTopics; j++) {
-            barPlotCSV += all_data[0][j]["label"];
-            for (let i = 0; i < categories.length; i++) {
-                barPlotCSV += ", " + all_data[i][j]["value"];
-
-            }
-            barPlotCSV += "\n"
-        }
-        var fileName = "barPlot.csv"
-        let fileType = "text/csv";
-        saveFile(fileName,barPlotCSV,fileType);
+    topicBarDownload = () => {
+        this.props.modelDataDLer.topicBarDownload(this.state.metaField);
     }
 
     scatterPlot = () => {

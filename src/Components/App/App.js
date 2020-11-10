@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 
 import {getObjectKeys} from '../../funcs/utilityFunctions'
 import LDAModel from '../../LDAModel/LDAModel'
+import ModelDataDLer from '../../LDAModel/ModelDataDLer'
 
 import Correlation from '../Pages/Correlation';
 import TopicDoc from '../Pages/TopicDoc/TopicDoc';
@@ -33,8 +34,11 @@ class App extends Component {
   constructor(props) {
     super(props)
 
+    let ldaModel = new LDAModel(this.startingNumTopics, this.modelForceUpdate);
+
     this.state = {
-      ldaModel: new LDAModel(this.startingNumTopics, this.modelForceUpdate),
+      ldaModel: ldaModel,
+      modelDataDLer: new ModelDataDLer(ldaModel,this),
 
       // The file location of default files
       docName: "Movie Plots",
@@ -384,15 +388,7 @@ class App extends Component {
         break;
       case "dl-tab":
         DisplayPage = <DLPage
-          numTopics={this.state.ldaModel.numTopics}
-          documents={this.state.ldaModel.documents}
-          annotations = {this.annotations}
-          wordTopicCounts={this.state.ldaModel.wordTopicCounts}
-          topicWordCounts={this.state.ldaModel.topicWordCounts}
-          sortTopicWords={this.state.ldaModel.sortTopicWords}
-          getTopicCorrelations={this.state.ldaModel.getTopicCorrelations}
-          tokensPerTopic={this.state.ldaModel.tokensPerTopic}
-          downloadModel={this.downloadModel}/>;
+          modelDataDLer={this.state.modelDataDLer}/>;
         break;
       case "home-tab":
         DisplayPage = <HomePage
@@ -415,8 +411,7 @@ class App extends Component {
           metaValues={this.state.ldaModel.metaValues}
           docTopicMetaValues={this.state.ldaModel.docTopicMetaValues}
           topicWordCounts={this.state.ldaModel.topicWordCounts}
-          numTopics={this.state.ldaModel.numTopics}
-          />
+          modelDataDLer={this.state.modelDataDLer}/>
         break;
       default:
         DisplayPage = null;
