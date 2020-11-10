@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 
 import {getObjectKeys} from '../../funcs/utilityFunctions'
 import LDAModel from '../../LDAModel/LDAModel'
+import ModelDataDLer from '../../LDAModel/ModelDataDLer'
 
 import Correlation from '../Pages/Correlation';
 import TopicDoc from '../Pages/TopicDoc/TopicDoc';
@@ -30,11 +31,14 @@ if (!Object.keys) {
 
 
 class App extends Component {
-  constructor(props) {
-    super(props)
+  constructor() {
+    super()
+
+    let ldaModel = new LDAModel(this.startingNumTopics, this.modelForceUpdate);
 
     this.state = {
-      ldaModel: new LDAModel(this.startingNumTopics, this.modelForceUpdate),
+      ldaModel: ldaModel,
+      modelDataDLer: new ModelDataDLer(ldaModel,this),
 
       // The file location of default files
       docName: "Movie Plots",
@@ -384,6 +388,7 @@ class App extends Component {
         break;
       case "dl-tab":
         DisplayPage = <DLPage
+          modelDataDLer={this.state.modelDataDLer}
           numTopics={this.state.ldaModel.numTopics}
           documents={this.state.ldaModel.documents}
           annotations = {this.annotations}

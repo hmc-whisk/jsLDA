@@ -1,15 +1,28 @@
 import {topNWords, zeros, saveFile} from '../funcs/utilityFunctions'
+import * as d3 from "d3"
 
 /**
  * A class that allows users to download information about an LDA model
+ * @author Theo Bayard de Volo
  */
 export default class LDAModelDataDLer {
     /**
      * A class that allows users to download information about an LDA model
      * @param {LDAModel} model the model to dl data from
+     * @param {Ojbect} annotationHolder an object that has an annotations 
+     * member variable with an array of topic annotations
+     * @note Okay yes, annotationHolder is a weird object to pass. 
+     * But, App likes to change the refference of the annotations, so
+     * that reference cannot be passed. This ensures the correct annotations
+     * are used.
      */
-    constructor(model) {
+    constructor(model, annotationHolder) {
         this._model = model;
+        this._annotationHolder = annotationHolder;
+    }
+
+    get _annotations () {
+        return this._annotationHolder.annotations;
     }
 
     /**
@@ -17,14 +30,14 @@ export default class LDAModelDataDLer {
      * Mostly, quotations need to be stripped.
      * @param {String} w word to sterilize
      */
-    sterilizeWord(w) {
+    _sterilizeWord(w) {
         return w.replace(/"/g,"");
     }
 
     /**
      * Truncates number to 8 digits
      */
-    eightDigits = d3.format(".8");
+    _eightDigits = d3.format(".8");
 
     /**
      * CSV of topics over time
@@ -37,8 +50,8 @@ export default class LDAModelDataDLer {
         var topicTimeCSV = "Topic Number";
 
         // Add a csv row for every topic
-        for (let topic = 0; topic < this.props.numTopics; topic++) {
-            var topicProportions = this.props.documents
+        for (let topic = 0; topic < this._model.numTopics; topic++) {
+            var topicProportions = this._model.documents
                 .map(function (d) { 
                     return {
                         date: d.date, 
@@ -83,13 +96,13 @@ export default class LDAModelDataDLer {
     saveDocTopics = () => {
         // Set up header
         var docTopicsCSV = "Document ID";
-        for(let i = 0; i < this.props.numTopics; i++) {
+        for(let i = 0; i < this._model.numTopics; i++) {
             docTopicsCSV += ",Topic " + i;
         }
         docTopicsCSV += "\n";
       
         // Add rows of each document's topic values
-        this.props.documents.forEach(function(d, i) {
+        this._model.documents.forEach(function(d, i) {
             docTopicsCSV += '"' + d.id + '",' + d.topicCounts.map((x) => { return d3.format(".8")(x / d.tokens.length); }).join(",") + "\n";
         });
       
@@ -105,19 +118,19 @@ export default class LDAModelDataDLer {
      */
     saveTopicWords = () => {
         var topicWordsCSV = "word," + d3
-            .range(0, this.props.numTopics)
+            .range(0, this._model.numTopics)
             .map(function(t) {return "Topic " + t; } )
             .join(",") + "\n";
-        for (let word in this.props.wordTopicCounts) {
+        for (let word in this._model.wordTopicCounts) {
             // Strip double quotes because CSV readers can't agree how to deal
             // with them.
-            word = this.sterilizeWord(word);
+            word = this._sterilizeWord(word);
 
-            let topicProbabilities = zeros(this.props.numTopics);
-            for (let topic in this.props.wordTopicCounts[word]) {
-                topicProbabilities[topic] = this.eightDigits(
-                    this.props.wordTopicCounts[word][topic] / 
-                    this.props.tokensPerTopic[topic]);
+            let topicProbabilities = zeros(this._model.numTopics);
+            for (let topic in this._model.wordTopicCounts[word]) {
+                topicProbabilities[topic] = this._eightDigits(
+                    this._model.wordTopicCounts[word][topic] / 
+                    this._model.tokensPerTopic[topic]);
             }
             topicWordsCSV += '"' + word + '",' + topicProbabilities.join(",") + "\n";
         }
@@ -136,12 +149,12 @@ export default class LDAModelDataDLer {
     saveTopicKeys = () => {
         var keysCSV = "Topic,Annotation,TokenCount,Words\n";
       
-        if (this.props.topicWordCounts.length === 0) { this.props.sortTopicWords(); }
+        if (this._model.topicWordCounts.length === 0) { this._model.sortTopicWords(); }
       
-            for (var topic = 0; topic < this.props.numTopics; topic++) {
-                let annotation = this.props.annotations[topic] ? this.props.annotations[topic]: "";
-                keysCSV += topic + "," + annotation + "," + this.props.tokensPerTopic[topic] + 
-                ",\"" + topNWords(this.props.topicWordCounts[topic], 10)
+            for (var topic = 0; topic < this._model.numTopics; topic++) {
+                let annotation = this._annotations[topic] ? this._annotations[topic]: "";
+                keysCSV += topic + "," + annotation + "," + this._model.tokensPerTopic[topic] + 
+                ",\"" + topNWords(this._model.topicWordCounts[topic], 10)
                 + "\"\n";
             }
       
@@ -162,14 +175,14 @@ export default class LDAModelDataDLer {
         }
         pmiCSV += "\n";
 
-        var matrix = this.props.getTopicCorrelations();
+        var matrix = this._model.getTopicCorrelations();
         matrix.forEach((row,i) => { 
             // Insert topic number
             pmiCSV += i + ",";
 
             // Insert PMI values
             pmiCSV += row.map((x) => { 
-                return this.eightDigits(x); 
+                return this._eightDigits(x); 
             }).join(",") + "\n"; 
         });
 
@@ -190,7 +203,7 @@ export default class LDAModelDataDLer {
         this._model.documents.forEach((d) => {
             d.topicCounts.forEach((x, topic) => {
                 if (x > 0.0) {
-                graphCSV += '"' + d.id + '",' + topic + "," + this.eightDigits(x / d.tokens.length) + ",undirected\n";
+                graphCSV += '"' + d.id + '",' + topic + "," + this._eightDigits(x / d.tokens.length) + ",undirected\n";
                 }
             });
         });
@@ -210,7 +223,7 @@ export default class LDAModelDataDLer {
         this._model.documents.forEach((d) => {
             d.tokens.forEach((token) => {
                 if (! token.isStopword) {
-                    state += d.id + ",\"" + this.sterilizeWord(token.word) + "\"," + token.topic + "\n";
+                    state += d.id + ",\"" + this._sterilizeWord(token.word) + "\"," + token.topic + "\n";
                 }
             });
         });
