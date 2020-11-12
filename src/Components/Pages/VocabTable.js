@@ -160,6 +160,7 @@ class VocabTable extends Component {
                 <div className = "help">
                   <button id="showStops" className = "lightButton">Show stopwords</button>
                   <button id="sortVocabByTopic" className = "lightButton">Sort by topic</button>
+                  {this.stopwordsDLButton}
                 </div>
                 <table id="vocab-table" className="center">
                     <thead><tr><th>Word</th><th>Frequency</th><th>Topic Specificity</th><th>Stoplist</th></tr></thead>
@@ -167,6 +168,17 @@ class VocabTable extends Component {
                 </table>
             </div>
         )
+    }
+
+    get stopwordsDLButton() {
+      return (
+          <>
+              <button id="stopword-dl" className = "lightButton"
+                  onClick={() => this.props.modelDataDLer.downloadStopwords()}>
+                  Download Stopwords 
+              </button>
+          </>
+      )
     }
 }
 
