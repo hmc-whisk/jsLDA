@@ -373,7 +373,9 @@ class App extends Component {
           addStop = {this.state.ldaModel.addStop}
           removeStop = {this.state.ldaModel.removeStop}
           update = {this.state.update}
-          modelIsRunning = {this.state.ldaModel.modelIsRunning}/>;
+          modelIsRunning = {this.state.ldaModel.modelIsRunning}
+          modelDataDLer = {this.state.modelDataDLer}
+          />;
           
         break;
       case "ts-tab":
