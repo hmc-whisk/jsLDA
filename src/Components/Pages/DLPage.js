@@ -23,6 +23,7 @@ class DLPage extends React.Component {
                         <li>{this.graphFile}</li>
                         <li>{this.stateFile}</li>
                         <li>{this.topicsTime}</li>
+                        <li>{this.stopwordsFile}</li>
                     </ul>
                 </div>
 
@@ -129,6 +130,19 @@ class DLPage extends React.Component {
                 <button id="topicstime-dl"
                     onClick={() => this.props.modelDataDLer.saveTopicsTime()}>
                     Topic Values Over Time
+                </button>
+                : {description}
+            </>
+        )
+    }
+
+    get stopwordsFile() {
+        let description = "A text file of all the current stopwords with one word per line."
+        return (
+            <>
+                <button id="stopword-dl"
+                    onClick={() => this.props.modelDataDLer.downloadStopwords()}>
+                    Stopwords
                 </button>
                 : {description}
             </>

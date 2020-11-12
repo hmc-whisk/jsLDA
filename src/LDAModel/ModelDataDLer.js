@@ -231,11 +231,27 @@ export default class LDAModelDataDLer {
         saveFile("state.csv",state,"text/csv");
     }
 
+    /**
+     * Downloads the json for active LDAModel object
+     */
     downloadModel = () => {
         const fileName = "jsLDA_Model.json";
         const json = JSON.stringify(this._model);
         const fileType = 'application/json'
         saveFile(fileName,json,fileType)   
+    }
+
+    /**
+     * Downloads a txt file of all stopwords with one stopword per line
+     */
+    downloadStopwords = () => {
+        let stopwordFile = ""
+        Object.keys(this._model.stopwords).forEach( stopword => {
+            stopwordFile += stopword + "\n";
+        })
+        let fileName = "stopwords.txt"
+        let fileType = "text/txt";
+        saveFile(fileName,stopwordFile,fileType);
     }
 
     /**
