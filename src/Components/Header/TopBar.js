@@ -1,5 +1,6 @@
 import React from "react";
 import NumTopicSlider from "./NumTopicSlider"
+import Checkbox from '@bit/mui-org.material-ui.checkbox';
 class TopBar extends React.Component {
 
     constructor(props) {
@@ -9,9 +10,10 @@ class TopBar extends React.Component {
             sliderValue: props.numTopics, 
             formValue: this.props.sweepParameter,
             numTopics: props.numTopics,
+            checked: false,
          };
-    
     }
+
 
     static getDerivedStateFromProps(props, state) {
         if (props.numTopics !== state.numTopics) {
@@ -83,6 +85,11 @@ class TopBar extends React.Component {
 
     }
 
+    handleCheck = (event) => {
+        this.setState({checked: event.target.checked});
+        this.props._hyperTune(event.target.checked);
+      };
+
 
     render() {
         console.log(this.props.iter);
@@ -99,6 +106,8 @@ class TopBar extends React.Component {
 
                 Iterations:<span id="iters" > {this.props.iter} </span>
 
+
+
                     <NumTopicSlider
                         onChange={this.updateNumDisplay}
                         sliderValue={this.state.sliderValue}
@@ -106,6 +115,13 @@ class TopBar extends React.Component {
                         onInput={(event) => this.updateNumDisplay(event)}
                         modelIsRunning={this.props.modelIsRunning}
                     />
+                    <Checkbox
+                        checked={this.checked}
+                        onChange={this.handleCheck}
+                        inputProps={{ 'aria-label': 'primary checkbox' }}
+                        color="primary"
+                    />
+                    Alpha Tuning
                 </form>
             </div>
 

@@ -57,18 +57,26 @@ class LDAModel {
 
         this._topicWeights = zeros(this.numTopics);
 
+        this.docLengthCounts = [];
+
+        this.topicDocCounts = [];
+
         // Array of dictionaries with keys 
         // {"originalOrder", "id", "date", "originalText", "tokens", "topicCounts", "metadata"}
         this.documents = [];
 
         this._timer = 0; // used in sweep
-        this._documentTopicSmoothing = 0.1; // (used by sweep)
+        this._documentTopicSmoothing = zeros(numTopics).fill(0.1); // (used by sweep)
         this._topicWordSmoothing = 0.01; // (used by sweep)
 
         this._sweeps = 0; // (used by addSweepRequest) for finding whether an additional sweep call should be called
 
         this.documentType = "text/csv";
         this.modelIsRunning = false;
+
+        this._optimizeInterval = 10; // 50
+        this._burninPeriod = 100; //200
+        this._changeAlpha = false;
     }
 
     // Used by sidebar to change selectedTopic and sortVocabByTopic
@@ -435,12 +443,23 @@ class LDAModel {
         this.updateWebpage();
     }
 
+    _hyperTune = (tune) => {
+        if (this.modelIsRunning == false)
+        this._changeAlpha = tune;
+        console.log(this._changeAlpha)
+    }
+
     /**
      * @summary completes one training iteration
      */
     _sweep = () => {
         var startTime = Date.now();
         var topicNormalizers = zeros(this.numTopics);
+        var alphaMod = false;
+        if (this._changeAlpha && this._completeSweeps > this._burninPeriod && this._optimizeInterval != 0 &&
+          this._completeSweeps % this._optimizeInterval == 0)
+          {alphaMod = true;} 
+        
         for (let topic = 0; topic < this.numTopics; topic++) {
           topicNormalizers[topic] = 1.0 / 
           (this._vocabularySize * this._topicWordSmoothing + 
@@ -450,10 +469,12 @@ class LDAModel {
         for (let doc = 0; doc < this.documents.length; doc++) {
           let currentDoc = this.documents[doc];
           let docTopicCounts = currentDoc.topicCounts;
+          if (alphaMod) {var docLength = 0;}
     
           for (let position = 0; position < currentDoc.tokens.length; position++) {
             let token = currentDoc.tokens[position];
             if (token.isStopword) { continue; }
+            if (alphaMod) {docLength++;}
     
             this.tokensPerTopic[ token.topic ]--;
             let currentWordTopicCounts = this.wordTopicCounts[ token.word ];
@@ -469,13 +490,13 @@ class LDAModel {
             for (let topic = 0; topic < this.numTopics; topic++) {
               if (currentWordTopicCounts[ topic ]) {
                 this._topicWeights[topic] =
-                  (this._documentTopicSmoothing + docTopicCounts[topic]) *
+                  (this._documentTopicSmoothing[topic] + docTopicCounts[topic]) *
                   (this._topicWordSmoothing + currentWordTopicCounts[ topic ]) *
                 topicNormalizers[topic];
               }
               else {
                 this._topicWeights[topic] =
-                  (this._documentTopicSmoothing + docTopicCounts[topic]) *
+                  (this._documentTopicSmoothing[topic] + docTopicCounts[topic]) *
                   this._topicWordSmoothing *
                 topicNormalizers[topic];
               }
@@ -506,12 +527,25 @@ class LDAModel {
             topicNormalizers[ token.topic ] = 1.0 / 
               (this._vocabularySize * this._topicWordSmoothing +
               this.tokensPerTopic[ token.topic ]);
+              
+          }
+    
+          if (alphaMod) {
+            this.docLengthCounts[docLength]++;
+            for (let topic = 0; topic < this.numTopics; topic++) {
+              this.topicDocCounts[topic][docTopicCounts[topic]]++;
+            }
           }
         }
-    
+
+        if (alphaMod) {
+            this._learnParameters(this._documentTopicSmoothing, this.topicDocCounts,
+                this.docLengthCounts, 1.001, 1.0, 1);
+        }
+
         console.log("sweep in " + (Date.now() - startTime) + " ms");
         this._completeSweeps += 1;    
-
+    
         // TODO: Update completed sweeps outside of this function
         d3.select("#iters").text(this._completeSweeps);
     
@@ -522,11 +556,143 @@ class LDAModel {
           this._sweeps = 0;
           this.modelIsRunning = false;
           this.updateWebpage();
+          console.log(this._documentTopicSmoothing);
         }
     }
 
     get iterations() {
         return this._completeSweeps;
+    }
+
+    /** 
+     *  Gather statistics on the size of documents 
+     *  and create histograms for use in Dirichlet hyperparameter
+     *  optimization.
+     */
+    _initializeHistograms = () => {
+        var maxTokens = 0;
+        // var totalTokens = 0;
+        var seqLen;
+
+        for (let doc = 0; doc < this.documents.length; doc++) {
+            let currentDoc = this.documents[doc];
+            seqLen = currentDoc.tokens.length
+            if (seqLen > maxTokens)
+                maxTokens = seqLen;
+            // totalTokens += seqLen;
+        }
+
+        console.log("max tokens: " + maxTokens);
+
+        this.docLengthCounts = zeros(maxTokens + 1);
+
+        // alternative would be to initialise the index in the
+        // 2d array only after they are accessed
+        this.topicDocCounts = zeros(this.numTopics);
+        for (let i = 0; i < this.topicDocCounts.length; i++) {
+            this.topicDocCounts[i] = zeros(maxTokens + 1);
+        }
+    }
+
+    /** 
+     * Learn Dirichlet parameters using frequency histograms
+     * 
+     * @param {Number[]} parameters A reference to the current values of the parameters, which will be updated in place
+     * @param {Number[][]} observations An array of count histograms. <code>observations[10][3]</code> could be the number of documents that contain exactly 3 tokens of word type 10.
+     * @param {Number[]} observationLengths A histogram of sample lengths, for example <code>observationLengths[20]</code> could be the number of documents that are exactly 20 tokens long.
+     * @param {Number} shape Gamma prior E(X) = shape * scale, var(X) = shape * scale<sup>2</sup>
+     * @param {Number} scale 
+     * @param {Number} numIterations 200 to 1000 generally insures convergence, but 1-5 is often enough to step in the right direction
+     * @returns The sum of the learned parameters.
+     */ 
+    _learnParameters = (parameters,
+        observations,
+        observationLengths,
+        shape,
+        scale,
+        numIterations) => {
+
+    var i;
+    var k;
+    var parametersSum = 0;
+
+    // Initialize the parameter sum
+    for (k = 0; k < parameters.length; k++) {
+    parametersSum += parameters[k];
+    }
+
+    var oldParametersK;
+    var currentDigamma;
+    var denominator;
+
+    var nonZeroLimit;
+    var nonZeroLimits = zeros(observations.length).fill(-1);
+
+    // The histogram arrays go up to the size of the largest document,
+    //	but the non-zero values will almost always cluster in the low end.
+    //	We avoid looping over empty arrays by saving the index of the largest
+    //	non-zero value.
+
+    var histogram;
+
+    for (i=0; i<observations.length; i++) {
+    histogram = observations[i];
+
+    //StringBuffer out = new StringBuffer();
+    for (k = 0; k < histogram.length; k++) {
+    if (histogram[k] > 0) {
+    nonZeroLimits[i] = k;
+    //out.append(k + ":" + histogram[k] + " ");
+    }
+    }
+    //System.out.println(out);
+    }
+
+    for (let iteration=0; iteration<numIterations; iteration++) {
+
+    // Calculate the denominator
+    denominator = 0;
+    currentDigamma = 0;
+
+    // Iterate over the histogram:
+    for (i=1; i<observationLengths.length; i++) {
+    currentDigamma += 1 / (parametersSum + i - 1);
+    denominator += observationLengths[i] * currentDigamma;
+    }
+
+    // Bayesian estimation Part I
+    denominator -= 1/scale;
+
+    // Calculate the individual parameters
+
+    parametersSum = 0;
+
+    for (k=0; k<parameters.length; k++) {
+
+    // What's the largest non-zero element in the histogram?
+    nonZeroLimit = nonZeroLimits[k];
+
+    oldParametersK = parameters[k];
+    parameters[k] = 0;
+    currentDigamma = 0;
+
+    histogram = observations[k];
+
+    for (i=1; i <= nonZeroLimit; i++) {
+    currentDigamma += 1 / (oldParametersK + i - 1);
+    parameters[k] += histogram[i] * currentDigamma;
+    }
+
+    // Bayesian estimation part II
+    parameters[k] = oldParametersK * (parameters[k] + shape) / denominator;
+
+    parametersSum += parameters[k];
+    }
+    }
+
+    if (parametersSum < 0.0) { throw "sum: " + parametersSum; }
+    console.log("parameter changed")
+    return parametersSum;
     }
 
     /**
@@ -653,6 +819,8 @@ class LDAModel {
         if (this._sweeps === 0) {
             this._sweeps = 1;
             this._timer = d3.timer(this._sweep);
+            //hyperedit
+            this._initializeHistograms();
             console.log("Requested Sweeps Now: " + this._requestedSweeps);
         }
 
