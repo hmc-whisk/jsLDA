@@ -8,7 +8,6 @@ import DocView from './DocView'
 class DocCard extends React.Component {
     render() {
         const format = d3Format(".2g");
-
         const document = this.props.document;
         return(
             <Card>
@@ -54,7 +53,9 @@ class DocCard extends React.Component {
         }
         return metaInfo;
     }
-
+    /**
+     * @summary Formats the document score, based on salience score vs topic score
+     */
     score(document) {
         const format = d3Format(".2g");
         let score = this.props.useSalience?

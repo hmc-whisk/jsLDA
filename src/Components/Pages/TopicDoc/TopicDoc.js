@@ -43,6 +43,9 @@ class TopicDoc extends Component {
         return sortedDocuments;
     }
 
+    /**
+     * @summary documents sorted in order of the saliency score of documents
+     */
     get sortedDocumentsSalient() {
         let sortedDocuments = this.props.documents;
         let getWordTopicValue = this.getWordTopicValue;
@@ -51,11 +54,11 @@ class TopicDoc extends Component {
 
         sortedDocuments = sortedDocuments.map(function (doc, i) {
             let words = doc.originalText.split(" ");
-            let sal = words.map((word) => getWordTopicValue(word))
+            let sal = words.map((word) => getWordTopicValue(word));
             let total = sal.length;
             let totsaliency = sal.reduce((a, b) => a + b, 0);
-            doc["score"] = totsaliency/total
-            return doc
+            doc["score"] = totsaliency/total;
+            return doc;
         });
         sortedDocuments.sort(function(a, b) {
             return b.score - a.score;
@@ -117,15 +120,19 @@ class TopicDoc extends Component {
         })
     }
 
+    /**
+     * @summary Toggles option to show meta data of documents
+     */
     toggleMetaData = () => {
-        console.log("Toggled")
         this.setState({
             showMetaData: !this.state.showMetaData
         })
     }
 
+    /**
+     * @summary Toggles option to sort by salinence score
+     */
     toggleSalience = () => {
-        console.log("Toggled")
         this.setState({
             useSalience: !this.state.useSalience
         })
