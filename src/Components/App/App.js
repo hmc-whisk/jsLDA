@@ -432,6 +432,7 @@ class App extends Component {
             onClick={this.runIterationsClick} 
             updateNumTopics={this.onTopicsChange} 
             sweepParameter={this.state.sweepParameter}
+            _hyperTune={this.state.ldaModel._hyperTune}
             onChange={this.changeSweepAmount}
             stopButtonClick={this.state.ldaModel.stopSweeps}
             iter={this.state.ldaModel._completeSweeps}
