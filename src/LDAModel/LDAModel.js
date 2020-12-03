@@ -74,8 +74,8 @@ class LDAModel {
         this.documentType = "text/csv";
         this.modelIsRunning = false;
 
-        this._optimizeInterval = 10; // 50
-        this._burninPeriod = 100; //200
+        this._optimizeInterval = 50;
+        this._burninPeriod = 200;
         this._changeAlpha = false;
     }
 
