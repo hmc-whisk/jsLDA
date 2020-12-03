@@ -178,7 +178,7 @@ class HomePage extends React.Component {
                         <p>Once you've trained a model, you'll need to figure out what your model has found. jsLDA 2.0 has a few different tools to help you do this.</p>
                         {this.analyzingHelp}
 		    <h3>About</h3>
-			<p>jsLDA was originated by David Mimno at Cornell University. Further development was conducted at Harvey Mudd College by Alfredo Gomez, Tatsuke Kuze, Theo Bayard de Volo, and Xanda Schofield.</p>
+			<p>jsLDA was originated by David Mimno at Cornell University. Further development was conducted at Harvey Mudd College by Alfredo Gomez, Tatsuki Kuze, Theo Bayard de Volo, and Xanda Schofield.</p>
                 </span>
                 
             </div>
