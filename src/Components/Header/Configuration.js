@@ -1,6 +1,6 @@
 import React, { Component } from 'react'; 
 
-class Tooltip extends Component {
+class Configuration extends Component {
     constructor(props) {
       super(props);
       this.state = {
@@ -70,25 +70,25 @@ class Tooltip extends Component {
     render() {
 
       return (
-        <div > 
+        <div style={{float: "right", }}> 
+        <button type="button" onClick={this.overlayOn}  class = "configButton" onMouseEnter={this.toggleHover} onMouseLeave={this.toggleHover}>Configure...</button>
         <div id="overlay" style= {this.overlayStyle} onClick={this.overlayOff}>
-          <div id="text" style= {this.textstyle}> 
-            <img src= {this.props.tooltip} className="media-object"
-              alt={this.props.altText} height = {'auto'} width = {this.state.width*0.8}
-              draggable= 'false'/>
-          </div>
+          <div onClick={(e) => {
+            //stop clicks getting to the overlay
+            e.stopPropagation();
+            }}>
           {this.props.displayElement}
+          </div>
         </div>
         <div style={{padding:'2px'}}>
-        <button type="button" onClick={this.overlayOn}  class = "lightButton" onMouseEnter={this.toggleHover} onMouseLeave={this.toggleHover}>Help</button>
         </div>
       </div>
       )
     }
 }
 
-Tooltip.defaultProps = {
+Configuration.defaultProps = {
   floatRight: true,
 }
 
-export default Tooltip;
+export default Configuration;
