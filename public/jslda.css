@@ -4,9 +4,8 @@ div.sidebar { float: left; width: 25%; }
 div.sidebar div.sidebox { margin: 5px; padding: 10px; }
 
 div.top { background-color: #ddd; margin: 5px; padding: 10px; -moz-border-radius: 10px; border-radius: 10px; }
-div.top #num_topics_control { float:right; }
 
-div.upload { background-color: #ddd; float: right; padding-right: 20px; border-radius: 10px; margin: 5px; }
+div.upload { background-color: #ddd; padding-right: 20px; border-radius: 10px; margin: 5px; }
 div.upload div { margin: 8px; }
 
 

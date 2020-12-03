@@ -150,16 +150,6 @@ class HomePage extends React.Component {
         return (
             <div id="home-page" className="page">
                 <h2>Welcome to jsLDA 2.0!</h2>
-                <Uploader 
-                    onDocumentFileChange = {this.props.onDocumentFileChange}
-                    onStopwordFileChange = {this.props.onStopwordFileChange}
-                    onModelFileChange={this.props.onModelFileChange}
-                    onFileUpload={this.props.onFileUpload}
-                    onModelUpload={this.props.onModelUpload}
-                    modelIsRunning = {this.props.modelIsRunning}
-                    onDefaultDocChange = {this.props.onDefaultDocChange}
-                    docName = {this.props.docName}
-                />
                 <span>
                     <p>
                         This is a tool designed to train and investigate LDA (latent Dirichlet allocation) topic

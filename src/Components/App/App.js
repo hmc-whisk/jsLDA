@@ -437,6 +437,14 @@ class App extends Component {
             stopButtonClick={this.state.ldaModel.stopSweeps}
             iter={this.state.ldaModel._completeSweeps}
             modelIsRunning = {this.state.ldaModel.modelIsRunning}
+            onDocumentFileChange={this.onDocumentFileChange}
+            onStopwordFileChange={this.onStopwordFileChange}
+            onModelFileChange={this.onModelFileChange}
+            onFileUpload={this.queueLoad}
+            onModelUpload={this.onModelUpload}
+            modelIsRunning = {this.state.ldaModel.modelIsRunning}
+            onDefaultDocChange = {this.onDefaultDocChange}
+            docName={this.state.docName}
             />
 
 
