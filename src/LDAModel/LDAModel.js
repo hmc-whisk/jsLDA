@@ -455,10 +455,10 @@ class LDAModel {
     _sweep = () => {
         var startTime = Date.now();
         var topicNormalizers = zeros(this.numTopics);
-        var alphaMod = false;
+        var doOptimizeAlpha = false;
         if (this._changeAlpha && this._completeSweeps > this._burninPeriod && this._optimizeInterval != 0 &&
           this._completeSweeps % this._optimizeInterval == 0)
-          {alphaMod = true;} 
+          {doOptimizeAlpha = true;} 
         
         for (let topic = 0; topic < this.numTopics; topic++) {
           topicNormalizers[topic] = 1.0 / 
@@ -469,12 +469,12 @@ class LDAModel {
         for (let doc = 0; doc < this.documents.length; doc++) {
           let currentDoc = this.documents[doc];
           let docTopicCounts = currentDoc.topicCounts;
-          if (alphaMod) {var docLength = 0;}
+          if (doOptimizeAlpha) {var docLength = 0;}
     
           for (let position = 0; position < currentDoc.tokens.length; position++) {
             let token = currentDoc.tokens[position];
             if (token.isStopword) { continue; }
-            if (alphaMod) {docLength++;}
+            if (doOptimizeAlpha) {docLength++;}
     
             this.tokensPerTopic[ token.topic ]--;
             let currentWordTopicCounts = this.wordTopicCounts[ token.word ];
@@ -530,7 +530,7 @@ class LDAModel {
               
           }
     
-          if (alphaMod) {
+          if (doOptimizeAlpha) {
             this.docLengthCounts[docLength]++;
             for (let topic = 0; topic < this.numTopics; topic++) {
               this.topicDocCounts[topic][docTopicCounts[topic]]++;
@@ -538,7 +538,9 @@ class LDAModel {
           }
         }
 
-        if (alphaMod) {
+        if (doOptimizeAlpha) {
+            // Values 1.001, 1.0 and 1 are from parameters used for ParallelTopicModel
+            // in Mallet, 2/10/2021. 
             this._learnParameters(this._documentTopicSmoothing, this.topicDocCounts,
                 this.docLengthCounts, 1.001, 1.0, 1);
         }
@@ -595,7 +597,7 @@ class LDAModel {
     }
 
     /** 
-     * Learn Dirichlet parameters using frequency histograms
+     * Learn Dirichlet parameters using frequency histograms, with an assumption of a Gamma distributions.
      * 
      * @param {Number[]} parameters A reference to the current values of the parameters, which will be updated in place
      * @param {Number[][]} observations An array of count histograms. <code>observations[10][3]</code> could be the number of documents that contain exactly 3 tokens of word type 10.
@@ -612,87 +614,84 @@ class LDAModel {
         scale,
         numIterations) => {
 
-    var i;
-    var k;
-    var parametersSum = 0;
+        var i;
+        var k;
+        var parametersSum = 0;
 
-    // Initialize the parameter sum
-    for (k = 0; k < parameters.length; k++) {
-    parametersSum += parameters[k];
-    }
+        // Initialize the parameter sum
+        for (k = 0; k < parameters.length; k++) {
+            parametersSum += parameters[k];
+        }
 
-    var oldParametersK;
-    var currentDigamma;
-    var denominator;
+        var oldParametersK;
+        var currentDigamma;
+        var denominator;
 
-    var nonZeroLimit;
-    var nonZeroLimits = zeros(observations.length).fill(-1);
+        var nonZeroLimit;
+        var nonZeroLimits = zeros(observations.length).fill(-1);
 
-    // The histogram arrays go up to the size of the largest document,
-    //	but the non-zero values will almost always cluster in the low end.
-    //	We avoid looping over empty arrays by saving the index of the largest
-    //	non-zero value.
+        // The histogram arrays go up to the size of the largest document,
+        //	but the non-zero values will almost always cluster in the low end.
+        //	We avoid looping over empty arrays by saving the index of the largest
+        //	non-zero value.
 
-    var histogram;
+        var histogram;
 
-    for (i=0; i<observations.length; i++) {
-    histogram = observations[i];
+        for (i=0; i<observations.length; i++) {
+            histogram = observations[i];
 
-    //StringBuffer out = new StringBuffer();
-    for (k = 0; k < histogram.length; k++) {
-    if (histogram[k] > 0) {
-    nonZeroLimits[i] = k;
-    //out.append(k + ":" + histogram[k] + " ");
-    }
-    }
-    //System.out.println(out);
-    }
+            for (k = 0; k < histogram.length; k++) {
+                if (histogram[k] > 0) {
+                nonZeroLimits[i] = k;
+                }
+            }
+        }
 
-    for (let iteration=0; iteration<numIterations; iteration++) {
+        for (let iteration=0; iteration<numIterations; iteration++) {
 
-    // Calculate the denominator
-    denominator = 0;
-    currentDigamma = 0;
+            // Calculate the denominator
+            denominator = 0;
+            currentDigamma = 0;
 
-    // Iterate over the histogram:
-    for (i=1; i<observationLengths.length; i++) {
-    currentDigamma += 1 / (parametersSum + i - 1);
-    denominator += observationLengths[i] * currentDigamma;
-    }
+            // Iterate over the histogram:
+            for (i=1; i<observationLengths.length; i++) {
+                currentDigamma += 1 / (parametersSum + i - 1);
+                denominator += observationLengths[i] * currentDigamma;
+            }
 
-    // Bayesian estimation Part I
-    denominator -= 1/scale;
+            // Bayesian estimation Part I
+            denominator -= 1/scale;
 
-    // Calculate the individual parameters
+            // Calculate the individual parameters
 
-    parametersSum = 0;
+            parametersSum = 0;
 
-    for (k=0; k<parameters.length; k++) {
+            for (k=0; k<parameters.length; k++) {
 
-    // What's the largest non-zero element in the histogram?
-    nonZeroLimit = nonZeroLimits[k];
+                // What's the largest non-zero element in the histogram?
+                nonZeroLimit = nonZeroLimits[k];
 
-    oldParametersK = parameters[k];
-    parameters[k] = 0;
-    currentDigamma = 0;
+                oldParametersK = parameters[k];
+                parameters[k] = 0;
+                currentDigamma = 0;
 
-    histogram = observations[k];
+                histogram = observations[k];
 
-    for (i=1; i <= nonZeroLimit; i++) {
-    currentDigamma += 1 / (oldParametersK + i - 1);
-    parameters[k] += histogram[i] * currentDigamma;
-    }
+                for (i=1; i <= nonZeroLimit; i++) {
+                    currentDigamma += 1 / (oldParametersK + i - 1);
+                    parameters[k] += histogram[i] * currentDigamma;
+                }
 
-    // Bayesian estimation part II
-    parameters[k] = oldParametersK * (parameters[k] + shape) / denominator;
+                // Bayesian estimation part II
+                parameters[k] = oldParametersK * (parameters[k] + shape) / denominator;
 
-    parametersSum += parameters[k];
-    }
-    }
+                parametersSum += parameters[k];
+            }
+        }
 
-    if (parametersSum < 0.0) { throw "sum: " + parametersSum; }
-    console.log("parameter changed")
-    return parametersSum;
+        if (parametersSum < 0.0) { throw "sum: " + parametersSum; }
+        console.log("parameter changed")
+        return parametersSum;
     }
 
     /**
