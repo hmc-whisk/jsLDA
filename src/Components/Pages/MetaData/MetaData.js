@@ -96,7 +96,7 @@ class MetaData extends Component {
         // Protec
         if (this.props.catagory === null) {
             return <div><h3>
-                Please select a catagory
+                Please select a category
             </h3></div>
         }
 
