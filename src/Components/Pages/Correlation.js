@@ -92,8 +92,10 @@ class Correlation extends Component {
         circles.exit().remove();
         circles = circles.enter().append("circle").merge(circles);
 
-        var posColor = getComputedStyle(document.documentElement).getPropertyValue('--color2');
-        var negColor = getComputedStyle(document.documentElement).getPropertyValue('--color4');
+        var posColor = getComputedStyle(document.documentElement)
+          .getPropertyValue('--positiveCorrelationColor');
+        var negColor = getComputedStyle(document.documentElement)
+          .getPropertyValue('--negativeCorrelationColor');
       
         circles.attr("cx", function(link) { return topicScale(link.source); })
         .attr("cy", function(link) { return topicScale(link.target); })
