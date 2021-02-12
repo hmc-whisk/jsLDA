@@ -120,6 +120,8 @@ class LDAModel {
         this.tokensPerTopic = zeros(this.numTopics);
         this._topicWeights = zeros(this.numTopics);
         this.documents = [];
+        this._memoMinDocTime = null;
+        this._memoMaxDocTime = null;
         d3.select("#iters").text(this._completeSweeps);
     }
 
@@ -310,6 +312,54 @@ class LDAModel {
     get highestWordTopicCount() {
         if(this.selectedTopic===-1) return 0;
         return this.topicWordCounts[this.selectedTopic][0]["count"]
+    }
+
+    /**
+     * lazy getter for the Date object of the earliest document
+     * @note memo stored in this._memoMinDocTime
+     */
+    get minDocTime() {
+        // If already calculated, return that
+        if(this._memoMinDocTime) return this._memoMinDocTime 
+
+        // Protect against no documents
+        if(!this.documents[0]) {
+            console.log("Tried to get minDocTime without any documents")
+            return null;
+        }
+
+        let minTime = this.documents[0].dateObject
+        // Iterate through docs and keep min found time
+        this.documents.forEach((doc) => {
+            minTime = Math.min(minTime, doc.dateObject)
+            console.log(minTime)
+        })
+        this._memoMinDocTime = new Date(minTime)
+        return this._memoMinDocTime
+    }
+
+    /**
+     * Lazily loaded Date object for the latest document
+     * @note memo stored in this._memoMaxDocTime
+     */
+    get maxDocTime() {
+        // If already calculated, return that
+        if(this._memoMaxDocTime) return this._memoMaxDocTime 
+
+        // Protect against no documents
+        if(!this.documents[0]) {
+            console.log("Tried to get maxDocTime without any documents")
+            return null;
+        }
+
+        let maxTime = this.documents[0].dateObject
+        // Iterate through docs and keep min found time
+        this.documents.forEach((doc) => {
+            maxTime = Math.max(maxTime, doc.dateObject)
+            console.log(maxTime)
+        })
+        this._memoMaxDocTime = new Date(maxTime)
+        return this._memoMaxDocTime
     }
 
     /**
@@ -820,6 +870,29 @@ class LDAModel {
 
         // Turn key back into Date object
         return topicMeans.map((d)=>{return{key:new Date(d.key),value:d.value}})
+    }
+
+    /**
+     * Calculates the average topic value for numBins bins over time
+     * @param {Number} topic number id of topic to get info for
+     * @param {Number} numBins number of bins to devide timespan into
+     * @returns {Array<{key:Date,value:Number}>} Array of average topic values.
+     * Entries are sorted by key. 
+     */
+    topicTimeBinnedAverage = (topic,numBins) => {
+        numBins = Math.max(numBins,1);
+        // Make bins
+            // Get min and max times
+            // Calc/record max of every bin
+        // Group topic values into bins
+            // Sort documents by time
+            // Find indicies of first doc in each bin
+            // Itterate through bins
+                // Itterate through docs and record topic value 
+
+        // Calc average for every bin
+
+        // Return
     }
 }
 
