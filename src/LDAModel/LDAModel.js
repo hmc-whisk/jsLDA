@@ -332,7 +332,6 @@ class LDAModel {
         // Iterate through docs and keep min found time
         this.documents.forEach((doc) => {
             minTime = Math.min(minTime, doc.dateObject)
-            console.log(minTime)
         })
         this._memoMinDocTime = new Date(minTime)
         return this._memoMinDocTime
@@ -356,7 +355,6 @@ class LDAModel {
         // Iterate through docs and keep min found time
         this.documents.forEach((doc) => {
             maxTime = Math.max(maxTime, doc.dateObject)
-            console.log(maxTime)
         })
         this._memoMaxDocTime = new Date(maxTime)
         return this._memoMaxDocTime
@@ -877,22 +875,45 @@ class LDAModel {
      * @param {Number} topic number id of topic to get info for
      * @param {Number} numBins number of bins to devide timespan into
      * @returns {Array<{key:Date,value:Number}>} Array of average topic values.
-     * Entries are sorted by key. 
+     * Entries are sorted by key. Date refers to the max date for that bin
      */
     topicTimeBinnedAverage = (topic,numBins) => {
         numBins = Math.max(numBins,1);
+        
         // Make bins
-            // Get min and max times
-            // Calc/record max of every bin
+        let timeSpan = this.maxDocTime - this.minDocTime;
+        let binSize = Math.ceil(timeSpan/numBins); // ceil to make sure all docs have a bin
+
+        let bins = []
+        for(let binNum = 0; binNum < numBins; binNum++) {
+            bins.push({
+                key: new Date(this.minDocTime.valueOf() + binSize*(binNum+1)),
+                value: []
+            })
+        }
+
         // Group topic values into bins
-            // Sort documents by time
-            // Find indicies of first doc in each bin
-            // Itterate through bins
-                // Itterate through docs and record topic value 
+        let documents = this.documents.sort((a,b) => a.dateObject-b.dateObject)
+        let currentBin = 0; // Keep track of which bin section of doc array we're in
+        documents.forEach((doc) => {
+            if(bins[currentBin].key < doc.dateObject) currentBin++;
+
+            // Record average topic value for doc
+            bins[currentBin].value.push(doc.topicCounts[topic]/
+                doc.tokens.length)
+        })
 
         // Calc average for every bin
+        bins = bins.map((bin) => {
+            let total = bin.value.reduce((a,b) => a + b);
+            let avg = total/bin.value.length;
+            return ({
+                key:bin.key,
+                value:avg
+            })
+        })
 
-        // Return
+        return bins
     }
 }
 
