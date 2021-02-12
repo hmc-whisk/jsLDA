@@ -31,93 +31,93 @@ class SideBar extends Component {
         }
     }
 
-    // Used by ready, changeNumTopics in processing, addStop, removeStop in vocab, sweep in sweep
-    displayTopicWords() {
-        console.log("displayTopicWords");
-        var topicTopWords = []; // TL: one string per topic containing top 10 words for that topic
-        let toggleTopicDocuments = this.toggleTopicDocuments;
-        let changeAnnotation = this.props.changeAnnotation
+    // // Used by ready, changeNumTopics in processing, addStop, removeStop in vocab, sweep in sweep
+    // displayTopicWords() {
+    //     console.log("displayTopicWords");
+    //     var topicTopWords = []; // TL: one string per topic containing top 10 words for that topic
+    //     let toggleTopicDocuments = this.toggleTopicDocuments;
+    //     let changeAnnotation = this.props.changeAnnotation
 
-        // TL: for each topic, push single string containing top 10 words to topicTopWords
-        for (let topic = 0; topic < this.props.numTopics; topic++) {
-            if (this.props.topicWordCounts[topic]) { 
-                topicTopWords.push(topNWords(this.props.topicWordCounts[topic], 10));
-            }
-        }
+    //     // TL: for each topic, push single string containing top 10 words to topicTopWords
+    //     for (let topic = 0; topic < this.props.numTopics; topic++) {
+    //         if (this.props.topicWordCounts[topic]) { 
+    //             topicTopWords.push(topNWords(this.props.topicWordCounts[topic], 10));
+    //         }
+    //     }
 
-        // Hard reset sidebar
-        d3.select("div#topics").selectAll("div.topics").remove();
+    //     // Hard reset sidebar
+    //     d3.select("div#topics").selectAll("div.topics").remove();
 
     
-        // TL: does this start with any topics already in there?? 
-        // TL: just did the "hard reset" thing
-        var topicLines = d3.select("div#topics").selectAll("div.topics")
-        .data(topicTopWords); // TL: binds topics div to topicTopWords lists and returns new div topicLines
+    //     // TL: does this start with any topics already in there?? 
+    //     // TL: just did the "hard reset" thing
+    //     var topicLines = d3.select("div#topics").selectAll("div.topics")
+    //     .data(topicTopWords); // TL: binds topics div to topicTopWords lists and returns new div topicLines
     
-        topicLines.exit().remove(); // TL: gets rid of topicLines that did not have topicTopWords associated
+    //     topicLines.exit().remove(); // TL: gets rid of topicLines that did not have topicTopWords associated
         
-        // TL: topic is all the topicLines originally w/o divs, now with <div className="topics">
-        // TL: QUESTION does this end with topic including ALL topicLines + new divs? or only the new divs? 
-        // TL: is everything just new divs?? 
-        let topic = topicLines
-        .enter().append("div").attr("class","topics");
+    //     // TL: topic is all the topicLines originally w/o divs, now with <div className="topics">
+    //     // TL: QUESTION does this end with topic including ALL topicLines + new divs? or only the new divs? 
+    //     // TL: is everything just new divs?? 
+    //     let topic = topicLines
+    //     .enter().append("div").attr("class","topics");
 
-        topic.append("foreignObject")
-        .append('xhtml:div')
-        .append('div')
-        .attr("class","textField")
-        .attr("style", "white-space: pre-line; background: var(--color3Dark); border-collapse: separate; border-radius: 3px; ")
-        .attr("dataText", "Enter annotation")
-        .attr("contentEditable", true)
-        .on("blur", function(d, i) {
-            var innerText = this.innerText 
-            if(innerText[innerText.length-1] === '\n'){
-                innerText = innerText.slice(0,-1)
-            }    
-            changeAnnotation(innerText, i)
+    //     topic.append("foreignObject")
+    //     .append('xhtml:div')
+    //     .append('div')
+    //     .attr("class","textField")
+    //     .attr("style", "white-space: pre-line; background: var(--color3Dark); border-collapse: separate; border-radius: 3px; ")
+    //     .attr("dataText", "Enter annotation")
+    //     .attr("contentEditable", true)
+    //     .on("blur", function(d, i) {
+    //         var innerText = this.innerText 
+    //         if(innerText[innerText.length-1] === '\n'){
+    //             innerText = innerText.slice(0,-1)
+    //         }    
+    //         changeAnnotation(innerText, i)
           
-        })
-        .on("notesEdit", function(d, i) { this.innerText = "" } )
-        .text((d,i) => this.props.getAnnotation(i))
+    //     })
+    //     .on("notesEdit", function(d, i) { this.innerText = "" } )
+    //     .text((d,i) => this.props.getAnnotation(i))
 
-        // TL: if this.reset call onNotesEdit 
-        if (this.reset === 1) {
-            d3.select("div#topics").selectAll("div.textField").dispatch("notesEdit")
-            this.reset = 0
-        }
+    //     // TL: if this.reset call onNotesEdit 
+    //     if (this.reset === 1) {
+    //         d3.select("div#topics").selectAll("div.textField").dispatch("notesEdit")
+    //         this.reset = 0
+    //     }
 
-        topicLines = topic.append("div")
-        .attr("class", "topicwords")
-        .on("click", function(d, i) { toggleTopicDocuments(i); })
-        .text(function(d, i) { return "[" + i + "] " + d; })
+    //     topicLines = topic.append("div")
+    //     .attr("class", "topicwords")
+    //     .on("click", function(d, i) { toggleTopicDocuments(i); })
+    //     .text(function(d, i) { return "[" + i + "] " + d; })
 
-        .merge(topicLines); // TL: merges all lists into one flattened list
+    //     .merge(topicLines); // TL: merges all lists into one flattened list
         
-        // Format selected topic
-        d3.selectAll("div.topicwords").attr("class", (d, i) =>  
-            i === this.props.selectedTopic ? "topicwords selected" : "topicwords");
+    //     // Format selected topic
+    //     d3.selectAll("div.topicwords").attr("class", (d, i) =>  
+    //         i === this.props.selectedTopic ? "topicwords selected" : "topicwords");
 
-        ///////////
-        // <div className={i === this.props.selectedTopic ? "topicwords selected" : "topicwords"}/> 
+    //     ///////////
+    //     // <div className={i === this.props.selectedTopic ? "topicwords selected" : "topicwords"}/> 
 
     
-        return this.props.topicWordCounts;
-    }
+    //     return this.props.topicWordCounts;
+    // }
 
-    // Used by displayTopicWords in display
-    toggleTopicDocuments = (topic) => {
-        if (topic === this.props.selectedTopic) {
-            // unselect the topic
-            d3.selectAll("div.topicwords").attr("class", "topicwords");
-            //sortVocabByTopic = false;
-            // TL: this comes in as a prop
-            d3.select("#sortVocabByTopic").text("Sort by topic")
-            this.props.selectedTopicChange(-1);
-        }
-        else {
-            this.props.selectedTopicChange(topic);
-        }
-    }
+    // // Used by displayTopicWords in display
+    // toggleTopicDocuments = (topic) => {
+    //     if (topic === this.props.selectedTopic) {
+    //         // unselect the topic
+    //         d3.selectAll("div.topicwords").attr("class", "topicwords");
+    //         //sortVocabByTopic = false;
+    //         // TL: this comes in as a prop
+    //         d3.select("#sortVocabByTopic").text("Sort by topic")
+    //         this.props.selectedTopicChange(-1);
+    //     }
+    //     else {
+    //         this.props.selectedTopicChange(topic);
+    //     }
+    // }
     
     componentDidMount() {
         this.toggleTopicDocuments(0)
@@ -164,6 +164,7 @@ class SideBar extends Component {
                                     whiteSpace: "preLine", 
                                     backgroundColor: "lightGray", 
                                     borderCollapse: "separate",
+                                    color: "black",
                                     borderRadius: "3px"}}
                                 dataText="Enter annotation"
                                 contentEditable={true}
