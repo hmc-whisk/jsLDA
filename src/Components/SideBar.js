@@ -118,6 +118,10 @@ class SideBar extends Component {
     //         this.props.selectedTopicChange(topic);
     //     }
     // }
+    clearAnnotations = () => {
+        document.getElementById("topic-annotations").reset();
+    }
+    
     
     componentDidMount() {
         this.toggleTopicDocuments(0)
@@ -129,11 +133,12 @@ class SideBar extends Component {
             this.numBefore = this.props.numTopics;
             this.reset = 1;
             resetAnnotation(this.props.numTopics);
+            this.clearAnnotations();
         }
     }
 
     render() {
-
+        
         // Original
         // return (
         // <div className="sidebar">
@@ -153,31 +158,38 @@ class SideBar extends Component {
         // TL TODO: handle reset 
         return (
             <div className="sidebar">
+                <form id="topic-annotations">
                 {
                     topicTopWords.map((topwords, i) => (
                         <div id="topics" className="sidebox" key={i}>
 
                             {/* Annotation text field */}
-                            <div 
+                            <textarea 
                                 className="textField"
                                 style={{
                                     whiteSpace: "preLine", 
                                     backgroundColor: "lightGray", 
                                     borderCollapse: "separate",
                                     color: "black",
-                                    borderRadius: "3px"}}
-                                dataText="Enter annotation"
-                                contentEditable={true}
-                                onBlur={(d, i) => {
-                                    var innerText = this.innerText 
+                                    borderRadius: "3px",
+                                    border: "none"}}
+                                placeholder="Enter annotation"
+                                onBlur={(e) => {
+                                    {/* var innerText = this.innerText;
+                                    console.log(innerText);
                                     if(innerText && innerText[innerText.length-1] === '\n'){
                                         innerText = innerText.slice(0,-1)
                                     }    
-                                    changeAnnotation(innerText, i)
+                                    changeAnnotation(innerText, i) */}
+                                    if(e.target.value && e.target.value[e.target.value.length-1] === '\n'){
+                                        e.target.value = e.target.value.slice(0,-1)
+                                    }    
+                                    changeAnnotation(e.target.value, i)
                                 }}
                                 onNotesReset={() => { this.innerText = ""}}
-                                value={() => getAnnotation(i)}
                             />
+                                {/* {getAnnotation(i)}
+                            </div> */}
 
                             {/* List of top words */}
                             <div 
@@ -190,6 +202,7 @@ class SideBar extends Component {
                         )
                     )
                 }
+                </form>
             </div>
         )
     }

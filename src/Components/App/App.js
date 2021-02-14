@@ -97,6 +97,7 @@ class App extends Component {
 
   changeAnnotation = (text,i) => {
     this.annotations[i] = text;
+    console.log(this.annotations.toString());
   }
 
   resetNotes = (i) => {
