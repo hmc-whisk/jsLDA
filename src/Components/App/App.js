@@ -97,7 +97,7 @@ class App extends Component {
 
   changeAnnotation = (text,i) => {
     this.annotations[i] = text;
-    console.log(this.annotations.toString());
+    console.log(this.annotations.toString);
   }
 
   resetNotes = (i) => {
@@ -425,7 +425,7 @@ class App extends Component {
       <div id="app">
       <div id="tooltip"></div>
 
-      <div id="main">
+      <div id="main" style={{display: "flex", flexDirection: "column", height: "100%"}}>
 
       <TopBar completeSweeps={this.state.ldaModel._completeSweeps} 
             requestedSweeps = {this.state.ldaModel._requestedSweeps} 
@@ -439,7 +439,7 @@ class App extends Component {
             modelIsRunning = {this.state.ldaModel.modelIsRunning}
             />
 
-
+      <div style={{display: "flex", flex: "1", overflow: "hidden"}}>
       <SideBar selectedTopic={this.state.ldaModel.selectedTopic} 
                changeAnnotation = {this.changeAnnotation}
                resetAnnotation = {this.resetNotes}
@@ -451,8 +451,11 @@ class App extends Component {
                />
 
       <div id="tabwrapper">
+              
       <NavBar onClick={this.changeTab}/>
       <div id="pages">
+      </div>
+
 
       {!this.state.ldaModel ? null : DisplayPage}
 

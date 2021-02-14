@@ -55,18 +55,26 @@ class SideBar extends Component {
                 <form id="topic-annotations">
                 {
                     topicTopWords.map((topwords, i) => (
-                        <div id="topics" className="sidebox" key={i}>
+                        <div 
+                            id="topics" 
+                            className="sidebox" 
+                            key={i}
+                            style={{marginBottom: "-5px"}}
+                        >
 
                             {/* Annotation text field */}
                             <textarea 
                                 className="textField"
                                 style={{
                                     whiteSpace: "preLine", 
-                                    backgroundColor: "lightGray", 
+                                    backgroundColor: "var(--color3Dark)", 
                                     borderCollapse: "separate",
                                     color: "black",
                                     borderRadius: "3px",
-                                    border: "none"}}
+                                    border: "none",
+                                    width: "100%",
+                                    height: "30px"}}
+                                wrap="soft"
                                 placeholder="Enter annotation"
                                 onBlur={(e) => {
                                     if(e.target.value && e.target.value[e.target.value.length-1] === '\n'){
