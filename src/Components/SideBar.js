@@ -99,6 +99,21 @@ class SideBar extends Component {
             this.clearAnnotations();
             this.initTopics(this.props.numTopics, this.props.topicWordCounts);
         }
+
+        // after init, if iterations have run creating new topicWordCounts
+        // update topWords but do not reinitialize everything
+        if(this.state.topics && prevProps.topicWordCounts !== this.props.topicWordCounts) {
+            let topicsCopy = {...this.state.topics};
+            console.log(this.topicsCopy);
+            for (let topic = 0; topic < this.props.numTopics; topic++) {
+                if (this.props.topicWordCounts[topic]) { 
+                    topicsCopy[topic].topWords = topNWords(this.props.topicWordCounts[topic], 10);
+                }
+            }
+            this.setState({
+                topics: topicsCopy,
+            });
+        }
     }
 
     render() {
@@ -139,6 +154,8 @@ class SideBar extends Component {
                                         changeAnnotation(e.target.value, topNum);
                                     }}
                                 />
+
+                                {/* Pin/Unpin button */}
                                 <button
                                     type="button"
                                     onClick={() => this.toggleTopicPin(topNum)}
@@ -154,6 +171,7 @@ class SideBar extends Component {
                                     }
                                 </button>
                                 
+                                {/* Hide/Unhide button */}
                                 
                             </div>
                             
