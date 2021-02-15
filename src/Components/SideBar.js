@@ -1,8 +1,14 @@
 import React, { Component } from 'react'; 
 import * as d3 from 'd3';
-import {topNWords} from '../funcs/utilityFunctions'
+import {topNWords} from '../funcs/utilityFunctions';
+import Spinner from 'react-bootstrap/Spinner';
 
 class SideBar extends Component {
+
+    state = {
+        topics: null,
+        displayOrder: [],
+    }
 
     // NOTE: kept the d3 implementation of this function because
     // it affects an external element (sortVocabByTopic)
@@ -20,6 +26,26 @@ class SideBar extends Component {
         }
     }
 
+    initTopics = (numTops, topWordCounts) => {
+        // for some reason can't get topWordCounts from componentDidMount but can get them from render
+        console.log("initTopics called", numTops, topWordCounts);
+        if (topWordCounts.length > 0) {
+            let topicsDict = {};
+            for (let topic = 0; topic < numTops; topic++) {
+                if (topWordCounts[topic]) { 
+                    topicsDict[topic] = topNWords(this.props.topicWordCounts[topic], 10)
+                }
+            }
+            // console.log(topicsDict);
+
+            this.setState({
+                topics: topicsDict,
+                displayOrder: Array.from(Array(numTops).keys())
+            });
+            // console.log(this.state);
+        }
+    }
+
     // When number of topics is changed, model resets and annotations
     // should be cleared 
     clearAnnotations = () => {
@@ -28,77 +54,83 @@ class SideBar extends Component {
     
     
     componentDidMount() {
-        this.toggleTopicDocuments(0)
+        this.toggleTopicDocuments(0);
     }
 
     componentDidUpdate(prevProps) {
         // if numTopics has changed, model has reset and annotations should clear
+        // also should re initialize topics
         if (prevProps.numTopics !== this.props.numTopics) {
             this.clearAnnotations();
+            this.initTopics(this.props.numTopics, this.props.topicWordCounts);
         }
     }
 
     render() {
-        let topicTopWords = [];
-        let { numTopics, topicWordCounts, changeAnnotation, getAnnotation, selectedTopic } = this.props;
-
-        // TL: for each topic, push single string containing top 10 words to topicTopWords
-        for (let topic = 0; topic < numTopics; topic++) {
-            if (topicWordCounts[topic]) { 
-                topicTopWords.push(topNWords(topicWordCounts[topic], 10));
+        const { numTopics, topicWordCounts, changeAnnotation, getAnnotation, selectedTopic } = this.props;
+        
+        if (topicWordCounts.length > 0) { // once props are loaded
+            if (!this.state.topics) { // initialize state if empty
+                this.initTopics(numTopics, topicWordCounts);
             }
-        }
 
-        // TL TODO: handle reset 
-        return (
-            <div className="sidebar">
-                <form id="topic-annotations">
-                {
-                    topicTopWords.map((topwords, i) => (
-                        <div 
-                            id="topics" 
-                            className="sidebox" 
-                            key={i}
-                            style={{marginBottom: "-5px"}}
-                        >
-
-                            {/* Annotation text field */}
-                            <textarea 
-                                className="textField"
-                                style={{
-                                    whiteSpace: "preLine", 
-                                    backgroundColor: "var(--color3Dark)", 
-                                    borderCollapse: "separate",
-                                    color: "black",
-                                    borderRadius: "3px",
-                                    border: "none",
-                                    width: "100%",
-                                    height: "30px"}}
-                                wrap="soft"
-                                placeholder="Enter annotation"
-                                onBlur={(e) => {
-                                    if(e.target.value && e.target.value[e.target.value.length-1] === '\n'){
-                                        e.target.value = e.target.value.slice(0,-1);
-                                    }    
-                                    changeAnnotation(e.target.value, i);
-                                }}
-                            />
-
-                            {/* List of top words */}
+            return (
+                <div className="sidebar">
+                    <form id="topic-annotations">
+                    {
+                        this.state.displayOrder.map((topNum) => (
                             <div 
-                                className={(i === selectedTopic) ? "topicwords selected" : "topicwords"}
-                                onClick={() => this.toggleTopicDocuments(i)}
+                                id="topics" 
+                                className="sidebox" 
+                                key={topNum}
+                                style={{marginBottom: "-5px"}}
                             >
-                                {`[${i}] ${topwords}`}
+
+                                {/* Annotation text field */}
+                                <textarea 
+                                    className="textField"
+                                    style={{
+                                        whiteSpace: "preLine", 
+                                        backgroundColor: "var(--color3Dark)", 
+                                        borderCollapse: "separate",
+                                        color: "black",
+                                        borderRadius: "3px",
+                                        border: "none",
+                                        width: "100%",
+                                        height: "30px"}}
+                                    wrap="soft"
+                                    placeholder="Enter annotation"
+                                    onBlur={(e) => {
+                                        if(e.target.value && e.target.value[e.target.value.length-1] === '\n'){
+                                            e.target.value = e.target.value.slice(0,-1);
+                                        }    
+                                        changeAnnotation(e.target.value, topNum);
+                                    }}
+                                />
+
+                                {/* List of top words */}
+                                <div 
+                                    className={(topNum === selectedTopic) ? "topicwords selected" : "topicwords"}
+                                    onClick={() => this.toggleTopicDocuments(topNum)}
+                                >
+                                    {`[${topNum}] ${this.state.topics[topNum]}`}
+                                </div>
                             </div>
-                        </div>
+                            )
                         )
-                    )
-                }
-                </form>
-            </div>
-        )
+                    }
+                    </form>
+                </div>
+            )
+        } else {
+            // topicTopWords props have not loaded yet
+            return (
+                <div className="sidebar">
+                    <Spinner animation="border" />
+                </div>
+            );
+        }
     }
 }
 
-export default SideBar
+export default SideBar;
