@@ -58,78 +58,66 @@ class SideBar extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        // if numTopics has changed, model has reset and annotations should clear
-        // also should re initialize topics
-        if (prevProps.numTopics !== this.props.numTopics) {
+        // if numTopics has changed, should reinitialize topics and clear annotations
+        // if topicWordCounts just finished loading, call initTopics
+        if (prevProps.numTopics !== this.props.numTopics 
+            || prevProps.topicWordCounts.length === 0 && this.props.topicWordCounts.length > 0) {
             this.clearAnnotations();
             this.initTopics(this.props.numTopics, this.props.topicWordCounts);
         }
     }
 
     render() {
-        const { numTopics, topicWordCounts, changeAnnotation, getAnnotation, selectedTopic } = this.props;
+        const { changeAnnotation, getAnnotation, selectedTopic } = this.props;
         
-        if (topicWordCounts.length > 0) { // once props are loaded
-            if (!this.state.topics) { // initialize state if empty
-                this.initTopics(numTopics, topicWordCounts);
-            }
+        return (
+            <div className="sidebar">
+                <form id="topic-annotations">
+                {
+                    this.state.displayOrder.map((topNum) => (
+                        <div 
+                            id="topics" 
+                            className="sidebox" 
+                            key={topNum}
+                            style={{marginBottom: "-5px"}}
+                        >
 
-            return (
-                <div className="sidebar">
-                    <form id="topic-annotations">
-                    {
-                        this.state.displayOrder.map((topNum) => (
+                            {/* Annotation text field */}
+                            <textarea 
+                                className="textField"
+                                style={{
+                                    whiteSpace: "preLine", 
+                                    backgroundColor: "var(--color3Dark)", 
+                                    borderCollapse: "separate",
+                                    color: "black",
+                                    borderRadius: "3px",
+                                    border: "none",
+                                    width: "100%",
+                                    height: "30px"}}
+                                wrap="soft"
+                                placeholder="Enter annotation"
+                                onBlur={(e) => {
+                                    if(e.target.value && e.target.value[e.target.value.length-1] === '\n'){
+                                        e.target.value = e.target.value.slice(0,-1);
+                                    }    
+                                    changeAnnotation(e.target.value, topNum);
+                                }}
+                            />
+
+                            {/* List of top words */}
                             <div 
-                                id="topics" 
-                                className="sidebox" 
-                                key={topNum}
-                                style={{marginBottom: "-5px"}}
+                                className={(topNum === selectedTopic) ? "topicwords selected" : "topicwords"}
+                                onClick={() => this.toggleTopicDocuments(topNum)}
                             >
-
-                                {/* Annotation text field */}
-                                <textarea 
-                                    className="textField"
-                                    style={{
-                                        whiteSpace: "preLine", 
-                                        backgroundColor: "var(--color3Dark)", 
-                                        borderCollapse: "separate",
-                                        color: "black",
-                                        borderRadius: "3px",
-                                        border: "none",
-                                        width: "100%",
-                                        height: "30px"}}
-                                    wrap="soft"
-                                    placeholder="Enter annotation"
-                                    onBlur={(e) => {
-                                        if(e.target.value && e.target.value[e.target.value.length-1] === '\n'){
-                                            e.target.value = e.target.value.slice(0,-1);
-                                        }    
-                                        changeAnnotation(e.target.value, topNum);
-                                    }}
-                                />
-
-                                {/* List of top words */}
-                                <div 
-                                    className={(topNum === selectedTopic) ? "topicwords selected" : "topicwords"}
-                                    onClick={() => this.toggleTopicDocuments(topNum)}
-                                >
-                                    {`[${topNum}] ${this.state.topics[topNum]}`}
-                                </div>
+                                {`[${topNum}] ${this.state.topics[topNum]}`}
                             </div>
-                            )
+                        </div>
                         )
-                    }
-                    </form>
-                </div>
-            )
-        } else {
-            // topicTopWords props have not loaded yet
-            return (
-                <div className="sidebar">
-                    <Spinner animation="border" />
-                </div>
-            );
-        }
+                    )
+                }
+                </form>
+            </div>
+        ) // TODO: spinner while topicWordCounts loads
     }
 }
 
