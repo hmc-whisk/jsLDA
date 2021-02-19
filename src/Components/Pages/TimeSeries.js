@@ -93,7 +93,7 @@ class TimeSeries extends Component {
         let allTopicMeans = [];
 
         for (let topic = 0; topic < this.props.ldaModel.numTopics; topic++) {
-            var topicMeans = this.flatTimeBinPoints(topic)
+            var topicMeans = this.getBins(topic)
 
             let thisMaxTopicMean = Math.max(...topicMeans.map(function (d) {
                 return d.value
@@ -146,22 +146,46 @@ class TimeSeries extends Component {
         }
     }
 
-    flatTimeBinPoints(topic) {
-        let bins = this.props.ldaModel
-            .topicTimesBinnedAverage(topic,this.state.numberToAvg);
+    /**
+     * Adds extra point at start of bins to flatten lines
+     * @param {Array<{key:Date}>} bins Bins with date refering to end time
+     * @returns {Array<{key:Date}>} Bins now with duplicate dictionaries at
+     * start of time span.
+     */
+    flattenTimeBinPoints(bins) {
         let originalBins = [...bins]
-
         bins.unshift({
             key:this.props.ldaModel.minDocTime,
             value:bins[0].value
         })
         for(let binNum = 1; binNum < originalBins.length; binNum++) {
-            let newPosition = binNum*2 // Acount for inserts into array
-            bins.splice(newPosition,0,{
-                key:originalBins[binNum-1].key,
-                value:originalBins[binNum].value
-            })
+            let newPosition = binNum*2 // Acount for previous inserts on array
+            let startOfBin = {...originalBins[binNum]}
+            startOfBin.key = originalBins[binNum-1].key
+            bins.splice(newPosition,0,startOfBin)
         }
+        return bins
+    }
+
+    /**
+     * Gets the bins that are needed to draw timeseries graph
+     * @param {Number} topic number of topic to get bins from
+     * @param {Boolean} flatLines whether or not to add extra points
+     * to flatten graph lines
+     * @param {Boolean} errorBars whether or not to add error bars to
+     * graph 
+     * @returns {Array<{key:Date,value:Number}>} Array of average 
+     * topic values for every document in bin. Entries are sorted by key. 
+     * Date refers to the max date for that bin.
+     */
+    getBins(topic, flatLines=true, errorBars=false) {
+        let bins = this.props.ldaModel
+            .topicTimesBinnedAverage(topic,this.state.numberToAvg);
+
+        if(flatLines) {
+            bins = this.flattenTimeBinPoints(bins)
+        }
+        
         return bins
     }
 
@@ -173,7 +197,7 @@ class TimeSeries extends Component {
 
         let topic = this.props.ldaModel.selectedTopic;
 
-        var topicMeans = this.flatTimeBinPoints(topic)
+        var topicMeans = this.getBins(topic)
 
         let thisMaxTopicMean = Math.max(...topicMeans.map(function (d) {
             return d.value
