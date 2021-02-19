@@ -874,10 +874,13 @@ class LDAModel {
      * Calculates the average topic value for numBins bins over time
      * @param {Number} topic number id of topic to get info for
      * @param {Number} numBins number of bins to devide timespan into
-     * @returns {Array<{key:Date,value:Number}>} Array of average topic values.
-     * Entries are sorted by key. Date refers to the max date for that bin
+     * @param {Boolean} stdError whether or not to include stdError margin
+     * @returns {Array<{key:Date,value:Number,upperEr:Number,lowerEr:Number}>} 
+     * Array of average topic values. Entries are sorted by key. 
+     * Date refers to the max date for that bin. upperEr/lowerEr are only
+     * included if stdError is set to true.
      */
-    topicTimesBinnedAverage = (topic,numBins) => {
+    topicTimesBinnedAverage = (topic, numBins, stdError=false) => {
         let bins = this.topicTimesBinned(topic, numBins)
 
         // Calc average for every bin
@@ -891,6 +894,27 @@ class LDAModel {
         })
 
         return bins
+    }
+
+    /**
+     * Function to add standard error margins to collections of values
+     * @param {Array<{value:Array<Number}>} valArray array of dictionaries to
+     * add stdError margins to. Must have value element.
+     * @param {Number} confidence a number between 0 and 1 indicating the
+     * confidence level. Defaults to .9 i.e. 90% confidence range.
+     * @returns {Array<{value:Array<Number},upperEr:Number,lowerEr:Number>}
+     * where upperEr/lowerEr are the margins of error of value at the given
+     * confidence level.
+     */
+    addStdErrorMargins(valArray, confidence=.9) {
+        valArray = [...valArray].forEach((dict) => {
+            const n = dict.value.length
+            const mean = dict.value.reduce((a,b) => a + b) / n
+            const stdDev = Math.sqrt(dict.value.map(
+                x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n)
+            let stdError = stdDev/Math.sqrt(n)
+            
+        })
     }
 
     /**
