@@ -147,17 +147,20 @@ class TimeSeries extends Component {
     }
 
     /**
-     * Adds extra point at start of bins to flatten lines
+     * Adds extra point at start of bins to flatten graph lines
      * @param {Array<{key:Date}>} bins Bins with date refering to end time
      * @returns {Array<{key:Date}>} Bins now with duplicate dictionaries at
      * start of time span.
      */
     flattenTimeBinPoints(bins) {
         let originalBins = [...bins]
-        bins.unshift({
-            key:this.props.ldaModel.minDocTime,
-            value:bins[0].value
-        })
+
+        // Deal with special starting point
+        let firstPoint = {...bins[0]}
+        firstPoint.key = this.props.ldaModel.minDocTime
+        bins.unshift(firstPoint)
+
+        // Add rest of points
         for(let binNum = 1; binNum < originalBins.length; binNum++) {
             let newPosition = binNum*2 // Acount for previous inserts on array
             let startOfBin = {...originalBins[binNum]}
