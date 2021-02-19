@@ -880,19 +880,19 @@ class LDAModel {
      * Date refers to the max date for that bin. upperEr/lowerEr are only
      * included if stdError is set to true.
      */
-    topicTimesBinnedAverage = (topic, numBins, stdError=false) => {
+    topicTimesBinnedAverage = (topic, numBins, stdError=true) => {
         let bins = this.topicTimesBinned(topic, numBins)
 
-        // Calc average for every bin
-        bins = bins.map((bin) => {
-            let total = bin.value.reduce((a,b) => a + b);
-            let avg = total/bin.value.length;
-            return ({
-                key:bin.key,
-                value:avg
-            })
-        })
+        if(stdError) {
+            bins = this.addStdErrorMargins(bins)
+        }
 
+        // Calc average for every bin
+        bins.forEach((bin) => {
+            const total = bin.value.reduce((a,b) => a + b);
+            const avg = total/bin.value.length;
+            bin.value = avg
+        })
         return bins
     }
 
@@ -900,21 +900,26 @@ class LDAModel {
      * Function to add standard error margins to collections of values
      * @param {Array<{value:Array<Number}>} valArray array of dictionaries to
      * add stdError margins to. Must have value element.
-     * @param {Number} confidence a number between 0 and 1 indicating the
-     * confidence level. Defaults to .9 i.e. 90% confidence range.
      * @returns {Array<{value:Array<Number},upperEr:Number,lowerEr:Number>}
-     * where upperEr/lowerEr are the margins of error of value at the given
+     * where upperEr/lowerEr are the margins of error of value at the 90%
      * confidence level.
      */
-    addStdErrorMargins(valArray, confidence=.9) {
-        valArray = [...valArray].forEach((dict) => {
+    addStdErrorMargins(valArray) {
+        
+        valArray = valArray.map((dict) => {
             const n = dict.value.length
             const mean = dict.value.reduce((a,b) => a + b) / n
             const stdDev = Math.sqrt(dict.value.map(
                 x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n)
-            let stdError = stdDev/Math.sqrt(n)
-            
+            const stdError = stdDev/Math.sqrt(n)
+            const z = 1.645
+            let newDict = {...dict}
+            newDict.upperEr = mean + z*stdError
+            newDict.lowerEr = mean - z*stdError
+            return newDict
         })
+        console.log(valArray)
+        return valArray
     }
 
     /**
