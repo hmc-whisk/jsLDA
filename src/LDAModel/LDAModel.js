@@ -880,7 +880,7 @@ class LDAModel {
      * Date refers to the max date for that bin. upperEr/lowerEr are only
      * included if stdError is set to true.
      */
-    topicTimesBinnedAverage = (topic, numBins, stdError=true) => {
+    topicTimesBinnedAverage = (topic, numBins, stdError=false) => {
         let bins = this.topicTimesBinned(topic, numBins)
 
         if(stdError) {
@@ -918,7 +918,6 @@ class LDAModel {
             newDict.lowerEr = mean - z*stdError
             return newDict
         })
-        console.log(valArray)
         return valArray
     }
 

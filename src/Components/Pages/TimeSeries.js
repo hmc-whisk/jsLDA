@@ -25,7 +25,7 @@ class TimeSeries extends Component {
     }
     
     /**
-     * @summary Creates skeleton of svg component
+     * @summary Creates skeleton of svg component when no topic is selected
      */
     createTimeSVGs () {
         var tsPage = d3.select(this._rootNode);
@@ -59,7 +59,7 @@ class TimeSeries extends Component {
     }
 
     /**
-     * @summary Creates skeleton of svg component
+     * @summary Creates skeleton of svg component when a topic is selected
      */
     createTimeSVGsTopic () {
         var tsPage = d3.select(this._rootNode);
@@ -76,17 +76,14 @@ class TimeSeries extends Component {
             .push(tsSVG
                 .append("g")
                 .attr("transform", "translate(50,50)"));
-        temp_topicTimeGroups[0]
-            .append("path")
-            .style("fill", this.state.fillColor)
-            .style("stroke", this.state.strokeColor);
         temp_topicTimeGroups[0].append("text").attr("transform", "translate(5,20)");
 
         this.topicTimeGroups = temp_topicTimeGroups
     }
 
     /**
-     * @summary Updates the info in the timeseries graphs
+     * @summary Updates the info in the timeseries graphs when a topic is not
+     * selected
      */
     timeSeries0() {
         let maxTopicMean = 0;
@@ -183,7 +180,7 @@ class TimeSeries extends Component {
      */
     getBins(topic, flatLines=true, errorBars=false) {
         let bins = this.props.ldaModel
-            .topicTimesBinnedAverage(topic,this.state.numberToAvg);
+            .topicTimesBinnedAverage(topic,this.state.numberToAvg,errorBars);
 
         if(flatLines) {
             bins = this.flattenTimeBinPoints(bins)
@@ -193,17 +190,18 @@ class TimeSeries extends Component {
     }
 
     /**
-     * @summary Updates the info in the timeseries graphs
+     * @summary Updates the info in the timeseries graph when a topic
+     * is selected
      */
     timeSeriesTopic() {
         let maxTopicMean = 0;
 
         let topic = this.props.ldaModel.selectedTopic;
 
-        var topicMeans = this.getBins(topic)
+        var topicMeans = this.getBins(topic,true,true)
 
         let thisMaxTopicMean = Math.max(...topicMeans.map(function (d) {
-            return d.value
+            return d.upperEr
         }));
         if (thisMaxTopicMean > maxTopicMean) {
             maxTopicMean = thisMaxTopicMean;
@@ -218,10 +216,16 @@ class TimeSeries extends Component {
             .domain([topicMeans[0].key, topicMeans[topicMeans.length-1].key])
             .range([0, this.state.timeSeriesWidth-50]);
 
-        var area = d3.area()
-            .x(function (d, i) { return scale(d.key); })
-            .y1(function (d) { return yScale(d.value); })
-            .y0(yScale(0));
+        // Function to draw line
+        var line = d3.line()
+            .x(function (d) { return scale(d.key); })
+            .y(function (d) { return yScale(d.value); })
+
+        // Function to draw confidence interval
+        const confInterval = d3.area()
+            .x(function (d) { return scale(d.key); })
+            .y0(function (d) { return yScale(d.lowerEr); })
+            .y1(function (d) { return yScale(d.upperEr); })
 
         var x_axis = d3.axisBottom()
             .scale(scale)
@@ -236,10 +240,18 @@ class TimeSeries extends Component {
             for (let i = 0; i < topicMeans.length; i += 1) {
                 topicKeys.push(topicMeans[i].key);
             }
-
             this.topicTimeGroups[0]
-                .select("path")
-                .attr("d", area(topicMeans));
+                //.select("g")
+                .append("path")
+                .attr("fill", this.state.fillColor)
+                .attr("stroke", "none")
+                .attr("d",confInterval(topicMeans))
+            this.topicTimeGroups[0]
+                //.select("g")
+                .append("path")
+                .attr("fill", "none")
+                .attr("stroke", this.state.strokeColor)
+                .attr("d", line(topicMeans));
             this.topicTimeGroups[0]
                 .select("text")
                 .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3));
