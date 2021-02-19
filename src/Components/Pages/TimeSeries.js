@@ -33,7 +33,7 @@ class TimeSeries extends Component {
         tsPage.select("svg").remove();
         let temp_topicTimeGroups = [];
         
-        let height = this.state.timeSeriesHeight * this.props.numTopics+75
+        let height = this.state.timeSeriesHeight * this.props.ldaModel.numTopics+75
         
         var tsSVG = tsPage
             .append("svg")
@@ -41,7 +41,7 @@ class TimeSeries extends Component {
             .attr("width", this.state.timeSeriesWidth)
             .style("overflow","visible");
         
-        for (var topic = 0; topic < this.props.numTopics; topic++) {
+        for (var topic = 0; topic < this.props.ldaModel.numTopics; topic++) {
             temp_topicTimeGroups
                 .push(tsSVG
                     .append("g")
@@ -92,8 +92,8 @@ class TimeSeries extends Component {
         let maxTopicMean = 0;
         let allTopicMeans = [];
 
-        for (let topic = 0; topic < this.props.numTopics; topic++) {
-            var topicMeans = this.props.topicTimeRollingAvg(topic,this.state.numberToAvg);
+        for (let topic = 0; topic < this.props.ldaModel.numTopics; topic++) {
+            var topicMeans = this.flatTimeBinPoints(topic)
 
             let thisMaxTopicMean = Math.max(...topicMeans.map(function (d) {
                 return d.value
@@ -105,7 +105,7 @@ class TimeSeries extends Component {
             allTopicMeans.push(topicMeans);
         }
 
-        for (let topic = 0; topic < this.props.numTopics; topic++) {
+        for (let topic = 0; topic < this.props.ldaModel.numTopics; topic++) {
             topicMeans = allTopicMeans[topic];
 
             // var xScale = d3.scaleLinear()
@@ -136,7 +136,7 @@ class TimeSeries extends Component {
                     .attr("d", area(topicMeans));
                 this.topicTimeGroups[topic]
                     .select("text")
-                    .text(topNWords(this.props.topicWordCounts[topic], 3));
+                    .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3));
                 this.topicTimeGroups[topic]
                     .select("g")
                     .attr("transform", "translate(0,75)")
@@ -146,15 +146,34 @@ class TimeSeries extends Component {
         }
     }
 
+    flatTimeBinPoints(topic) {
+        let bins = this.props.ldaModel
+            .topicTimesBinnedAverage(topic,this.state.numberToAvg);
+        let originalBins = [...bins]
+
+        bins.unshift({
+            key:this.props.ldaModel.minDocTime,
+            value:bins[0].value
+        })
+        for(let binNum = 1; binNum < originalBins.length; binNum++) {
+            let newPosition = binNum*2 // Acount for inserts into array
+            bins.splice(newPosition,0,{
+                key:originalBins[binNum-1].key,
+                value:originalBins[binNum].value
+            })
+        }
+        return bins
+    }
+
     /**
      * @summary Updates the info in the timeseries graphs
      */
     timeSeriesTopic() {
         let maxTopicMean = 0;
 
-        let topic = this.props.selectedTopic;
+        let topic = this.props.ldaModel.selectedTopic;
 
-        var topicMeans = this.props.topicTimeRollingAvg(topic,this.state.numberToAvg);
+        var topicMeans = this.flatTimeBinPoints(topic)
 
         let thisMaxTopicMean = Math.max(...topicMeans.map(function (d) {
             return d.value
@@ -162,10 +181,6 @@ class TimeSeries extends Component {
         if (thisMaxTopicMean > maxTopicMean) {
             maxTopicMean = thisMaxTopicMean;
         }
-
-        // var xScale = d3.scaleLinear()
-        //     .domain([0, topicMeans.length])
-        //     .range([0, this.state.timeSeriesWidth-50]);
 
         var yScale = d3
             .scaleLinear()
@@ -200,7 +215,7 @@ class TimeSeries extends Component {
                 .attr("d", area(topicMeans));
             this.topicTimeGroups[0]
                 .select("text")
-                .text(topNWords(this.props.topicWordCounts[topic], 3));
+                .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3));
             this.topicTimeGroups[0]
                 .append("g")
                 .attr("transform", "translate(0," + this.state.timeSeriesHeightTopic + ")")
@@ -294,7 +309,7 @@ class TimeSeries extends Component {
     }
   
     componentDidMount() {
-        if (this.props.selectedTopic === -1) {
+        if (this.props.ldaModel.selectedTopic === -1) {
             this.createTimeSVGs();
             this.timeSeries0()
         }
@@ -305,10 +320,10 @@ class TimeSeries extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if(prevProps.numTopics !== this.props.numTopics) {
+        if(prevProps.ldaModel.numTopics !== this.props.ldaModel.numTopics) {
             this.createTimeSVGs();
         }
-        if (this.props.selectedTopic === -1) {
+        if (this.props.ldaModel.selectedTopic === -1) {
             this.createTimeSVGs();
             this.timeSeries0()
         }
