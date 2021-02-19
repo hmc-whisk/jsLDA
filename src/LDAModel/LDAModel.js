@@ -877,7 +877,32 @@ class LDAModel {
      * @returns {Array<{key:Date,value:Number}>} Array of average topic values.
      * Entries are sorted by key. Date refers to the max date for that bin
      */
-    topicTimeBinnedAverage = (topic,numBins) => {
+    topicTimesBinnedAverage = (topic,numBins) => {
+        let bins = this.topicTimesBinned(topic, numBins)
+
+        // Calc average for every bin
+        bins = bins.map((bin) => {
+            let total = bin.value.reduce((a,b) => a + b);
+            let avg = total/bin.value.length;
+            return ({
+                key:bin.key,
+                value:avg
+            })
+        })
+
+        return bins
+    }
+
+    /**
+     * Calculates the average document values and groups them into numBin
+     * bins over time
+     * @param {Number} topic number id of topic to get info for
+     * @param {Number} numBins number of bins to devide timespan into
+     * @returns {Array<{key:Date,value:Array<Number>}>} Array of average 
+     * topic values for every document in bin. Entries are sorted by key. 
+     * Date refers to the max date for that bin.
+     */
+    topicTimesBinned = (topic, numBins) => {
         numBins = Math.max(numBins,1);
         
         // Make bins
@@ -901,16 +926,6 @@ class LDAModel {
             // Record average topic value for doc
             bins[currentBin].value.push(doc.topicCounts[topic]/
                 doc.tokens.length)
-        })
-
-        // Calc average for every bin
-        bins = bins.map((bin) => {
-            let total = bin.value.reduce((a,b) => a + b);
-            let avg = total/bin.value.length;
-            return ({
-                key:bin.key,
-                value:avg
-            })
         })
 
         return bins

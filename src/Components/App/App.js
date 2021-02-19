@@ -379,13 +379,9 @@ class App extends Component {
           
         break;
       case "ts-tab":
-        DisplayPage = <TimeSeries 
-          numTopics={this.state.ldaModel.numTopics}
-          documents={this.state.ldaModel.documents}
-          topicWordCounts={this.state.ldaModel.topicWordCounts}
-          selectedTopic={this.state.ldaModel.selectedTopic}
+        DisplayPage = <TimeSeries
+          ldaModel={this.state.ldaModel} 
           update = {this.state.update}
-          topicTimeRollingAvg = {this.state.ldaModel.topicTimeRollingAvg}
           />;
         break;
       case "dl-tab":
