@@ -117,7 +117,7 @@ class TimeSeries extends Component {
                 .domain([0, maxTopicMean])
                 .range([this.state.timeSeriesHeight, 0]);
 
-            var scale = d3.scaleTime()
+            let scale = d3.scaleTime()
                 .domain([topicMeans[0].key, topicMeans[topicMeans.length-1].key])
                 .range([0, this.state.timeSeriesWidth])
                 .nice();

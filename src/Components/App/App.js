@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 
 import {getObjectKeys} from '../../funcs/utilityFunctions'
 import LDAModel from '../../LDAModel/LDAModel'
+import ModelDataDLer from '../../LDAModel/ModelDataDLer'
 
 import Correlation from '../Pages/Correlation';
 import TopicDoc from '../Pages/TopicDoc/TopicDoc';
@@ -33,8 +34,11 @@ class App extends Component {
   constructor(props) {
     super(props)
 
+    let ldaModel = new LDAModel(this.startingNumTopics, this.modelForceUpdate);
+
     this.state = {
-      ldaModel: new LDAModel(this.startingNumTopics, this.modelForceUpdate),
+      ldaModel: ldaModel,
+      modelDataDLer: new ModelDataDLer(ldaModel,this),
 
       // The file location of default files
       docName: "Movie Plots",
@@ -168,7 +172,7 @@ class App extends Component {
     this.setState({
       documentsFileArray: [Array.prototype.slice.call(event.target.files)],
     });
-    this.state.ldaModel.documentType = event.target.files[0].type;
+    this.state.ldaModel.setDocumentType(event.target.files[0].type);
   }
 
   /**
@@ -202,7 +206,7 @@ class App extends Component {
   }
 
   onModelUpload = () => {
-    let model = new Promise((resolve, reject) => {
+    new Promise((resolve, reject) => {
       const fileSelection = this.state.modelFileArray[0].slice();
 
       // Read file
@@ -219,9 +223,12 @@ class App extends Component {
         }
       };
       reader.readAsText(fileSelection[0]);
-    }).then((result) => this.setState({
-      ldaModel: result
-    }),(reject) => {
+    }).then((result) => {
+      this.setState({ldaModel: result});
+      // d3 controls itteration display, so this is the only
+      // way to update it.
+      d3.select("#iters").text(result._completeSweeps);
+    },(reject) => {
       alert(reject)
     })
   }
@@ -253,7 +260,7 @@ class App extends Component {
    */
   getDocsUpload = () => (new Promise((resolve) => {
     if (this.state.documentsFileArray.length === 0) {
-      this.state.ldaModel.documentType = this.state.defaultExt;
+      this.state.ldaModel.setDocumentType(this.state.defaultExt);
       resolve(d3.text(this.state.documentsURL));
     } else {
       const fileSelection = this.state.documentsFileArray[0].slice();
@@ -366,7 +373,9 @@ class App extends Component {
           addStop = {this.state.ldaModel.addStop}
           removeStop = {this.state.ldaModel.removeStop}
           update = {this.state.update}
-          modelIsRunning = {this.state.ldaModel.modelIsRunning}/>;
+          modelIsRunning = {this.state.ldaModel.modelIsRunning}
+          modelDataDLer = {this.state.modelDataDLer}
+          />;
           
         break;
       case "ts-tab":
@@ -381,15 +390,7 @@ class App extends Component {
         break;
       case "dl-tab":
         DisplayPage = <DLPage
-          numTopics={this.state.ldaModel.numTopics}
-          documents={this.state.ldaModel.documents}
-          annotations = {this.annotations}
-          wordTopicCounts={this.state.ldaModel.wordTopicCounts}
-          topicWordCounts={this.state.ldaModel.topicWordCounts}
-          sortTopicWords={this.state.ldaModel.sortTopicWords}
-          getTopicCorrelations={this.state.ldaModel.getTopicCorrelations}
-          tokensPerTopic={this.state.ldaModel.tokensPerTopic}
-          downloadModel={this.downloadModel}/>;
+          modelDataDLer={this.state.modelDataDLer}/>;
         break;
       case "home-tab":
         DisplayPage = <HomePage
@@ -412,8 +413,7 @@ class App extends Component {
           metaValues={this.state.ldaModel.metaValues}
           docTopicMetaValues={this.state.ldaModel.docTopicMetaValues}
           topicWordCounts={this.state.ldaModel.topicWordCounts}
-          numTopics={this.state.ldaModel.numTopics}
-          />
+          modelDataDLer={this.state.modelDataDLer}/>
         break;
       default:
         DisplayPage = null;
