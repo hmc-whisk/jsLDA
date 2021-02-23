@@ -191,7 +191,7 @@ div.upload div { margin: 8px; }
 
 div#topics div { color:var(--color4); margin-bottom: 1px; padding: 1px; cursor: default;}
 div#topics div.selected { border-right: solid black 2px; font-weight: bold; }
-div#topics div:hover { background-color: var(--color4); color: var(--color3) }
+div#topics:hover { background-color: var(--color4); color: var(--color3) }
 
 /* #tabwrapper { margin-left: 25%; } */
 

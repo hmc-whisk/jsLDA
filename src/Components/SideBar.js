@@ -19,7 +19,6 @@ class SideBar extends Component {
             // unselect the topic
             // d3.selectAll("div.topicwords").attr("class", "topicwords");
             //sortVocabByTopic = false;
-            // TL: this comes in as a prop
             d3.select("#sortVocabByTopic").text("Sort by topic")
             this.props.selectedTopicChange(-1);
         }
@@ -27,6 +26,7 @@ class SideBar extends Component {
             this.props.selectedTopicChange(topic);
         }
     }
+
 
     initTopics = (numTops, topWordCounts) => {
         if (topWordCounts.length > 0) {
@@ -137,7 +137,7 @@ class SideBar extends Component {
 
         // after init, if iterations have run creating new topicWordCounts
         // update topWords but do not reinitialize everything
-        if(this.state.topics && prevProps.topicWordCounts !== this.props.topicWordCounts) {
+        else if(this.state.topics && prevProps.topicWordCounts !== this.props.topicWordCounts) {
             let topicsCopy = {...this.state.topics};
             console.log(this.topicsCopy);
             for (let topic = 0; topic < this.props.numTopics; topic++) {
@@ -168,72 +168,75 @@ class SideBar extends Component {
                             className="sidebox" 
                             key={topNum}
                         >
-                            <div>
-                                {/* Annotation text field */}
-                                <textarea 
-                                    className="textField"
+                            {/* Pin and Hide buttons */}
+                            <div style={{ 
+                                display: "flex", 
+                                justifyContent: "flex-end",
+                                backgroundColor: "var(--color1)"
+                            }}>
+                                {/* Pin/Unpin button */}
+                                <button
+                                    type="button"
+                                    onClick={() => this.toggleTopicPin(topNum)}
                                     style={{
-                                        whiteSpace: "preLine", 
-                                        backgroundColor: "var(--color3Dark)", 
-                                        borderCollapse: "separate",
-                                        color: "black",
-                                        borderRadius: "3px",
                                         border: "none",
-                                        height: "30px"}}
-                                    wrap="soft"
-                                    placeholder="Enter annotation"
-                                    onBlur={(e) => {
-                                        if(e.target.value && e.target.value[e.target.value.length-1] === '\n'){
-                                            e.target.value = e.target.value.slice(0,-1);
-                                        }    
-                                        changeAnnotation(e.target.value, topNum);
+                                        backgroundColor: "inherit"
                                     }}
-                                />
-
-
-                                {/* Pin and Hide buttons */}
-                                <div>
-                                    {/* Pin/Unpin button */}
-                                    <button
-                                        type="button"
-                                        onClick={() => this.toggleTopicPin(topNum)}
-                                        style={{
-                                            border: "none",
-                                            backgroundColor: "inherit"
-                                        }}
-                                    >
-                                        { this.state.topics[topNum].isPinned ? 
-                                            <PinAngleFill />
-                                            :
-                                            <PinAngle />
-                                        }
-                                    </button>
-                                    
-                                    {/* Hide/Unhide button */}
-                                    <button
-                                        type="button"
-                                        onClick={() => this.toggleTopicHide(topNum)}
-                                        style={{
-                                            border: "none",
-                                            backgroundColor: "inherit"
-                                        }}
-                                    >
-                                        { this.state.topics[topNum].isHidden ? 
-                                            <EyeSlashFill />
-                                            :
-                                            <EyeSlash />
-                                        }
-                                    </button>
-                                    
-                                </div>
+                                >
+                                    { this.state.topics[topNum].isPinned ? 
+                                        <PinAngleFill />
+                                        :
+                                        <PinAngle />
+                                    }
+                                </button>
+                                
+                                {/* Hide/Unhide button */}
+                                <button
+                                    type="button"
+                                    onClick={() => this.toggleTopicHide(topNum)}
+                                    style={{
+                                        border: "none",
+                                        backgroundColor: "inherit"
+                                    }}
+                                >
+                                    { this.state.topics[topNum].isHidden ? 
+                                        <EyeSlashFill />
+                                        :
+                                        <EyeSlash />
+                                    }
+                                </button>
                                 
                             </div>
+
+                            {/* Annotation text field */}
+                            <textarea 
+                                className="textField"
+                                style={{
+                                    whiteSpace: "preLine", 
+                                    backgroundColor: "var(--color3Dark)", 
+                                    borderCollapse: "separate",
+                                    color: "black",
+                                    borderRadius: "3px",
+                                    border: "none",
+                                    height: "30px",
+                                    width: "100%",
+                                }}
+                                wrap="soft"
+                                placeholder="Enter annotation"
+                                onBlur={(e) => {
+                                    if(e.target.value && e.target.value[e.target.value.length-1] === '\n'){
+                                        e.target.value = e.target.value.slice(0,-1);
+                                    }    
+                                    changeAnnotation(e.target.value, topNum);
+                                }}
+                            />
                             
 
                             {/* List of top words */}
                             <div 
                                 className={(topNum === selectedTopic) ? "topicwords selected" : "topicwords"}
                                 onClick={() => this.toggleTopicDocuments(topNum)}
+                                style={{ color: "inherit" }}
                             >
                                 {`[${topNum}] ${this.state.topics[topNum].topWords}`}
                             </div>
