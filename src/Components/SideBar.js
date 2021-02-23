@@ -72,8 +72,43 @@ class SideBar extends Component {
             dispOrderCopy.unshift(topNum);
         }
 
-        // toggle isPinned state of topic
+        // toggle isPinned state of topic and ensure topic is not hidden
         topicsCopy[topNum].isPinned = !topicsCopy[topNum].isPinned;
+        topicsCopy[topNum].isHidden = false;
+        this.setState({ 
+            topics: topicsCopy,
+            displayOrder: dispOrderCopy 
+        });
+    }
+
+    toggleTopicHide = (topNum) => {
+        let topicsCopy = {...this.state.topics};
+
+        let dispOrderCopy = [...this.state.displayOrder];
+        dispOrderCopy = dispOrderCopy.filter(tn => tn !== topNum);
+
+        if (this.state.topics[topNum].isHidden) { // topic gets unhidden
+            let i;
+            for (i = dispOrderCopy.length; i > -1; i--) {
+                let currTop = this.state.displayOrder[i];
+                // should insert unhidden topics after pinned topics
+                if (this.state.topics[currTop].isPinned) {
+                    break;
+                }
+                // insert topNum in correct spot before hidden topics
+                if (!this.state.topics[currTop].isHidden && currTop < topNum) {
+                    break;
+                }
+            }
+            dispOrderCopy.splice(i+1, 0, topNum);
+        }
+        else { // topic gets hidden; push to end of display order
+            dispOrderCopy.push(topNum);
+        }
+
+        // toggle isHidden state of topic and ensure topic is not pinned
+        topicsCopy[topNum].isHidden = !topicsCopy[topNum].isHidden;
+        topicsCopy[topNum].isPinned = false;
         this.setState({ 
             topics: topicsCopy,
             displayOrder: dispOrderCopy 
@@ -155,23 +190,42 @@ class SideBar extends Component {
                                     }}
                                 />
 
-                                {/* Pin/Unpin button */}
-                                <button
-                                    type="button"
-                                    onClick={() => this.toggleTopicPin(topNum)}
-                                    style={{
-                                        border: "none",
-                                        backgroundColor: "inherit"
-                                    }}
-                                >
-                                    { this.state.topics[topNum].isPinned ? 
-                                        <PinAngleFill />
-                                        :
-                                        <PinAngle />
-                                    }
-                                </button>
-                                
-                                {/* Hide/Unhide button */}
+
+                                {/* Pin and Hide buttons */}
+                                <div>
+                                    {/* Pin/Unpin button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => this.toggleTopicPin(topNum)}
+                                        style={{
+                                            border: "none",
+                                            backgroundColor: "inherit"
+                                        }}
+                                    >
+                                        { this.state.topics[topNum].isPinned ? 
+                                            <PinAngleFill />
+                                            :
+                                            <PinAngle />
+                                        }
+                                    </button>
+                                    
+                                    {/* Hide/Unhide button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => this.toggleTopicHide(topNum)}
+                                        style={{
+                                            border: "none",
+                                            backgroundColor: "inherit"
+                                        }}
+                                    >
+                                        { this.state.topics[topNum].isHidden ? 
+                                            <EyeSlashFill />
+                                            :
+                                            <EyeSlash />
+                                        }
+                                    </button>
+                                    
+                                </div>
                                 
                             </div>
                             
