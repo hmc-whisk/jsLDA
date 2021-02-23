@@ -8,8 +8,8 @@ import { PinAngle, PinAngleFill, EyeSlash, EyeSlashFill } from 'react-bootstrap-
 class SideBar extends Component {
 
     state = {
-        topics: null,
-        displayOrder: [],
+        topics: null, // {topic#: { topWords: ..., isPinned: ..., isHidden: ... }, ...}
+        displayOrder: [], // keeps track of pinning and hiding
     }
 
     // NOTE: kept the d3 implementation of this function because
@@ -162,11 +162,11 @@ class SideBar extends Component {
             <div className="sidebar">
                 <form id="topic-annotations">
                 {
-                    this.state.displayOrder.map((topNum) => (
+                    this.state.displayOrder.map((topNum, index) => (
                         <div 
                             id="topics" 
                             className="sidebox" 
-                            key={topNum}
+                            key={index}
                         >
                             {/* Pin and Hide buttons */}
                             <div style={{ 
@@ -180,13 +180,14 @@ class SideBar extends Component {
                                     onClick={() => this.toggleTopicPin(topNum)}
                                     style={{
                                         border: "none",
-                                        backgroundColor: "inherit"
+                                        backgroundColor: "inherit",
+                                        outline: "none",
                                     }}
                                 >
                                     { this.state.topics[topNum].isPinned ? 
-                                        <PinAngleFill />
+                                        <PinAngleFill style={{height: "16px", width: "16px"}} />
                                         :
-                                        <PinAngle />
+                                        <PinAngle style={{height: "16px", width: "16px"}} />
                                     }
                                 </button>
                                 
@@ -196,13 +197,14 @@ class SideBar extends Component {
                                     onClick={() => this.toggleTopicHide(topNum)}
                                     style={{
                                         border: "none",
-                                        backgroundColor: "inherit"
+                                        backgroundColor: "inherit",
+                                        outline: "none",
                                     }}
                                 >
                                     { this.state.topics[topNum].isHidden ? 
-                                        <EyeSlashFill />
+                                        <EyeSlashFill style={{height: "16px", width: "16px"}} />
                                         :
-                                        <EyeSlash />
+                                        <EyeSlash style={{height: "16px", width: "16px"}} />
                                     }
                                 </button>
                                 
