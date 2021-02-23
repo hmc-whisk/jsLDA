@@ -83,3 +83,20 @@ export function confirmReset(event, callback){
   else 
       event.preventDefault();
 }
+
+/**
+ * @summary Saves a given file to the user's computer.
+ * @param {String} fileName Name of file to be saved. Including extension
+ * @param {String} fileContents Contents of file to be saved
+ * @param {String} fileType Type of file to be saved
+ */
+export function saveFile(fileName, fileContents, fileType) {
+  const blob = new Blob([fileContents],{type:fileType});
+  const href = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = href;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);    
+}
