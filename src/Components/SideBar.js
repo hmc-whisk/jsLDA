@@ -5,53 +5,6 @@ import Spinner from 'react-bootstrap/Spinner';
 
 import { PinAngle, PinAngleFill, EyeSlash, EyeSlashFill } from 'react-bootstrap-icons';
 
-const MinimizedTopic = ({
-    topNum,
-    topWords,
-    togglePin,
-    toggleHide
-}) => {
-    
-    return (
-        <div>
-            <div>
-                {`[${topNum}] ${topWords.slice(0, 20)}...`}
-            </div>
-            <div style={{ 
-                display: "flex", 
-                justifyContent: "flex-end",
-            }}>
-                {/* Pin/Unpin button */}
-                <button
-                    type="button"
-                    onClick={() => togglePin(topNum)}
-                    style={{
-                        border: "none",
-                        backgroundColor: "inherit",
-                        outline: "none",
-                    }}
-                >
-                    <PinAngle style={{height: "16px", width: "16px"}} />
-                </button>
-                
-                {/* Hide/Unhide button */}
-                <button
-                    type="button"
-                    onClick={() => toggleHide(topNum)}
-                    style={{
-                        border: "none",
-                        backgroundColor: "inherit",
-                        outline: "none",
-                    }}
-                >
-                    <EyeSlashFill style={{height: "16px", width: "16px"}} />
-                </button>
-                
-            </div>
-        </div>
-    )
-}
-
 const TopicBox = ({
     topNum,
     selectedTopic,
@@ -61,36 +14,23 @@ const TopicBox = ({
     toggleTopicDocuments,
     changeAnnotation,
 }) => {
-    const [minimized, setMinimized] = useState(true);
-    console.log(minimized);
+    
     return (
-        (topicsDict[topNum].isHidden && minimized) ? 
-        <div onClick={() => setMinimized(!minimized)}>
-            <MinimizedTopic
-                topNum={topNum}
-                topWords={topicsDict[topNum].topWords}
-                togglePin={togglePin}
-                toggleHide={toggleHide}
-            />
-        </div>
-        
-        :
-        <div
-            id="topics" 
-            className="sidebox" 
-            onClick={() => {
-                if (topicsDict[topNum].isHidden) {
-                    setMinimized(!minimized)
-                }
-            }}
-        >
+        <div id="topics" className="sidebox">
             {/* Pin and Hide buttons */}
             <div style={{ 
                 display: "flex", 
-                justifyContent: "flex-end",
-                backgroundColor: "var(--color1)"
+                justifyContent: "space-between",
+                backgroundColor: "var(--color1)",
+                borderRadius: "4px"
             }}>
-                {/* Pin/Unpin button */}
+                {/* Topic label */}
+                <div style={{color: "black"}}>
+                    {`Topic ${topNum}`}
+                </div>
+
+                {/* Pin/Unpin buttons */}
+                <div>
                 <button
                     type="button"
                     onClick={() => togglePin(topNum)}
@@ -123,7 +63,7 @@ const TopicBox = ({
                         <EyeSlash style={{height: "16px", width: "16px"}} />
                     }
                 </button>
-                
+                </div>
             </div>
 
             {/* Annotation text field */}
@@ -138,6 +78,7 @@ const TopicBox = ({
                     border: "none",
                     height: "30px",
                     width: "100%",
+                    resize: "vertical"
                 }}
                 wrap="soft"
                 placeholder="Enter annotation"
@@ -149,14 +90,13 @@ const TopicBox = ({
                 }}
             />
             
-
             {/* List of top words */}
             <div 
                 className={(topNum === selectedTopic) ? "topicwords selected" : "topicwords"}
                 onClick={() => toggleTopicDocuments(topNum)}
                 style={{ color: "inherit" }}
             >
-                {`[${topNum}] ${topicsDict[topNum].topWords}`}
+                {`${topicsDict[topNum].topWords}`}
             </div>
         </div>
     )

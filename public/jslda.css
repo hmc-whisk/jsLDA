@@ -1,7 +1,7 @@
 body { font-family: Calibri, Verdana; background-color: #fff; }
 
 div.sidebar { float: left; flex: 1; overflow-y: scroll; }
-div.sidebar div.sidebox { margin: 5px; padding: 10px; }
+div.sidebar div.sidebox { margin: 5px; padding: 8px; }
 
 div.top { background-color: #ddd; margin: 5px; padding: 10px; -moz-border-radius: 10px; border-radius: 10px; }
 div.top #num_topics_control { float:right; }
