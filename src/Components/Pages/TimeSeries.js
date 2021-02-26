@@ -11,8 +11,9 @@ class TimeSeries extends Component {
             timeSeriesWidth: 600, 
             timeSeriesHeight: 75,
             timeSeriesHeightTopic: 300,
-            numberToAvg: 5,
+            numberOfBins: 20,
             fillColor: getComputedStyle(document.documentElement).getPropertyValue('--color2'),
+            errorBarColor: getComputedStyle(document.documentElement).getPropertyValue('--color2Light'),
             strokeColor: getComputedStyle(document.documentElement).getPropertyValue('--color4'),
         };
         
@@ -50,7 +51,6 @@ class TimeSeries extends Component {
                 .append("path")
                 .style("fill", this.state.fillColor)
                 .style("stroke", this.state.strokeColor);
-            temp_topicTimeGroups[topic].append("text").attr("transform", "translate(5,40)");
             temp_topicTimeGroups[topic].append("g");
         }
 
@@ -76,7 +76,7 @@ class TimeSeries extends Component {
             .push(tsSVG
                 .append("g")
                 .attr("transform", "translate(50,50)"));
-        temp_topicTimeGroups[0].append("text").attr("transform", "translate(5,20)");
+        //temp_topicTimeGroups[0].append("text").attr("transform", "translate(5,20)");
 
         this.topicTimeGroups = temp_topicTimeGroups
     }
@@ -132,7 +132,8 @@ class TimeSeries extends Component {
                     .select("path")
                     .attr("d", area(topicMeans));
                 this.topicTimeGroups[topic]
-                    .select("text")
+                    .append("text")
+                    .attr("transform", "translate(5,40)")
                     .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3));
                 this.topicTimeGroups[topic]
                     .select("g")
@@ -180,7 +181,7 @@ class TimeSeries extends Component {
      */
     getBins(topic, flatLines=true, errorBars=false) {
         let bins = this.props.ldaModel
-            .topicTimesBinnedAverage(topic,this.state.numberToAvg,errorBars);
+            .topicTimesBinnedAverage(topic,this.state.numberOfBins,errorBars);
 
         if(flatLines) {
             bins = this.flattenTimeBinPoints(bins)
@@ -240,21 +241,24 @@ class TimeSeries extends Component {
             for (let i = 0; i < topicMeans.length; i += 1) {
                 topicKeys.push(topicMeans[i].key);
             }
+            // Error region
             this.topicTimeGroups[0]
-                //.select("g")
                 .append("path")
-                .attr("fill", this.state.fillColor)
+                .attr("fill", this.state.errorBarColor)
                 .attr("stroke", "none")
                 .attr("d",confInterval(topicMeans))
+            // Chart line
             this.topicTimeGroups[0]
-                //.select("g")
                 .append("path")
                 .attr("fill", "none")
                 .attr("stroke", this.state.strokeColor)
                 .attr("d", line(topicMeans));
+            // Topic Label
             this.topicTimeGroups[0]
-                .select("text")
+                .append("text")
+                .attr("transform", "translate(5,20)")
                 .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3));
+            // X axis
             this.topicTimeGroups[0]
                 .append("g")
                 .attr("transform", "translate(0," + this.state.timeSeriesHeightTopic + ")")
@@ -263,9 +267,12 @@ class TimeSeries extends Component {
                     .attr("transform", "rotate(45)")
                     .attr("dx", "3em")
                     .attr("dy", ".1em");
+            // Y axis
             this.topicTimeGroups[0]
                 .append("g")
                 .call(y_axis)
+
+            // Tooltip?
             this.topicTimeGroups[0]
                 .append("text")
                 .style("text-anchor", "middle")
@@ -385,7 +392,7 @@ class TimeSeries extends Component {
         if(!event.target.value) event.target.value = 1; // Protect from empty field
 
         this.setState({
-            numberToAvg: Math.max(1,event.target.value),
+            numberOfBins: Math.max(1,event.target.value),
         })
     }
 
@@ -394,21 +401,22 @@ class TimeSeries extends Component {
             <>
                 <div className="help">Documents are grouped by their "date_tag" 
                 field. These plots 
-                show the average document proportion of each topic at each 
-                date value. Date values are parsed as ISO date time strings.
+                show the average document proportion of each topic in each time bin. 
+                Date values are parsed as ISO date time strings.
                 When a topic is selected a more detailed graph of just that topic
                 is shown.
-                Hover only shows the time fields that are filled. Two 
-                consective time periods present in the data are connected with
-                 a straight line. The graphs use a rolling average to cut out 
-                 noise. You can change the number of documents this average
-                is taken over by adjusting the graph smoothing parameter.
+                Hover only shows the time fields that are filled. The light blue
+                area around the line represents the 90% confidence interval calculated 
+                using standard error.
+                The graphs bin documents into time periods to smooth
+                out the data and make it more interpretable. You can change the number 
+                of bins that are used below.
                 Data for plots are available in downloads page.</div>
-                <label for="numberToAvg">Graph Smoothing:</label>
+                <label for="numberOfBins">Number of Bins:</label>
                 <input 
                     onChange = {this.handleNumAvgChange} 
-                    type="number" id="numberToAvg" 
-                    value = {this.state.numberToAvg} 
+                    type="number" id="numberOfBins" 
+                    value = {this.state.numberOfBins} 
                     max="1000"
                     min="5"
                     step="5"

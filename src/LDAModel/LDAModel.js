@@ -915,7 +915,7 @@ class LDAModel {
             const z = 1.645
             let newDict = {...dict}
             newDict.upperEr = mean + z*stdError
-            newDict.lowerEr = mean - z*stdError
+            newDict.lowerEr = Math.max(mean - z*stdError,0)
             return newDict
         })
         return valArray
