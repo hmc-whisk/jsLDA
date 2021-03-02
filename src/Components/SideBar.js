@@ -168,9 +168,15 @@ class SideBar extends Component {
                 }
             }
             dispOrderCopy.splice(i-1, 0, topNum);
+
+            // set visibility back to default in ldaModel
+            this.props.setTopicVisibility(topNum, "default")
         }
         else { // topic gets pinned; push to front of display order
             dispOrderCopy.unshift(topNum);
+
+            // set visibility to pinned in ldaModel 
+            this.props.setTopicVisibility(topNum, "pinned");
         }
 
         // toggle isPinned state of topic and ensure topic is not hidden
@@ -202,9 +208,15 @@ class SideBar extends Component {
                 }
             }
             dispOrderCopy.splice(i+1, 0, topNum);
+
+            // set topic visibility back to "default" in ldaModel
+            this.props.setTopicVisibility(topNum, "default")
         }
         else { // topic gets hidden; push to end of display order
             dispOrderCopy.push(topNum);
+
+            // set topic visibility to "hidden" in ldaModel
+            this.props.setTopicVisibility(topNum, "hidden")
         }
 
         // toggle isHidden state of topic and ensure topic is not pinned
@@ -231,8 +243,8 @@ class SideBar extends Component {
         // if topicWordCounts just finished loading, call initTopics
         if (prevProps.numTopics !== this.props.numTopics 
             || (prevProps.topicWordCounts.length === 0 && this.props.topicWordCounts.length > 0)) {
-            console.log(this.props.topicWordCounts);
             this.clearAnnotations();
+            
             this.initTopics(this.props.numTopics, this.props.topicWordCounts);
         }
 
@@ -254,7 +266,7 @@ class SideBar extends Component {
 
     render() {
         const { numTopics, topicWordCounts, changeAnnotation, getAnnotation, selectedTopic } = this.props;
-
+        console.log(this.props.topicVisibility);
         // if (topicWordCounts.length === 0) {
         //     if (this.state.displayOrder.length === 0) {
         //         this.initTopics(this.props.numTopics, this.props.topicWordCounts);
@@ -264,7 +276,7 @@ class SideBar extends Component {
             <div className="sidebar">
                 <form id="topic-annotations">
                 {
-                    this.state.displayOrder.map((topNum, index) => (
+                    this.state.displayOrder.map((topNum) => (
                         <TopicBox
                             key={topNum}
                             topNum={topNum}
