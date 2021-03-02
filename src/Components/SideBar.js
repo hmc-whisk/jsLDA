@@ -18,14 +18,18 @@ const TopicBox = ({
     return (
         <div id="topics" className="sidebox">
             {/* Pin and Hide buttons */}
-            <div style={{ 
-                display: "flex", 
-                justifyContent: "space-between",
-                backgroundColor: "var(--color1)",
-                borderRadius: "4px"
-            }}>
+            <div className={ // topbar color change if selected or hidden
+                (topNum === selectedTopic) ? 
+                    "topicbar topicbar-selected"
+                    :
+                    (topicsDict[topNum].isHidden ?
+                        "topicbar topicbar-hidden"
+                        :
+                        "topicbar"
+                    )
+            }>
                 {/* Topic label */}
-                <div style={{color: "black"}}>
+                <div style={{color: (topNum === selectedTopic) ? "white" : "black"}}>
                     {`Topic ${topNum}`}
                 </div>
 
