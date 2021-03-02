@@ -97,11 +97,9 @@ class App extends Component {
 
   changeAnnotation = (text,i) => {
     this.annotations[i] = text;
-    console.log(this.annotations.toString);
   }
 
   resetNotes = (i) => {
-    console.log("resetNotes");
     this.annotations = new Array(i);
   }
 
@@ -303,7 +301,8 @@ class App extends Component {
       if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.state.ldaModel.numTopics) {
         this.state.ldaModel.changeNumTopics(Number(val));
       }
-    
+      
+      this.resetNotes(this.state.ldaModel.numTopics);
   }
 
   componentDidMount() {
@@ -446,6 +445,8 @@ class App extends Component {
                getAnnotation = {this.getAnnotation}
                sortVocabByTopic={this.state.ldaModel.sortVocabByTopic} 
                numTopics={this.state.ldaModel.numTopics} 
+               topicVisibility={this.state.ldaModel.topicVisibility}
+               setTopicVisibility={this.state.ldaModel.setTopicVisibility}
                topicWordCounts={this.state.ldaModel.topicWordCounts}
                selectedTopicChange = {this.state.ldaModel.selectedTopicChange}
                />
