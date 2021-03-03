@@ -440,15 +440,14 @@ class App extends Component {
 
       <div style={{display: "flex", flex: "1", overflow: "hidden"}}>
       <SideBar selectedTopic={this.state.ldaModel.selectedTopic} 
-               changeAnnotation = {this.changeAnnotation}
-               resetAnnotation = {this.resetNotes}
-               getAnnotation = {this.getAnnotation}
+               changeAnnotation={this.changeAnnotation}
+               getAnnotation={this.getAnnotation}
                sortVocabByTopic={this.state.ldaModel.sortVocabByTopic} 
                numTopics={this.state.ldaModel.numTopics} 
                topicVisibility={this.state.ldaModel.topicVisibility}
                setTopicVisibility={this.state.ldaModel.setTopicVisibility}
                topicWordCounts={this.state.ldaModel.topicWordCounts}
-               selectedTopicChange = {this.state.ldaModel.selectedTopicChange}
+               selectedTopicChange={this.state.ldaModel.selectedTopicChange}
                />
 
       <div id="tabwrapper">

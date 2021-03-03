@@ -1,7 +1,6 @@
-import React, { Component, useState } from 'react'; 
+import React, { Component } from 'react'; 
 import * as d3 from 'd3';
 import {topNWords} from '../funcs/utilityFunctions';
-import Spinner from 'react-bootstrap/Spinner';
 
 import { PinAngle, PinAngleFill, EyeSlash, EyeSlashFill } from 'react-bootstrap-icons';
 
@@ -9,6 +8,7 @@ const TopicBox = ({
     topNum,
     selectedTopic,
     topicsDict,
+    topicVisibility,
     togglePin,
     toggleHide,
     toggleTopicDocuments,
@@ -22,7 +22,7 @@ const TopicBox = ({
                 (topNum === selectedTopic) ? 
                     "topicbar topicbar-selected"
                     :
-                    (topicsDict[topNum].isHidden ?
+                    (topicVisibility[topNum] === "hidden" ?
                         "topicbar topicbar-hidden"
                         :
                         "topicbar"
@@ -44,7 +44,7 @@ const TopicBox = ({
                         outline: "none",
                     }}
                 >
-                    { topicsDict[topNum].isPinned ? 
+                    { topicVisibility[topNum] === "pinned" ? 
                         <PinAngleFill style={{height: "16px", width: "16px"}} />
                         :
                         <PinAngle style={{height: "16px", width: "16px"}} />
@@ -61,7 +61,7 @@ const TopicBox = ({
                         outline: "none",
                     }}
                 >
-                    { topicsDict[topNum].isHidden ? 
+                    { topicVisibility[topNum] === "hidden" ? 
                         <EyeSlashFill style={{height: "16px", width: "16px"}} />
                         :
                         <EyeSlash style={{height: "16px", width: "16px"}} />
@@ -100,7 +100,7 @@ const TopicBox = ({
                 onClick={() => toggleTopicDocuments(topNum)}
                 style={{ color: "inherit" }}
             >
-                {`${topicsDict[topNum].topWords}`}
+                {`${topicsDict[topNum]}`}
             </div>
         </div>
     )
@@ -109,7 +109,7 @@ const TopicBox = ({
 class SideBar extends Component {
 
     state = {
-        topics: null, // {topic#: { topWords: ..., isPinned: ..., isHidden: ... }, ...}
+        topics: null, // {topic#: "string of top words", ...}
         displayOrder: [], // keeps track of pinning and hiding
     }
 
@@ -134,11 +134,7 @@ class SideBar extends Component {
             let topicsDict = {};
             for (let topic = 0; topic < numTops; topic++) {
                 if (topWordCounts[topic]) { 
-                    topicsDict[topic] = {
-                        topWords: topNWords(this.props.topicWordCounts[topic], 10),
-                        isPinned: false,
-                        isHidden: false,
-                    }
+                    topicsDict[topic] = topNWords(this.props.topicWordCounts[topic], 10)
                 }
             }
             this.setState({
@@ -149,21 +145,19 @@ class SideBar extends Component {
     }
 
     toggleTopicPin = (topNum) => {
-        let topicsCopy = {...this.state.topics};
-
         let dispOrderCopy = [...this.state.displayOrder];
         dispOrderCopy = dispOrderCopy.filter(tn => tn !== topNum);
 
-        if (this.state.topics[topNum].isPinned) { // topic gets unpinned
+        if (this.props.topicVisibility[topNum] === "pinned") { // topic gets unpinned
             let i;
             for (i = 0; i < dispOrderCopy.length+1; i++) {
                 let currTop = this.state.displayOrder[i];
                 // should insert unpinned topics before hidden topics
-                if (this.state.topics[currTop].isHidden) {
+                if (this.props.topicVisibility[currTop] === "hidden") {
                     break;
                 }
                 // insert topNum in correct spot after pinned topics
-                if (!this.state.topics[currTop].isPinned && topNum < currTop) {
+                if (this.props.topicVisibility[currTop] !== "pinned" && topNum < currTop) {
                     break;
                 }
             }
@@ -179,31 +173,25 @@ class SideBar extends Component {
             this.props.setTopicVisibility(topNum, "pinned");
         }
 
-        // toggle isPinned state of topic and ensure topic is not hidden
-        topicsCopy[topNum].isPinned = !topicsCopy[topNum].isPinned;
-        topicsCopy[topNum].isHidden = false;
         this.setState({ 
-            topics: topicsCopy,
             displayOrder: dispOrderCopy 
         });
     }
 
     toggleTopicHide = (topNum) => {
-        let topicsCopy = {...this.state.topics};
-
         let dispOrderCopy = [...this.state.displayOrder];
         dispOrderCopy = dispOrderCopy.filter(tn => tn !== topNum);
 
-        if (this.state.topics[topNum].isHidden) { // topic gets unhidden
+        if (this.props.topicVisibility[topNum] === "hidden") { // topic gets unhidden
             let i;
             for (i = dispOrderCopy.length; i > -1; i--) {
                 let currTop = this.state.displayOrder[i];
                 // should insert unhidden topics after pinned topics
-                if (this.state.topics[currTop].isPinned) {
+                if (this.props.topicVisibility[currTop] === "pinned") {
                     break;
                 }
                 // insert topNum in correct spot before hidden topics
-                if (!this.state.topics[currTop].isHidden && currTop < topNum) {
+                if (this.props.topicVisibility[currTop] !== "hidden" && currTop < topNum) {
                     break;
                 }
             }
@@ -219,11 +207,7 @@ class SideBar extends Component {
             this.props.setTopicVisibility(topNum, "hidden")
         }
 
-        // toggle isHidden state of topic and ensure topic is not pinned
-        topicsCopy[topNum].isHidden = !topicsCopy[topNum].isHidden;
-        topicsCopy[topNum].isPinned = false;
         this.setState({ 
-            topics: topicsCopy,
             displayOrder: dispOrderCopy 
         });
     }
@@ -265,7 +249,7 @@ class SideBar extends Component {
     }
 
     render() {
-        const { numTopics, topicWordCounts, changeAnnotation, getAnnotation, selectedTopic } = this.props;
+        const { numTopics, topicWordCounts, changeAnnotation, getAnnotation, topicVisibility, selectedTopic } = this.props;
         console.log(this.props.topicVisibility);
         // if (topicWordCounts.length === 0) {
         //     if (this.state.displayOrder.length === 0) {
@@ -282,6 +266,7 @@ class SideBar extends Component {
                             topNum={topNum}
                             selectedTopic={selectedTopic}
                             topicsDict={this.state.topics}
+                            topicVisibility={topicVisibility}
                             togglePin={this.toggleTopicPin}
                             toggleHide={this.toggleTopicHide}
                             toggleTopicDocuments={this.toggleTopicDocuments}
@@ -293,14 +278,6 @@ class SideBar extends Component {
                 </form>
             </div>
         )
-
-        // TODO: spinner while topicWordCounts loads
-        //     return (
-        //         <div className="sidebar">
-        //             Loading
-        //         </div>
-        //     )
-        // }
     }
 }
 
