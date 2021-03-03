@@ -9,8 +9,7 @@ const TopicBox = ({
     selectedTopic,
     topicsDict,
     topicVisibility,
-    togglePin,
-    toggleHide,
+    toggleVisibility,
     toggleTopicDocuments,
     changeAnnotation,
 }) => {
@@ -37,7 +36,7 @@ const TopicBox = ({
                 <div>
                 <button
                     type="button"
-                    onClick={() => togglePin(topNum)}
+                    onClick={() => toggleVisibility(topNum, "pin")}
                     style={{
                         border: "none",
                         backgroundColor: "inherit",
@@ -54,7 +53,7 @@ const TopicBox = ({
                 {/* Hide/Unhide button */}
                 <button
                     type="button"
-                    onClick={() => toggleHide(topNum)}
+                    onClick={() => toggleVisibility(topNum, "hide")}
                     style={{
                         border: "none",
                         backgroundColor: "inherit",
@@ -109,7 +108,7 @@ const TopicBox = ({
 class SideBar extends Component {
 
     state = {
-        topics: null, // {topic#: "string of top words", ...}
+        topicWords: null, // {topic#: "string of top words", ...}
         displayOrder: [], // keeps track of pinning and hiding
     }
 
@@ -128,7 +127,6 @@ class SideBar extends Component {
         }
     }
 
-
     initTopics = (numTops, topWordCounts) => {
         if (topWordCounts.length > 0) {
             let topicsDict = {};
@@ -138,78 +136,66 @@ class SideBar extends Component {
                 }
             }
             this.setState({
-                topics: topicsDict,
+                topicWords: topicsDict,
                 displayOrder: Array.from(Array(numTops).keys())
             });
         }
     }
 
-    toggleTopicPin = (topNum) => {
+    toggleTopicVisibility = (topNum, toggledButton) => {
         let dispOrderCopy = [...this.state.displayOrder];
         dispOrderCopy = dispOrderCopy.filter(tn => tn !== topNum);
+        
+        const currentVis = this.props.topicVisibility[topNum];
 
-        if (this.props.topicVisibility[topNum] === "pinned") { // topic gets unpinned
-            let i;
-            for (i = 0; i < dispOrderCopy.length+1; i++) {
-                let currTop = this.state.displayOrder[i];
-                // should insert unpinned topics before hidden topics
-                if (this.props.topicVisibility[currTop] === "hidden") {
-                    break;
+        if (toggledButton === "pin") {
+            if (currentVis === "pinned") { // unpin
+                let i;
+                for (i = 0; i < dispOrderCopy.length+1; i++) {
+                    let currTop = this.state.displayOrder[i];
+                    // should insert unpinned topics before hidden topics
+                    if (this.props.topicVisibility[currTop] === "hidden") {
+                        break;
+                    }
+                    // insert topNum in correct spot after pinned topics
+                    if (this.props.topicVisibility[currTop] !== "pinned" && topNum < currTop) {
+                        break;
+                    }
                 }
-                // insert topNum in correct spot after pinned topics
-                if (this.props.topicVisibility[currTop] !== "pinned" && topNum < currTop) {
-                    break;
-                }
+                dispOrderCopy.splice(i-1, 0, topNum);
+
+                this.props.setTopicVisibility(topNum, "default");
             }
-            dispOrderCopy.splice(i-1, 0, topNum);
-
-            // set visibility back to default in ldaModel
-            this.props.setTopicVisibility(topNum, "default")
-        }
-        else { // topic gets pinned; push to front of display order
-            dispOrderCopy.unshift(topNum);
-
-            // set visibility to pinned in ldaModel 
-            this.props.setTopicVisibility(topNum, "pinned");
-        }
-
-        this.setState({ 
-            displayOrder: dispOrderCopy 
-        });
-    }
-
-    toggleTopicHide = (topNum) => {
-        let dispOrderCopy = [...this.state.displayOrder];
-        dispOrderCopy = dispOrderCopy.filter(tn => tn !== topNum);
-
-        if (this.props.topicVisibility[topNum] === "hidden") { // topic gets unhidden
-            let i;
-            for (i = dispOrderCopy.length; i > -1; i--) {
-                let currTop = this.state.displayOrder[i];
-                // should insert unhidden topics after pinned topics
-                if (this.props.topicVisibility[currTop] === "pinned") {
-                    break;
-                }
-                // insert topNum in correct spot before hidden topics
-                if (this.props.topicVisibility[currTop] !== "hidden" && currTop < topNum) {
-                    break;
-                }
+            else { // pin
+                dispOrderCopy.unshift(topNum);
+                this.props.setTopicVisibility(topNum, "pinned");
             }
-            dispOrderCopy.splice(i+1, 0, topNum);
-
-            // set topic visibility back to "default" in ldaModel
-            this.props.setTopicVisibility(topNum, "default")
         }
-        else { // topic gets hidden; push to end of display order
-            dispOrderCopy.push(topNum);
-
-            // set topic visibility to "hidden" in ldaModel
-            this.props.setTopicVisibility(topNum, "hidden")
+        else if (toggledButton === "hide") {
+            if (currentVis === "hidden") { // unhide
+                let i;
+                for (i = dispOrderCopy.length; i > -1; i--) {
+                    let currTop = this.state.displayOrder[i];
+                    // should insert unhidden topics after pinned topics
+                    if (this.props.topicVisibility[currTop] === "pinned") {
+                        break;
+                    }
+                    // insert topNum in correct spot before hidden topics
+                    if (this.props.topicVisibility[currTop] !== "hidden" && currTop < topNum) {
+                        break;
+                    }
+                }
+                dispOrderCopy.splice(i+1, 0, topNum);
+    
+                // set topic visibility back to "default" in ldaModel
+                this.props.setTopicVisibility(topNum, "default")
+            }
+            else { // hide
+                dispOrderCopy.push(topNum);
+                this.props.setTopicVisibility(topNum, "hidden");
+            }
         }
-
-        this.setState({ 
-            displayOrder: dispOrderCopy 
-        });
+        this.setState({ displayOrder: dispOrderCopy })
     }
 
     // When number of topics is changed, model resets and annotations
@@ -234,27 +220,19 @@ class SideBar extends Component {
 
         // after init, if iterations have run creating new topicWordCounts
         // update topWords but do not reinitialize everything
-        else if(this.state.topics && prevProps.topicWordCounts !== this.props.topicWordCounts) {
-            let topicsCopy = {...this.state.topics};
-            console.log(this.topicsCopy);
+        else if(this.state.topicWords && prevProps.topicWordCounts !== this.props.topicWordCounts) {
+            let topicWordsCopy = {...this.state.topicWords};
             for (let topic = 0; topic < this.props.numTopics; topic++) {
                 if (this.props.topicWordCounts[topic]) { 
-                    topicsCopy[topic].topWords = topNWords(this.props.topicWordCounts[topic], 10);
+                    topicWordsCopy[topic] = topNWords(this.props.topicWordCounts[topic], 10);
                 }
             }
-            this.setState({
-                topics: topicsCopy,
-            });
+            this.setState({ topicWords: topicWordsCopy });
         }
     }
 
     render() {
-        const { numTopics, topicWordCounts, changeAnnotation, getAnnotation, topicVisibility, selectedTopic } = this.props;
-        console.log(this.props.topicVisibility);
-        // if (topicWordCounts.length === 0) {
-        //     if (this.state.displayOrder.length === 0) {
-        //         this.initTopics(this.props.numTopics, this.props.topicWordCounts);
-        //     }
+        const { changeAnnotation, topicVisibility, selectedTopic } = this.props;
 
         return (
             <div className="sidebar">
@@ -265,10 +243,9 @@ class SideBar extends Component {
                             key={topNum}
                             topNum={topNum}
                             selectedTopic={selectedTopic}
-                            topicsDict={this.state.topics}
+                            topicsDict={this.state.topicWords}
                             topicVisibility={topicVisibility}
-                            togglePin={this.toggleTopicPin}
-                            toggleHide={this.toggleTopicHide}
+                            toggleVisibility={this.toggleTopicVisibility}
                             toggleTopicDocuments={this.toggleTopicDocuments}
                             changeAnnotation={changeAnnotation}
                         />

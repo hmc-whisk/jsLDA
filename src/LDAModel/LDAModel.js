@@ -438,6 +438,7 @@ class LDAModel {
     changeNumTopics(numTopics) {
         this.numTopics = numTopics;
         this.selectedTopic = -1;
+        this.topicVisibility = this.initTopicVisibility(this.numTopics);
         this.topicWordCounts = [];
         this.tokensPerTopic = zeros(this.numTopics);
         this._topicWeights = zeros(this.numTopics);
