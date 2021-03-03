@@ -17,7 +17,7 @@ const TopicBox = ({
     return (
         <div id="topics" className="sidebox">
             {/* Pin and Hide buttons */}
-            <div className={ // topbar color change if selected or hidden
+            <div className={ // topicbar color change if selected or hidden
                 (topNum === selectedTopic) ? 
                     "topicbar topicbar-selected"
                     :
@@ -127,6 +127,8 @@ class SideBar extends Component {
         }
     }
 
+    // initialize state with top 10 words for each topic and
+    // reset display order
     initTopics = (numTops, topWordCounts) => {
         if (topWordCounts.length > 0) {
             let topicsDict = {};
@@ -142,6 +144,9 @@ class SideBar extends Component {
         }
     }
 
+    // update topic visibility according to UI action with
+    // pin/hide buttons
+    // also updates topicVisibility in ldaModel
     toggleTopicVisibility = (topNum, toggledButton) => {
         let dispOrderCopy = [...this.state.displayOrder];
         dispOrderCopy = dispOrderCopy.filter(tn => tn !== topNum);
@@ -168,6 +173,7 @@ class SideBar extends Component {
             }
             else { // pin
                 dispOrderCopy.unshift(topNum);
+
                 this.props.setTopicVisibility(topNum, "pinned");
             }
         }
@@ -187,11 +193,11 @@ class SideBar extends Component {
                 }
                 dispOrderCopy.splice(i+1, 0, topNum);
     
-                // set topic visibility back to "default" in ldaModel
                 this.props.setTopicVisibility(topNum, "default")
             }
             else { // hide
                 dispOrderCopy.push(topNum);
+
                 this.props.setTopicVisibility(topNum, "hidden");
             }
         }
