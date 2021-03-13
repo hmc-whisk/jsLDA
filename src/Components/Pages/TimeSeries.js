@@ -11,8 +11,9 @@ class TimeSeries extends Component {
             timeSeriesWidth: 600, 
             timeSeriesHeight: 75,
             timeSeriesHeightTopic: 300,
-            numberToAvg: 5,
+            numberOfBins: 20,
             fillColor: getComputedStyle(document.documentElement).getPropertyValue('--color2'),
+            errorBarColor: getComputedStyle(document.documentElement).getPropertyValue('--color2Light'),
             strokeColor: getComputedStyle(document.documentElement).getPropertyValue('--color4'),
         };
         
@@ -25,7 +26,7 @@ class TimeSeries extends Component {
     }
     
     /**
-     * @summary Creates skeleton of svg component
+     * @summary Creates skeleton of svg component when no topic is selected
      */
     createTimeSVGs () {
         var tsPage = d3.select(this._rootNode);
@@ -33,7 +34,7 @@ class TimeSeries extends Component {
         tsPage.select("svg").remove();
         let temp_topicTimeGroups = [];
         
-        let height = this.state.timeSeriesHeight * this.props.numTopics+75
+        let height = this.state.timeSeriesHeight * this.props.ldaModel.numTopics+75
         
         var tsSVG = tsPage
             .append("svg")
@@ -41,7 +42,7 @@ class TimeSeries extends Component {
             .attr("width", this.state.timeSeriesWidth)
             .style("overflow","visible");
         
-        for (var topic = 0; topic < this.props.numTopics; topic++) {
+        for (var topic = 0; topic < this.props.ldaModel.numTopics; topic++) {
             temp_topicTimeGroups
                 .push(tsSVG
                     .append("g")
@@ -50,7 +51,6 @@ class TimeSeries extends Component {
                 .append("path")
                 .style("fill", this.state.fillColor)
                 .style("stroke", this.state.strokeColor);
-            temp_topicTimeGroups[topic].append("text").attr("transform", "translate(5,40)");
             temp_topicTimeGroups[topic].append("g");
         }
 
@@ -59,7 +59,7 @@ class TimeSeries extends Component {
     }
 
     /**
-     * @summary Creates skeleton of svg component
+     * @summary Creates skeleton of svg component when a topic is selected
      */
     createTimeSVGsTopic () {
         var tsPage = d3.select(this._rootNode);
@@ -76,24 +76,21 @@ class TimeSeries extends Component {
             .push(tsSVG
                 .append("g")
                 .attr("transform", "translate(50,50)"));
-        temp_topicTimeGroups[0]
-            .append("path")
-            .style("fill", this.state.fillColor)
-            .style("stroke", this.state.strokeColor);
-        temp_topicTimeGroups[0].append("text").attr("transform", "translate(5,20)");
+        //temp_topicTimeGroups[0].append("text").attr("transform", "translate(5,20)");
 
         this.topicTimeGroups = temp_topicTimeGroups
     }
 
     /**
-     * @summary Updates the info in the timeseries graphs
+     * @summary Updates the info in the timeseries graphs when a topic is not
+     * selected
      */
     timeSeries0() {
         let maxTopicMean = 0;
         let allTopicMeans = [];
 
-        for (let topic = 0; topic < this.props.numTopics; topic++) {
-            var topicMeans = this.props.topicTimeRollingAvg(topic,this.state.numberToAvg);
+        for (let topic = 0; topic < this.props.ldaModel.numTopics; topic++) {
+            var topicMeans = this.getBins(topic)
 
             let thisMaxTopicMean = Math.max(...topicMeans.map(function (d) {
                 return d.value
@@ -105,7 +102,7 @@ class TimeSeries extends Component {
             allTopicMeans.push(topicMeans);
         }
 
-        for (let topic = 0; topic < this.props.numTopics; topic++) {
+        for (let topic = 0; topic < this.props.ldaModel.numTopics; topic++) {
             topicMeans = allTopicMeans[topic];
 
             // var xScale = d3.scaleLinear()
@@ -135,8 +132,9 @@ class TimeSeries extends Component {
                     .select("path")
                     .attr("d", area(topicMeans));
                 this.topicTimeGroups[topic]
-                    .select("text")
-                    .text(topNWords(this.props.topicWordCounts[topic], 3));
+                    .append("text")
+                    .attr("transform", "translate(5,40)")
+                    .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3));
                 this.topicTimeGroups[topic]
                     .select("g")
                     .attr("transform", "translate(0,75)")
@@ -147,25 +145,68 @@ class TimeSeries extends Component {
     }
 
     /**
-     * @summary Updates the info in the timeseries graphs
+     * Adds extra point at start of bins to flatten graph lines
+     * @param {Array<{key:Date}>} bins Bins with date refering to end time
+     * @returns {Array<{key:Date}>} Bins now with duplicate dictionaries at
+     * start of time span.
+     */
+    flattenTimeBinPoints(bins) {
+        let originalBins = [...bins]
+
+        // Deal with special starting point
+        let firstPoint = {...bins[0]}
+        firstPoint.key = this.props.ldaModel.minDocTime
+        bins.unshift(firstPoint)
+
+        // Add rest of points
+        for(let binNum = 1; binNum < originalBins.length; binNum++) {
+            let newPosition = binNum*2 // Acount for previous inserts on array
+            let startOfBin = {...originalBins[binNum]}
+            startOfBin.key = originalBins[binNum-1].key
+            bins.splice(newPosition,0,startOfBin)
+        }
+        return bins
+    }
+
+    /**
+     * Gets the bins that are needed to draw timeseries graph
+     * @param {Number} topic number of topic to get bins from
+     * @param {Boolean} flatLines whether or not to add extra points
+     * to flatten graph lines
+     * @param {Boolean} errorBars whether or not to add error bars to
+     * graph 
+     * @returns {Array<{key:Date,value:Number}>} Array of average 
+     * topic values for every document in bin. Entries are sorted by key. 
+     * Date refers to the max date for that bin.
+     */
+    getBins(topic, flatLines=true, errorBars=false) {
+        let bins = this.props.ldaModel
+            .topicTimesBinnedAverage(topic,this.state.numberOfBins,errorBars);
+
+        if(flatLines) {
+            bins = this.flattenTimeBinPoints(bins)
+        }
+        
+        return bins
+    }
+
+    /**
+     * @summary Updates the info in the timeseries graph when a topic
+     * is selected
      */
     timeSeriesTopic() {
         let maxTopicMean = 0;
 
-        let topic = this.props.selectedTopic;
+        let topic = this.props.ldaModel.selectedTopic;
 
-        var topicMeans = this.props.topicTimeRollingAvg(topic,this.state.numberToAvg);
+        var topicMeans = this.getBins(topic,true,true)
 
         let thisMaxTopicMean = Math.max(...topicMeans.map(function (d) {
-            return d.value
+            return d.upperEr
         }));
         if (thisMaxTopicMean > maxTopicMean) {
             maxTopicMean = thisMaxTopicMean;
         }
-
-        // var xScale = d3.scaleLinear()
-        //     .domain([0, topicMeans.length])
-        //     .range([0, this.state.timeSeriesWidth-50]);
 
         var yScale = d3
             .scaleLinear()
@@ -176,10 +217,16 @@ class TimeSeries extends Component {
             .domain([topicMeans[0].key, topicMeans[topicMeans.length-1].key])
             .range([0, this.state.timeSeriesWidth-50]);
 
-        var area = d3.area()
-            .x(function (d, i) { return scale(d.key); })
-            .y1(function (d) { return yScale(d.value); })
-            .y0(yScale(0));
+        // Function to draw line
+        var line = d3.line()
+            .x(function (d) { return scale(d.key); })
+            .y(function (d) { return yScale(d.value); })
+
+        // Function to draw confidence interval
+        const confInterval = d3.area()
+            .x(function (d) { return scale(d.key); })
+            .y0(function (d) { return yScale(d.lowerEr); })
+            .y1(function (d) { return yScale(d.upperEr); })
 
         var x_axis = d3.axisBottom()
             .scale(scale)
@@ -194,13 +241,24 @@ class TimeSeries extends Component {
             for (let i = 0; i < topicMeans.length; i += 1) {
                 topicKeys.push(topicMeans[i].key);
             }
-
+            // Error region
             this.topicTimeGroups[0]
-                .select("path")
-                .attr("d", area(topicMeans));
+                .append("path")
+                .attr("fill", this.state.errorBarColor)
+                .attr("stroke", "none")
+                .attr("d",confInterval(topicMeans))
+            // Chart line
             this.topicTimeGroups[0]
-                .select("text")
-                .text(topNWords(this.props.topicWordCounts[topic], 3));
+                .append("path")
+                .attr("fill", "none")
+                .attr("stroke", this.state.strokeColor)
+                .attr("d", line(topicMeans));
+            // Topic Label
+            this.topicTimeGroups[0]
+                .append("text")
+                .attr("transform", "translate(5,20)")
+                .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3));
+            // X axis
             this.topicTimeGroups[0]
                 .append("g")
                 .attr("transform", "translate(0," + this.state.timeSeriesHeightTopic + ")")
@@ -209,9 +267,12 @@ class TimeSeries extends Component {
                     .attr("transform", "rotate(45)")
                     .attr("dx", "3em")
                     .attr("dy", ".1em");
+            // Y axis
             this.topicTimeGroups[0]
                 .append("g")
                 .call(y_axis)
+
+            // Tooltip?
             this.topicTimeGroups[0]
                 .append("text")
                 .style("text-anchor", "middle")
@@ -294,7 +355,7 @@ class TimeSeries extends Component {
     }
   
     componentDidMount() {
-        if (this.props.selectedTopic === -1) {
+        if (this.props.ldaModel.selectedTopic === -1) {
             this.createTimeSVGs();
             this.timeSeries0()
         }
@@ -305,10 +366,10 @@ class TimeSeries extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if(prevProps.numTopics !== this.props.numTopics) {
+        if(prevProps.ldaModel.numTopics !== this.props.ldaModel.numTopics) {
             this.createTimeSVGs();
         }
-        if (this.props.selectedTopic === -1) {
+        if (this.props.ldaModel.selectedTopic === -1) {
             this.createTimeSVGs();
             this.timeSeries0()
         }
@@ -331,7 +392,7 @@ class TimeSeries extends Component {
         if(!event.target.value) event.target.value = 1; // Protect from empty field
 
         this.setState({
-            numberToAvg: Math.max(1,event.target.value),
+            numberOfBins: Math.max(1,event.target.value),
         })
     }
 
@@ -340,21 +401,22 @@ class TimeSeries extends Component {
             <>
                 <div className="help">Documents are grouped by their "date_tag" 
                 field. These plots 
-                show the average document proportion of each topic at each 
-                date value. Date values are parsed as ISO date time strings.
+                show the average document proportion of each topic in each time bin. 
+                Date values are parsed as ISO date time strings.
                 When a topic is selected a more detailed graph of just that topic
                 is shown.
-                Hover only shows the time fields that are filled. Two 
-                consective time periods present in the data are connected with
-                 a straight line. The graphs use a rolling average to cut out 
-                 noise. You can change the number of documents this average
-                is taken over by adjusting the graph smoothing parameter.
+                Hover only shows the time fields that are filled. The light blue
+                area around the line represents the 90% confidence interval calculated 
+                using standard error.
+                The graphs bin documents into time periods to smooth
+                out the data and make it more interpretable. You can change the number 
+                of bins that are used below.
                 Data for plots are available in downloads page.</div>
-                <label for="numberToAvg">Graph Smoothing:</label>
+                <label for="numberOfBins">Number of Bins:</label>
                 <input 
                     onChange = {this.handleNumAvgChange} 
-                    type="number" id="numberToAvg" 
-                    value = {this.state.numberToAvg} 
+                    type="number" id="numberOfBins" 
+                    value = {this.state.numberOfBins} 
                     max="1000"
                     min="5"
                     step="5"
