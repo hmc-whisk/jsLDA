@@ -128,6 +128,8 @@ class LDAModel {
         this.tokensPerTopic = zeros(this.numTopics);
         this._topicWeights = zeros(this.numTopics);
         this.documents = [];
+        this._memoMinDocTime = null;
+        this._memoMaxDocTime = null;
         d3.select("#iters").text(this._completeSweeps);
     }
 
@@ -318,6 +320,52 @@ class LDAModel {
     get highestWordTopicCount() {
         if(this.selectedTopic===-1) return 0;
         return this.topicWordCounts[this.selectedTopic][0]["count"]
+    }
+
+    /**
+     * lazy getter for the Date object of the earliest document
+     * @note memo stored in this._memoMinDocTime
+     */
+    get minDocTime() {
+        // If already calculated, return that
+        if(this._memoMinDocTime) return this._memoMinDocTime 
+
+        // Protect against no documents
+        if(!this.documents[0]) {
+            console.log("Tried to get minDocTime without any documents")
+            return null;
+        }
+
+        let minTime = this.documents[0].dateObject
+        // Iterate through docs and keep min found time
+        this.documents.forEach((doc) => {
+            minTime = Math.min(minTime, doc.dateObject)
+        })
+        this._memoMinDocTime = new Date(minTime)
+        return this._memoMinDocTime
+    }
+
+    /**
+     * Lazily loaded Date object for the latest document
+     * @note memo stored in this._memoMaxDocTime
+     */
+    get maxDocTime() {
+        // If already calculated, return that
+        if(this._memoMaxDocTime) return this._memoMaxDocTime 
+
+        // Protect against no documents
+        if(!this.documents[0]) {
+            console.log("Tried to get maxDocTime without any documents")
+            return null;
+        }
+
+        let maxTime = this.documents[0].dateObject
+        // Iterate through docs and keep min found time
+        this.documents.forEach((doc) => {
+            maxTime = Math.max(maxTime, doc.dateObject)
+        })
+        this._memoMaxDocTime = new Date(maxTime)
+        return this._memoMaxDocTime
     }
 
     /**
@@ -987,6 +1035,95 @@ class LDAModel {
 
         // Turn key back into Date object
         return topicMeans.map((d)=>{return{key:new Date(d.key),value:d.value}})
+    }
+
+    /**
+     * Calculates the average topic value for numBins bins over time
+     * @param {Number} topic number id of topic to get info for
+     * @param {Number} numBins number of bins to devide timespan into
+     * @param {Boolean} stdError whether or not to include stdError margin
+     * @returns {Array<{key:Date,value:Number,upperEr:Number,lowerEr:Number}>} 
+     * Array of average topic values. Entries are sorted by key. 
+     * Date refers to the max date for that bin. upperEr/lowerEr are only
+     * included if stdError is set to true.
+     */
+    topicTimesBinnedAverage = (topic, numBins, stdError=false) => {
+        let bins = this.topicTimesBinned(topic, numBins)
+
+        if(stdError) {
+            bins = this.addStdErrorMargins(bins)
+        }
+
+        // Calc average for every bin
+        bins.forEach((bin) => {
+            const total = bin.value.reduce((a,b) => a + b);
+            const avg = total/bin.value.length;
+            bin.value = avg
+        })
+        return bins
+    }
+
+    /**
+     * Function to add standard error margins to collections of values
+     * @param {Array<{value:Array<Number}>} valArray array of dictionaries to
+     * add stdError margins to. Must have value element.
+     * @returns {Array<{value:Array<Number},upperEr:Number,lowerEr:Number>}
+     * where upperEr/lowerEr are the margins of error of value at the 90%
+     * confidence level.
+     */
+    addStdErrorMargins(valArray) {
+        
+        valArray = valArray.map((dict) => {
+            const n = dict.value.length
+            const mean = dict.value.reduce((a,b) => a + b) / n
+            const stdDev = Math.sqrt(dict.value.map(
+                x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n)
+            const stdError = stdDev/Math.sqrt(n)
+            const z = 1.645
+            let newDict = {...dict}
+            newDict.upperEr = mean + z*stdError
+            newDict.lowerEr = Math.max(mean - z*stdError,0)
+            return newDict
+        })
+        return valArray
+    }
+
+    /**
+     * Calculates the average document values and groups them into numBin
+     * bins over time
+     * @param {Number} topic number id of topic to get info for
+     * @param {Number} numBins number of bins to devide timespan into
+     * @returns {Array<{key:Date,value:Array<Number>}>} Array of average 
+     * topic values for every document in bin. Entries are sorted by key. 
+     * Date refers to the max date for that bin.
+     */
+    topicTimesBinned = (topic, numBins) => {
+        numBins = Math.max(numBins,1);
+        
+        // Make bins
+        let timeSpan = this.maxDocTime - this.minDocTime;
+        let binSize = Math.ceil(timeSpan/numBins); // ceil to make sure all docs have a bin
+
+        let bins = []
+        for(let binNum = 0; binNum < numBins; binNum++) {
+            bins.push({
+                key: new Date(this.minDocTime.valueOf() + binSize*(binNum+1)),
+                value: []
+            })
+        }
+
+        // Group topic values into bins
+        let documents = this.documents.sort((a,b) => a.dateObject-b.dateObject)
+        let currentBin = 0; // Keep track of which bin section of doc array we're in
+        documents.forEach((doc) => {
+            if(bins[currentBin].key < doc.dateObject) currentBin++;
+
+            // Record average topic value for doc
+            bins[currentBin].value.push(doc.topicCounts[topic]/
+                doc.tokens.length)
+        })
+
+        return bins
     }
 }
 
