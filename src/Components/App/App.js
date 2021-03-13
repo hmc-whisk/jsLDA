@@ -428,10 +428,19 @@ class App extends Component {
             onClick={this.runIterationsClick} 
             updateNumTopics={this.onTopicsChange} 
             sweepParameter={this.state.sweepParameter}
+            _hyperTune={this.state.ldaModel._hyperTune}
             onChange={this.changeSweepAmount}
             stopButtonClick={this.state.ldaModel.stopSweeps}
             iter={this.state.ldaModel._completeSweeps}
             modelIsRunning = {this.state.ldaModel.modelIsRunning}
+            onDocumentFileChange={this.onDocumentFileChange}
+            onStopwordFileChange={this.onStopwordFileChange}
+            onModelFileChange={this.onModelFileChange}
+            onFileUpload={this.queueLoad}
+            onModelUpload={this.onModelUpload}
+            modelIsRunning = {this.state.ldaModel.modelIsRunning}
+            onDefaultDocChange = {this.onDefaultDocChange}
+            docName={this.state.docName}
             />
 
 

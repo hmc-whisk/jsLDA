@@ -1,5 +1,12 @@
 import React from "react";
 import NumTopicSlider from "./NumTopicSlider"
+import Checkbox from '@material-ui/core/checkbox';
+import Configuration from './Configuration'
+import Uploader from '../Pages/Uploader';
+
+var backColor = getComputedStyle(document.documentElement).getPropertyValue('--color3');
+
+
 class TopBar extends React.Component {
 
     constructor(props) {
@@ -9,9 +16,10 @@ class TopBar extends React.Component {
             sliderValue: props.numTopics, 
             formValue: this.props.sweepParameter,
             numTopics: props.numTopics,
+            checked: false,
          };
-    
     }
+
 
     static getDerivedStateFromProps(props, state) {
         if (props.numTopics !== state.numTopics) {
@@ -83,6 +91,75 @@ class TopBar extends React.Component {
 
     }
 
+    handleCheck = (event) => {
+        this.setState({checked: event.target.checked});
+        this.props._hyperTune(event.target.checked);
+      };
+
+    helpTextStyle = {
+        backgroundColor: backColor,
+        position: "fixed",
+        top: "10%",
+        left: "30%",
+        right:"30%",
+        borderRadius: "20px 0px 0px 20px",
+        margin: "10px",
+        height: "70%",
+        overflowY: "scroll"
+    }
+
+    get uploadHelp() {
+        return (
+            <Configuration
+                displayElement={
+                    <div style={this.helpTextStyle}>
+                        <div style={{margin:"15px"}}>
+                        <div className="upload"> 
+                        <div style={{padding:'5px'}}>
+                        <h3 > Topic Configuration</h3>
+                        <h4 > Set number of topics</h4>
+
+                        <NumTopicSlider
+                        onChange={this.updateNumDisplay}
+                        sliderValue={this.state.sliderValue}
+                        updateNumTopics={this.confirmUpdate}
+                        onInput={(event) => this.updateNumDisplay(event)}
+                        modelIsRunning={this.props.modelIsRunning}
+                        />
+
+                        <br/>
+                        </div>
+                        <h4> 
+                        
+                        <Checkbox
+                        checked={this.checked}
+                        onChange={this.handleCheck}
+                        inputProps={{ 'aria-label': 'primary checkbox' }}
+                        color="primary"
+                        />
+                        Optimize topic concentrations</h4>
+                        <i style={{padding:'10px'}}>Optimized topic correlation allow the model to account for </i>
+                        <i style={{padding:'10px'}}>different proportions of topics in each documents </i>
+                        <br/>
+                        <br/>
+
+                        </div>
+
+                        <Uploader 
+                            onDocumentFileChange = {this.props.onDocumentFileChange}
+                            onStopwordFileChange = {this.props.onStopwordFileChange}
+                            onModelFileChange={this.props.onModelFileChange}
+                            onFileUpload={this.props.onFileUpload}
+                            onModelUpload={this.props.onModelUpload}
+                            modelIsRunning = {this.props.modelIsRunning}
+                            onDefaultDocChange = {this.props.onDefaultDocChange}
+                            docName = {this.props.docName}
+                        />
+                        </div>
+                    </div>
+                }/>
+        )
+    }
 
     render() {
         console.log(this.props.iter);
@@ -99,14 +176,10 @@ class TopBar extends React.Component {
 
                 Iterations:<span id="iters" > {this.props.iter} </span>
 
-                    <NumTopicSlider
-                        onChange={this.updateNumDisplay}
-                        sliderValue={this.state.sliderValue}
-                        updateNumTopics={this.confirmUpdate}
-                        onInput={(event) => this.updateNumDisplay(event)}
-                        modelIsRunning={this.props.modelIsRunning}
-                    />
+
                 </form>
+                {this.uploadHelp}
+
             </div>
 
 
