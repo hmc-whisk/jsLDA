@@ -48,6 +48,7 @@ class LDAModel {
         this._requestedSweeps = 0;
 
         this.selectedTopic = 0;
+        this.topicVisibility = {};
 
         this.wordTopicCounts = {};
 
@@ -123,6 +124,7 @@ class LDAModel {
         this._completeSweeps = 0;
         this._requestedSweeps = 0;
         this.selectedTopic = -1;
+        this.topicVisibility = this.initTopicVisibility(this.numTopics);
         this.wordTopicCounts = {};
         this.topicWordCounts = [];
         this.tokensPerTopic = zeros(this.numTopics);
@@ -131,6 +133,31 @@ class LDAModel {
         this._memoMinDocTime = null;
         this._memoMaxDocTime = null;
         d3.select("#iters").text(this._completeSweeps);
+    }
+
+    /**
+     * @summary Initializes this.topicVisibility dict with every topic
+     *          number having "default" visibility
+     * @param {Number} this.numTopics the number of topics in
+     * current model
+     */
+    initTopicVisibility = (numTops) => {
+        let visDict = {};
+        for (const n of Array(numTops).keys()) {
+            visDict[n] = "default";
+        }
+        return visDict;
+    }
+
+    /**
+     * @summary Initializes this.topicVisibility dict with every topic
+     *          number having "default" visibility
+     * @param {Number} topicNum the number of the topic 
+     * @param {String} visibility the new visibility state of the
+     * topic ("default", "pinned", or "hidden")
+     */
+    setTopicVisibility = (topicNum, visibility) => {
+        this.topicVisibility[topicNum] = visibility;
     }
 
     /**
@@ -467,6 +494,7 @@ class LDAModel {
     changeNumTopics(numTopics) {
         this.numTopics = numTopics;
         this.selectedTopic = -1;
+        this.topicVisibility = this.initTopicVisibility(this.numTopics);
         this.topicWordCounts = [];
         this.tokensPerTopic = zeros(this.numTopics);
         this._topicWeights = zeros(this.numTopics);
