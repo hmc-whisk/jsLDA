@@ -185,9 +185,6 @@ div.accordion {
 
 body { font-family: Calibri, Verdana; background-color: var(--color3); }
 
-div.sidebar { float: left; width: 25%; }
-div.sidebar div.sidebox { margin: 5px; padding: 10px; }
-
 div.top { background-color: var(--color1); margin: 5px; padding: 10px; -moz-border-radius: 10px; border-radius: 10px; }
 
 div.upload { background-color: var(--color1); padding-right: 20px; border-radius: 10px; margin: 5px; }
@@ -196,9 +193,7 @@ div.upload div { margin: 8px; }
 
 div#topics div { color:var(--color4); margin-bottom: 1px; padding: 1px; cursor: default;}
 div#topics div.selected { border-right: solid black 2px; font-weight: bold; }
-div#topics div:hover { background-color: var(--color4); color: var(--color3) }
-
-#tabwrapper { margin-left: 25%; }
+div#topics:hover { background-color: var(--color4); color: var(--color3); border-radius: 10px; }
 
 .tabs{ height: 30px; }
 .tabs > ul { font-size: 1em; list-style: none; }

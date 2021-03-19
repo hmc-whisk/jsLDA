@@ -100,7 +100,6 @@ class App extends Component {
   }
 
   resetNotes = (i) => {
-    console.log("resetNotes");
     this.annotations = new Array(i);
   }
 
@@ -302,7 +301,8 @@ class App extends Component {
       if (! isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.state.ldaModel.numTopics) {
         this.state.ldaModel.changeNumTopics(Number(val));
       }
-    
+      
+      this.resetNotes(this.state.ldaModel.numTopics);
   }
 
   componentDidMount() {
@@ -420,7 +420,7 @@ class App extends Component {
       <div id="app">
       <div id="tooltip"></div>
 
-      <div id="main">
+      <div id="main" style={{display: "flex", flexDirection: "column", height: "100%"}}>
 
       <TopBar completeSweeps={this.state.ldaModel._completeSweeps} 
             requestedSweeps = {this.state.ldaModel._requestedSweeps} 
@@ -443,20 +443,24 @@ class App extends Component {
             docName={this.state.docName}
             />
 
-
+      <div style={{display: "flex", flex: "1", overflow: "hidden"}}>
       <SideBar selectedTopic={this.state.ldaModel.selectedTopic} 
-               changeAnnotation = {this.changeAnnotation}
-               resetAnnotation = {this.resetNotes}
-               getAnnotation = {this.getAnnotation}
+               changeAnnotation={this.changeAnnotation}
+               getAnnotation={this.getAnnotation}
                sortVocabByTopic={this.state.ldaModel.sortVocabByTopic} 
                numTopics={this.state.ldaModel.numTopics} 
+               topicVisibility={this.state.ldaModel.topicVisibility}
+               setTopicVisibility={this.state.ldaModel.setTopicVisibility}
                topicWordCounts={this.state.ldaModel.topicWordCounts}
-               selectedTopicChange = {this.state.ldaModel.selectedTopicChange}
+               selectedTopicChange={this.state.ldaModel.selectedTopicChange}
                />
 
       <div id="tabwrapper">
+              
       <NavBar onClick={this.changeTab}/>
       <div id="pages">
+      </div>
+
 
       {!this.state.ldaModel ? null : DisplayPage}
 
