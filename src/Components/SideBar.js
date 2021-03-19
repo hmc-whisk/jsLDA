@@ -37,16 +37,12 @@ const TopicBox = ({
                 <button
                     type="button"
                     onClick={() => toggleVisibility(topNum, "pin")}
-                    style={{
-                        border: "none",
-                        backgroundColor: "inherit",
-                        outline: "none",
-                    }}
+                    className="topic-button"
                 >
                     { topicVisibility[topNum] === "pinned" ? 
-                        <PinAngleFill style={{height: "16px", width: "16px"}} />
+                        <PinAngleFill className="topic-button-icon" />
                         :
-                        <PinAngle style={{height: "16px", width: "16px"}} />
+                        <PinAngle className="topic-button-icon" />
                     }
                 </button>
                 
@@ -54,16 +50,12 @@ const TopicBox = ({
                 <button
                     type="button"
                     onClick={() => toggleVisibility(topNum, "hide")}
-                    style={{
-                        border: "none",
-                        backgroundColor: "inherit",
-                        outline: "none",
-                    }}
+                    className="topic-button"
                 >
                     { topicVisibility[topNum] === "hidden" ? 
-                        <EyeSlashFill style={{height: "16px", width: "16px"}} />
+                        <EyeSlashFill className="topic-button-icon" />
                         :
-                        <EyeSlash style={{height: "16px", width: "16px"}} />
+                        <EyeSlash className="topic-button-icon" />
                     }
                 </button>
                 </div>
