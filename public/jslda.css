@@ -11,9 +11,17 @@ div.sidebar div.sidebox { margin: 5px; padding: 8px; }
 .topicbar-selected {
     background-color: #6c7b9c;
 }
-
 .topicbar-hidden {
     background-color: #c4c8cf;
+}
+.topic-button {
+    border: none;
+    background-color: inherit;
+    outline: none;
+}
+.topic-button-icon {
+    height: 16px;
+    width: 16px;
 }
 
 div.top { background-color: #ddd; margin: 5px; padding: 10px; -moz-border-radius: 10px; border-radius: 10px; }
@@ -21,11 +29,6 @@ div.top #num_topics_control { float:right; }
 
 div.upload { background-color: #ddd; float: right; padding-right: 20px; border-radius: 10px; margin: 5px; }
 div.upload div { margin: 8px; }
-
-
-div#topics div { color: #555; margin-bottom: 10px; padding: 5px; cursor: default;}
-div#topics div.selected { border-right: solid black 2px; font-weight: bold; }
-/* div#topics div:hover { background-color: #ccc; } */
 
 #tabwrapper { flex: 3; overflow-y: scroll; }
 
