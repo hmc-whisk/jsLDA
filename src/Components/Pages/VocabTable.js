@@ -174,8 +174,20 @@ class VocabTable extends Component {
                   <button id="sortVocabByTopic" className = "lightButton">Sort by topic</button>
                   {this.stopwordsDLButton}
                 </div>
-                <input type="text" placeholder="Search Vocab" onChange={this.handleChange} />
-                <table id="vocab-table" className="center">
+                <input 
+                  type="text" 
+                  placeholder="Search Vocab" 
+                  onChange={this.handleChange} 
+                  style={{
+                    height: "30px",
+                    width: "320px", 
+                    borderRadius: "10px", 
+                    border: "1px var(--color1) solid",
+                    marginLeft: "30px",
+                    outline: "none",
+                  }}
+                />
+                <table id="vocab-table" style={{marginLeft: "30px"}}> {/* className="center"> */}
                     <thead><tr><th>Word</th><th>Frequency</th><th>Topic Specificity</th><th>Stoplist</th></tr></thead>
                     <tbody></tbody>
                 </table>
