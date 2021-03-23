@@ -1,4 +1,4 @@
-import React, { Component } from 'react'; 
+import React, { Component, useState } from 'react'; 
 import * as d3 from 'd3';
 
 class VocabTable extends Component {
@@ -6,10 +6,12 @@ class VocabTable extends Component {
         super(props);
         this.state = {
           displayingStopwords: false,
+          searchText: "",
         };
         
       }
 
+      // let [searchText, setSearch] = useState("");
       
     
 
@@ -31,6 +33,11 @@ class VocabTable extends Component {
       let specificityScale = this.specificityScale;
       let addStop = this.props.addStop;
       let removeStop = this.props.removeStop;
+
+      // TL: SEARCH 
+      if (this.state.searchText !== "") {
+        wordFrequencies = wordFrequencies.filter(d => d.word.includes(this.state.searchText));
+      }
 
       wordFrequencies.forEach(function (d) {
         var isStopword = stopwords[d.word];
@@ -134,6 +141,10 @@ class VocabTable extends Component {
       });
 
     }
+
+    handleChange = (e) => {
+      this.setState({ searchText: e.target.value })
+    }
   
     componentDidMount() {
       this.vocabTable();
@@ -155,13 +166,15 @@ class VocabTable extends Component {
     render() {
         return (
             <div id="vocab-page" className="page">
-                <div className="help">Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0.
+                <div className="help">
+                  Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0.
                 </div>
                 <div className = "help">
                   <button id="showStops" className = "lightButton">Show stopwords</button>
                   <button id="sortVocabByTopic" className = "lightButton">Sort by topic</button>
                   {this.stopwordsDLButton}
                 </div>
+                <input type="text" placeholder="Search Vocab" onChange={this.handleChange} />
                 <table id="vocab-table" className="center">
                     <thead><tr><th>Word</th><th>Frequency</th><th>Topic Specificity</th><th>Stoplist</th></tr></thead>
                     <tbody></tbody>
