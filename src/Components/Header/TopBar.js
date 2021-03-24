@@ -1,6 +1,6 @@
 import React from "react";
 import NumTopicSlider from "./NumTopicSlider"
-import Checkbox from '@material-ui/core/checkbox';
+import Checkbox from '@material-ui/core/Checkbox';
 import Configuration from './Configuration'
 import Uploader from '../Pages/Uploader';
 
