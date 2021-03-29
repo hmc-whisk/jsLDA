@@ -174,17 +174,17 @@ class VocabTable extends Component {
                 overflow: "hidden",
               }}
             className="page">
-              <div style={{display: "flex", flexDirection: "column", flex: "1"}}>
-                <div className="help">
-                  Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0.
-                </div>
-                <div className="help" style={{display: "flex", flexDirection: "column", flex: "1"}}>
-                  <button id="showStops" className = "lightButton">Show stopwords</button>
-                  <button id="sortVocabByTopic" className = "lightButton">Sort by topic</button>
-                  {this.stopwordsDLButton}
-                </div>
-              </div>
-              <div style={{flex: "1", marginTop: "10px", height: "100%", overflow: "hidden"}}>
+              <div style={{
+                flex: "1", 
+                marginTop: "10px", 
+                height: "100%", 
+                overflow: "hidden", 
+                display: "flex", 
+                flexDirection: "column",
+                alignItems: "flex-start",
+                width: "90%",
+                padding: "10px 10px 10px 10px"
+              }}>
                 <input 
                   type="text" 
                   placeholder="Search Vocab" 
@@ -194,18 +194,27 @@ class VocabTable extends Component {
                     width: "320px", 
                     borderRadius: "10px", 
                     border: "1px var(--color1) solid",
-                    marginLeft: "45px",
                     outline: "none",
                   }}
                 />
-                <div style={{height: "100%", overflow: "auto"}}>
+                <div style={{flex: "1", overflow: "auto"}}>
                   <table id="vocab-table">
                       <thead><tr><th>Word</th><th>Frequency</th><th>Topic Specificity</th><th>Stoplist</th></tr></thead>
                       <tbody></tbody>
                   </table>
                 </div>
-
                 </div>
+                
+                <div style={{display: "flex", flexDirection: "column", flex: "1"}}>
+                <div className="help">
+                  Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0.
+                </div>
+                <div className="help" style={{display: "flex", flexDirection: "column", flex: "1"}}>
+                  <button id="showStops" className = "lightButton">Show stopwords</button>
+                  <button id="sortVocabByTopic" className = "lightButton">Sort by topic</button>
+                  {this.stopwordsDLButton}
+                </div>
+              </div>
             </div>
         )
     }
