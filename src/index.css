@@ -216,7 +216,7 @@ div.document { font-family: Alegreya, Georgia, Times; margin: 20px; padding: 10p
 
 text { font-size: small; vertical-align: baseline;; }
 
-table { margin-left: 50px; border-collapse: collapse; text-align: left; }
+table { margin: 10px 10px 10px 10px; border-collapse: collapse; text-align: left; }
 table th { font-weight: normal; padding: 10px 8px; border-bottom: 2px solid black; }
 table td { text-align: left; padding: 9px 8px 0px 8px; }
 
