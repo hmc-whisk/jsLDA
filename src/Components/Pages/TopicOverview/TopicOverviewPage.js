@@ -1,4 +1,6 @@
 import React from "react";
+import {topNWords} from '../../../funcs/utilityFunctions';
+import DocAccordion from '../TopicDoc/DocAccordion'
 
 /**
  * @summary Component for Topic Overview page
@@ -7,16 +9,40 @@ import React from "react";
  * 
  * @author Theo Bayard de Volo
  */
-class TopicOverviewPage extends React.Component { 
+class TopicOverviewPage extends React.Component {
+    // Some settings
+    numWordsToShow = 10 // Number of topic words in label
+    numDocuments = 5 // Number of documents to display
+
+
+
     render() {
+        
+        if (this.props.ldaModel.selectedTopic == -1) {
+            return this.noTopicSelected()
+        }
+
         return (
             <div id="pages">
-            <div id="to-page" className="page">
-                {this.label()}
-                {this.timeline()}
-                {this.correlations()}
-                {this.documents()}
+                <div id="to-page" className="page">
+                    {this.label()}
+                    {this.timeline()}
+                    {this.correlations()}
+                    {this.documents()}
+                </div>
             </div>
+        )
+    }
+
+    /**
+     * The element to be displayed on screen if no topic is selected
+     */
+    noTopicSelected() {
+        return (
+            <div id="pages">
+                <div id="to-page" className="page">
+                    <h2 id="label">Please Select a Topic</h2>
+                </div>
             </div>
         )
     }
@@ -27,9 +53,15 @@ class TopicOverviewPage extends React.Component {
      * and annotation of a topic
      */
     label() {
+        const topicNum = this.props.ldaModel.selectedTopic
         return (
             <div id="label">
-                <h2>Topic {this.ldaModel}</h2>
+                <h2>Topic {topicNum}</h2>
+                <p class="subtitle">
+                    {topNWords(this.props.ldaModel.topicWordCounts[topicNum], 
+                        this.numWordsToShow)}
+                </p>
+                <b>{this.props.annotations[topicNum]}</b>
             </div>
         )
     }
@@ -63,7 +95,19 @@ class TopicOverviewPage extends React.Component {
      */
     documents() {
         return (
-            <div class="grid-item"id="documents" > topic documents </div>
+            <DocAccordion
+                documents = {this.sortedDocuments}
+                startDoc = {0}
+                endDoc = {this.numDocuments}
+                isTopicSelected = {this.props.ldaModel.selectedTopic !== -1}
+                selectedTopic = {this.props.ldaModel.selectedTopic}
+                tokensPerTopic = {this.props.ldaModel.tokensPerTopic}
+                wordTopicCounts = {this.props.ldaModel.wordTopicCounts}
+                highestWordTopicCount = {this.props.ldaModel.highestWordTopicCount}
+                showMetaData = {false}
+                topicSaliency = {this.props.ldaModel.topicSaliency}
+                maxTopicSaliency = {this.props.ldaModel.maxTopicSaliency(this.props.selectedTopic)}
+            />
         )
     }
 }

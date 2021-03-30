@@ -258,12 +258,16 @@ div#dl-page.page ul li {
   border-radius: 20px;
 }
 
+.subtitle {
+  color: var(--color4);
+}
+
 div#to-page {
   display: grid;
   width: 95%;
   gap: 15px 15px;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 100px 1fr 3fr;
+  grid-template-rows: auto 1fr 3fr;
   grid-template-areas: 
     "label label"
     "timegraph correlations"
@@ -272,6 +276,8 @@ div#to-page {
 
 div#to-page #label {
   grid-area: label;
+  justify-self: center;
+  text-align: center;
 }
 
 div#to-page #timegraph {
