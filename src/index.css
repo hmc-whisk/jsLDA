@@ -249,3 +249,39 @@ div:empty:before {
 div#dl-page.page ul li {
   margin-bottom: 10px;
 }
+
+
+/* css for topic overview page */
+.grid-item {
+  border: solid var(--color1) 3px; 
+  width: 100%;
+  border-radius: 20px;
+}
+
+div#to-page {
+  display: grid;
+  width: 95%;
+  gap: 15px 15px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 100px 1fr 3fr;
+  grid-template-areas: 
+    "label label"
+    "timegraph correlations"
+    "documents documents";
+}
+
+div#to-page #label {
+  grid-area: label;
+}
+
+div#to-page #timegraph {
+  grid-area: timegraph;
+}
+
+div#to-page #correlations {
+  grid-area: correlations;
+}
+
+div#to-page #documents {
+  grid-area: documents;
+} 
