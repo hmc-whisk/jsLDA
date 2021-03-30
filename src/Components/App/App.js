@@ -98,6 +98,7 @@ class App extends Component {
 
   changeAnnotation = (text,i) => {
     this.annotations[i] = text;
+    this.modelForceUpdate();
   }
 
   resetNotes = (i) => {
@@ -413,7 +414,9 @@ class App extends Component {
           modelDataDLer={this.state.modelDataDLer}/>
         break;
       case "to-tab":
-        DisplayPage = <TopicOverviewPage/>
+        DisplayPage = <TopicOverviewPage
+          ldaModel ={this.state.ldaModel}
+          annotations = {this.annotations}/>
         break;
       default:
         DisplayPage = null;
