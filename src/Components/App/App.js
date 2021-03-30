@@ -16,6 +16,7 @@ import TopBar from '../Header/TopBar';
 import DLPage from '../Pages/DLPage';
 import HomePage from '../Pages/HomePage';
 import MetaData from '../Pages/MetaData/MetaData';
+import TopicOverviewPage from '../Pages/TopicOverview/TopicOverviewPage';
 
 import stateOfUnionDocs from '../../defaultDocs/stateOfUnionDocs.txt';
 import moviePlotsDocs from '../../defaultDocs/wikiMoviePlots.csv';
@@ -410,6 +411,9 @@ class App extends Component {
           docTopicMetaValues={this.state.ldaModel.docTopicMetaValues}
           topicWordCounts={this.state.ldaModel.topicWordCounts}
           modelDataDLer={this.state.modelDataDLer}/>
+        break;
+      case "to-tab":
+        DisplayPage = <TopicOverviewPage/>
         break;
       default:
         DisplayPage = null;
