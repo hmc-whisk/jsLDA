@@ -14,9 +14,11 @@ class DocCard extends React.Component {
                 <Accordion.Toggle as={Card.Header} eventKey={document.originalOrder}>
                     <b>ID: </b>{document.id} 
                     <span style={{float:"right"}}>
-                        <b> Topic Score: </b>
+                        { this.props.useSalience?
+                            <b> Saliency Score: </b>:
+                            <b> Topic Score: </b>}
                         {this.props.isTopicSelected ? 
-                            format(document.score * 100): 
+                            this.score(document): 
                             "No topic selected"}
                     </span>
                     <div>{this.metaInfo}</div>
@@ -50,6 +52,16 @@ class DocCard extends React.Component {
             metaInfo.push(this.formatInfo(key,value))
         }
         return metaInfo;
+    }
+    /**
+     * @summary Formats the document score, based on salience score vs topic score
+     */
+    score(document) {
+        const format = d3Format(".2g");
+        let score = this.props.useSalience?
+            format(document.score):
+            format(document.score * 100);
+        return score;
     }
 
     formatInfo(key,value){
