@@ -11,7 +11,7 @@ import DocAccordion from '../TopicDoc/DocAccordion'
  */
 class TopicOverviewPage extends React.Component {
     // Some settings
-    numWordsToShow = 10 // Number of topic words in label
+    numWordsToShow = 50 // Number of topic words in label
     numDocuments = 5 // Number of documents to display
 
 
@@ -57,11 +57,11 @@ class TopicOverviewPage extends React.Component {
         return (
             <div id="label">
                 <h2>Topic {topicNum}</h2>
+                <i>{this.props.annotations[topicNum]}</i>
                 <p class="subtitle">
                     {topNWords(this.props.ldaModel.topicWordCounts[topicNum], 
                         this.numWordsToShow)}
                 </p>
-                <b>{this.props.annotations[topicNum]}</b>
             </div>
         )
     }
@@ -95,19 +95,13 @@ class TopicOverviewPage extends React.Component {
      */
     documents() {
         return (
-            <DocAccordion
-                documents = {this.sortedDocuments}
-                startDoc = {0}
-                endDoc = {this.numDocuments}
-                isTopicSelected = {this.props.ldaModel.selectedTopic !== -1}
-                selectedTopic = {this.props.ldaModel.selectedTopic}
-                tokensPerTopic = {this.props.ldaModel.tokensPerTopic}
-                wordTopicCounts = {this.props.ldaModel.wordTopicCounts}
-                highestWordTopicCount = {this.props.ldaModel.highestWordTopicCount}
-                showMetaData = {false}
-                topicSaliency = {this.props.ldaModel.topicSaliency}
-                maxTopicSaliency = {this.props.ldaModel.maxTopicSaliency(this.props.selectedTopic)}
-            />
+            <div id="documents">
+                <DocAccordion
+                    ldaModel = {this.props.ldaModel}
+                    startDoc = {0}
+                    endDoc = {5}
+                    showMetaData = {false}/>
+            </div>
         )
     }
 }
