@@ -20,7 +20,7 @@ class DocView extends React.Component {
      * @summary The text of the document formatted with topic highlighting
      */
     get highlightedText() {
-        if(this.props.selectedTopic===-1) return this.props.document.originalText;
+        if(this.props.ldaModel.selectedTopic===-1) return this.props.document.originalText;
         let words = this.props.document.originalText.split(" ");
         let highlightedWords = words.map((word,i) => this.highlightWord(word,i))
         return highlightedWords;
@@ -52,7 +52,7 @@ class DocView extends React.Component {
      * @param {String} w Word to be generate styling for
      */
     getComputedStyle(w) {
-        let colorScale = d3.scaleLinear().domain([0, this.maxTopicValue])
+        let colorScale = d3.scaleLinear().domain([0, this.props.maxTopicValue])
             .range([DocView.minHighlight, DocView.maxHighlight]);
         return {backgroundColor: colorScale(this.getWordTopicValue(w))}
     }
@@ -64,13 +64,9 @@ class DocView extends React.Component {
      */
     getWordTopicValue(w) {
         w = this.stripWord(w);
-        let salience = this.props.topicSaliency(w,this.props.selectedTopic);
+        let salience = this.props.ldaModel.topicSaliency(w,this.props.ldaModel.selectedTopic);
         if(salience < 0) {salience = 0};
         return salience;
-    }
-
-    get maxTopicValue() {
-        return this.props.maxTopicSaliency;
     }
 
 }

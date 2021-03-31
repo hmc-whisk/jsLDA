@@ -339,16 +339,7 @@ class App extends Component {
     switch (this.state.selectedTab) {
       case "docs-tab":
         DisplayPage = <TopicDoc 
-          selectedTopic={this.state.ldaModel.selectedTopic} 
-          documents={this.state.ldaModel.documents} 
-          sortVocabByTopic={this.state.ldaModel.sortVocabByTopic} 
-          numTopics={this.state.ldaModel.numTopics}
-          update = {this.state.update}
-          tokensPerTopic = {this.state.ldaModel.tokensPerTopic}
-          wordTopicCounts = {this.state.ldaModel.wordTopicCounts}
-          highestWordTopicCount = {this.state.ldaModel.highestWordTopicCount}
-          topicSaliency = {this.state.ldaModel.topicSaliency}
-          maxTopicSaliency = {this.state.ldaModel.maxTopicSaliency}
+          ldaModel = {this.state.ldaModel}
         />;
         break;
       case "corr-tab":
@@ -445,7 +436,6 @@ class App extends Component {
             onModelFileChange={this.onModelFileChange}
             onFileUpload={this.queueLoad}
             onModelUpload={this.onModelUpload}
-            modelIsRunning = {this.state.ldaModel.modelIsRunning}
             onDefaultDocChange = {this.onDefaultDocChange}
             docName={this.state.docName}
             />

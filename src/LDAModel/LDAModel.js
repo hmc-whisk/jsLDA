@@ -80,6 +80,8 @@ class LDAModel {
         this._changeAlpha = false;
     }
 
+    static DOC_SORT_SMOOTHING = 10.0;
+
     /**
      * Used to set the type of file LDAModel will
      * treat a documents file as
@@ -132,6 +134,7 @@ class LDAModel {
         this.documents = [];
         this._memoMinDocTime = null;
         this._memoMaxDocTime = null;
+        this._maxTopicSaliency = new Array(this.numTopics)
         d3.select("#iters").text(this._completeSweeps);
     }
 
@@ -341,6 +344,30 @@ class LDAModel {
     }
 
     /**
+     * @summary documents sorted in order of the prevalence 
+     * of the selected topic
+     */
+    get sortedDocuments() {
+        const selectedTopic = this.selectedTopic;
+        const sumDocSortSmoothing = LDAModel.DOC_SORT_SMOOTHING * this.numTopics;
+        let sortedDocuments = this.documents;
+
+        // Return default order if no topic is selected
+        if (this.selectedTopic === -1) return sortedDocuments;
+
+        sortedDocuments = sortedDocuments.map(function (doc, i) {
+            doc["score"] = 
+                (doc.topicCounts[selectedTopic] + LDAModel.DOC_SORT_SMOOTHING)/
+                (doc.tokens.length + sumDocSortSmoothing)
+            return doc
+        });
+        sortedDocuments.sort(function(a, b) {
+            return b.score - a.score;
+        });
+        return sortedDocuments;
+    }
+
+    /**
      * @summary returns the number of time the word most assigned to
      * the selected topic was assigned
      */
@@ -469,7 +496,7 @@ class LDAModel {
      * @description Parses at most the most common 1000 tokens in topic t
      * and returns the value of the highest salience.
      */
-    maxTopicSaliency = (t) => {
+    _calcMaxTopicSaliency(t) {
         if (t===-1) return 0; // If no topic selected
 
         // Set to at most 1000
@@ -488,6 +515,18 @@ class LDAModel {
     }
 
     /**
+     * @summary Returns the highest salience value for all tokens of topic t
+     * @param {Number} topicNum Topic to analyze
+     * @description Check if the maxTopicSaliency for a given topic has already been 
+     * calculated before calculating it. 
+     */
+    maxTopicSaliency = (topicNum) => {
+        if(this._maxTopicSaliency[topicNum]) return this._maxTopicSaliency[topicNum];
+        this._maxTopicSaliency[topicNum] = this._calcMaxTopicSaliency(topicNum);
+        return this._maxTopicSaliency[topicNum];
+    }
+
+    /**
      * @summary Shifts model to have a dif number of topics
      * @param {Number} numTopics new number of topics
      */
@@ -501,6 +540,7 @@ class LDAModel {
         this.wordTopicCounts = {};
         this._completeSweeps = 0;
         this._requestedSweeps = 0;
+        this._maxTopicSaliency = new Array(numTopics);
 
         d3.select("#iters").text(this._completeSweeps);
         
@@ -642,6 +682,7 @@ class LDAModel {
           this._timer.stop();
           this._sweeps = 0;
           this.modelIsRunning = false;
+          this._maxTopicSaliency = new Array(this.numTopics);
           this.updateWebpage();
           console.log(this._documentTopicSmoothing);
         }
