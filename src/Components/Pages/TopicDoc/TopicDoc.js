@@ -18,32 +18,8 @@ class TopicDoc extends Component {
         }
     }
 
-    /**
-     * @summary documents sorted in order of the prevalence 
-     * of the selected topic
-     */
-    get sortedDocuments() {
-        const selectedTopic = this.props.selectedTopic;
-        const sumDocSortSmoothing = TopicDoc.DOC_SORT_SMOOTHING * this.props.numTopics;
-        let sortedDocuments = this.props.documents;
-
-        // Return default order if no topic is selected
-        if (this.props.selectedTopic === -1) return sortedDocuments;
-
-        sortedDocuments = sortedDocuments.map(function (doc, i) {
-            doc["score"] = 
-                (doc.topicCounts[selectedTopic] + TopicDoc.DOC_SORT_SMOOTHING)/
-                (doc.tokens.length + sumDocSortSmoothing)
-            return doc
-        });
-        sortedDocuments.sort(function(a, b) {
-            return b.score - a.score;
-        });
-        return sortedDocuments;
-    }
-
     get lastPage() {
-        return Math.ceil(this.props.documents.length/TopicDoc.DOCS_PER_PAGE);
+        return Math.ceil(this.props.ldaModel.documents.length/TopicDoc.DOCS_PER_PAGE);
     }
 
     get startDoc() {
@@ -57,8 +33,8 @@ class TopicDoc extends Component {
         const endDoc = this.startDoc + TopicDoc.DOCS_PER_PAGE
 
         // Avoid giving document past the end of documents
-        if (endDoc >= this.props.documents.length) {
-            return this.props.documents.length;
+        if (endDoc >= this.props.ldaModel.documents.length) {
+            return this.props.ldaModel.documents.length;
         }
         return endDoc
     }
@@ -93,17 +69,10 @@ class TopicDoc extends Component {
                 </div>
 
                 <DocAccordion
-                    documents = {this.sortedDocuments}
+                    ldaModel = {this.props.ldaModel}
                     startDoc = {this.startDoc}
                     endDoc = {this.endDoc}
-                    isTopicSelected = {this.props.selectedTopic !== -1}
-                    selectedTopic = {this.props.selectedTopic}
-                    tokensPerTopic = {this.props.tokensPerTopic}
-                    wordTopicCounts = {this.props.wordTopicCounts}
-                    highestWordTopicCount = {this.props.highestWordTopicCount}
                     showMetaData = {this.state.showMetaData}
-                    topicSaliency = {this.props.topicSaliency}
-                    maxTopicSaliency = {this.props.maxTopicSaliency(this.props.selectedTopic)}
                 />
             </div>
         )

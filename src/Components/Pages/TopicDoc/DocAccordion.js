@@ -5,26 +5,30 @@ import DocCard from './DocCard'
 class DocAccordion extends React.Component {
     render() {
         return (
-            <Accordion defaultActiveKey={this.props.documents[this.props.startDoc].originalOrder}>
-                {this.props.documents
+            <Accordion defaultActiveKey={this.props.ldaModel.documents[this.props.startDoc].originalOrder}>
+                {this.props.ldaModel.sortedDocuments
                     .slice(this.props.startDoc,this.props.endDoc)
                     .map( (document) => {
-                        return <DocCard 
+                        return <DocCard
+                            ldaModel = {this.props.ldaModel}
                             document = {document}
-                            isTopicSelected = {this.props.isTopicSelected}
                             key = {document.originalOrder}
-                            tokensPerTopic = {this.props.tokensPerTopic}
-                            wordTopicCounts = {this.props.wordTopicCounts}
-                            selectedTopic={this.props.selectedTopic}
-                            highestWordTopicCount = {this.props.highestWordTopicCount}
                             showMetaData = {this.props.showMetaData}
-                            topicSaliency = {this.props.topicSaliency}
-                            maxTopicSaliency = {this.props.maxTopicSaliency}
+                            maxTopicValue = {this.maxTopicValue}
                         />
                     }
                 )}
             </Accordion>
         )
+    }
+
+    /**
+     * The highest saliency of any of the top 1000 words in the selected
+     * topic.
+     */
+    get maxTopicValue() {
+        return this.props.ldaModel.maxTopicSaliency(
+            this.props.ldaModel.selectedTopic);
     }
 }
 

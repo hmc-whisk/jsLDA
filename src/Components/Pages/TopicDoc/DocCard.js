@@ -15,7 +15,7 @@ class DocCard extends React.Component {
                     <b>ID: </b>{document.id} 
                     <span style={{float:"right"}}>
                         <b> Topic Score: </b>
-                        {this.props.isTopicSelected ? 
+                        {this.props.ldaModel.selectedTopic !== -1 ? 
                             format(document.score * 100): 
                             "No topic selected"}
                     </span>
@@ -26,12 +26,8 @@ class DocCard extends React.Component {
                         <div class={"preview"}>{truncate(document.originalText,100)}</div>
                         <DocView 
                             document = {this.props.document}
-                            tokensPerTopic = {this.props.tokensPerTopic}
-                            wordTopicCounts = {this.props.wordTopicCounts}
-                            selectedTopic = {this.props.selectedTopic}
-                            highestWordTopicCount = {this.props.highestWordTopicCount}
-                            topicSaliency = {this.props.topicSaliency}
-                            maxTopicSaliency = {this.props.maxTopicSaliency}
+                            ldaModel = {this.props.ldaModel}
+                            maxTopicValue = {this.props.maxTopicValue}
                         />
                     </span>
                 </Accordion.Collapse>
