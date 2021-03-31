@@ -138,9 +138,10 @@ class TopBar extends React.Component {
                         color="primary"
                         />
                         Optimize topic concentrations</h4>
-                        <i style={{padding:'15px'}}>Optimized topic correlation allow the model to account for </i>
-                        <br/>
-                        <i style={{padding:'15px'}}>different proportions of topics in each documents </i>
+                        <div style={{padding:'5px'}}>
+                        <i>Optimized topic correlation allow the model to account for 
+                        different proportions of topics in each documents</i>
+                        </div>
                         <br/>
                         <br/>
 
