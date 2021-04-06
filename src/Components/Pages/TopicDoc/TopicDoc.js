@@ -1,6 +1,7 @@
 import React, { Component } from 'react'; 
 import PageController from './PageController';
 import DocAccordion from './DocAccordion';
+import LabeledToggleButton from '../../LabeledToggleButton';
 
 /**
  * @summary A page that displays the documents in the model
@@ -79,14 +80,19 @@ class TopicDoc extends Component {
     }
 
     toggleMetaDataButton() {
-        let message = this.state.showMetaData ? 
-            "Hide Metadata" : "Show Metadata";
+        // let message = this.state.showMetaData ? 
+        //     "Hide Metadata" : "Show Metadata";
         return(
-            <button type="button" id="metaDataButton" 
-            onClick={() => this.toggleMetaData()} className = "lightButton">
-                {message}
+            // <button type="button" id="metaDataButton" 
+            // onClick={() => this.toggleMetaData()} className = "lightButton">
+            //     {message}
             
-            </button>
+            // </button>
+            <LabeledToggleButton 
+                label= {"Show Metadata"}
+                style = {{float:"right",margin:"10px 0px"}}
+                checked = {this.state.showMetaData}
+                onChange = {this.toggleMetaData}/>
         )
     }
 

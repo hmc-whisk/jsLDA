@@ -1,6 +1,7 @@
 import React from "react";
 import {topNWords} from '../../../funcs/utilityFunctions';
-import DocAccordion from '../TopicDoc/DocAccordion'
+import DocAccordion from '../TopicDoc/DocAccordion';
+import LabeledToggleButton from '../../LabeledToggleButton';
 
 /**
  * @summary Component for Topic Overview page
@@ -15,7 +16,13 @@ class TopicOverviewPage extends React.Component {
     static numDocuments = 20 // Number of documents to display
     static annotationFontSize = 16
 
+    constructor(props) {
+        super(props);
 
+        this.state = { 
+            showMetaData: false,
+         };
+    }
 
     render() {
         
@@ -101,13 +108,27 @@ class TopicOverviewPage extends React.Component {
     documents() {
         return (
             <div id="documents">
+                <h3 style={{float:"left",margin:"10 0 0 0"}}>
+                    Documents:
+                </h3>
+
+                <LabeledToggleButton 
+                    label= {"Show Metadata"}
+                    style = {{float:"right"}}
+                    checked = {this.state.showMetaData}
+                    onChange = {this.toggleMetaData}/>
+                
                 <DocAccordion
                     ldaModel = {this.props.ldaModel}
                     startDoc = {0}
                     endDoc = {TopicOverviewPage.numDocuments}
-                    showMetaData = {false}/>
+                    showMetaData = {this.state.showMetaData}/>
             </div>
         )
+    }
+
+    toggleMetaData = () => {
+        this.setState({showMetaData: !this.state.showMetaData})
     }
 }
 
