@@ -182,6 +182,13 @@ div.accordion {
   margin-left: 10px;
 }
 
+.labeledToggleButton {
+  border: solid var(--color1) 2px;
+  padding: 0px 10px;
+  border-radius: 4px;
+  background: var(--color3);
+}
+
 
 body { font-family: Calibri, Verdana; background-color: var(--color3); }
 
