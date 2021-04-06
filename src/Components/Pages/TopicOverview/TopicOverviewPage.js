@@ -11,14 +11,15 @@ import DocAccordion from '../TopicDoc/DocAccordion'
  */
 class TopicOverviewPage extends React.Component {
     // Some settings
-    numWordsToShow = 50 // Number of topic words in label
-    numDocuments = 5 // Number of documents to display
+    static numWordsToShow = 50 // Number of topic words in label
+    static numDocuments = 20 // Number of documents to display
+    static annotationFontSize = 16
 
 
 
     render() {
         
-        if (this.props.ldaModel.selectedTopic == -1) {
+        if (this.props.ldaModel.selectedTopic === -1) {
             return this.noTopicSelected()
         }
 
@@ -57,10 +58,14 @@ class TopicOverviewPage extends React.Component {
         return (
             <div id="label">
                 <h2>Topic {topicNum}</h2>
-                <i>{this.props.annotations[topicNum]}</i>
+                <pre style={{fontSize:TopicOverviewPage.annotationFontSize,
+                             whiteSpace: "pre-wrap"}}>
+                    <i>{this.props.annotations[topicNum]}</i>
+                </pre>
                 <p class="subtitle">
+                    <b>Top Words: </b> 
                     {topNWords(this.props.ldaModel.topicWordCounts[topicNum], 
-                        this.numWordsToShow)}
+                        TopicOverviewPage.numWordsToShow)}
                 </p>
             </div>
         )
@@ -99,7 +104,7 @@ class TopicOverviewPage extends React.Component {
                 <DocAccordion
                     ldaModel = {this.props.ldaModel}
                     startDoc = {0}
-                    endDoc = {5}
+                    endDoc = {TopicOverviewPage.numDocuments}
                     showMetaData = {false}/>
             </div>
         )
