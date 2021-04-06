@@ -1,4 +1,4 @@
-import React, { Component, useState } from 'react'; 
+import React, { Component } from 'react'; 
 import * as d3 from 'd3';
 
 class VocabTable extends Component {
@@ -210,8 +210,8 @@ class VocabTable extends Component {
                   Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0.
                 </div>
                 <div className="help" style={{display: "flex", flexDirection: "column", flex: "1"}}>
-                  <button id="showStops" className = "lightButton">Show stopwords</button>
-                  <button id="sortVocabByTopic" className = "lightButton">Sort by topic</button>
+                  <button id="showStops" className="lightButton" style={{marginTop: "15px"}}>Show stopwords</button>
+                  <button id="sortVocabByTopic" className="lightButton" style={{marginTop: "15px"}}>Sort by topic</button>
                   {this.stopwordsDLButton}
                 </div>
               </div>
@@ -222,9 +222,9 @@ class VocabTable extends Component {
     get stopwordsDLButton() {
       return (
           <>
-              <button id="stopword-dl" className = "lightButton"
+              <button id="stopword-dl" className="lightButton" style={{marginTop: "15px"}}
                   onClick={() => this.props.modelDataDLer.downloadStopwords()}>
-                  Download Stopwords 
+                  Download stopwords 
               </button>
           </>
       )
