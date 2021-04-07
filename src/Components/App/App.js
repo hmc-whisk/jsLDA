@@ -1,5 +1,6 @@
 import React, { Component } from 'react'; 
 import './App.css';
+import '../../jslda.css';
 import * as d3 from 'd3';
 
 import {getObjectKeys} from '../../funcs/utilityFunctions'
