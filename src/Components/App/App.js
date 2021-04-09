@@ -7,7 +7,7 @@ import LDAModel from '../../LDAModel/LDAModel'
 import ModelDataDLer from '../../LDAModel/ModelDataDLer'
 
 import Correlation from '../Pages/Correlation';
-import TopicDoc from '../Pages/TopicDoc/TopicDoc';
+import DocPage from '../Pages/TopicDoc/DocPage';
 import SideBar from '../SideBar';
 import VocabTable from '../Pages/VocabTable';
 import TimeSeries from '../Pages/TimeSeries';
@@ -338,7 +338,7 @@ class App extends Component {
     var DisplayPage;
     switch (this.state.selectedTab) {
       case "docs-tab":
-        DisplayPage = <TopicDoc 
+        DisplayPage = <DocPage 
           ldaModel = {this.state.ldaModel}
         />;
         break;
