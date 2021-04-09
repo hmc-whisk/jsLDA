@@ -3,8 +3,10 @@ import Accordion from 'react-bootstrap/Accordion'
 import DocCard from './DocCard'
 
 class DocAccordion extends React.Component {
+
     render() {
         return (
+        <div>
             <Accordion defaultActiveKey={this.props.ldaModel.documents[this.props.startDoc].originalOrder}>
                 {this.props.ldaModel.sortedDocuments
                     .slice(this.props.startDoc,this.props.endDoc)
@@ -19,6 +21,7 @@ class DocAccordion extends React.Component {
                     }
                 )}
             </Accordion>
+        </div>
         )
     }
 

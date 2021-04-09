@@ -51,48 +51,33 @@ class TopicDoc extends Component {
     }
 
     toggleMetaData = () => {
-        console.log("Toggled")
-        this.setState({
-            showMetaData: !this.state.showMetaData
-        })
+        this.setState({showMetaData: !this.state.showMetaData})
     }
 
     render() {
         return(
             <div>
+                <LabeledToggleButton 
+                    label= {"Show Metadata"}
+                    style = {{
+                                float:"right",
+                            }}
+                    checked = {this.state.showMetaData}
+                    onChange = {this.toggleMetaData}/>
+
                 <div className = "docNav">
                 <PageController
                     currentPage = {this.state.currentPage}
                     changePage = {this.changePage}
-                    lastPage = {this.lastPage}
-                />
-                {this.toggleMetaDataButton()}
+                    lastPage = {this.lastPage}/>
                 </div>
 
                 <DocAccordion
                     ldaModel = {this.props.ldaModel}
                     startDoc = {this.startDoc}
                     endDoc = {this.endDoc}
-                    showMetaData = {this.state.showMetaData}
-                />
+                    showMetaData = {this.state.showMetaData}/>
             </div>
-        )
-    }
-
-    toggleMetaDataButton() {
-        // let message = this.state.showMetaData ? 
-        //     "Hide Metadata" : "Show Metadata";
-        return(
-            // <button type="button" id="metaDataButton" 
-            // onClick={() => this.toggleMetaData()} className = "lightButton">
-            //     {message}
-            
-            // </button>
-            <LabeledToggleButton 
-                label= {"Show Metadata"}
-                style = {{float:"right",margin:"10px 0px"}}
-                checked = {this.state.showMetaData}
-                onChange = {this.toggleMetaData}/>
         )
     }
 

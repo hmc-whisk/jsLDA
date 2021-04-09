@@ -1,6 +1,6 @@
 import React from "react";
 import {topNWords} from '../../../funcs/utilityFunctions';
-import DocAccordion from '../TopicDoc/DocAccordion';
+import TopicDoc from '../TopicDoc/TopicDoc';
 import LabeledToggleButton from '../../LabeledToggleButton';
 
 /**
@@ -16,14 +16,6 @@ class TopicOverviewPage extends React.Component {
     static numDocuments = 20 // Number of documents to display
     static annotationFontSize = 16
 
-    constructor(props) {
-        super(props);
-
-        this.state = { 
-            showMetaData: false,
-         };
-    }
-
     render() {
         
         if (this.props.ldaModel.selectedTopic === -1) {
@@ -34,8 +26,8 @@ class TopicOverviewPage extends React.Component {
             <div id="pages">
                 <div id="to-page" className="page">
                     {this.label()}
-                    {this.timeline()}
-                    {this.correlations()}
+                    {/* {this.timeline()}
+                    {this.correlations()} */}
                     {this.documents()}
                 </div>
             </div>
@@ -69,7 +61,7 @@ class TopicOverviewPage extends React.Component {
                              whiteSpace: "pre-wrap"}}>
                     <i>{this.props.annotations[topicNum]}</i>
                 </pre>
-                <p class="subtitle">
+                <p className="subtitle" style={{textAlign:"left"}}>
                     <b>Top Words: </b> 
                     {topNWords(this.props.ldaModel.topicWordCounts[topicNum], 
                         TopicOverviewPage.numWordsToShow)}
@@ -110,25 +102,11 @@ class TopicOverviewPage extends React.Component {
             <div id="documents">
                 <h3 style={{float:"left",margin:"10 0 0 0"}}>
                     Documents:
-                </h3>
-
-                <LabeledToggleButton 
-                    label= {"Show Metadata"}
-                    style = {{float:"right"}}
-                    checked = {this.state.showMetaData}
-                    onChange = {this.toggleMetaData}/>
-                
-                <DocAccordion
-                    ldaModel = {this.props.ldaModel}
-                    startDoc = {0}
-                    endDoc = {TopicOverviewPage.numDocuments}
-                    showMetaData = {this.state.showMetaData}/>
+                </h3>   
+                <TopicDoc
+                    ldaModel = {this.props.ldaModel}/>
             </div>
         )
-    }
-
-    toggleMetaData = () => {
-        this.setState({showMetaData: !this.state.showMetaData})
     }
 }
 
