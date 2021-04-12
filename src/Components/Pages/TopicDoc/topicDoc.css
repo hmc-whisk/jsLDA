@@ -54,6 +54,10 @@ div.accordion div.card {
     border-bottom: 0px;
 }
 
+div.accordion div.card-body {
+    padding: 0px;
+}
+
 div.accordion div.card:last-child {
     border-bottom: 2px solid var(--color1);
 }
@@ -62,6 +66,10 @@ div.accordion {
     display: block;
     position: relative;
     clear: right;
+}
+
+.collapsing {
+    padding: 8px 16px;
 }
   
 /**** PageController.js // Pagination Styling ****/
