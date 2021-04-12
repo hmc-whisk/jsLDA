@@ -261,7 +261,7 @@ class SideBar extends Component {
             </div>
             :
             <div className="sidebar">
-                <Spinner animation="border" />
+                <Spinner animation="border" style={{width: "50px", height: "50px", marginLeft: "40%"}}/>
             </div>
         )
     }
