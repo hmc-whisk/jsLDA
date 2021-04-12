@@ -1,0 +1,32 @@
+.sidebar { 
+    float: left; 
+    flex: 1; 
+    overflow-y: scroll; 
+}
+
+.sidebar .sidebox { 
+    margin: 5px; 
+    padding: 8px; 
+}
+
+.topicbar { 
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--color1);
+    border-radius: 4px;
+}
+.topicbar-selected {
+    background-color: #6c7b9c;
+}
+.topicbar-hidden {
+    background-color: #c4c8cf;
+}
+.topic-button {
+    border: none;
+    background-color: inherit;
+    outline: none;
+}
+.topic-button-icon {
+    height: 16px;
+    width: 16px;
+}
