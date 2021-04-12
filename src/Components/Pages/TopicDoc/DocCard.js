@@ -1,9 +1,11 @@
 import React from 'react'; 
-import Card from 'react-bootstrap/Card'
-import Accordion from 'react-bootstrap/Accordion'
+import Card from 'react-bootstrap/Card';
+import Accordion from 'react-bootstrap/Accordion';
 import {format as d3Format} from 'd3';
-import {truncate} from '../../../funcs/utilityFunctions'
-import DocView from './DocView'
+import {truncate} from '../../../funcs/utilityFunctions';
+import DocView from './DocView';
+import './topicDoc.css';
+
 
 class DocCard extends React.Component {
     render() {
