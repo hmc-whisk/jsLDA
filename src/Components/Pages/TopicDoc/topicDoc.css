@@ -115,4 +115,6 @@ clear: right;
 .pagination {
     float: left;
     display: block;
+    padding-left: 40px;
+    margin: 1em 0 1em 0;
 }
