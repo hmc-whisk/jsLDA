@@ -1,5 +1,6 @@
 import React from 'react'; 
 import Pagination from 'react-bootstrap/Pagination';
+import './topicDoc.css';
 
 /**
  * @summary a class for changing between pages

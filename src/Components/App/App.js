@@ -459,9 +459,8 @@ class App extends Component {
                />
 
       <div id="tabwrapper">
-              
-      <NavBar onClick={this.changeTab}/>
-      <div id="pages">
+        <NavBar onClick={this.changeTab}/>
+        <div id="pages">
       </div>
 
 

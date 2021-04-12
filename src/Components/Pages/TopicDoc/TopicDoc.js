@@ -141,7 +141,7 @@ class TopicDoc extends Component {
     render() {
         return(
             <div>
-                <div className = "docNav">
+                <div className="docNav">
                 <PageController
                     currentPage = {this.state.currentPage}
                     changePage = {this.changePage}

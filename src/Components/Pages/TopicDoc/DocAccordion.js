@@ -1,6 +1,8 @@
 import React from 'react'; 
-import Accordion from 'react-bootstrap/Accordion'
-import DocCard from './DocCard'
+import Accordion from 'react-bootstrap/Accordion';
+import DocCard from './DocCard';
+import './topicDoc.css';
+
 
 class DocAccordion extends React.Component {
     render() {
