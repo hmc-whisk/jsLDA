@@ -29,7 +29,7 @@ class PageController extends React.Component {
         if(this.props.currentPage > 3){
             return (
                 [this.pageButton(1),
-                <Pagination.Ellipsis key = "firstEllipsis"/>]
+                <Pagination.Ellipsis key="firstEllipsis"/>]
             );
         }
         else if(this.props.currentPage > 2){
