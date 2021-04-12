@@ -1,6 +1,9 @@
 import React, { Component } from 'react'; 
+
 import './App.css';
 import '../../jslda.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+
 import * as d3 from 'd3';
 
 import {getObjectKeys} from '../../funcs/utilityFunctions'
@@ -9,7 +12,7 @@ import ModelDataDLer from '../../LDAModel/ModelDataDLer'
 
 import Correlation from '../Pages/Correlation';
 import TopicDoc from '../Pages/TopicDoc/TopicDoc';
-import SideBar from '../SideBar';
+import SideBar from '../SideBar/SideBar';
 import VocabTable from '../Pages/VocabTable';
 import TimeSeries from '../Pages/TimeSeries';
 import NavBar from '../Header/NavBar';
