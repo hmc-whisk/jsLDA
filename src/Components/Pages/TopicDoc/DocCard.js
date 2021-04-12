@@ -27,7 +27,7 @@ class DocCard extends React.Component {
                 </Accordion.Toggle>
                 <Accordion.Collapse eventKey={document.originalOrder}>
                     <span>
-                        <div class={"preview"}>{truncate(document.originalText,100)}</div>
+                        <div className="preview">{truncate(document.originalText,100)}</div>
                         <DocView 
                             document = {this.props.document}
                             tokensPerTopic = {this.props.tokensPerTopic}

@@ -19,44 +19,49 @@
 /**** DocAccordion.js // Accordion Styling ****/
 div.accordion div.collapse:not(.show) .card-body{
     display: none;
-  }
-  
-div.accordion div.collapse .preview{
-padding: 8px 16px;
 }
 
-div.accordion div.collapse.show {
-display: block;
-padding: 8px 16px;
+div.accordion div.collapse:not(.show) {
+    display: block;
 }
 
 div.accordion .collapse.show .preview {
-display: none;
+    display: none;
 }
+  
+div.accordion div.collapse .preview {
+    padding: 8px 16px;
+}
+
+div.accordion div.collapse.show {
+    display: block;
+    padding: 8px 16px;
+}
+
 
 /* DocCard.js */
 div.accordion div.card-header {
-padding: 8px 16px;
-display: block;
-background-color: var(--color1)
+    padding: 8px 16px;
+    display: block;
+    background-color: var(--color1)
 }
 
 div.accordion div.card-header:hover{background-color:var(--color1Dark);}
 
 div.accordion div.card {
-display: block;
-border: 2px solid var(--color1);
-border-bottom: 0px
+    display: block;
+    border: 2px solid var(--color1);
+    border-bottom: 0px;
 }
 
 div.accordion div.card:last-child {
-border-bottom: 2px solid var(--color1);
+    border-bottom: 2px solid var(--color1);
 }
 
 div.accordion {
-display: block;
-position: relative;
-clear: right;
+    display: block;
+    position: relative;
+    clear: right;
 }
   
 /**** PageController.js // Pagination Styling ****/
