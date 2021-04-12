@@ -1,6 +1,6 @@
 
 /* NavBar.js */
-.tabs{ height: auto; }
+.tabs{ height: auto; margin-top: 20px;}
 .tabs > ul { font-size: 1em; list-style: none; }
 .tabs > ul > li { border: solid var(--color1) 2px; margin:0 2px 0 0; padding:7px 10px; display:block; float:left; color:#333; -webkit-user-select: none; -moz-user-select: none; user-select: none; -moz-border-radius: 4px; border-radius: 4px; background: var(--color3); }
 .tabs > ul > li:hover { background: var(--color1); cursor:pointer; }
