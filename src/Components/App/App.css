@@ -1,0 +1,12 @@
+body { 
+    font-family: Calibri, Verdana; 
+    background-color: var(--color3); 
+    margin: 0;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+text { font-size: small; vertical-align: baseline; }
+  

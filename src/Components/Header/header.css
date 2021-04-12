@@ -50,6 +50,8 @@ div.top {
     border-radius: 10px; 
     display: flex;
     justify-content: space-between;
+    font-size: 16px;
+    line-height: 1;
 }
 /* NumTopicSlider.js */
 div.top #num_topics_control { float:right; }

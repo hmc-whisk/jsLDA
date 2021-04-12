@@ -25,18 +25,17 @@
 
 
 
-body { 
+/* body { 
   font-family: Calibri, Verdana; 
   background-color: var(--color3); 
   margin: 0;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-text { font-size: small; vertical-align: baseline; }
+text { font-size: small; vertical-align: baseline; } */
 
 
 .lightButton { 
@@ -56,9 +55,13 @@ text { font-size: small; vertical-align: baseline; }
   border: solid var(--color1Dark) 2px; 
   /* margin:0 2px 0 0;  */
   /* padding:7px 10px;  */
-  -webkit-user-select: none; -moz-user-select: none; user-select: none; -moz-border-radius: 4px; 
+  -webkit-user-select: none; 
+  -moz-user-select: none; 
+  user-select: none; 
+  -moz-border-radius: 4px; 
   border-radius: 4px; 
-  background: var(--color3); }
+  background: var(--color3); 
+}
 
 .darkButton:hover:enabled{
   background: var(--color3Dark); 
