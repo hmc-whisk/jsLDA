@@ -1,7 +1,7 @@
 import React, { Component } from 'react'; 
 
 import './App.css';
-import '../../jslda.css';
+// import '../../jslda.css';
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
 import * as d3 from 'd3';
