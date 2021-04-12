@@ -2,6 +2,7 @@ body {
     font-family: Calibri, Verdana; 
     background-color: var(--color3); 
     margin: 0;
+    line-height: 1;
 }
 
 code {
