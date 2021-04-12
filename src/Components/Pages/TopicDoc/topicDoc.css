@@ -62,45 +62,57 @@ clear: right;
 /**** PageController.js // Pagination Styling ****/
 
 .pagination a {
-color: black;
-text-decoration: none;
+    color: black;
+    text-decoration: none;
 }
 
 .pagination li:first-child {
-border-top-left-radius: 5px;
-border-bottom-left-radius: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
 }
 
 .pagination li:last-child {
-border-top-right-radius: 5px;
-border-bottom-right-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
 }
 
 .pagination li {
-display: inline-block;
-border: 2px solid var(--color1);
+    display: inline-block;
+    border: 2px solid var(--color1);
 }
 
 .pagination li:not(.active) a {
-display: inline-block;
-padding: 8px 16px;
+    display: inline-block;
+    padding: 8px 16px;
 }
 
 .pagination li:hover:not(.active) {background-color: var(--color1);}
 
 .pagination li.page-item.active {
-background-color: var(--color2);
-color: white;
-text-decoration: none;
-border: 2px solid var(--color1);
-padding: 8px 16px;
+    background-color: var(--color2);
+    color: white;
+    text-decoration: none;
+    border: 3px solid var(--color1);
+    padding: 8px 16px;
+}
+
+.pagination li.page-item.active span.page-link {
+    padding: 0px;
+    background-color: var(--color2);
+    border: none;
+}
+
+.pagination li.page-item:not(.active) .page-link:hover {
+    background-color: var(--color1);
+    color: black;
+    border: 1px solid var(--color1);
 }
 
 .pagination span.sr-only {
-display: none
+    display: none
 }
 
 .pagination {
-float: left;
-display: block;
+    float: left;
+    display: block;
 }
