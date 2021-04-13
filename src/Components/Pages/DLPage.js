@@ -37,7 +37,7 @@ class DLPage extends React.Component {
         let description = "A copy of your current model which you can upload to this website and continue working on."
         return (
             <>
-                <button id="model-dl"
+                <button id="model-dl" className="darkButton"
                     onClick={() => this.props.modelDataDLer.downloadModel()}>
                     LDA Model
                 </button>
@@ -50,7 +50,7 @@ class DLPage extends React.Component {
         let description = "Every topic value for every document."
         return (
             <>
-                <button id="doctopics-dl"
+                <button id="doctopics-dl" className="darkButton"
                     onClick={() => this.props.modelDataDLer.saveDocTopics()}>
                     Document Topics
                 </button>
@@ -63,7 +63,7 @@ class DLPage extends React.Component {
         let description = "The average topic value for every word type."
         return (
             <>
-                <button id="topicwords-dl"
+                <button id="topicwords-dl" className="darkButton"
                     onClick={() => this.props.modelDataDLer.saveTopicWords()}>
                     Topic Words
                 </button>
@@ -76,7 +76,7 @@ class DLPage extends React.Component {
         let description = "The topic number, annotation, token count, and top 10 words for every topic."
         return (
             <>
-                <button id="keys-dl"
+                <button id="keys-dl" className="darkButton"
                     onClick={() => this.props.modelDataDLer.saveTopicKeys()}>
                     Topic Summaries
                 </button>
@@ -89,7 +89,7 @@ class DLPage extends React.Component {
         let description = "The pointwise mutual information score between every pair of topics."
         return (
             <>
-                <button id="topictopic-dl"
+                <button id="topictopic-dl" className="darkButton"
                     onClick={() => this.props.modelDataDLer.saveTopicPMI()}>
                     Topic-Topic Correlations
                 </button>
@@ -102,7 +102,7 @@ class DLPage extends React.Component {
         let description = "Formatted to make graphs in Gephi."
         return (
             <>
-                <button id="graph-dl"
+                <button id="graph-dl" className="darkButton"
                     onClick={() => this.props.modelDataDLer.saveGraph()}>
                     Doc-Topic Graph File
                 </button>
@@ -115,7 +115,7 @@ class DLPage extends React.Component {
         let description = "The topic assignment for every token."
         return (
             <>
-                <button id="state-dl"
+                <button id="state-dl" className="darkButton"
                     onClick={() => this.props.modelDataDLer.saveState()}>
                     Complete Sampling State
                 </button>
@@ -128,7 +128,7 @@ class DLPage extends React.Component {
         let description = "The proportion of tokens assigned to a topic at every time stamp."
         return (
             <>
-                <button id="topicstime-dl"
+                <button id="topicstime-dl" className="darkButton"
                     onClick={() => this.props.modelDataDLer.saveTopicsTime()}>
                     Topic Values Over Time
                 </button>
@@ -141,7 +141,7 @@ class DLPage extends React.Component {
         let description = "A text file of all the current stopwords with one word per line."
         return (
             <>
-                <button id="stopword-dl"
+                <button id="stopword-dl" className="darkButton"
                     onClick={() => this.props.modelDataDLer.downloadStopwords()}>
                     Stopwords
                 </button>
