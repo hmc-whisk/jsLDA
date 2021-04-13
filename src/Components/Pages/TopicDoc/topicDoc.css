@@ -56,6 +56,7 @@ div.accordion div.card {
 
 div.accordion div.card-body {
     padding: 0px;
+    line-height: 1.25;
 }
 
 div.accordion div.card:last-child {
