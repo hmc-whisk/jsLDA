@@ -8,7 +8,7 @@ class DocAccordion extends React.Component {
         return (
         <div>
             <Accordion defaultActiveKey={this.props.ldaModel.documents[this.props.startDoc].originalOrder}>
-                {this.props.ldaModel.sortedDocuments
+                {this.props.documents
                     .slice(this.props.startDoc,this.props.endDoc)
                     .map( (document) => {
                         return <DocCard
@@ -17,6 +17,7 @@ class DocAccordion extends React.Component {
                             key = {document.originalOrder}
                             showMetaData = {this.props.showMetaData}
                             maxTopicValue = {this.maxTopicValue}
+                            useSalience = {this.props.useSalience}
                         />
                     }
                 )}
