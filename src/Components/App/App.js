@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
-
 import * as d3 from 'd3';
 
 import {getObjectKeys} from '../../funcs/utilityFunctions'
