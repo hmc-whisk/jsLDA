@@ -114,6 +114,7 @@ div.accordion {
     padding: 0px;
     background-color: var(--color2);
     border: none;
+    z-index: 1;
 }
 
 .pagination li.page-item:not(.active) .page-link:hover {
