@@ -226,6 +226,7 @@ class App extends Component {
       };
       reader.readAsText(fileSelection[0]);
     }).then((result) => {
+      result.modelUploaded()
       this.setState({ldaModel: result});
       // d3 controls itteration display, so this is the only
       // way to update it.
