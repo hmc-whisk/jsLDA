@@ -22,7 +22,7 @@ import {confirmReset} from '../../funcs/utilityFunctions'
  * @prop {Function(Event)} onModelFileChange
  *      - The function to be called when the
  *        model file has been changed
- * @prop {Function(Event)} onFileUpload
+ * @prop {Function(Event)} onModelUpload
  *      - The function to be called when
  *        the model upload button is pressed
  */
