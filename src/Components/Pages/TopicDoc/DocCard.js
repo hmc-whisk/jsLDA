@@ -16,10 +16,10 @@ class DocCard extends React.Component {
                 <Accordion.Toggle as={Card.Header} eventKey={document.id}>
                     <b>ID: </b>{document.id} 
                     <span style={{float:"right"}}>
-                        { this.props.useSalience?
+                        { this.props.useSalience ?
                             <b> Saliency Score: </b>:
                             <b> Topic Score: </b>}
-                        {this.props.isTopicSelected ? 
+                        {this.props.ldaModel.selectedTopic !== -1 ? 
                             this.score(document): 
                             "No topic selected"}
                     </span>
@@ -29,13 +29,9 @@ class DocCard extends React.Component {
                     <span>
                         <div className="preview">{truncate(document.originalText,100)}</div>
                         <DocView 
-                            document={this.props.document}
-                            tokensPerTopic={this.props.tokensPerTopic}
-                            wordTopicCounts={this.props.wordTopicCounts}
-                            selectedTopic={this.props.selectedTopic}
-                            highestWordTopicCount={this.props.highestWordTopicCount}
-                            topicSaliency={this.props.topicSaliency}
-                            maxTopicSaliency={this.props.maxTopicSaliency}
+                            document = {this.props.document}
+                            ldaModel = {this.props.ldaModel}
+                            maxTopicValue = {this.props.maxTopicValue}
                         />
                     </span>
                 </Accordion.Collapse>
