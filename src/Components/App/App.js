@@ -9,8 +9,8 @@ import {getObjectKeys} from '../../funcs/utilityFunctions'
 import LDAModel from '../../LDAModel/LDAModel'
 import ModelDataDLer from '../../LDAModel/ModelDataDLer'
 
+import DocPage from '../Pages/TopicDoc/DocPage';
 import Correlation from '../Pages/Correlation';
-import TopicDoc from '../Pages/TopicDoc/TopicDoc';
 import SideBar from '../SideBar/SideBar';
 import VocabTable from '../Pages/VocabTable';
 import TimeSeries from '../Pages/TimeSeries';
@@ -19,6 +19,7 @@ import TopBar from '../Header/TopBar';
 import DLPage from '../Pages/DLPage';
 import HomePage from '../Pages/HomePage';
 import MetaData from '../Pages/MetaData/MetaData';
+import TopicOverviewPage from '../Pages/TopicOverview/TopicOverviewPage';
 
 import stateOfUnionDocs from '../../defaultDocs/stateOfUnionDocs.txt';
 import moviePlotsDocs from '../../defaultDocs/wikiMoviePlots.csv';
@@ -100,6 +101,7 @@ class App extends Component {
 
   changeAnnotation = (text,i) => {
     this.annotations[i] = text;
+    this.modelForceUpdate();
   }
 
   resetNotes = (i) => {
@@ -340,17 +342,8 @@ class App extends Component {
     var DisplayPage;
     switch (this.state.selectedTab) {
       case "docs-tab":
-        DisplayPage = <TopicDoc 
-          selectedTopic={this.state.ldaModel.selectedTopic} 
-          documents={this.state.ldaModel.documents} 
-          sortVocabByTopic={this.state.ldaModel.sortVocabByTopic} 
-          numTopics={this.state.ldaModel.numTopics}
-          update = {this.state.update}
-          tokensPerTopic = {this.state.ldaModel.tokensPerTopic}
-          wordTopicCounts = {this.state.ldaModel.wordTopicCounts}
-          highestWordTopicCount = {this.state.ldaModel.highestWordTopicCount}
-          topicSaliency = {this.state.ldaModel.topicSaliency}
-          maxTopicSaliency = {this.state.ldaModel.maxTopicSaliency}
+        DisplayPage = <DocPage 
+          ldaModel = {this.state.ldaModel}
         />;
         break;
       case "corr-tab":
@@ -415,6 +408,11 @@ class App extends Component {
           topicWordCounts={this.state.ldaModel.topicWordCounts}
           modelDataDLer={this.state.modelDataDLer}/>
         break;
+      case "to-tab":
+        DisplayPage = <TopicOverviewPage
+          ldaModel ={this.state.ldaModel}
+          annotations = {this.annotations}/>
+        break;
       default:
         DisplayPage = null;
         break;
@@ -442,7 +440,6 @@ class App extends Component {
             onModelFileChange={this.onModelFileChange}
             onFileUpload={this.queueLoad}
             onModelUpload={this.onModelUpload}
-            modelIsRunning = {this.state.ldaModel.modelIsRunning}
             onDefaultDocChange = {this.onDefaultDocChange}
             docName={this.state.docName}
             />
