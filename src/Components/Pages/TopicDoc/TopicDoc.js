@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PageController from './PageController';
 import DocAccordion from './DocAccordion';
 import LabeledToggleButton from '../../LabeledToggleButton';
+import './topicDoc.css';
 
 /**
  * @summary A page that displays the documents in the model
@@ -140,9 +141,10 @@ class TopicDoc extends Component {
     render() {
         return(
             <div>
+
                 {this.toggleMetaDataButton()}
                 {this.toggleSalienceDataButton()}
-
+                
                 <div className = "docNav">
                 <PageController
                     currentPage = {this.state.currentPage}
