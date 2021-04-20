@@ -1,9 +1,11 @@
 import React from 'react'; 
-import Card from 'react-bootstrap/Card'
-import Accordion from 'react-bootstrap/Accordion'
+import Card from 'react-bootstrap/Card';
+import Accordion from 'react-bootstrap/Accordion';
 import {format as d3Format} from 'd3';
-import {truncate} from '../../../funcs/utilityFunctions'
-import DocView from './DocView'
+import {truncate} from '../../../funcs/utilityFunctions';
+import DocView from './DocView';
+import './topicDoc.css';
+
 
 class DocCard extends React.Component {
     render() {
@@ -11,7 +13,7 @@ class DocCard extends React.Component {
         const document = this.props.document;
         return(
             <Card>
-                <Accordion.Toggle as={Card.Header} eventKey={document.originalOrder}>
+                <Accordion.Toggle as={Card.Header} eventKey={document.id}>
                     <b>ID: </b>{document.id} 
                     <span style={{float:"right"}}>
                         { this.props.useSalience ?
@@ -23,9 +25,9 @@ class DocCard extends React.Component {
                     </span>
                     <div>{this.metaInfo}</div>
                 </Accordion.Toggle>
-                <Accordion.Collapse eventKey={document.originalOrder}>
+                <Accordion.Collapse eventKey={document.id}>
                     <span>
-                        <div class={"preview"}>{truncate(document.originalText,100)}</div>
+                        <div className="preview">{truncate(document.originalText,100)}</div>
                         <DocView 
                             document = {this.props.document}
                             ldaModel = {this.props.ldaModel}

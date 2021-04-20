@@ -1,5 +1,6 @@
 import React, { Component } from 'react'; 
 import * as d3 from 'd3';
+import './pages.css';
 
 class VocabTable extends Component {
     constructor(props) {
@@ -8,11 +9,7 @@ class VocabTable extends Component {
           displayingStopwords: false,
           searchText: "",
         };
-        
-      }
-
-      // let [searchText, setSearch] = useState("");
-      
+      }      
     
 
     specificityScale = d3.scaleLinear().domain([0,1]).range([

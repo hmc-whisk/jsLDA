@@ -1,6 +1,7 @@
 import React from "react";
 import Uploader from './Uploader';
-import Tooltip from '../Tooltip'
+import Tooltip from '../Tooltip';
+import './pages.css';
 
 var backColor = getComputedStyle(document.documentElement).getPropertyValue('--color3');
 

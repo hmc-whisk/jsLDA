@@ -1,6 +1,7 @@
 import React, { Component } from 'react'; 
 import * as d3 from 'd3';
 import {topNWords} from '../../funcs/utilityFunctions';
+import './pages.css';
 
 class TimeSeries extends Component {
     graphMargin = 20;
@@ -34,7 +35,7 @@ class TimeSeries extends Component {
         tsPage.select("svg").remove();
         let temp_topicTimeGroups = [];
         
-        let height = this.state.timeSeriesHeight * this.props.ldaModel.numTopics+125
+        let height = (this.state.timeSeriesHeight + this.graphMargin) * this.props.ldaModel.numTopics+50
         
         var tsSVG = tsPage
             .append("svg")
