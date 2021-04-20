@@ -1,14 +1,17 @@
 import React, { Component } from 'react'; 
+
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+
 import * as d3 from 'd3';
 
 import {getObjectKeys} from '../../funcs/utilityFunctions'
 import LDAModel from '../../LDAModel/LDAModel'
 import ModelDataDLer from '../../LDAModel/ModelDataDLer'
 
-import Correlation from '../Pages/Correlation';
 import DocPage from '../Pages/TopicDoc/DocPage';
-import SideBar from '../SideBar';
+import Correlation from '../Pages/Correlation';
+import SideBar from '../SideBar/SideBar';
 import VocabTable from '../Pages/VocabTable';
 import TimeSeries from '../Pages/TimeSeries';
 import NavBar from '../Header/NavBar';
@@ -225,6 +228,7 @@ class App extends Component {
       };
       reader.readAsText(fileSelection[0]);
     }).then((result) => {
+      result.modelUploaded()
       this.setState({ldaModel: result});
       // d3 controls itteration display, so this is the only
       // way to update it.
@@ -453,9 +457,8 @@ class App extends Component {
                />
 
       <div id="tabwrapper">
-              
-      <NavBar onClick={this.changeTab}/>
-      <div id="pages">
+        <NavBar onClick={this.changeTab}/>
+        <div id="pages">
       </div>
 
 

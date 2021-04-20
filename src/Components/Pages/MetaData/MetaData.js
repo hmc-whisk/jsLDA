@@ -5,7 +5,7 @@ import ScatterPlot from './ScatterPlot'
 import PlotChooser from './PlotChooser'
 import { topNWords} from '../../../funcs/utilityFunctions'
 
-
+import '../pages.css';
 
 class MetaData extends Component {
 

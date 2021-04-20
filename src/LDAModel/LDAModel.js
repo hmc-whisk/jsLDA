@@ -313,6 +313,25 @@ class LDAModel {
     }
 
     /**
+     * This function carries out the necessary functions after a model is uploaded
+     */
+    modelUploaded = () => {
+        console.log("Corrected Model")
+        // Date Objects get uploaded as strings not object, and thus must be remade
+        this._remakeDateObjects()
+    }
+
+    /**
+     * Creates a new dateObject for every document based on their date variable
+     */
+    _remakeDateObjects() {
+        this.documents = this.documents.map((doc) => {
+            doc.dateObject = new Date(doc.date)
+            return doc
+        })
+    }
+
+    /**
      * @summary Parses column names to get column index info
      * @param {Array<String>} header an array of column names
      * @returns {Object} {"id":index, "text":index, "date_tag":index, 
@@ -1126,7 +1145,7 @@ class LDAModel {
 
         // Calc average for every bin
         bins.forEach((bin) => {
-            const total = bin.value.reduce((a,b) => a + b);
+            const total = bin.value.reduce((a,b) => a + b,0);
             const avg = total/bin.value.length;
             bin.value = avg
         })
