@@ -63,7 +63,8 @@ class LDAModel {
         this.topicDocCounts = [];
 
         // /*/
-        this.bigram = 1;
+        this.bigram = false;
+        this.bigramInitialized = false;
         this.bigramCount = {};
         this.bigramCountRev = {};
         this.bigramWord1Count = {};
@@ -191,6 +192,7 @@ class LDAModel {
             this._parseDoc(doc);
         
             this.sortTopicWords();
+            console.log(this.documents[1].tokens)
         }
     }
 
@@ -230,61 +232,6 @@ class LDAModel {
             return;
         }
 
-        // /*/
-        if (this.bigram) {
-            for(let i = 1; i < parsedDoc.length; i++) {
-                let fields = parsedDoc[i];
-                // Set fields based on whether they exist
-                var text = fields[columnInfo.text];
-                
-                var rawTokens = text.toLowerCase().match(this._wordPattern);
-                if (rawTokens == null) { continue; }
-                var prevWord = ""; 
-
-                rawTokens.forEach((word) => {
-                    if (word !== "") {
-                        if (word.length <= 2) { this.stopwords[word] = 1; }
-                    
-                        var isStopword = this.stopwords[word];
-                        if (isStopword) {
-                            prevWord = "";
-                        }
-                        else {
-                            if (prevWord) {
-                                if (! this.bigramCount[prevWord]) {
-                                this.bigramCount[prevWord] = {};
-                                this.bigramWord1Count[prevWord] = 0;
-                                }
-
-                                if (! this.bigramCountRev[word]) {
-                                    this.bigramCountRev[word] = {};
-                                    }
-                                
-                                if (!this.bigramCount[prevWord][word]) {
-                                    this.bigramCount[prevWord][word] = 0;
-                                    }
-                                
-                                if (!this.bigramCountRev[word][prevWord]) {
-                                    this.bigramCountRev[word][prevWord] = 0;
-                                    }
-                                
-                                if (!this.bigramWord2Count[word]) {
-                                    this.bigramWord2Count[word] = 0;
-                                    }
-
-                                this.bigramCount[prevWord][word] += 1;
-                                this.bigramCountRev[word][prevWord] += 1;
-                                this.bigramWord1Count[prevWord] += 1;
-                                this.bigramWord2Count[word]+= 1;
-                                this.totalBigramCount += 1;
-                                }
-                        }
-                        prevWord = word;
-                    }
-                });
-            }
-            this.scoreBigram();
-        }
         for(let i = 1; i < parsedDoc.length; i++) {
             let fields = parsedDoc[i];
             // Set fields based on whether they exist
@@ -316,22 +263,8 @@ class LDAModel {
                     else {
                     this.vocabularyCounts[word] += 1;
                     }
-                    if (this.bigram) {
-                    prevWord = "";} // /*/
                 }
                 else {
-                    // /*/
-                    if (this.bigram) {
-                        if (prevWord) {
-                            if (this.finalBigram[prevWord] && this.finalBigram[prevWord][word]) {
-                                word = prevWord + "_" + word;
-                                tokens.pop();
-                                prevWord = "";
-                                console.log(word)
-                            }
-                        }
-                        prevWord = word;
-                    }
 
                     this.tokensPerTopic[topic]++;
                     if (! this.wordTopicCounts[word]) {
@@ -374,7 +307,88 @@ class LDAModel {
 
     }
 
+    _parseBigram = (docText) => {
+        this.tokensPerTopic = zeros(this.numTopics);
+
+        var parsedDoc
+        if(this.documentType === "text/csv") {
+            parsedDoc = d3.csvParseRows(docText);
+        } else {
+            parsedDoc = d3.tsvParseRows(docText);
+        }
+        
+        // Handle empty documents
+        if(parsedDoc.length===0){
+            alert("Document file is empty");
+            return;
+        }
+
+        let columnInfo = this._getColumnInfo(parsedDoc[0]);
+
+        // Handle no text column
+        if(columnInfo["text"] === -1) {
+            alert("No text column found in document file");
+            return;
+        }
+
+        for(let i = 1; i < parsedDoc.length; i++) {
+            let fields = parsedDoc[i];
+            // Set fields based on whether they exist
+            var text = fields[columnInfo.text];
+            
+            var rawTokens = text.toLowerCase().match(this._wordPattern);
+            if (rawTokens == null) { continue; }
+            var prevWord = ""; 
+
+            rawTokens.forEach((word) => {
+                if (word !== "") {
+                    if (word.length <= 2) { this.stopwords[word] = 1; }
+                
+                    var isStopword = this.stopwords[word];
+                    if (isStopword) {
+                        prevWord = "";
+                    }
+                    else {
+                        if (prevWord) {
+                            if (! this.bigramCount[prevWord]) {
+                            this.bigramCount[prevWord] = {};
+                            this.bigramWord1Count[prevWord] = 0;
+                            }
+
+                            if (! this.bigramCountRev[word]) {
+                                this.bigramCountRev[word] = {};
+                                }
+                            
+                            if (!this.bigramCount[prevWord][word]) {
+                                this.bigramCount[prevWord][word] = 0;
+                                }
+                            
+                            if (!this.bigramCountRev[word][prevWord]) {
+                                this.bigramCountRev[word][prevWord] = 0;
+                                }
+                            
+                            if (!this.bigramWord2Count[word]) {
+                                this.bigramWord2Count[word] = 0;
+                                }
+
+                            this.bigramCount[prevWord][word] += 1;
+                            this.bigramCountRev[word][prevWord] += 1;
+                            this.bigramWord1Count[prevWord] += 1;
+                            this.bigramWord2Count[word]+= 1;
+                            this.totalBigramCount += 1;
+                            }
+                    }
+                    prevWord = word;
+                }
+            });
+            }
+            this.scoreBigram();
+            this.bigramInitialized = true;
+            this._changeBigramStatus(true);
+        }
+
     sortTopicWords() {
+        console.log("sortingTopicWords")
             this.topicWordCounts = [];
             for (let topic = 0; topic < this.numTopics; topic++) {
                 this.topicWordCounts[topic] = [];
@@ -478,6 +492,10 @@ class LDAModel {
     }
 
     // /*/
+    /**
+     * @summary scores bigrams according to chi-squared test and total frequency
+     * and adds to finalBigram if deemed valid.
+     */
     scoreBigram() {
         console.log("running score")
         var tempFinalBigram = {};
@@ -643,10 +661,30 @@ class LDAModel {
         this.updateWebpage();
     }
 
+    /**
+     * @summary Turns on/off hyptertuning option
+     */
     _hyperTune = (tune) => {
         if (this.modelIsRunning == false)
         this._changeAlpha = tune;
         console.log(this._changeAlpha)
+    }
+
+    /**
+     * @summary Turns on/off Bigrams option
+     */
+     _changeBigramStatus = (bigramStatus) => {
+        console.log("bigram status is:")
+        console.log(bigramStatus)
+        if (bigramStatus) {
+            this.addBigram();
+        }
+        else {
+            this.removeBigram();
+        }
+        this.bigram = bigramStatus;
+        console.log(this.vocabularyCounts["wife"])
+        console.log(this.documents[1].tokens)
     }
 
     /**
@@ -899,22 +937,19 @@ class LDAModel {
      * @param {String} word the word to be added to stoplist
      */
     addStop = (word) => {  
-        this.addStopHelper(word);
-        if (this.bigram) {
-            for (let w in this.finalBigram[word]) {
-                if (!this.stopwords[word+"_"+w]) {
-                    console.log(word+"_"+w)
-                    this.addStopHelper(word+"_"+w)
+            this.addStopHelper(word);
+            if (this.bigram) {
+                for (let w in this.finalBigram[word]) {
+                    if (!this.stopwords[word+"_"+w]) {
+                        this.addStopHelper(word+"_"+w)
+                    }
+                }
+                for (let w in this.finalBigramRev[word]) {
+                    if (!this.stopwords[w+"_"+word]) {
+                        this.addStopHelper(w+"_"+word)
+                    }
                 }
             }
-            for (let w in this.finalBigramRev[word]) {
-                if (!this.stopwords[w+"_"+word]) {
-                    console.log(w+"_"+word)
-                    this.addStopHelper(w+"_"+word)
-                }
-            }
-        }
-        this.sortTopicWords();
     }
 
     // /*/
@@ -922,7 +957,8 @@ class LDAModel {
      * @summary adds a word to model's stoplist
      * @param {String} word the word to be added to stoplist
      */
-     addStopHelper = (word) => {  
+     addStopHelper = (word) => { 
+        if (!this.stopwords[word]) { 
         this.stopwords[word] = 1;
         this._vocabularySize--;
         delete this.wordTopicCounts[word];
@@ -938,6 +974,7 @@ class LDAModel {
                 }
             }
         });
+        }
     }
 
     /**
@@ -958,7 +995,6 @@ class LDAModel {
                 }
             }
         }
-        this.sortTopicWords();
     }
 
     // /*/
@@ -989,6 +1025,123 @@ class LDAModel {
                 }
             }
         });
+    }
+
+    addBigram = () => {
+        console.log("addingBigrams")
+        for (let word1 in this.finalBigram) {
+            if (!this.stopwords[word1]){
+            for (let word2 in this.finalBigram[word1]) {
+                if (!this.stopwords[word2]) {
+                this.addBigramHelper(word1, word2);
+            }
+        }}}
+        for (let w in this.stopwords) {
+            if (this.stopwords[w]) {
+                this.addStop(w);
+            }
+        }
+        this.sortTopicWords();
+    }
+
+    addBigramHelper = (word1, word2) => {
+        var curBigram = word1+"_"+word2
+        this.wordTopicCounts[curBigram] = {};
+        this.vocabularyCounts[curBigram] = 0;
+        var currentWordTopicCounts = this.wordTopicCounts[ curBigram ];
+        this._vocabularySize++;
+        
+        this.documents.forEach(( currentDoc, i ) => {
+            var docTopicCounts = currentDoc.topicCounts;
+            var skipNext = false;
+            var tempTokens = [];
+            for (var position = 0; position < currentDoc.tokens.length; position++) {
+                if (skipNext) {
+                    skipNext = false;
+                }
+                else {
+                var token = currentDoc.tokens[position];
+                if (position==currentDoc.tokens.length-1) {tempTokens.push(token)}
+                else {
+                var nextToken = currentDoc.tokens[position+1];
+                if (token.word == word1 && nextToken.word == word2) {
+                    var random_boolean = Math.random() < 0.5;
+                    this.wordTopicCounts[word1][token.topic]--;
+                    this.wordTopicCounts[word2][nextToken.topic]--;
+                    this.vocabularyCounts[curBigram]++;
+                    this.vocabularyCounts[word1]--;
+                    this.vocabularyCounts[word2]--;
+
+                    if (random_boolean) {
+                        this.tokensPerTopic[nextToken.topic]--;
+                        docTopicCounts[nextToken.topic]--;
+                        if (!currentWordTopicCounts[token.topic]) {
+                            currentWordTopicCounts[token.topic] = 0;
+                            }
+                        currentWordTopicCounts[ token.topic ]+=1;
+                        token.word = curBigram;
+                        tempTokens.push(token);
+                    }
+                    else {
+                        this.tokensPerTopic[token.topic]--;
+                        docTopicCounts[token.topic]--;
+                        if (!currentWordTopicCounts[nextToken.topic]) {
+                            currentWordTopicCounts[nextToken.topic] = 0;
+                            }
+                        currentWordTopicCounts[ nextToken.topic ]+=1;
+                        nextToken.word = curBigram;
+                        tempTokens.push(nextToken);
+                    }
+                    skipNext = true;
+                }
+                else {
+                    tempTokens.push(token)
+                    }}
+            }}
+            currentDoc.tokens = tempTokens;
+        })
+    }
+
+    removeBigram = () => {
+        console.log("removing Bigrams")
+        for (let word1 in this.finalBigram) {
+            for (let word2 in this.finalBigram[word1]) {
+                this.removeBigramHelper(word1, word2);
+            }
+        }
+        this.sortTopicWords();
+    }
+
+    removeBigramHelper = (word1, word2) => {
+        var curBigram = word1+"_"+word2
+        delete this.wordTopicCounts[curBigram];
+        delete this.vocabularyCounts[curBigram];
+        this._vocabularySize--;
+        
+        this.documents.forEach(( currentDoc, i ) => {
+            var docTopicCounts = currentDoc.topicCounts;
+            var tempTokens = [];
+            for (var position = 0; position < currentDoc.tokens.length; position++) {
+                var token = currentDoc.tokens[position];
+                if (token.word == curBigram) {
+                    this.wordTopicCounts[word1][token.topic]++;
+                    this.wordTopicCounts[word2][token.topic]++;
+                    this.vocabularyCounts[word1]++;
+                    this.vocabularyCounts[word2]++;
+                    docTopicCounts[token.topic]++;
+                    token.word = word1;
+                    token.isStopword = this.stopwords[word1];
+                    tempTokens.push(token);
+                    let isStopword = this.stopwords[word2];
+                    tempTokens.push({"word":word2, "topic":token.topic, "isStopword":isStopword });
+                }
+                else {
+                    tempTokens.push(token);
+                    }
+            }
+            
+            currentDoc.tokens = tempTokens;
+        })
     }
 
     /**
