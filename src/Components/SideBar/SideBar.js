@@ -20,16 +20,19 @@ const TopicBox = ({
     return (
         <div id="topics" className="sidebox">
             {/* Pin and Hide buttons */}
-            <div className={ // topicbar color change if selected or hidden
-                (topNum === selectedTopic) ? 
-                    "topicbar topicbar-selected"
-                    :
-                    (topicVisibility[topNum] === "hidden" ?
-                        "topicbar topicbar-hidden"
+            <div 
+                className={ // topicbar color change if selected or hidden
+                    (topNum === selectedTopic) ? 
+                        "topicbar topicbar-selected"
                         :
-                        "topicbar"
-                    )
-            }>
+                        (topicVisibility[topNum] === "hidden" ?
+                            "topicbar topicbar-hidden"
+                            :
+                            "topicbar"
+                        )
+                }
+                onClick={() => toggleTopicDocuments(topNum)}
+            >
                 {/* Topic label */}
                 <div style={{color: (topNum === selectedTopic) ? "white" : "black"}}>
                     {`Topic ${topNum}`}
