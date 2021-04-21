@@ -62,7 +62,7 @@ class LDAModel {
 
         this.topicDocCounts = [];
 
-        // /*/
+        // parameters used for the bigram option
         this.bigram = false;
         this.bigramInitialized = false;
         this.bigramCount = {};
@@ -72,7 +72,7 @@ class LDAModel {
         this.totalBigramCount = 0;
         this.finalBigram = {};
         this.finalBigramRev = {};
-        this.bigramThreshold = 10.828; // Probability exceeding critical value 0.001
+        this.bigramThreshold = 10.828; // Threshold for exceeding critical value 0.001
 
         // Array of dictionaries with keys 
         // {"originalOrder", "id", "date", "originalText", "tokens", "topicCounts", "metadata"}
@@ -192,7 +192,6 @@ class LDAModel {
             this._parseDoc(doc);
         
             this.sortTopicWords();
-            console.log(this.documents[1].tokens)
         }
     }
 
@@ -388,7 +387,6 @@ class LDAModel {
         }
 
     sortTopicWords() {
-        console.log("sortingTopicWords")
             this.topicWordCounts = [];
             for (let topic = 0; topic < this.numTopics; topic++) {
                 this.topicWordCounts[topic] = [];
@@ -491,13 +489,12 @@ class LDAModel {
         return this._memoMaxDocTime
     }
 
-    // /*/
     /**
      * @summary scores bigrams according to chi-squared test and total frequency
      * and adds to finalBigram if deemed valid.
+     * https://tedboy.github.io/nlps/_modules/nltk/metrics/association.html#BigramAssocMeasures.chi_sq
      */
     scoreBigram() {
-        console.log("running score")
         var tempFinalBigram = {};
         var tempFinalBigramRev = {};
         for (var word1 in this.bigramCount){
@@ -667,15 +664,12 @@ class LDAModel {
     _hyperTune = (tune) => {
         if (this.modelIsRunning == false)
         this._changeAlpha = tune;
-        console.log(this._changeAlpha)
     }
 
     /**
      * @summary Turns on/off Bigrams option
      */
      _changeBigramStatus = (bigramStatus) => {
-        console.log("bigram status is:")
-        console.log(bigramStatus)
         if (bigramStatus) {
             this.addBigram();
         }
@@ -683,8 +677,6 @@ class LDAModel {
             this.removeBigram();
         }
         this.bigram = bigramStatus;
-        console.log(this.vocabularyCounts["wife"])
-        console.log(this.documents[1].tokens)
     }
 
     /**
@@ -928,31 +920,26 @@ class LDAModel {
         }
 
         if (parametersSum < 0.0) { throw "sum: " + parametersSum; }
-        console.log("parameter changed")
         return parametersSum;
     }
 
     /**
      * @summary adds a word to model's stoplist
+     * if the bigram option is on, we add bigrams that contain the stopword as well.
      * @param {String} word the word to be added to stoplist
      */
     addStop = (word) => {  
             this.addStopHelper(word);
             if (this.bigram) {
                 for (let w in this.finalBigram[word]) {
-                    if (!this.stopwords[word+"_"+w]) {
-                        this.addStopHelper(word+"_"+w)
-                    }
+                    this.addStopHelper(word+"_"+w)
                 }
                 for (let w in this.finalBigramRev[word]) {
-                    if (!this.stopwords[w+"_"+word]) {
-                        this.addStopHelper(w+"_"+word)
-                    }
+                    this.addStopHelper(w+"_"+word)
                 }
             }
     }
 
-    // /*/
     /**
      * @summary adds a word to model's stoplist
      * @param {String} word the word to be added to stoplist
@@ -979,6 +966,7 @@ class LDAModel {
 
     /**
      * @summary removes a word from stoplist
+     * if the bigram option is on, we remove bigrams that contain the stopword as well.
      * @param {String} word the word to remove
      */
     removeStop = (word) => {
@@ -997,7 +985,6 @@ class LDAModel {
         }
     }
 
-    // /*/
     /**
      * @summary removes a word from stoplist
      * @param {String} word the word to remove
@@ -1028,7 +1015,6 @@ class LDAModel {
     }
 
     addBigram = () => {
-        console.log("addingBigrams")
         for (let word1 in this.finalBigram) {
             if (!this.stopwords[word1]){
             for (let word2 in this.finalBigram[word1]) {
@@ -1103,7 +1089,6 @@ class LDAModel {
     }
 
     removeBigram = () => {
-        console.log("removing Bigrams")
         for (let word1 in this.finalBigram) {
             for (let word2 in this.finalBigram[word1]) {
                 this.removeBigramHelper(word1, word2);
