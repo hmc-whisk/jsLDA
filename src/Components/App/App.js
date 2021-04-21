@@ -283,6 +283,28 @@ class App extends Component {
       .catch(err => this.state.ldaModel.ready(err, null, null));
   }
   
+   /**
+   * @summary Runs the document processing pipeline for bigrams
+   */
+    _initializeBigram = () => {
+      Promise.all([this.getDocsUpload()])
+        .then(([lines]) => {this.state.ldaModel._parseBigram(lines)})
+    }
+
+    /**
+   * @summary changes bigram status in ldamodel
+   */
+     _changeBigramStatus = (bigramStatus) => {
+       console.log("initailized?")
+       console.log(this.state.ldaModel.bigramInitialized)
+      if (!this.state.ldaModel.bigramInitialized) {
+        this._initializeBigram();
+      }
+      else {
+        this.state.ldaModel._changeBigramStatus(bigramStatus);
+      }
+      this.forceUpdate();
+    }
 
   /**
    * @summary This function is the callback for "input", it changes as we move the slider without releasing it.
@@ -375,6 +397,7 @@ class App extends Component {
           update = {this.state.update}
           modelIsRunning = {this.state.ldaModel.modelIsRunning}
           modelDataDLer = {this.state.modelDataDLer}
+          sortTopicWords = {this.state.ldaModel.sortTopicWords}
           />;
           
         break;
@@ -429,6 +452,7 @@ class App extends Component {
             updateNumTopics={this.onTopicsChange} 
             sweepParameter={this.state.sweepParameter}
             _hyperTune={this.state.ldaModel._hyperTune}
+            _bigrams = {this._changeBigramStatus}
             onChange={this.changeSweepAmount}
             stopButtonClick={this.state.ldaModel.stopSweeps}
             iter={this.state.ldaModel._completeSweeps}
@@ -441,6 +465,8 @@ class App extends Component {
             modelIsRunning = {this.state.ldaModel.modelIsRunning}
             onDefaultDocChange = {this.onDefaultDocChange}
             docName={this.state.docName}
+            optimizeValue = {this.state.ldaModel._changeAlpha}
+            bigramValue = {this.state.ldaModel.bigrams}
             />
 
       <div style={{display: "flex", flex: "1", overflow: "hidden"}}>
