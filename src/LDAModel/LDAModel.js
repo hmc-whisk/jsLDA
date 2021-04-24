@@ -561,6 +561,7 @@ class LDAModel {
         this._completeSweeps = 0;
         this._requestedSweeps = 0;
         this._maxTopicSaliency = new Array(numTopics);
+        this._documentTopicSmoothing = zeros(numTopics).fill(0.1);
 
         d3.select("#iters").text(this._completeSweeps);
         
