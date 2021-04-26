@@ -30,17 +30,19 @@ class CustomTokenizer extends Component {
 
     render() {
         return (
-            <div>
-            <input onChange={this.handleChange} id="regex" value={this.state.inputRegex} />
+            <div className="upload" style={{padding: "10px"}}>
+                <h3>Customize Tokenization</h3>
 
-            <button 
-                type="submit" 
-                id="submitRegex" 
-                className="darkButton"
-                onClick={this.handleSubmit}
-            >
-                Change Tokenizer
-            </button>
+                <input onChange={this.handleChange} id="regex" value={this.state.inputRegex} />
+                <button 
+                    type="submit" 
+                    id="submitRegex" 
+                    className="darkButton"
+                    onClick={this.handleSubmit}
+                    style={{marginLeft: "5px"}}
+                >
+                    Change Tokenizer
+                </button>
 
             </div>
         );
