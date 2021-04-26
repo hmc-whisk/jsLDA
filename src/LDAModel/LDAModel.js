@@ -82,6 +82,18 @@ class LDAModel {
 
     static DOC_SORT_SMOOTHING = 10.0;
 
+    get tokenRegex() {
+        return this._wordPattern;
+    }
+
+    setTokenRegex = (newRegex) => {
+        console.log(`setting tokenizer to ${newRegex.xregexp.source}`);
+        this._wordPattern = newRegex; 
+        console.log(this._wordPattern.xregexp.source);
+        this.updateWebpage();
+    }
+
+
     /**
      * Used to set the type of file LDAModel will
      * treat a documents file as
@@ -122,6 +134,7 @@ class LDAModel {
         this.vocabularyCounts = {};
         this.sortVocabByTopic = false;
         this._specificityScale = d3.scaleLinear().domain([0,1]).range(["#ffffff", "#99d8c9"]);
+        // this._wordPattern = XRegExp("\\p{L}(\\p{P}?\\p{L})+", "g"); // ?
         this.stopwords = {};
         this._completeSweeps = 0;
         this._requestedSweeps = 0;
@@ -232,7 +245,10 @@ class LDAModel {
                 "" : 
                 fields[columnInfo.date_tag];
             var text = fields[columnInfo.text];
-            
+            if (i == 1) { //
+                console.log(text);
+                console.log(text.toLowerCase().match(this._wordPattern));
+            }
             let tokens = [];
             var rawTokens = text.toLowerCase().match(this._wordPattern);
             if (rawTokens == null) { continue; }
@@ -245,6 +261,7 @@ class LDAModel {
             
                 var isStopword = this.stopwords[word];
                 if (isStopword) {
+                    console.log(word); //
                     // Record counts for stopwords, but nothing else
                     if (! this.vocabularyCounts[word]) {
                     this.vocabularyCounts[word] = 1;
