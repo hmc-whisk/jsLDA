@@ -129,6 +129,18 @@ class App extends Component {
   }
 
   /**
+   * @summary Change regex tokenizer and update model
+   */
+  onTokenRegexChange = (inputRegex) => {
+    this.state.ldaModel.setTokenRegex(inputRegex);
+    console.log(this.state.ldaModel._wordPattern.xregexp.source)
+    this.queueLoad();
+    // Promise.all([this.getStoplistUpload(),this.getDocsUpload()])
+    //   .then(([stops, lines]) => {this.state.ldaModel.ready(null, stops, lines)})
+    //   .catch(err => this.state.ldaModel.ready(err, null, null));
+  }
+
+  /**
    * @summary Load in new default document
    */
   onDefaultDocChange = (event) => {
@@ -442,6 +454,8 @@ class App extends Component {
             onModelUpload={this.onModelUpload}
             onDefaultDocChange = {this.onDefaultDocChange}
             docName={this.state.docName}
+            tokenRegex={this.state.ldaModel.tokenRegex}
+            changeTokenRegex={this.onTokenRegexChange}
             />
 
       <div style={{display: "flex", flex: "1", overflow: "hidden"}}>
