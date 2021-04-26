@@ -133,11 +133,7 @@ class App extends Component {
    */
   onTokenRegexChange = (inputRegex) => {
     this.state.ldaModel.setTokenRegex(inputRegex);
-    console.log(this.state.ldaModel._wordPattern.xregexp.source)
     this.queueLoad();
-    // Promise.all([this.getStoplistUpload(),this.getDocsUpload()])
-    //   .then(([stops, lines]) => {this.state.ldaModel.ready(null, stops, lines)})
-    //   .catch(err => this.state.ldaModel.ready(err, null, null));
   }
 
   /**

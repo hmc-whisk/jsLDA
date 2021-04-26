@@ -14,7 +14,8 @@ class CustomTokenizer extends Component {
         })
     }
 
-    handleSubmit = () => {
+    handleSubmit = (e) => {
+        e.preventDefault();
         let newRegex;
         try {
             newRegex = XRegExp(this.state.inputRegex, "g");

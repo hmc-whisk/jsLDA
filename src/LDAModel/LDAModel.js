@@ -89,7 +89,6 @@ class LDAModel {
     setTokenRegex = (newRegex) => {
         console.log(`setting tokenizer to ${newRegex.xregexp.source}`);
         this._wordPattern = newRegex; 
-        console.log(this._wordPattern.xregexp.source);
         this.updateWebpage();
     }
 
@@ -245,10 +244,6 @@ class LDAModel {
                 "" : 
                 fields[columnInfo.date_tag];
             var text = fields[columnInfo.text];
-            if (i == 1) { //
-                console.log(text);
-                console.log(text.toLowerCase().match(this._wordPattern));
-            }
             let tokens = [];
             var rawTokens = text.toLowerCase().match(this._wordPattern);
             if (rawTokens == null) { continue; }
@@ -261,7 +256,6 @@ class LDAModel {
             
                 var isStopword = this.stopwords[word];
                 if (isStopword) {
-                    console.log(word); //
                     // Record counts for stopwords, but nothing else
                     if (! this.vocabularyCounts[word]) {
                     this.vocabularyCounts[word] = 1;
