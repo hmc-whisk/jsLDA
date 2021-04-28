@@ -118,7 +118,7 @@ class TopBar extends React.Component {
                         <div style={{margin:"15px"}}>
                             <div className="configMenu"> 
                                 <h3> Topics </h3>
-                                <div style={{padding: "0 10px"}}>
+                                <div>
                                     <h5> Set number of topics: </h5>
                                     <NumTopicSlider
                                         onChange={this.updateNumDisplay}

@@ -12,7 +12,7 @@ class NumTopicSlider extends React.Component {
 
     render() {
         return (
-            <div style={{display: "flex", justifyContent: "center"}}>
+            <div style={{display: "flex", justifyContent: "center", margin: "10px"}}>
                 <span id="num_topics_control">
                     Train with 
                     <input id="num-topics-input" type="range" name="topics" 
