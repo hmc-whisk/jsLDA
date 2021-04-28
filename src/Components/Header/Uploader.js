@@ -29,7 +29,7 @@ import {confirmReset} from '../../funcs/utilityFunctions'
 export function Uploader(props) {
     return (
         <div>
-        <div className="upload">
+        <div className="configMenu">
             <div style={{padding:'5px'}}>
             <h3>Data Configuration</h3>
             <div>
@@ -64,7 +64,7 @@ export function Uploader(props) {
         </div>
         </div>
 
-        <div className="upload">
+        <div className="configMenu">
         <div style={{padding:'5px'}}>
         <h3>Model Configuration</h3>
         <div>

@@ -116,7 +116,7 @@ class TopBar extends React.Component {
                 displayElement={
                     <div style={this.helpTextStyle}>
                         <div style={{margin:"15px"}}>
-                        <div className="upload"> 
+                        <div className="configMenu"> 
                         <div style={{padding:'5px'}}>
                         <h3 > Topic Configuration</h3>
                         <h4 > Set number of topics</h4>

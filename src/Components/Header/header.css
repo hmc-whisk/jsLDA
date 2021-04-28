@@ -32,14 +32,14 @@
     margin-left: 10px;
 }  
 
-div.upload { 
+div.configMenu { 
     background-color: var(--color1); 
     /* float: right;  */
     padding-right: 20px; 
     border-radius: 10px; 
     margin: 5px; 
   }
-div.upload div { margin: 8px; }
+div.configMenu div { margin: 8px; }
   
 div.top { 
     background-color: var(--color1); 
