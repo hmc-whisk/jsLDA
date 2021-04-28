@@ -38,8 +38,9 @@ div.configMenu {
     padding-right: 20px; 
     border-radius: 10px; 
     margin: 5px; 
+    padding: 10px;
   }
-div.configMenu div { margin: 8px; }
+/* div.configMenu div { margin: 8px; } */
   
 div.top { 
     background-color: var(--color1); 

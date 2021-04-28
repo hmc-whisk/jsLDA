@@ -116,46 +116,43 @@ class TopBar extends React.Component {
                 displayElement={
                     <div style={this.helpTextStyle}>
                         <div style={{margin:"15px"}}>
-                        <div className="configMenu"> 
-                        <div style={{padding:'5px'}}>
-                        <h3 > Topic Configuration</h3>
-                        <h4 > Set number of topics</h4>
+                            <div className="configMenu"> 
+                                <h3> Topics </h3>
+                                <div style={{padding: "0 10px"}}>
+                                    <h5> Set number of topics: </h5>
+                                    <NumTopicSlider
+                                        onChange={this.updateNumDisplay}
+                                        sliderValue={this.state.sliderValue}
+                                        updateNumTopics={this.confirmUpdate}
+                                        onInput={(event) => this.updateNumDisplay(event)}
+                                        modelIsRunning={this.props.modelIsRunning}
+                                    />
 
-                        <NumTopicSlider
-                        onChange={this.updateNumDisplay}
-                        sliderValue={this.state.sliderValue}
-                        updateNumTopics={this.confirmUpdate}
-                        onInput={(event) => this.updateNumDisplay(event)}
-                        modelIsRunning={this.props.modelIsRunning}
-                        />
+                                    <h6>
+                                        <Checkbox
+                                            checked={this.checked}
+                                            onChange={this.handleCheck}
+                                            inputProps={{ 'aria-label': 'primary checkbox' }}
+                                            color="primary"
+                                            style={{padding: "0"}}
+                                        />
+                                        Optimize topic concentrations
+                                    </h6>
 
-                        <br/>
-                        </div>
-                        <h4> 
-                        
-                        <Checkbox
-                        checked={this.checked}
-                        onChange={this.handleCheck}
-                        inputProps={{ 'aria-label': 'primary checkbox' }}
-                        color="primary"
-                        />
-                        Optimize topic concentrations</h4>
-                        <i style={{padding:'10px'}}>Optimized topic correlation allow the model to account for </i>
-                        <i style={{padding:'10px'}}>different proportions of topics in each documents </i>
-                        <br/>
-                        <br/>
-
-                        </div>
+                                    <i> Optimized topic correlation allow the model to account for </i>
+                                    <i> different proportions of topics in each documents </i>
+                                </div>
+                            </div>
 
                         <Uploader 
-                            onDocumentFileChange = {this.props.onDocumentFileChange}
-                            onStopwordFileChange = {this.props.onStopwordFileChange}
+                            onDocumentFileChange={this.props.onDocumentFileChange}
+                            onStopwordFileChange={this.props.onStopwordFileChange}
                             onModelFileChange={this.props.onModelFileChange}
                             onFileUpload={this.props.onFileUpload}
                             onModelUpload={this.props.onModelUpload}
-                            modelIsRunning = {this.props.modelIsRunning}
-                            onDefaultDocChange = {this.props.onDefaultDocChange}
-                            docName = {this.props.docName}
+                            modelIsRunning={this.props.modelIsRunning}
+                            onDefaultDocChange={this.props.onDefaultDocChange}
+                            docName={this.props.docName}
                         />
 
                         <CustomTokenizer
