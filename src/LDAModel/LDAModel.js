@@ -133,7 +133,6 @@ class LDAModel {
         this.vocabularyCounts = {};
         this.sortVocabByTopic = false;
         this._specificityScale = d3.scaleLinear().domain([0,1]).range(["#ffffff", "#99d8c9"]);
-        // this._wordPattern = XRegExp("\\p{L}(\\p{P}?\\p{L})+", "g"); // ?
         this.stopwords = {};
         this._completeSweeps = 0;
         this._requestedSweeps = 0;
