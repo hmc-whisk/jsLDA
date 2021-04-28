@@ -82,6 +82,17 @@ class LDAModel {
 
     static DOC_SORT_SMOOTHING = 10.0;
 
+    get tokenRegex() {
+        return this._wordPattern;
+    }
+
+    setTokenRegex = (newRegex) => {
+        console.log(`setting tokenizer to ${newRegex.xregexp.source}`);
+        this._wordPattern = newRegex; 
+        this.updateWebpage();
+    }
+
+
     /**
      * Used to set the type of file LDAModel will
      * treat a documents file as
@@ -232,7 +243,6 @@ class LDAModel {
                 "" : 
                 fields[columnInfo.date_tag];
             var text = fields[columnInfo.text];
-            
             let tokens = [];
             var rawTokens = text.toLowerCase().match(this._wordPattern);
             if (rawTokens == null) { continue; }
