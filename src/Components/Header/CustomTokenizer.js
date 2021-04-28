@@ -32,7 +32,7 @@ class CustomTokenizer extends Component {
     render() {
         return (
             <div className="configMenu">
-                <h3>Customize Tokenization</h3>
+                <h3>Tokenization</h3>
                 <div>
                     <input onChange={this.handleChange} id="regex" value={this.state.inputRegex} />
                     <button 
