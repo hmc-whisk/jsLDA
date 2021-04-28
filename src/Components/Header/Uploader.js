@@ -31,8 +31,8 @@ export function Uploader(props) {
         <div>
         <div className="configMenu">
             <h3>Data Configuration</h3>
-            <div style={{padding: "0 10px"}}>
-                <form onSubmit={(event) => { confirmReset(event, props.onFileUpload); }} style={{padding: "0"}}>
+            <div>
+                <form onSubmit={(event) => { confirmReset(event, props.onFileUpload); }}>
                     <label>Default Documents: </label>
                     <select id="defaultDoc" onChange={(event) => props.onDefaultDocChange(event)} value={props.docName}>
                         <option value="Movie Plots">Movie Plots</option>
@@ -42,9 +42,10 @@ export function Uploader(props) {
                     <input type="submit" value="Reset" className="darkButton" disabled={props.modelIsRunning} />
                 </form>
 
-                <form onSubmit={(event) => { confirmReset(event, props.onFileUpload); }} style={{padding: "0"}}>
+                <br />
+                <form onSubmit={(event) => { confirmReset(event, props.onFileUpload); }}>
                     <h5> Or use a custom collection: </h5>
-                    <div style={{margin: "0 10px"}}>
+                    <div className="fileInput">
                         <label htmlFor="docs-file-input">Documents: </label>
                         <input id="docs-file-input" type="file" 
                             onChange={(event) => props.onDocumentFileChange(event)} size="10" />
@@ -60,17 +61,15 @@ export function Uploader(props) {
 
         <div className="configMenu">
             <h3>Model Configuration</h3>
-            <div style={{padding: "0 10px"}}>
+            <div>
                 <h5> Upload a previously generated model: </h5>
                 <form onSubmit={(event) => { confirmReset(event, props.onModelUpload); }}>
-                <div style={{margin: "0 10px"}}>
+                <div className="fileInput">
                     <label htmlFor="saved-model-input">Model: </label>
                     <input id="saved-model-input" type="file" 
                         onChange={(event) => props.onModelFileChange(event)} size="10" />
                 </div>
-                <div>
-                    <input type="submit" id="load-inputs" value="Upload" className="darkButton" disabled={props.modelIsRunning} />
-                </div>
+                <input type="submit" id="load-inputs" value="Upload" className="darkButton" disabled={props.modelIsRunning} />
                 </form>
             </div>
         </div>
