@@ -30,7 +30,7 @@ export function Uploader(props) {
     return (
         <div>
         <div className="configMenu">
-            <h3>Data Configuration</h3>
+            <h3>Data Upload</h3>
             <div>
                 <form onSubmit={(event) => { confirmReset(event, props.onFileUpload); }}>
                     <label>Default Documents: </label>
@@ -60,7 +60,7 @@ export function Uploader(props) {
         </div>
 
         <div className="configMenu">
-            <h3>Model Configuration</h3>
+            <h3>Model Upload</h3>
             <div>
                 <h5> Upload a previously generated model: </h5>
                 <form onSubmit={(event) => { confirmReset(event, props.onModelUpload); }}>
