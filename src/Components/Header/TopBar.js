@@ -6,9 +6,6 @@ import Uploader from './Uploader';
 import CustomTokenizer from './CustomTokenizer';
 import './header.css';
 
-var backColor = getComputedStyle(document.documentElement).getPropertyValue('--color3');
-
-
 class TopBar extends React.Component {
 
     constructor(props) {
@@ -99,7 +96,7 @@ class TopBar extends React.Component {
       };
 
     helpTextStyle = {
-        backgroundColor: backColor,
+        backgroundColor: "var(--color3)",
         position: "fixed",
         top: "10%",
         left: "30%",
