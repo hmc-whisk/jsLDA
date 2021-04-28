@@ -31,7 +31,7 @@ class CustomTokenizer extends Component {
 
     render() {
         return (
-            <div className="upload" style={{padding: "10px"}}>
+            <div className="configMenu" style={{padding: "10px"}}>
                 <h3>Customize Tokenization</h3>
 
                 <input onChange={this.handleChange} id="regex" value={this.state.inputRegex} />
