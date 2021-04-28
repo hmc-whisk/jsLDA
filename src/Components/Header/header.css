@@ -31,7 +31,7 @@
     margin-bottom: 0px;
     margin-left: 10px;
 }  
-/* .upload duplicated in pages.css */
+
 div.upload { 
     background-color: var(--color1); 
     /* float: right;  */
