@@ -26,6 +26,13 @@ import {confirmReset} from '../../funcs/utilityFunctions'
  *      - The function to be called when
  *        the model upload button is pressed
  */
+
+// returns true if the input has a file selected, false otherwise
+const isFileAdded = (inputId) => {
+    let inp = document.getElementById(inputId);
+    return inp && inp.files.length;
+}
+
 export function Uploader(props) {
     return (
         <div>
@@ -54,7 +61,7 @@ export function Uploader(props) {
                         <input id="stops-file-input" type="file" 
                             onChange={(event) => props.onStopwordFileChange(event)} size="10" />
                     </div>
-                    <input type="submit" id="load-inputs" value="Upload" className="darkButton" disabled={props.modelIsRunning} />
+                    <input type="submit" id="load-inputs" value="Upload" className="darkButton" disabled={props.modelIsRunning || !isFileAdded("docs-file-input")} />
                 </form>
             </div>
         </div>
@@ -69,7 +76,7 @@ export function Uploader(props) {
                     <input id="saved-model-input" type="file" 
                         onChange={(event) => props.onModelFileChange(event)} size="10" />
                 </div>
-                <input type="submit" id="load-inputs" value="Upload" className="darkButton" disabled={props.modelIsRunning} />
+                <input type="submit" id="load-inputs" value="Upload" className="darkButton" disabled={props.modelIsRunning || !isFileAdded("saved-model-input")} />
                 </form>
             </div>
         </div>
