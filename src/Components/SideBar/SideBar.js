@@ -42,7 +42,7 @@ const TopicBox = ({
                 <div>
                 <button
                     type="button"
-                    onClick={() => toggleVisibility(topNum, "pin")}
+                    onClick={(e) => toggleVisibility(e, topNum, "pin")}
                     className="topic-button"
                 >
                     { topicVisibility[topNum] === "pinned" ? 
@@ -55,7 +55,7 @@ const TopicBox = ({
                 {/* Hide/Unhide button */}
                 <button
                     type="button"
-                    onClick={() => toggleVisibility(topNum, "hide")}
+                    onClick={(e) => toggleVisibility(e, topNum, "hide")}
                     className="topic-button"
                 >
                     { topicVisibility[topNum] === "hidden" ? 
@@ -145,7 +145,9 @@ class SideBar extends Component {
     // update topic visibility according to UI action with
     // pin/hide buttons
     // also updates topicVisibility in ldaModel
-    toggleTopicVisibility = (topNum, toggledButton) => {
+    toggleTopicVisibility = (event, topNum, toggledButton) => {
+        event.stopPropagation();
+
         let dispOrderCopy = [...this.state.displayOrder];
         dispOrderCopy = dispOrderCopy.filter(tn => tn !== topNum);
         
@@ -218,7 +220,6 @@ class SideBar extends Component {
         if (prevProps.numTopics !== this.props.numTopics 
             || (prevProps.topicWordCounts.length === 0 && this.props.topicWordCounts.length > 0)) {
             if (this.state.topicWords !== null) { // already initialized once so must clear annotations
-                console.log(this.state);
                 this.clearAnnotations();
             }
             
