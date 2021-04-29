@@ -61,7 +61,13 @@ export function Uploader(props) {
                         <input id="stops-file-input" type="file" 
                             onChange={(event) => props.onStopwordFileChange(event)} size="10" />
                     </div>
-                    <input type="submit" id="load-inputs" value="Upload" className="darkButton" disabled={props.modelIsRunning || !isFileAdded("docs-file-input")} />
+                    <input 
+                        type="submit" 
+                        id="load-inputs" 
+                        value="Upload" 
+                        className="darkButton" 
+                        disabled={props.modelIsRunning || (!isFileAdded("docs-file-input") && !isFileAdded("stops-file-input"))} 
+                    />
                 </form>
             </div>
         </div>
