@@ -244,7 +244,7 @@ class LDAModel {
                 fields[columnInfo.date_tag];
             var text = fields[columnInfo.text];
             let tokens = [];
-            var rawTokens = text.toLowerCase().match(this._wordPattern);
+            var rawTokens = this.getRawTokens(text)
             if (rawTokens == null) { continue; }
             let topicCounts = zeros(this.numTopics);
             rawTokens.forEach((word) => {
@@ -449,6 +449,58 @@ class LDAModel {
         })
         this._memoMaxDocTime = new Date(maxTime)
         return this._memoMaxDocTime
+    }
+
+    /**
+     * A function for getting the location of tokens in a string
+     * @param {String} text the document object you'd like to parse
+     * @returns An iterable set of match Objects with tokens that
+     * match LDAModel.tokenRegex. match[0] yields the string matched
+     * and match.index yields the location in the text where it matched
+     */
+    getRawTokensWithIndices(text) {
+        let tokens = text.toLowerCase().matchAll(this.tokenRegex)
+        return tokens
+    }
+
+    /**
+     * 
+     * @param {String} text 
+     * @returns An array of strings in text that match LDAModel.tokenRegex
+     */
+    getRawTokens(text) {
+        return text.toLowerCase().match(this.tokenRegex)
+    }
+
+    /**
+     * Get the salience and location of every token in some text
+     * @param {String} text the text to parse
+     * @param {Number} topic the topic to get saliency for
+     * @returns {[{string:String,salience:Number,startIndex:Number}]} 
+     */
+    textToTokenSaliences(text,topic) {
+        const tokensItter = this.getRawTokensWithIndices(text)
+        const tokens = [...tokensItter]
+        return tokens.map((token) => {
+            return {
+                string: token[0],
+                salience: this.topicSaliency(token[0],topic),
+                startIndex: token.index
+            }
+        })
+    }
+
+    /**
+     * A function to get the average token salience in a text
+     * @param {String} text text to parse
+     * @param {Number} topic topic to get salience of
+     * @returns {Number} the average token salience in text for topic
+     */
+    textSalience(text,topic) {
+        const tokensSals = this.textToTokenSaliences(text,topic)
+        const addSal = (sumSals, token) => (token.salience+sumSals)
+        const totalSal = tokensSals.reduce(addSal,0)
+        return totalSal/tokensSals.length
     }
 
     /**
