@@ -50,45 +50,19 @@ class TopicDoc extends Component {
      */
     get sortedDocumentsSalient() {
         let sortedDocuments = this.props.ldaModel.documents;
-        let getWordTopicValue = this.getWordTopicValue;
         // Return default order if no topic is selected
         if (this.props.ldaModel.selectedTopic === -1) return sortedDocuments;
 
-        sortedDocuments = sortedDocuments.map(function (doc) {
-            let words = doc.originalText.split(" ");
-            let sal = words.map((word) => getWordTopicValue(word));
-            let total = sal.length;
-            let totsaliency = sal.reduce((a, b) => a + b, 0);
-            doc["score"] = totsaliency/total;
-            return doc;
-        });
+        sortedDocuments = sortedDocuments.map((doc) => { 
+            doc["score"] = this.props.ldaModel.textSalience(
+                                doc.originalText,
+                                this.props.ldaModel.selectedTopic)
+            return doc
+        })
         sortedDocuments.sort(function(a, b) {
             return b.score - a.score;
         });
         return sortedDocuments;
-    }
-
-
-    /**
-     * @summary returns a number indicating the prevalence 
-     * of w in the selected topic
-     * @param {String} w Word to get topic value of
-     */
-    getWordTopicValue = (w) => {
-        w = this.stripWord(w);
-        let salience = this.props.ldaModel.topicSaliency(w,this.props.ldaModel.selectedTopic);
-        if(salience < 0) {salience = 0};
-        return salience;
-    }
-
-    /**
-     * @summary makes a word only lowercase letters
-     * @param {String} w word to strip
-     */
-    stripWord = (w) => {
-        w = w.toLocaleLowerCase();
-        w = w.replace(/[^a-zA-Z]/g,"");
-        return w;
     }
 
     get lastPage() {
