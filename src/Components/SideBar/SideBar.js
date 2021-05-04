@@ -1,8 +1,11 @@
 import React, { Component } from 'react'; 
 import * as d3 from 'd3';
-import {topNWords} from '../funcs/utilityFunctions';
+import {topNWords} from '../../funcs/utilityFunctions';
 
 import { PinAngle, PinAngleFill, EyeSlash, EyeSlashFill } from 'react-bootstrap-icons';
+import Spinner from 'react-bootstrap/Spinner';
+import './sidebar.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 const TopicBox = ({
     topNum,
@@ -17,16 +20,19 @@ const TopicBox = ({
     return (
         <div id="topics" className="sidebox">
             {/* Pin and Hide buttons */}
-            <div className={ // topicbar color change if selected or hidden
-                (topNum === selectedTopic) ? 
-                    "topicbar topicbar-selected"
-                    :
-                    (topicVisibility[topNum] === "hidden" ?
-                        "topicbar topicbar-hidden"
+            <div 
+                className={ // topicbar color change if selected or hidden
+                    (topNum === selectedTopic) ? 
+                        "topicbar topicbar-selected"
                         :
-                        "topicbar"
-                    )
-            }>
+                        (topicVisibility[topNum] === "hidden" ?
+                            "topicbar topicbar-hidden"
+                            :
+                            "topicbar"
+                        )
+                }
+                onClick={() => toggleTopicDocuments(topNum)}
+            >
                 {/* Topic label */}
                 <div style={{color: (topNum === selectedTopic) ? "white" : "black"}}>
                     {`Topic ${topNum}`}
@@ -211,7 +217,10 @@ class SideBar extends Component {
         // if topicWordCounts just finished loading, call initTopics
         if (prevProps.numTopics !== this.props.numTopics 
             || (prevProps.topicWordCounts.length === 0 && this.props.topicWordCounts.length > 0)) {
-            this.clearAnnotations();
+            if (this.state.topicWords !== null) { // already initialized once so must clear annotations
+                console.log(this.state);
+                this.clearAnnotations();
+            }
             
             this.initTopics(this.props.numTopics, this.props.topicWordCounts);
         }
@@ -231,8 +240,9 @@ class SideBar extends Component {
 
     render() {
         const { changeAnnotation, topicVisibility, selectedTopic } = this.props;
-
         return (
+            this.state.topicWords
+            ?
             <div className="sidebar">
                 <form id="topic-annotations">
                 {
@@ -251,6 +261,14 @@ class SideBar extends Component {
                     )
                 }
                 </form>
+            </div>
+            :
+            <div className="sidebar">
+                <Spinner 
+                    animation="grow" 
+                    style={{width: "50px", height: "50px", marginLeft: "45%"}}
+                    variant="secondary"
+                />
             </div>
         )
     }

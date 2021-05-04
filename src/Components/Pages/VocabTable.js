@@ -1,16 +1,15 @@
 import React, { Component } from 'react'; 
 import * as d3 from 'd3';
+import './pages.css';
 
 class VocabTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
           displayingStopwords: false,
+          searchText: "",
         };
-        
-      }
-
-      
+      }      
     
 
     specificityScale = d3.scaleLinear().domain([0,1]).range([
@@ -32,6 +31,11 @@ class VocabTable extends Component {
       let addStop = this.props.addStop;
       let removeStop = this.props.removeStop;
       let sortTopicWords = this.props.sortTopicWords;
+
+      // TL: SEARCH 
+      if (this.state.searchText !== "") {
+        wordFrequencies = wordFrequencies.filter(d => d.word.includes(this.state.searchText));
+      }
 
       wordFrequencies.forEach(function (d) {
         var isStopword = stopwords[d.word];
@@ -135,6 +139,10 @@ class VocabTable extends Component {
       });
 
     }
+
+    handleChange = (e) => {
+      this.setState({ searchText: e.target.value })
+    }
   
     componentDidMount() {
       this.vocabTable();
@@ -155,18 +163,56 @@ class VocabTable extends Component {
 
     render() {
         return (
-            <div id="vocab-page" className="page">
-                <div className="help">Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0.
+            <div 
+              id="vocab-page" 
+              style={{ 
+                flex: "1",
+                display: "flex",
+                marginTop: "20px", 
+                overflow: "hidden",
+              }}
+            className="page">
+              <div style={{
+                flex: "1", 
+                marginTop: "10px", 
+                height: "100%", 
+                overflow: "hidden", 
+                display: "flex", 
+                flexDirection: "column",
+                alignItems: "flex-start",
+                width: "90%",
+                padding: "10px 10px 10px 10px"
+              }}>
+                <input 
+                  type="text" 
+                  placeholder="Search Vocab" 
+                  onChange={this.handleChange} 
+                  style={{
+                    height: "30px",
+                    width: "320px", 
+                    borderRadius: "10px", 
+                    border: "1px var(--color1) solid",
+                    outline: "none",
+                  }}
+                />
+                <div style={{flex: "1", overflow: "auto"}}>
+                  <table id="vocab-table">
+                      <thead><tr><th>Word</th><th>Frequency</th><th>Topic Specificity</th><th>Stoplist</th></tr></thead>
+                      <tbody></tbody>
+                  </table>
                 </div>
-                <div className = "help">
-                  <button id="showStops" className = "lightButton">Show stopwords</button>
-                  <button id="sortVocabByTopic" className = "lightButton">Sort by topic</button>
+                </div>
+                
+                <div style={{display: "flex", flexDirection: "column", flex: "1"}}>
+                <div className="help">
+                  Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0.
+                </div>
+                <div className="help" style={{display: "flex", flexDirection: "column", flex: "1"}}>
+                  <button id="showStops" className="lightButton" style={{marginTop: "15px"}}>Show stopwords</button>
+                  <button id="sortVocabByTopic" className="lightButton" style={{marginTop: "15px"}}>Sort by topic</button>
                   {this.stopwordsDLButton}
                 </div>
-                <table id="vocab-table" className="center">
-                    <thead><tr><th>Word</th><th>Frequency</th><th>Topic Specificity</th><th>Stoplist</th></tr></thead>
-                    <tbody></tbody>
-                </table>
+              </div>
             </div>
         )
     }
@@ -174,9 +220,9 @@ class VocabTable extends Component {
     get stopwordsDLButton() {
       return (
           <>
-              <button id="stopword-dl" className = "lightButton"
+              <button id="stopword-dl" className="lightButton" style={{marginTop: "15px"}}
                   onClick={() => this.props.modelDataDLer.downloadStopwords()}>
-                  Download Stopwords 
+                  Download stopwords 
               </button>
           </>
       )

@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import React, { Component } from 'react'; 
 import {topNWords} from '../../funcs/utilityFunctions'
 import Tooltip from '../Tooltip';
+import './pages.css';
 
 /* This function will compute pairwise correlations between topics.
  * Unlike the correlated topic model (CTM) LDA doesn't have parameters

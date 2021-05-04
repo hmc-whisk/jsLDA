@@ -20,59 +20,60 @@ class DocView extends React.Component {
      * @summary The text of the document formatted with topic highlighting
      */
     get highlightedText() {
-        if(this.props.selectedTopic===-1) return this.props.document.originalText;
-        let words = this.props.document.originalText.split(" ");
-        let highlightedWords = words.map((word,i) => this.highlightWord(word,i))
-        return highlightedWords;
-    }
+        const topic = this.props.ldaModel.selectedTopic;
+        const originalText = this.props.document.originalText;
 
-    /**
-     * @summary makes a word only lowercase letters
-     * @param {String} w word to strip
-     */
-    stripWord(w) {
-        w = w.toLocaleLowerCase();
-        w = w.replace(/[^a-zA-Z]/g,"");
-        return w;
+        if(topic===-1) return originalText; // No topic selected
+
+        const tokens = this.props.ldaModel.textToTokenSaliences(originalText,topic)
+
+        // If no tokens found, just return text
+        if(tokens.length===0) return originalText;
+
+        return <>
+            {/* highlighted text before first token */}
+            {originalText.slice(0,tokens[0].startIndex)}
+            {/* For every token, add highlighted token and 
+            then add the text between this token and the next */}
+            {tokens.map((token,i) => {
+                const tokenEndIndex = token.startIndex + token.string.length
+                const originalString = originalText.slice(token.startIndex,tokenEndIndex)
+
+                // Next token index or end of originalString if last token
+                const nextTokenIndex = i === tokens.length-1 ? 
+                                       originalText.length : 
+                                       tokens[i+1].startIndex
+
+                const stringBetweenTokens = originalText.slice(tokenEndIndex,nextTokenIndex)
+                return <>
+                    {this.highlightWord(originalString,token.salience,i)}
+                    {stringBetweenTokens}
+                </>
+            })}
+        </>
     }
 
     /**
      * @summary Formats a word in jsx with it's topic value highlighting
      * @param {String} w the word to add highlighting to
+     * @param {Number} salience the 
      * @param key The key to be used in the element
      */
-    highlightWord(w, key) {
+    highlightWord(w, value, key) {
         return(
-            <span key = {key} style={this.getComputedStyle(w)}>{w + " "}</span>
+            <span key = {key} style={this.getComputedStyle(value)}>{w}</span>
         )
     }
 
     /**
      * @summary Creates a style object for w
-     * @param {String} w Word to be generate styling for
+     * @param {Number} value Value to be generate styling for
      */
-    getComputedStyle(w) {
-        let colorScale = d3.scaleLinear().domain([0, this.maxTopicValue])
+    getComputedStyle(value) {
+        let colorScale = d3.scaleLinear().domain([0, this.props.maxTopicValue])
             .range([DocView.minHighlight, DocView.maxHighlight]);
-        return {backgroundColor: colorScale(this.getWordTopicValue(w))}
+        return {backgroundColor: colorScale(value)}
     }
-
-    /**
-     * @summary returns a number indicating the prevalence 
-     * of w in the selected topic
-     * @param {String} w Word to get topic value of
-     */
-    getWordTopicValue(w) {
-        w = this.stripWord(w);
-        let salience = this.props.topicSaliency(w,this.props.selectedTopic);
-        if(salience < 0) {salience = 0};
-        return salience;
-    }
-
-    get maxTopicValue() {
-        return this.props.maxTopicSaliency;
-    }
-
 }
 
 export default DocView;
