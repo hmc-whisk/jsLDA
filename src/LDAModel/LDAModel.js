@@ -62,6 +62,18 @@ class LDAModel {
 
         this.topicDocCounts = [];
 
+        // parameters used for the bigram option
+        this.bigram = false;
+        this.bigramInitialized = false;
+        this.bigramCount = {};
+        this.bigramCountRev = {};
+        this.bigramWord1Count = {};
+        this.bigramWord2Count = {};
+        this.totalBigramCount = 0;
+        this.finalBigram = {};
+        this.finalBigramRev = {};
+        this.bigramThreshold = 10.828; // Threshold for exceeding critical value 0.001
+
         // Array of dictionaries with keys 
         // {"originalOrder", "id", "date", "originalText", "tokens", "topicCounts", "metadata"}
         this.documents = [];
@@ -247,6 +259,7 @@ class LDAModel {
             var rawTokens = this.getRawTokens(text)
             if (rawTokens == null) { continue; }
             let topicCounts = zeros(this.numTopics);
+
             rawTokens.forEach((word) => {
                 if (word !== "") {
                 var topic = Math.floor(Math.random() * (this.numTopics));
@@ -264,6 +277,7 @@ class LDAModel {
                     }
                 }
                 else {
+
                     this.tokensPerTopic[topic]++;
                     if (! this.wordTopicCounts[word]) {
                     this.wordTopicCounts[word] = {};
@@ -304,6 +318,97 @@ class LDAModel {
         }
 
     }
+
+    /**
+     * @summary Processes bigrams in documents
+     * @param docText {String} a string of a tsv or csv file
+     *  - With column names
+     *    - a "text" column with the document text is required
+     *    - an "id" column will be used for document ids
+     *    - a "tag" column will be used to sort/group documents by date
+     *    - all other columns are assumed to be metadata
+     * This function calls upon the documentType object member
+     * to determine whether docText is a csv or tsv. If it isn't
+     * "text/csv" then it will assume it is a tsv.
+     * The function acts to process through all potential bigrams
+     */
+    _parseBigram = (docText) => {
+        var parsedDoc
+        if(this.documentType === "text/csv") {
+            parsedDoc = d3.csvParseRows(docText);
+        } else {
+            parsedDoc = d3.tsvParseRows(docText);
+        }
+        
+        // Handle empty documents
+        if(parsedDoc.length===0){
+            alert("Document file is empty");
+            return;
+        }
+
+        let columnInfo = this._getColumnInfo(parsedDoc[0]);
+
+        // Handle no text column
+        if(columnInfo["text"] === -1) {
+            alert("No text column found in document file");
+            return;
+        }
+
+        for(let i = 1; i < parsedDoc.length; i++) {
+            let fields = parsedDoc[i];
+            // Set fields based on whether they exist
+            var text = fields[columnInfo.text];
+            
+            var rawTokens = text.toLowerCase().match(this._wordPattern);
+            if (rawTokens == null) { continue; }
+            var prevWord = ""; 
+
+            rawTokens.forEach((word) => {
+                if (word !== "") {
+                    if (word.length <= 2) { this.stopwords[word] = 1; }
+                
+                    var isStopword = this.stopwords[word];
+                    if (isStopword) {
+                        prevWord = "";
+                    }
+                    else {
+                        if (prevWord) {
+                            if (! this.bigramCount[prevWord]) {
+                            this.bigramCount[prevWord] = {};
+                            this.bigramWord1Count[prevWord] = 0;
+                            }
+
+                            if (! this.bigramCountRev[word]) {
+                                this.bigramCountRev[word] = {};
+                                }
+                            
+                            if (!this.bigramCount[prevWord][word]) {
+                                this.bigramCount[prevWord][word] = 0;
+                                }
+                            
+                            if (!this.bigramCountRev[word][prevWord]) {
+                                this.bigramCountRev[word][prevWord] = 0;
+                                }
+                            
+                            if (!this.bigramWord2Count[word]) {
+                                this.bigramWord2Count[word] = 0;
+                                }
+
+                            this.bigramCount[prevWord][word] += 1;
+                            this.bigramCountRev[word][prevWord] += 1;
+                            this.bigramWord1Count[prevWord] += 1;
+                            this.bigramWord2Count[word]+= 1;
+                            this.totalBigramCount += 1;
+                            }
+                    }
+                    prevWord = word;
+                }
+            });
+            }
+            this.scoreBigram();
+            this.bigramInitialized = true;
+            this._changeBigramStatus(true);
+        }
 
     sortTopicWords() {
             this.topicWordCounts = [];
@@ -452,6 +557,41 @@ class LDAModel {
     }
 
     /**
+     * @summary scores bigrams according to chi-squared test and total frequency
+     * and adds to finalBigram if deemed valid.
+     * https://tedboy.github.io/nlps/_modules/nltk/metrics/association.html#BigramAssocMeasures.chi_sq
+     */
+    scoreBigram() {
+        var tempFinalBigram = {};
+        var tempFinalBigramRev = {};
+        for (var word1 in this.bigramCount){
+            tempFinalBigram[word1] = {};
+            for (var word2 in this.bigramCount[word1]) {
+                var n_oo = this.totalBigramCount;
+                var n_ii = this.bigramCount[word1][word2];
+                var n_io = this.bigramWord1Count[word1];
+                var n_oi = this.bigramWord2Count[word2];
+
+                var score = n_oo *((n_ii*n_oo - n_io*n_oi)**2 /
+                        ((n_ii + n_io) * (n_ii + n_oi) * (n_io + n_oo) * (n_oi + n_oo)))
+
+             // check to see if more than 20 occurance in total
+                var scoreCheck = score > this.bigramThreshold;
+                var freqCheck = n_ii > 20;
+                if (scoreCheck && freqCheck) {
+                    tempFinalBigram[word1][word2] = 1;
+                    if (!tempFinalBigramRev[word2]) {
+                        tempFinalBigramRev[word2] = {};
+                    }
+                    tempFinalBigramRev[word2][word1] = 1;
+                }
+            }
+        }
+        this.finalBigram = tempFinalBigram;
+        this.finalBigramRev = tempFinalBigramRev;
+    }
+
+    /*
      * A function for getting the location of tokens in a string
      * @param {String} text the document object you'd like to parse
      * @returns An iterable set of match Objects with tokens that
@@ -651,10 +791,25 @@ class LDAModel {
         this.updateWebpage();
     }
 
-    _hyperTune = (tune) => {
+    /**
+     * @summary Turns on/off hyptertuning option
+     */
+    hyperTune = (tune) => {
         if (this.modelIsRunning == false)
         this._changeAlpha = tune;
-        console.log(this._changeAlpha)
+    }
+
+    /**
+     * @summary Turns on/off Bigrams option
+     */
+     _changeBigramStatus = (bigramStatus) => {
+        if (bigramStatus) {
+            this.addBigram();
+        }
+        else {
+            this.removeBigram();
+        }
+        this.bigram = bigramStatus;
     }
 
     /**
@@ -899,15 +1054,34 @@ class LDAModel {
         }
 
         if (parametersSum < 0.0) { throw "sum: " + parametersSum; }
-        console.log("parameter changed")
         return parametersSum;
+    }
+
+    /**
+     * @summary adds a word to model's stoplist
+     * if the bigram option is on, we add bigrams that contain the stopword as well.
+     * @param {String} word the word to be added to stoplist
+     * @param {Boolean} refresh whether or not to run sortTopicWords
+     */
+    addStop = (word, refresh=false) => {  
+            this.addStopHelper(word);
+            if (this.bigram) {
+                for (let w in this.finalBigram[word]) {
+                    this.addStopHelper(word+"_"+w)
+                }
+                for (let w in this.finalBigramRev[word]) {
+                    this.addStopHelper(w+"_"+word)
+                }
+            }
+            if (refresh) {this.sortTopicWords()}
     }
 
     /**
      * @summary adds a word to model's stoplist
      * @param {String} word the word to be added to stoplist
      */
-    addStop = (word) => {  
+     addStopHelper = (word) => { 
+        if (!this.stopwords[word]) { 
         this.stopwords[word] = 1;
         this._vocabularySize--;
         delete this.wordTopicCounts[word];
@@ -923,14 +1097,35 @@ class LDAModel {
                 }
             }
         });
-        this.sortTopicWords();
+        }
+    }
+
+    /**
+     * @summary removes a word from stoplist
+     * if the bigram option is on, we remove bigrams that contain the stopword as well.
+     * @param {String} word the word to remove
+     */
+    removeStop = (word) => {
+        this.removeStopHelper(word);
+        if (this.bigram) {
+            for (let w in this.finalBigram[word]) {
+                if (this.stopwords[word+"_"+w] && !this.stopwords[w]) {
+                    this.removeStopHelper(word+"_"+w)
+                }
+            }
+            for (let w in this.finalBigramRev[word]) {
+                if (this.stopwords[w+"_"+word] && !this.stopwords[w]) {
+                    this.removeStopHelper(w+"_"+word)
+                }
+            }
+        }
     }
 
     /**
      * @summary removes a word from stoplist
      * @param {String} word the word to remove
      */
-    removeStop = (word) => {
+     removeStopHelper = (word) => {
         delete this.stopwords[word];
         this._vocabularySize++;
         this.wordTopicCounts[word] = {};
@@ -953,7 +1148,151 @@ class LDAModel {
                 }
             }
         });
+    }
+
+    /**
+     * @summary Add bigrams to the model
+     * Calls helper addBigramHelper on each bigram deemed valid in finalBigram.
+     * After adding, we call addStop to every word in the stopwords to add bigram
+     * to stopword if their constituent word is a stopword
+     */
+    addBigram = () => {
+        for (let word1 in this.finalBigram) {
+            if (!this.stopwords[word1]){
+            for (let word2 in this.finalBigram[word1]) {
+                if (!this.stopwords[word2]) {
+                this.addBigramHelper(word1, word2);
+            }
+        }}}
+        for (let w in this.stopwords) {
+            if (this.stopwords[w]) {
+                this.addStop(w);
+            }
+        }
         this.sortTopicWords();
+    }
+
+    /**
+     * @summary Add bigrams to the model
+     * @param {String} word1 first word of the bigram to add
+     * @param {String} word1 second word of the bigram to add
+     */
+    addBigramHelper = (word1, word2) => {
+        // Makes word1_word2 into a “word” by adding it to the wordTopicCounts, vocaburaryCounts, 
+        // and increasing the vocaburarySize.
+        var curBigram = word1+"_"+word2
+        this.wordTopicCounts[curBigram] = {};
+        this.vocabularyCounts[curBigram] = 0;
+        var currentWordTopicCounts = this.wordTopicCounts[ curBigram ];
+        this._vocabularySize++;
+        
+        this.documents.forEach(( currentDoc, i ) => {
+            var docTopicCounts = currentDoc.topicCounts;
+            var skipNext = false;
+            var tempTokens = [];
+            for (var position = 0; position < currentDoc.tokens.length; position++) {
+                if (skipNext) {
+                    skipNext = false;
+                }
+                else {
+                var token = currentDoc.tokens[position];
+                if (position==currentDoc.tokens.length-1) {tempTokens.push(token)}
+                else {
+                var nextToken = currentDoc.tokens[position+1];
+                // We look for all occurrences of word1 followed directly by word2 in this.documents
+                // Then, we replace the two tokens for word1 and word2 by one token for
+                // word1_word2 in this.documents
+                // For every bigram occurrence, we subtract the vocaburaryCounts of word 1
+                // and word2 and add to the vocaburaryCounts of the bigram
+                if (token.word == word1 && nextToken.word == word2) {
+                    var random_boolean = Math.random() < 0.5;
+                    this.wordTopicCounts[word1][token.topic]--;
+                    this.wordTopicCounts[word2][nextToken.topic]--;
+                    this.vocabularyCounts[curBigram]++;
+                    this.vocabularyCounts[word1]--;
+                    this.vocabularyCounts[word2]--;
+                    // Half the time, we put the bigram in the same topic as word1,
+                    // and half the time we put the bigram in the same topic as word2
+                    if (random_boolean) {
+                        this.tokensPerTopic[nextToken.topic]--;
+                        docTopicCounts[nextToken.topic]--;
+                        if (!currentWordTopicCounts[token.topic]) {
+                            currentWordTopicCounts[token.topic] = 0;
+                            }
+                        currentWordTopicCounts[ token.topic ]+=1;
+                        token.word = curBigram;
+                        tempTokens.push(token);
+                    }
+                    else {
+                        this.tokensPerTopic[token.topic]--;
+                        docTopicCounts[token.topic]--;
+                        if (!currentWordTopicCounts[nextToken.topic]) {
+                            currentWordTopicCounts[nextToken.topic] = 0;
+                            }
+                        currentWordTopicCounts[ nextToken.topic ]+=1;
+                        nextToken.word = curBigram;
+                        tempTokens.push(nextToken);
+                    }
+                    skipNext = true;
+                }
+                else {
+                    tempTokens.push(token)
+                    }}
+            }}
+            currentDoc.tokens = tempTokens;
+        })
+    }
+
+    /**
+     * @summary Remove bigrams from the model
+     * Calls helper removeBigramHelper on each bigram deemed valid in finalBigram.
+     */
+    removeBigram = () => {
+        for (let word1 in this.finalBigram) {
+            for (let word2 in this.finalBigram[word1]) {
+                this.removeBigramHelper(word1, word2);
+            }
+        }
+        this.sortTopicWords();
+    }
+
+    /**
+     * @summary Remove bigrams to the model
+     * @param {String} word1 first word of the bigram to remove
+     * @param {String} word1 second word of the bigram to remove
+     * We effectively reverse what was done in addBigramHelper. We replace word1_word2
+     * token with two tokens, placing the words in the same topic as the bigram
+     */
+    removeBigramHelper = (word1, word2) => {
+        var curBigram = word1+"_"+word2
+        delete this.wordTopicCounts[curBigram];
+        delete this.vocabularyCounts[curBigram];
+        this._vocabularySize--;
+        
+        this.documents.forEach(( currentDoc, i ) => {
+            var docTopicCounts = currentDoc.topicCounts;
+            var tempTokens = [];
+            for (var position = 0; position < currentDoc.tokens.length; position++) {
+                var token = currentDoc.tokens[position];
+                if (token.word == curBigram) {
+                    this.wordTopicCounts[word1][token.topic]++;
+                    this.wordTopicCounts[word2][token.topic]++;
+                    this.vocabularyCounts[word1]++;
+                    this.vocabularyCounts[word2]++;
+                    docTopicCounts[token.topic]++;
+                    token.word = word1;
+                    token.isStopword = this.stopwords[word1];
+                    tempTokens.push(token);
+                    let isStopword = this.stopwords[word2];
+                    tempTokens.push({"word":word2, "topic":token.topic, "isStopword":isStopword });
+                }
+                else {
+                    tempTokens.push(token);
+                    }
+            }
+            
+            currentDoc.tokens = tempTokens;
+        })
     }
 
     /**

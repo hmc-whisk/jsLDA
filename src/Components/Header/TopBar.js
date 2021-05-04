@@ -18,7 +18,8 @@ class TopBar extends React.Component {
             sliderValue: props.numTopics, 
             formValue: this.props.sweepParameter,
             numTopics: props.numTopics,
-            checked: false,
+            checkedOptimize: this.props.optimizeValue,
+            checkedBigram: this.props.bigramValue,
          };
     }
 
@@ -93,10 +94,24 @@ class TopBar extends React.Component {
 
     }
 
-    handleCheck = (event) => {
-        this.setState({checked: event.target.checked});
-        this.props._hyperTune(event.target.checked);
+    /**
+     * @summary This function handles changing the bigram option
+     */
+     confirmBigramUpdate = (checked) => {
+        // does not use confrimReset bc of the slider needs to reset to original positions
+        if (window.confirm('This will take some time and may result in loss of data.')) {
+            this.setState({checkedBigram: checked});
+            this.props.bigrams(checked);}
+    }
+
+    handleCheckOptimize = (event) => {
+        this.setState({checkedOptimize: event.target.checked});
+        this.props.hyperTune(event.target.checked);
       };
+    
+    handleCheckBigram = (event) => {
+        this.confirmBigramUpdate(event.target.checked);
+    };
 
     helpTextStyle = {
         backgroundColor: backColor,
@@ -135,17 +150,39 @@ class TopBar extends React.Component {
                         
                         <Checkbox
                         checked={this.checked}
-                        onChange={this.handleCheck}
+                        onChange={this.handleCheckOptimize}
                         inputProps={{ 'aria-label': 'primary checkbox' }}
                         color="primary"
                         />
                         Optimize topic concentrations</h4>
-                        <i style={{padding:'10px'}}>Optimized topic correlation allow the model to account for </i>
-                        <i style={{padding:'10px'}}>different proportions of topics in each documents </i>
+                        <div style={{padding:'5px'}}>
+                        <i>Optimized topic correlation allow the model to account for 
+                        different proportions of topics in each documents</i>
+                        </div>
                         <br/>
                         <br/>
 
                         </div>
+
+                        <div className="upload"> 
+                        <div style={{padding:'5px'}}>
+                        <h3 > Vocaburary Configuration</h3>
+                        <h4> 
+                        
+                        <Checkbox
+                        checked={this.checkedBigram}
+                        onChange={this.handleCheckBigram}
+                        inputProps={{ 'aria-label': 'primary checkbox' }}
+                        color="primary"
+                        />
+                        Allow bigrams</h4>
+                        <div style={{padding:'5px'}}>
+                        <i>Allows bigrams to be accounted for in the model.</i>
+                        </div>
+                        </div>
+                        </div>
+
+                        
 
                         <Uploader 
                             onDocumentFileChange = {this.props.onDocumentFileChange}
