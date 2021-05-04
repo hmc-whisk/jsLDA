@@ -99,7 +99,7 @@ class TopBar extends React.Component {
         // does not use confrimReset bc of the slider needs to reset to original positions
         if (window.confirm('This will take some time and may result in loss of data.')) {
             this.setState({checkedBigram: checked});
-            this.props._bigrams(checked);
+            this.props._bigrams(checked);}
     }
 
     handleCheckOptimize = (event) => {
