@@ -306,6 +306,19 @@ class LDAModel {
 
     }
 
+    /**
+     * @summary Processes bigrams in documents
+     * @param docText {String} a string of a tsv or csv file
+     *  - With column names
+     *    - a "text" column with the document text is required
+     *    - an "id" column will be used for document ids
+     *    - a "tag" column will be used to sort/group documents by date
+     *    - all other columns are assumed to be metadata
+     * This function calls upon the documentType object member
+     * to determine whether docText is a csv or tsv. If it isn't
+     * "text/csv" then it will assume it is a tsv.
+     * The function acts to process through all potential bigrams
+     */
     _parseBigram = (docText) => {
         var parsedDoc
         if(this.documentType === "text/csv") {
@@ -1012,6 +1025,12 @@ class LDAModel {
         });
     }
 
+    /**
+     * @summary Add bigrams to the model
+     * Calls helper addBigramHelper on each bigram deemed valid in finalBigram.
+     * After adding, we call addStop to every word in the stopwords to add bigram
+     * to stopword if their constituent word is a stopword
+     */
     addBigram = () => {
         for (let word1 in this.finalBigram) {
             if (!this.stopwords[word1]){
@@ -1028,6 +1047,17 @@ class LDAModel {
         this.sortTopicWords();
     }
 
+    /**
+     * @summary Add bigrams to the model
+     * @param {String} word1 first word of the bigram to remove
+     * @param {String} word1 second word of the bigram to remove
+     * Makes word1_word2 into a “word” by adding it to the wordTopicCounts, vocaburaryCounts,
+     * and increasing the vocaburarySize. We look for all occurrences of word1 followed directly
+     * by word2 in this.documents. Then, we replace the two tokens for word1 and word2 by one token
+     * for word1_word2 in this.documents. For every bigram occurrence, we subtract the vocaburaryCounts
+     * of word 1 and word2 and add to the vocaburaryCounts of the bigram. Half the time, we put the
+     * bigram in the same topic as word1, and half the time we put the bigram in the same topic as word2.
+     */
     addBigramHelper = (word1, word2) => {
         var curBigram = word1+"_"+word2
         this.wordTopicCounts[curBigram] = {};

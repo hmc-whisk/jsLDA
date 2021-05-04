@@ -100,8 +100,6 @@ class TopBar extends React.Component {
         if (window.confirm('This will take some time and may result in loss of data.')) {
             this.setState({checkedBigram: checked});
             this.props._bigrams(checked);
-            console.log("bigramCheck is")
-            console.log(checked)        }
     }
 
     handleCheckOptimize = (event) => {
