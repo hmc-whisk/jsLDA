@@ -1051,14 +1051,10 @@ class LDAModel {
      * @summary Add bigrams to the model
      * @param {String} word1 first word of the bigram to add
      * @param {String} word1 second word of the bigram to add
-     * Makes word1_word2 into a “word” by adding it to the wordTopicCounts, vocaburaryCounts,
-     * and increasing the vocaburarySize. We look for all occurrences of word1 followed directly
-     * by word2 in this.documents. Then, we replace the two tokens for word1 and word2 by one token
-     * for word1_word2 in this.documents. For every bigram occurrence, we subtract the vocaburaryCounts
-     * of word 1 and word2 and add to the vocaburaryCounts of the bigram. Half the time, we put the
-     * bigram in the same topic as word1, and half the time we put the bigram in the same topic as word2.
      */
     addBigramHelper = (word1, word2) => {
+        // Makes word1_word2 into a “word” by adding it to the wordTopicCounts, vocaburaryCounts, 
+        // and increasing the vocaburarySize.
         var curBigram = word1+"_"+word2
         this.wordTopicCounts[curBigram] = {};
         this.vocabularyCounts[curBigram] = 0;
@@ -1078,6 +1074,11 @@ class LDAModel {
                 if (position==currentDoc.tokens.length-1) {tempTokens.push(token)}
                 else {
                 var nextToken = currentDoc.tokens[position+1];
+                // We look for all occurrences of word1 followed directly by word2 in this.documents
+                // Then, we replace the two tokens for word1 and word2 by one token for
+                // word1_word2 in this.documents
+                // For every bigram occurrence, we subtract the vocaburaryCounts of word 1
+                // and word2 and add to the vocaburaryCounts of the bigram
                 if (token.word == word1 && nextToken.word == word2) {
                     var random_boolean = Math.random() < 0.5;
                     this.wordTopicCounts[word1][token.topic]--;
@@ -1085,7 +1086,8 @@ class LDAModel {
                     this.vocabularyCounts[curBigram]++;
                     this.vocabularyCounts[word1]--;
                     this.vocabularyCounts[word2]--;
-
+                    // Half the time, we put the bigram in the same topic as word1,
+                    // and half the time we put the bigram in the same topic as word2
                     if (random_boolean) {
                         this.tokensPerTopic[nextToken.topic]--;
                         docTopicCounts[nextToken.topic]--;
