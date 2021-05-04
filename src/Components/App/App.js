@@ -400,7 +400,6 @@ class App extends Component {
           update = {this.state.update}
           modelIsRunning = {this.state.ldaModel.modelIsRunning}
           modelDataDLer = {this.state.modelDataDLer}
-          sortTopicWords = {this.state.ldaModel.sortTopicWords}
           />;
           
         break;

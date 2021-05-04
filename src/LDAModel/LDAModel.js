@@ -591,6 +591,7 @@ class LDAModel {
         this.finalBigramRev = tempFinalBigramRev;
     }
 
+    /*
      * A function for getting the location of tokens in a string
      * @param {String} text the document object you'd like to parse
      * @returns An iterable set of match Objects with tokens that
@@ -1060,8 +1061,9 @@ class LDAModel {
      * @summary adds a word to model's stoplist
      * if the bigram option is on, we add bigrams that contain the stopword as well.
      * @param {String} word the word to be added to stoplist
+     * @param {Boolean} refresh whether or not to run sortTopicWords
      */
-    addStop = (word) => {  
+    addStop = (word, refresh=false) => {  
             this.addStopHelper(word);
             if (this.bigram) {
                 for (let w in this.finalBigram[word]) {
@@ -1071,6 +1073,7 @@ class LDAModel {
                     this.addStopHelper(w+"_"+word)
                 }
             }
+            if (refresh) {this.sortTopicWords()}
     }
 
     /**
