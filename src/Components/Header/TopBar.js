@@ -3,6 +3,8 @@ import NumTopicSlider from "./NumTopicSlider"
 import Checkbox from '@material-ui/core/Checkbox';
 import Configuration from './Configuration'
 import Uploader from '../Pages/Uploader';
+import CustomTokenizer from './CustomTokenizer';
+import './header.css';
 
 var backColor = getComputedStyle(document.documentElement).getPropertyValue('--color3');
 
@@ -191,6 +193,11 @@ class TopBar extends React.Component {
                             modelIsRunning = {this.props.modelIsRunning}
                             onDefaultDocChange = {this.props.onDefaultDocChange}
                             docName = {this.props.docName}
+                        />
+
+                        <CustomTokenizer
+                            tokenRegex={this.props.tokenRegex}
+                            changeTokenRegex={this.props.changeTokenRegex}
                         />
                         </div>
                     </div>

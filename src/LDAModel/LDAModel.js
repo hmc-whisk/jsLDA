@@ -92,6 +92,19 @@ class LDAModel {
         this._changeAlpha = false;
     }
 
+    static DOC_SORT_SMOOTHING = 10.0;
+
+    get tokenRegex() {
+        return this._wordPattern;
+    }
+
+    setTokenRegex = (newRegex) => {
+        console.log(`setting tokenizer to ${newRegex.xregexp.source}`);
+        this._wordPattern = newRegex; 
+        this.updateWebpage();
+    }
+
+
     /**
      * Used to set the type of file LDAModel will
      * treat a documents file as
@@ -144,6 +157,7 @@ class LDAModel {
         this.documents = [];
         this._memoMinDocTime = null;
         this._memoMaxDocTime = null;
+        this._maxTopicSaliency = new Array(this.numTopics)
         d3.select("#iters").text(this._completeSweeps);
     }
 
@@ -241,9 +255,8 @@ class LDAModel {
                 "" : 
                 fields[columnInfo.date_tag];
             var text = fields[columnInfo.text];
-            
             let tokens = [];
-            var rawTokens = text.toLowerCase().match(this._wordPattern);
+            var rawTokens = this.getRawTokens(text)
             if (rawTokens == null) { continue; }
             let topicCounts = zeros(this.numTopics);
 
@@ -415,6 +428,25 @@ class LDAModel {
     }
 
     /**
+     * This function carries out the necessary functions after a model is uploaded
+     */
+    modelUploaded = () => {
+        console.log("Corrected Model")
+        // Date Objects get uploaded as strings not object, and thus must be remade
+        this._remakeDateObjects()
+    }
+
+    /**
+     * Creates a new dateObject for every document based on their date variable
+     */
+    _remakeDateObjects() {
+        this.documents = this.documents.map((doc) => {
+            doc.dateObject = new Date(doc.date)
+            return doc
+        })
+    }
+
+    /**
      * @summary Parses column names to get column index info
      * @param {Array<String>} header an array of column names
      * @returns {Object} {"id":index, "text":index, "date_tag":index, 
@@ -443,6 +475,30 @@ class LDAModel {
             }
         }
         return columnInfo;
+    }
+
+    /**
+     * @summary documents sorted in order of the prevalence 
+     * of the selected topic
+     */
+    get sortedDocuments() {
+        const selectedTopic = this.selectedTopic;
+        const sumDocSortSmoothing = LDAModel.DOC_SORT_SMOOTHING * this.numTopics;
+        let sortedDocuments = this.documents;
+
+        // Return default order if no topic is selected
+        if (this.selectedTopic === -1) return sortedDocuments;
+
+        sortedDocuments = sortedDocuments.map(function (doc, i) {
+            doc["score"] = 
+                (doc.topicCounts[selectedTopic] + LDAModel.DOC_SORT_SMOOTHING)/
+                (doc.tokens.length + sumDocSortSmoothing)
+            return doc
+        });
+        sortedDocuments.sort(function(a, b) {
+            return b.score - a.score;
+        });
+        return sortedDocuments;
     }
 
     /**
@@ -535,6 +591,57 @@ class LDAModel {
         this.finalBigramRev = tempFinalBigramRev;
     }
 
+     * A function for getting the location of tokens in a string
+     * @param {String} text the document object you'd like to parse
+     * @returns An iterable set of match Objects with tokens that
+     * match LDAModel.tokenRegex. match[0] yields the string matched
+     * and match.index yields the location in the text where it matched
+     */
+    getRawTokensWithIndices(text) {
+        let tokens = text.toLowerCase().matchAll(this.tokenRegex)
+        return tokens
+    }
+
+    /**
+     * 
+     * @param {String} text 
+     * @returns An array of strings in text that match LDAModel.tokenRegex
+     */
+    getRawTokens(text) {
+        return text.toLowerCase().match(this.tokenRegex)
+    }
+
+    /**
+     * Get the salience and location of every token in some text
+     * @param {String} text the text to parse
+     * @param {Number} topic the topic to get saliency for
+     * @returns {[{string:String,salience:Number,startIndex:Number}]} 
+     */
+    textToTokenSaliences(text,topic) {
+        const tokensItter = this.getRawTokensWithIndices(text)
+        const tokens = [...tokensItter]
+        return tokens.map((token) => {
+            return {
+                string: token[0],
+                salience: this.topicSaliency(token[0],topic),
+                startIndex: token.index
+            }
+        })
+    }
+
+    /**
+     * A function to get the average token salience in a text
+     * @param {String} text text to parse
+     * @param {Number} topic topic to get salience of
+     * @returns {Number} the average token salience in text for topic
+     */
+    textSalience(text,topic) {
+        const tokensSals = this.textToTokenSaliences(text,topic)
+        const addSal = (sumSals, token) => (token.salience+sumSals)
+        const totalSal = tokensSals.reduce(addSal,0)
+        return totalSal/tokensSals.length
+    }
+
     /**
      * @summary Computes the salience score of a word for a topic
      * @param {String} w Word to analyze
@@ -610,7 +717,7 @@ class LDAModel {
      * @description Parses at most the most common 1000 tokens in topic t
      * and returns the value of the highest salience.
      */
-    maxTopicSaliency = (t) => {
+    _calcMaxTopicSaliency(t) {
         if (t===-1) return 0; // If no topic selected
 
         // Set to at most 1000
@@ -629,6 +736,18 @@ class LDAModel {
     }
 
     /**
+     * @summary Returns the highest salience value for all tokens of topic t
+     * @param {Number} topicNum Topic to analyze
+     * @description Check if the maxTopicSaliency for a given topic has already been 
+     * calculated before calculating it. 
+     */
+    maxTopicSaliency = (topicNum) => {
+        if(this._maxTopicSaliency[topicNum]) return this._maxTopicSaliency[topicNum];
+        this._maxTopicSaliency[topicNum] = this._calcMaxTopicSaliency(topicNum);
+        return this._maxTopicSaliency[topicNum];
+    }
+
+    /**
      * @summary Shifts model to have a dif number of topics
      * @param {Number} numTopics new number of topics
      */
@@ -642,6 +761,8 @@ class LDAModel {
         this.wordTopicCounts = {};
         this._completeSweeps = 0;
         this._requestedSweeps = 0;
+        this._maxTopicSaliency = new Array(numTopics);
+        this._documentTopicSmoothing = zeros(numTopics).fill(0.1);
 
         d3.select("#iters").text(this._completeSweeps);
         
@@ -798,6 +919,7 @@ class LDAModel {
           this._timer.stop();
           this._sweeps = 0;
           this.modelIsRunning = false;
+          this._maxTopicSaliency = new Array(this.numTopics);
           this.updateWebpage();
           console.log(this._documentTopicSmoothing);
         }
@@ -1422,7 +1544,7 @@ class LDAModel {
 
         // Calc average for every bin
         bins.forEach((bin) => {
-            const total = bin.value.reduce((a,b) => a + b);
+            const total = bin.value.reduce((a,b) => a + b,0);
             const avg = total/bin.value.length;
             bin.value = avg
         })

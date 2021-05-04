@@ -1,6 +1,7 @@
 import React, { Component } from 'react'; 
 import * as d3 from 'd3';
 import {topNWords} from '../../funcs/utilityFunctions';
+import './pages.css';
 
 class TimeSeries extends Component {
     graphMargin = 20;
@@ -34,7 +35,7 @@ class TimeSeries extends Component {
         tsPage.select("svg").remove();
         let temp_topicTimeGroups = [];
         
-        let height = this.state.timeSeriesHeight * this.props.ldaModel.numTopics+75
+        let height = (this.state.timeSeriesHeight + this.graphMargin) * this.props.ldaModel.numTopics+50
         
         var tsSVG = tsPage
             .append("svg")
@@ -412,6 +413,7 @@ class TimeSeries extends Component {
                 out the data and make it more interpretable. You can change the number 
                 of bins that are used below.
                 Data for plots are available in downloads page.</div>
+                <div>
                 <label for="numberOfBins">Number of Bins:</label>
                 <input 
                     onChange = {this.handleNumAvgChange} 
@@ -421,6 +423,7 @@ class TimeSeries extends Component {
                     min="5"
                     step="5"
                 />
+                </div>
                 <div id="ts-page" className="page" ref={this._setRef.bind(this)}>
                 </div>    
             </>    

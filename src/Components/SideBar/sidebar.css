@@ -1,0 +1,53 @@
+.sidebar { 
+    float: left; 
+    flex: 1; 
+    overflow-y: scroll; 
+}
+
+.sidebar .sidebox { 
+    margin: 5px; 
+    padding: 8px; 
+}
+
+#topics div { 
+    color:var(--color4); 
+    margin-bottom: 1px; 
+    padding: 1px; 
+    cursor: default;
+}
+#topics .selected { 
+    border-right: solid black 2px; 
+    font-weight: bold; 
+}
+#topics:hover { 
+    background-color: var(--color4); 
+    color: var(--color3); 
+    border-radius: 10px; 
+}
+
+/* colored bar with Topic # label */
+.topicbar { 
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--color1);
+    border-radius: 4px;
+}
+.topicbar-selected {
+    background-color: #6c7b9c;
+}
+.topicbar-hidden {
+    background-color: #c4c8cf;
+}
+
+/* pin and hide buttons */
+.topic-button {
+    border: none;
+    background-color: inherit;
+    outline: none;
+}
+.topic-button-icon {
+    height: 16px;
+    width: 16px;
+}
+
+
