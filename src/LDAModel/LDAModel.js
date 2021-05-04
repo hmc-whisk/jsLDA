@@ -307,8 +307,6 @@ class LDAModel {
     }
 
     _parseBigram = (docText) => {
-        this.tokensPerTopic = zeros(this.numTopics);
-
         var parsedDoc
         if(this.documentType === "text/csv") {
             parsedDoc = d3.csvParseRows(docText);
