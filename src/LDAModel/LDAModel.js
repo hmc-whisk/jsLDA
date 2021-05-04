@@ -1049,8 +1049,8 @@ class LDAModel {
 
     /**
      * @summary Add bigrams to the model
-     * @param {String} word1 first word of the bigram to remove
-     * @param {String} word1 second word of the bigram to remove
+     * @param {String} word1 first word of the bigram to add
+     * @param {String} word1 second word of the bigram to add
      * Makes word1_word2 into a “word” by adding it to the wordTopicCounts, vocaburaryCounts,
      * and increasing the vocaburarySize. We look for all occurrences of word1 followed directly
      * by word2 in this.documents. Then, we replace the two tokens for word1 and word2 by one token
@@ -1116,6 +1116,10 @@ class LDAModel {
         })
     }
 
+    /**
+     * @summary Remove bigrams from the model
+     * Calls helper removeBigramHelper on each bigram deemed valid in finalBigram.
+     */
     removeBigram = () => {
         for (let word1 in this.finalBigram) {
             for (let word2 in this.finalBigram[word1]) {
@@ -1125,6 +1129,13 @@ class LDAModel {
         this.sortTopicWords();
     }
 
+    /**
+     * @summary Remove bigrams to the model
+     * @param {String} word1 first word of the bigram to remove
+     * @param {String} word1 second word of the bigram to remove
+     * We effectively reverse what was done in addBigramHelper. We replace word1_word2
+     * token with two tokens, placing the words in the same topic as the bigram
+     */
     removeBigramHelper = (word1, word2) => {
         var curBigram = word1+"_"+word2
         delete this.wordTopicCounts[curBigram];
