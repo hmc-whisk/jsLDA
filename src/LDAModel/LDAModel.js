@@ -1275,8 +1275,12 @@ class LDAModel {
             for (var position = 0; position < currentDoc.tokens.length; position++) {
                 var token = currentDoc.tokens[position];
                 if (token.word == curBigram) {
+                    if (!this.stopwords[word1]) {
                     this.wordTopicCounts[word1][token.topic]++;
+                    this.docTopicCounts--;}
+                    if (!this.stopwords[word2]) {
                     this.wordTopicCounts[word2][token.topic]++;
+                    this.docTopicCounts--;}
                     this.vocabularyCounts[word1]++;
                     this.vocabularyCounts[word2]++;
                     docTopicCounts[token.topic]++;
