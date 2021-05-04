@@ -294,7 +294,7 @@ class App extends Component {
     /**
    * @summary changes bigram status in ldamodel
    */
-     _changeBigramStatus = (bigramStatus) => {
+     changeBigramStatus = (bigramStatus) => {
       if (!this.state.ldaModel.bigramInitialized) {
         this._initializeBigram();
       }
@@ -449,8 +449,8 @@ class App extends Component {
             onClick={this.runIterationsClick} 
             updateNumTopics={this.onTopicsChange} 
             sweepParameter={this.state.sweepParameter}
-            _hyperTune={this.state.ldaModel._hyperTune}
-            _bigrams = {this._changeBigramStatus}
+            hyperTune={this.state.ldaModel.hyperTune}
+            bigrams = {this.changeBigramStatus}
             onChange={this.changeSweepAmount}
             stopButtonClick={this.state.ldaModel.stopSweeps}
             iter={this.state.ldaModel._completeSweeps}

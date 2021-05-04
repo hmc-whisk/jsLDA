@@ -672,7 +672,7 @@ class LDAModel {
     /**
      * @summary Turns on/off hyptertuning option
      */
-    _hyperTune = (tune) => {
+    hyperTune = (tune) => {
         if (this.modelIsRunning == false)
         this._changeAlpha = tune;
     }
