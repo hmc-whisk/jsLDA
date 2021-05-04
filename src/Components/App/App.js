@@ -295,8 +295,6 @@ class App extends Component {
    * @summary changes bigram status in ldamodel
    */
      _changeBigramStatus = (bigramStatus) => {
-       console.log("initailized?")
-       console.log(this.state.ldaModel.bigramInitialized)
       if (!this.state.ldaModel.bigramInitialized) {
         this._initializeBigram();
       }
