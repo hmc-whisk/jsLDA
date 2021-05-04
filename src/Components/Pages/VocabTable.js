@@ -49,8 +49,8 @@ class VocabTable extends Component {
         row.append("td").append("button").text(stopwords[d.word] ? "unstop" : "stop").attr("class","lightButton")
         .on("click", function () {
           console.log(d.word);
-          if (! isStopword) { addStop(d.word); sortTopicWords();}
-          else { removeStop(d.word); sortTopicWords();}
+          if (! isStopword) { addStop(d.word, true); }
+          else { removeStop(d.word, true);}
 
         })
         .attr("disabled", shouldDisable);
