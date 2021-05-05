@@ -1267,7 +1267,7 @@ class LDAModel {
         var curBigram = word1+"_"+word2
         delete this.wordTopicCounts[curBigram];
         delete this.vocabularyCounts[curBigram];
-        this._vocabularySize--;
+        var firstAppearance = true;
         
         this.documents.forEach(( currentDoc, i ) => {
             var docTopicCounts = currentDoc.topicCounts;
@@ -1275,6 +1275,10 @@ class LDAModel {
             for (var position = 0; position < currentDoc.tokens.length; position++) {
                 var token = currentDoc.tokens[position];
                 if (token.word == curBigram) {
+                    if (firstAppearance) {
+                        this._vocabularySize--;
+                        firstAppearance = false;
+                    }
                     if (!this.stopwords[word1]) {
                     this.wordTopicCounts[word1][token.topic]++;
                     this.docTopicCounts--;}
