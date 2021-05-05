@@ -30,6 +30,7 @@ class VocabTable extends Component {
       let specificityScale = this.specificityScale;
       let addStop = this.props.addStop;
       let removeStop = this.props.removeStop;
+      let sortTopicWords = this.props.sortTopicWords;
 
       // TL: SEARCH 
       if (this.state.searchText !== "") {
@@ -48,8 +49,8 @@ class VocabTable extends Component {
         row.append("td").append("button").text(stopwords[d.word] ? "unstop" : "stop").attr("class","lightButton")
         .on("click", function () {
           console.log(d.word);
-          if (! isStopword) { addStop(d.word); }
-          else { removeStop(d.word); }
+          if (! isStopword) { addStop(d.word, true); }
+          else { removeStop(d.word, true);}
 
         })
         .attr("disabled", shouldDisable);

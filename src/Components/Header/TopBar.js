@@ -15,7 +15,8 @@ class TopBar extends React.Component {
             sliderValue: props.numTopics, 
             formValue: this.props.sweepParameter,
             numTopics: props.numTopics,
-            checked: false,
+            checkedOptimize: this.props.optimizeValue,
+            checkedBigram: this.props.bigramValue,
          };
     }
 
@@ -90,10 +91,24 @@ class TopBar extends React.Component {
 
     }
 
-    handleCheck = (event) => {
-        this.setState({checked: event.target.checked});
-        this.props._hyperTune(event.target.checked);
+    /**
+     * @summary This function handles changing the bigram option
+     */
+     confirmBigramUpdate = (checked) => {
+        // does not use confrimReset bc of the slider needs to reset to original positions
+        if (window.confirm('This will take some time and may result in loss of data.')) {
+            this.setState({checkedBigram: checked});
+            this.props.bigrams(checked);}
+    }
+
+    handleCheckOptimize = (event) => {
+        this.setState({checkedOptimize: event.target.checked});
+        this.props.hyperTune(event.target.checked);
       };
+    
+    handleCheckBigram = (event) => {
+        this.confirmBigramUpdate(event.target.checked);
+    };
 
     helpTextStyle = {
         backgroundColor: "var(--color3)",
@@ -131,7 +146,7 @@ class TopBar extends React.Component {
                                             onChange={this.handleCheck}
                                             inputProps={{ 'aria-label': 'primary checkbox' }}
                                             color="primary"
-                                            style={{padding: "0"}}
+                                            style={{paddingLeft: "0"}}
                                         />
                                         Optimize topic concentrations
                                     </h6>
@@ -140,6 +155,25 @@ class TopBar extends React.Component {
                                     <i> different proportions of topics in each documents </i>
                                 </div>
                             </div>
+
+                        <div className="configMenu"> 
+                            <h3> Vocabulary </h3>
+                            <div>
+                                <h6> 
+                                    <Checkbox
+                                    checked={this.checkedBigram}
+                                    onChange={this.handleCheckBigram}
+                                    inputProps={{ 'aria-label': 'primary checkbox' }}
+                                    color="primary"
+                                    style={{paddingLeft: "0"}}
+                                    />
+                                    Allow bigrams
+                                </h6>
+                                <i>Allows bigrams to be accounted for in the model.</i>
+                            </div>
+                        </div>
+
+                        
 
                         <Uploader 
                             onDocumentFileChange={this.props.onDocumentFileChange}

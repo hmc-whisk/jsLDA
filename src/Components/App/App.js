@@ -297,6 +297,26 @@ class App extends Component {
       .catch(err => this.state.ldaModel.ready(err, null, null));
   }
   
+   /**
+   * @summary Runs the document processing pipeline for bigrams
+   */
+    _initializeBigram = () => {
+      Promise.all([this.getDocsUpload()])
+        .then(([lines]) => {this.state.ldaModel._parseBigram(lines)})
+    }
+
+    /**
+   * @summary changes bigram status in ldamodel
+   */
+     changeBigramStatus = (bigramStatus) => {
+      if (!this.state.ldaModel.bigramInitialized) {
+        this._initializeBigram();
+      }
+      else {
+        this.state.ldaModel._changeBigramStatus(bigramStatus);
+      }
+      this.forceUpdate();
+    }
 
   /**
    * @summary This function is the callback for "input", it changes as we move the slider without releasing it.
@@ -438,7 +458,8 @@ class App extends Component {
             onClick={this.runIterationsClick} 
             updateNumTopics={this.onTopicsChange} 
             sweepParameter={this.state.sweepParameter}
-            _hyperTune={this.state.ldaModel._hyperTune}
+            hyperTune={this.state.ldaModel.hyperTune}
+            bigrams = {this.changeBigramStatus}
             onChange={this.changeSweepAmount}
             stopButtonClick={this.state.ldaModel.stopSweeps}
             iter={this.state.ldaModel._completeSweeps}
@@ -450,6 +471,8 @@ class App extends Component {
             onModelUpload={this.onModelUpload}
             onDefaultDocChange = {this.onDefaultDocChange}
             docName={this.state.docName}
+            optimizeValue = {this.state.ldaModel._changeAlpha}
+            bigramValue = {this.state.ldaModel.bigrams}
             tokenRegex={this.state.ldaModel.tokenRegex}
             changeTokenRegex={this.onTokenRegexChange}
             />
