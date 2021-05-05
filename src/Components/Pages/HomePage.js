@@ -1,5 +1,4 @@
 import React from "react";
-import Uploader from './Uploader';
 import Tooltip from '../Tooltip';
 import './pages.css';
 

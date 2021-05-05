@@ -2,12 +2,9 @@ import React from "react";
 import NumTopicSlider from "./NumTopicSlider"
 import Checkbox from '@material-ui/core/Checkbox';
 import Configuration from './Configuration'
-import Uploader from '../Pages/Uploader';
+import Uploader from './Uploader';
 import CustomTokenizer from './CustomTokenizer';
 import './header.css';
-
-var backColor = getComputedStyle(document.documentElement).getPropertyValue('--color3');
-
 
 class TopBar extends React.Component {
 
@@ -114,7 +111,7 @@ class TopBar extends React.Component {
     };
 
     helpTextStyle = {
-        backgroundColor: backColor,
+        backgroundColor: "var(--color3)",
         position: "fixed",
         top: "10%",
         left: "30%",
@@ -131,68 +128,62 @@ class TopBar extends React.Component {
                 displayElement={
                     <div style={this.helpTextStyle}>
                         <div style={{margin:"15px"}}>
-                        <div className="upload"> 
-                        <div style={{padding:'5px'}}>
-                        <h3 > Topic Configuration</h3>
-                        <h4 > Set number of topics</h4>
+                            <div className="configMenu"> 
+                                <h3> Topics </h3>
+                                <div>
+                                    <h5> Set number of topics: </h5>
+                                    <NumTopicSlider
+                                        onChange={this.updateNumDisplay}
+                                        sliderValue={this.state.sliderValue}
+                                        updateNumTopics={this.confirmUpdate}
+                                        onInput={(event) => this.updateNumDisplay(event)}
+                                        modelIsRunning={this.props.modelIsRunning}
+                                    />
 
-                        <NumTopicSlider
-                        onChange={this.updateNumDisplay}
-                        sliderValue={this.state.sliderValue}
-                        updateNumTopics={this.confirmUpdate}
-                        onInput={(event) => this.updateNumDisplay(event)}
-                        modelIsRunning={this.props.modelIsRunning}
-                        />
+                                    <h6>
+                                        <Checkbox
+                                            checked={this.checked}
+                                            onChange={this.handleCheck}
+                                            inputProps={{ 'aria-label': 'primary checkbox' }}
+                                            color="primary"
+                                            style={{paddingLeft: "0"}}
+                                        />
+                                        Optimize topic concentrations
+                                    </h6>
 
-                        <br/>
-                        </div>
-                        <h4> 
-                        
-                        <Checkbox
-                        checked={this.checked}
-                        onChange={this.handleCheckOptimize}
-                        inputProps={{ 'aria-label': 'primary checkbox' }}
-                        color="primary"
-                        />
-                        Optimize topic concentrations</h4>
-                        <div style={{padding:'5px'}}>
-                        <i>Optimized topic correlation allow the model to account for 
-                        different proportions of topics in each documents</i>
-                        </div>
-                        <br/>
-                        <br/>
+                                    <i> Optimized topic correlation allow the model to account for </i>
+                                    <i> different proportions of topics in each documents </i>
+                                </div>
+                            </div>
 
-                        </div>
-
-                        <div className="upload"> 
-                        <div style={{padding:'5px'}}>
-                        <h3 > Vocaburary Configuration</h3>
-                        <h4> 
-                        
-                        <Checkbox
-                        checked={this.checkedBigram}
-                        onChange={this.handleCheckBigram}
-                        inputProps={{ 'aria-label': 'primary checkbox' }}
-                        color="primary"
-                        />
-                        Allow bigrams</h4>
-                        <div style={{padding:'5px'}}>
-                        <i>Allows bigrams to be accounted for in the model.</i>
-                        </div>
-                        </div>
+                        <div className="configMenu"> 
+                            <h3> Vocabulary </h3>
+                            <div>
+                                <h6> 
+                                    <Checkbox
+                                    checked={this.checkedBigram}
+                                    onChange={this.handleCheckBigram}
+                                    inputProps={{ 'aria-label': 'primary checkbox' }}
+                                    color="primary"
+                                    style={{paddingLeft: "0"}}
+                                    />
+                                    Allow bigrams
+                                </h6>
+                                <i>Allows bigrams to be accounted for in the model.</i>
+                            </div>
                         </div>
 
                         
 
                         <Uploader 
-                            onDocumentFileChange = {this.props.onDocumentFileChange}
-                            onStopwordFileChange = {this.props.onStopwordFileChange}
+                            onDocumentFileChange={this.props.onDocumentFileChange}
+                            onStopwordFileChange={this.props.onStopwordFileChange}
                             onModelFileChange={this.props.onModelFileChange}
                             onFileUpload={this.props.onFileUpload}
                             onModelUpload={this.props.onModelUpload}
-                            modelIsRunning = {this.props.modelIsRunning}
-                            onDefaultDocChange = {this.props.onDefaultDocChange}
-                            docName = {this.props.docName}
+                            modelIsRunning={this.props.modelIsRunning}
+                            onDefaultDocChange={this.props.onDefaultDocChange}
+                            docName={this.props.docName}
                         />
 
                         <CustomTokenizer

@@ -25,16 +25,6 @@ table td {
     padding: 9px 8px 0px 8px; 
 }
 
-/* Uploader.js (duplicated in header.css) */
-div.upload { 
-    background-color: var(--color1); 
-    /* float: right;  */
-    padding-right: 20px; 
-    border-radius: 10px; 
-    margin: 5px; 
-  }
-div.upload div { margin: 8px; }
-
 /* DLPage.js */
 div#dl-page.page ul li {
     margin-bottom: 10px;
