@@ -12,8 +12,8 @@ class NumTopicSlider extends React.Component {
 
     render() {
         return (
-
-                <span id="num_topics_control" style={{margin:"auto"}}>
+            <div style={{display: "flex", justifyContent: "center", margin: "10px"}}>
+                <span id="num_topics_control">
                     Train with 
                     <input id="num-topics-input" type="range" name="topics" 
                         value={this.props.sliderValue}
@@ -21,10 +21,11 @@ class NumTopicSlider extends React.Component {
                         disabled = {this.props.modelIsRunning}
                         onMouseUp={(e) => this.handleChange(e)}
                         onInput={(e) => this.props.onInput(e)}
-                        /> 
+                    />
                     <span id="num_topics_display"> </span>  
                     {this.props.sliderValue} Topics
                 </span>
+            </div>
         );
     }
 
