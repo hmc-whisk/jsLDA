@@ -1,16 +1,78 @@
-
 import {zeros, getObjectKeys, truncate} from '../funcs/utilityFunctions'
 import * as d3 from 'd3';
-var XRegExp = require('xregexp');
+import XRegExp from "xregexp";
 
 // This adds the Object.keys() function to some old browsers that don't support it
 if (!Object.keys) {
     Object.keys = (getObjectKeys());
 }
 
+// type reverse-engineered from LDAModel.parseDoc
+type LDAToken = {
+    word: string,
+    topic: number,
+    isStopword: boolean;
+}
+
+// type reverse-engineered from LDAModel.parseDoc
+type LDADocument = {
+    originalOrder: number
+    id: string | number,
+    date: string,
+    originalText: string,
+    tokens: LDAToken[],
+    topicCounts: number[],
+    metadata: { [key: string]: string },
+    dateObject: Date
+}
+
+
+type SortedLDADocument = {
+    originalOrder: number
+    id: string,
+    date: string,
+    originalText: string,
+    tokens: LDAToken[],
+    topicCounts: number[],
+    metadata: { [key: string]: string },
+    dateObject: Date,
+    score: number
+}
+
+// type reverse-engineered from LDAModel._getColumnInfo
+type LDAColumnInfo = {
+    metadata: { [key: string]: number },
+    id: number,
+    text: number,
+    date_tag: number
+};
+
+// type reverse-engineered from LDAModel.setTopicVisibility
+type LDATopicVisibility = {
+    [key: number]: "default" | "pinned" | "hidden"
+}
+
+// type reverse-engineered from LDAModel.topicTimesBinned
+type LDATopicTimeBin = {
+    key:Date,
+    value: number[]
+}
+
+// type reverse-engineered from LDAModel.addStdErrorMargins
+interface LDATopicTimeBinWithStd extends LDATopicTimeBin {
+    upperEr:number,
+    lowerEr:number
+}
+
+// type reverse-engineered from LDAModel.topicTimesBinnedAverage
+type LDATopicTimeBinAveraged ={
+    key:Date,
+    value: number
+}
+
 /**
  * @summary Creates/maintains a topic model over a corpus
- * @param {Number} numTopics the starting 
+ * @param {Number} numTopics the starting
  * @param {Function} forceUpdate callback that updates the webpage
  */
 class LDAModel {
@@ -20,7 +82,57 @@ class LDAModel {
      * @param {Number} numTopics the starting number of topics
      * @param {Function} forceUpdate callback that updates the webpage
      */
-    constructor(numTopics, forceUpdate) {
+
+    private _vocabularySize: number;
+    private _correlationMinTokens: number;
+    private _correlationMinProportion: number;
+    private _wordPattern: RegExp;
+    private _completeSweeps: number;
+    private _requestedSweeps: number;
+    private _topicWeights: number[];
+
+    public sortVocabByTopic: boolean;
+    public vocabularyCounts: { [key: string]: number }; // reversed from _parseDoc
+    public numTopics: number;
+    public updateWebpage: () => void;
+    public stopwords: object;
+    public selectedTopic: number;
+    public topicVisibility: LDATopicVisibility;
+    public wordTopicCounts: { [key: string]: { [key: string]: number } };  // reversed from _parseDoc
+    public topicWordCounts: { word: string, count: number }[][]; // reversed from sortTopicWords
+    public tokensPerTopic: number[];
+    public docLengthCounts: number[];
+    public topicDocCounts: number[][];
+
+    public bigram: boolean;
+    public bigramInitialized: boolean;
+    public bigramCount: object;
+    public bigramCountRev: object;
+    public bigramWord1Count: object
+    public bigramWord2Count: object
+    public totalBigramCount: number
+    public finalBigram: object
+    public finalBigramRev: object
+    public bigramThreshold: number
+    public documents: LDADocument []
+    public documentType: string;
+    public modelIsRunning: boolean;
+
+    private _specificityScale: d3.ScaleLinear<string, string>;
+
+    private _timer?: d3.Timer;
+    private _documentTopicSmoothing: number[];
+    private _topicWordSmoothing: number;
+    private _sweeps: number;
+    private _optimizeInterval: number;
+    private _burninPeriod: number;
+    private _changeAlpha: boolean;
+    private _memoMinDocTime?: Date;
+    private _memoMaxDocTime?: Date;
+    private _maxTopicSaliency: number[];
+
+
+    constructor(numTopics: number, forceUpdate: () => void) {
 
         this._vocabularySize = 0;
 
@@ -32,7 +144,7 @@ class LDAModel {
         this.vocabularyCounts = {};
 
         this.sortVocabByTopic = false;
-        this._specificityScale = d3.scaleLinear().domain([0, 1]).range(["#ffffff", "#99d8c9"]);
+        this._specificityScale = d3.scaleLinear<string>().domain([0, 1]).range(["#ffffff", "#99d8c9"]);
 
         this._wordPattern = XRegExp("\\p{L}(\\p{P}?\\p{L})+", "g");
 
@@ -78,7 +190,6 @@ class LDAModel {
         // {"originalOrder", "id", "date", "originalText", "tokens", "topicCounts", "metadata"}
         this.documents = [];
 
-        this._timer = 0; // used in sweep
         this._documentTopicSmoothing = zeros(numTopics).fill(0.1); // (used by sweep)
         this._topicWordSmoothing = 0.01; // (used by sweep)
 
@@ -90,17 +201,20 @@ class LDAModel {
         this._optimizeInterval = 50;
         this._burninPeriod = 200;
         this._changeAlpha = false;
+
+        this._maxTopicSaliency = new Array(this.numTopics)
     }
 
     static DOC_SORT_SMOOTHING = 10.0;
 
-    get tokenRegex() {
+    get tokenRegex(): RegExp {
         return this._wordPattern;
     }
 
-    setTokenRegex = (newRegex) => {
+    setTokenRegex(newRegex: RegExp) {
+        // @ts-ignore xregexp ts.d file is wrong
         console.log(`setting tokenizer to ${newRegex.xregexp.source}`);
-        this._wordPattern = newRegex; 
+        this._wordPattern = newRegex;
         this.updateWebpage();
     }
 
@@ -108,14 +222,14 @@ class LDAModel {
     /**
      * Used to set the type of file LDAModel will
      * treat a documents file as
-     * @param {String} type 
+     * @param {String} type
      */
-    setDocumentType = (type) => {
+    setDocumentType(type: string) {
         this.documentType = type;
     }
 
     // Used by sidebar to change selectedTopic and sortVocabByTopic
-    selectedTopicChange = (topic) => {
+    selectedTopicChange(topic: number) {
         this.selectedTopic = topic;
         if (topic === -1) {
             this.sortVocabByTopic = false;
@@ -123,17 +237,19 @@ class LDAModel {
         this.updateWebpage();
     }
 
-    sortbyTopicChange = (sort) => {
+    sortbyTopicChange(sort: boolean) {
         this.sortVocabByTopic = sort
         this.updateWebpage();
     }
 
     /**
      * @summary function to sort by Object's count attribute
-     * @param {Object} a 
-     * @param {Object} b 
+     * @param {Object} a
+     * @param {Object} b
      */
-    byCountDescending(a, b) { return b.count - a.count; };
+    byCountDescending(a, b) {
+        return b.count - a.count;
+    };
 
     /**
      * @summary Resets data members in preparation
@@ -144,7 +260,7 @@ class LDAModel {
         this._vocabularySize = 0;
         this.vocabularyCounts = {};
         this.sortVocabByTopic = false;
-        this._specificityScale = d3.scaleLinear().domain([0,1]).range(["#ffffff", "#99d8c9"]);
+        this._specificityScale = d3.scaleLinear<string>().domain([0, 1]).range(["#ffffff", "#99d8c9"]);
         this.stopwords = {};
         this._completeSweeps = 0;
         this._requestedSweeps = 0;
@@ -155,8 +271,8 @@ class LDAModel {
         this.tokensPerTopic = zeros(this.numTopics);
         this._topicWeights = zeros(this.numTopics);
         this.documents = [];
-        this._memoMinDocTime = null;
-        this._memoMaxDocTime = null;
+        this._memoMinDocTime = undefined;
+        this._memoMaxDocTime = undefined;
         this._maxTopicSaliency = new Array(this.numTopics)
         d3.select("#iters").text(this._completeSweeps);
     }
@@ -167,22 +283,21 @@ class LDAModel {
      * @param {Number} this.numTopics the number of topics in
      * current model
      */
-    initTopicVisibility = (numTops) => {
+    initTopicVisibility(numTops: number): LDATopicVisibility {
         let visDict = {};
-        for (const n of Array(numTops).keys()) {
-            visDict[n] = "default";
-        }
+        for (let i = 0; i < numTops; i++)
+            visDict[i] = "default"
         return visDict;
     }
 
     /**
      * @summary Initializes this.topicVisibility dict with every topic
      *          number having "default" visibility
-     * @param {Number} topicNum the number of the topic 
+     * @param {Number} topicNum the number of the topic
      * @param {String} visibility the new visibility state of the
      * topic ("default", "pinned", or "hidden")
      */
-    setTopicVisibility = (topicNum, visibility) => {
+    setTopicVisibility(topicNum: number, visibility: "default" | "pinned" | "hidden") {
         this.topicVisibility[topicNum] = visibility;
     }
 
@@ -194,17 +309,19 @@ class LDAModel {
      *  - Lines should not have column names included
      *  - See parseDoc for
      */
-    ready = (error, stops, doc) => {
-        if (error) { 
+    ready(error, stops: string, doc: string) {
+        if (error) {
             //alert("File upload failed. Please try again."); TODO: uncomment this for deployment
             throw error;
         } else {
             // Create the stoplist
-            stops.split(/\s+/).forEach((w) => {this.stopwords[w] = 1; });
-        
+            stops.split(/\s+/).forEach((w) => {
+                this.stopwords[w] = 1;
+            });
+
             // Load documents and populate the vocabulary
             this._parseDoc(doc);
-        
+
             this.sortTopicWords();
         }
     }
@@ -221,18 +338,18 @@ class LDAModel {
      * to determine whether docText is a csv or tsv. If it isn't
      * "text/csv" then it will assume it is a tsv.
      */
-    _parseDoc = (docText) => {
+    _parseDoc(docText: string) {
         this.tokensPerTopic = zeros(this.numTopics);
 
-        var parsedDoc
-        if(this.documentType === "text/csv") {
+        let parsedDoc: string[][];
+        if (this.documentType === "text/csv") {
             parsedDoc = d3.csvParseRows(docText);
         } else {
             parsedDoc = d3.tsvParseRows(docText);
         }
-        
+
         // Handle empty documents
-        if(parsedDoc.length===0){
+        if (parsedDoc.length === 0) {
             alert("Document file is empty");
             return;
         }
@@ -240,75 +357,77 @@ class LDAModel {
         let columnInfo = this._getColumnInfo(parsedDoc[0]);
 
         // Handle no text column
-        if(columnInfo["text"] === -1) {
+        if (columnInfo["text"] === -1) {
             alert("No text column found in document file");
             return;
         }
 
-        for(let i = 1; i < parsedDoc.length; i++) {
+        for (let i = 1; i < parsedDoc.length; i++) {
             let fields = parsedDoc[i];
             // Set fields based on whether they exist
-            var docID = columnInfo.id === -1 ? 
-                this.documents.length : 
+            let docID = columnInfo.id === -1 ?
+                this.documents.length :
                 fields[columnInfo.id];
-            var docDate = columnInfo.date_tag === -1 ? 
-                "" : 
+            let docDate = columnInfo.date_tag === -1 ?
+                "" :
                 fields[columnInfo.date_tag];
-            var text = fields[columnInfo.text];
-            let tokens = [];
-            var rawTokens = this.getRawTokens(text)
-            if (rawTokens == null) { continue; }
+            let text = fields[columnInfo.text];
+            let tokens: LDAToken[] = [];
+            let rawTokens = this.getRawTokens(text)
+            if (rawTokens == null) {
+                continue;
+            }
             let topicCounts = zeros(this.numTopics);
 
             rawTokens.forEach((word) => {
                 if (word !== "") {
-                var topic = Math.floor(Math.random() * (this.numTopics));
-            
-                if (word.length <= 2) { this.stopwords[word] = 1; }
-            
-                var isStopword = this.stopwords[word];
-                if (isStopword) {
-                    // Record counts for stopwords, but nothing else
-                    if (! this.vocabularyCounts[word]) {
-                    this.vocabularyCounts[word] = 1;
-                    }
-                    else {
-                    this.vocabularyCounts[word] += 1;
-                    }
-                }
-                else {
+                    let topic = Math.floor(Math.random() * (this.numTopics));
 
-                    this.tokensPerTopic[topic]++;
-                    if (! this.wordTopicCounts[word]) {
-                    this.wordTopicCounts[word] = {};
-                    this._vocabularySize++;
-                    this.vocabularyCounts[word] = 0;
+                    if (word.length <= 2) {
+                        this.stopwords[word] = 1;
                     }
-                    if (!this.wordTopicCounts[word][topic]) {
-                    this.wordTopicCounts[word][topic] = 0;
+
+                    var isStopword = this.stopwords[word];
+                    if (isStopword) {
+                        // Record counts for stopwords, but nothing else
+                        if (!this.vocabularyCounts[word]) {
+                            this.vocabularyCounts[word] = 1;
+                        } else {
+                            this.vocabularyCounts[word] += 1;
+                        }
+                    } else {
+
+                        this.tokensPerTopic[topic]++;
+                        if (!this.wordTopicCounts[word]) {
+                            this.wordTopicCounts[word] = {};
+                            this._vocabularySize++;
+                            this.vocabularyCounts[word] = 0;
+                        }
+                        if (!this.wordTopicCounts[word][topic]) {
+                            this.wordTopicCounts[word][topic] = 0;
+                        }
+                        this.wordTopicCounts[word][topic] += 1;
+                        this.vocabularyCounts[word] += 1;
+                        topicCounts[topic] += 1;
                     }
-                    this.wordTopicCounts[word][topic] += 1;
-                    this.vocabularyCounts[word] += 1;
-                    topicCounts[topic] += 1;
-                }
-                tokens.push({"word":word, "topic":topic, "isStopword":isStopword });
+                    tokens.push({word, topic, isStopword});
                 }
             });
 
-            let metadata = {}
+            let metadata: { [key: string]: string } = {}
             for (const [key, index] of Object.entries(columnInfo["metadata"])) {
                 metadata[key] = fields[index];
             }
 
-            this.documents.push({ 
-                "originalOrder" : this.documents.length,
-                "id" : docID,
-                "date" : docDate,
-                "originalText" : text,
-                "tokens" : tokens,
-                "topicCounts" : topicCounts,
-                "metadata" : metadata,
-                "dateObject" : new Date(docDate)
+            this.documents.push({
+                "originalOrder": this.documents.length,
+                "id": docID,
+                "date": docDate,
+                "originalText": text,
+                "tokens": tokens,
+                "topicCounts": topicCounts,
+                "metadata": metadata,
+                "dateObject": new Date(docDate)
             });
 
             // Need to move this selection and adding to #docs-page into a different component
@@ -334,14 +453,14 @@ class LDAModel {
      */
     _parseBigram = (docText) => {
         var parsedDoc
-        if(this.documentType === "text/csv") {
+        if (this.documentType === "text/csv") {
             parsedDoc = d3.csvParseRows(docText);
         } else {
             parsedDoc = d3.tsvParseRows(docText);
         }
-        
+
         // Handle empty documents
-        if(parsedDoc.length===0){
+        if (parsedDoc.length === 0) {
             alert("Document file is empty");
             return;
         }
@@ -349,88 +468,91 @@ class LDAModel {
         let columnInfo = this._getColumnInfo(parsedDoc[0]);
 
         // Handle no text column
-        if(columnInfo["text"] === -1) {
+        if (columnInfo.text === -1) {
             alert("No text column found in document file");
             return;
         }
 
-        for(let i = 1; i < parsedDoc.length; i++) {
+        for (let i = 1; i < parsedDoc.length; i++) {
             let fields = parsedDoc[i];
             // Set fields based on whether they exist
             var text = fields[columnInfo.text];
-            
+
             var rawTokens = text.toLowerCase().match(this._wordPattern);
-            if (rawTokens == null) { continue; }
-            var prevWord = ""; 
+            if (rawTokens == null) {
+                continue;
+            }
+            let prevWord = "";
 
             rawTokens.forEach((word) => {
                 if (word !== "") {
-                    if (word.length <= 2) { this.stopwords[word] = 1; }
-                
+                    if (word.length <= 2) {
+                        this.stopwords[word] = 1;
+                    }
+
                     var isStopword = this.stopwords[word];
                     if (isStopword) {
                         prevWord = "";
-                    }
-                    else {
+                    } else {
                         if (prevWord) {
-                            if (! this.bigramCount[prevWord]) {
-                            this.bigramCount[prevWord] = {};
-                            this.bigramWord1Count[prevWord] = 0;
+                            if (!this.bigramCount[prevWord]) {
+                                this.bigramCount[prevWord] = {};
+                                this.bigramWord1Count[prevWord] = 0;
                             }
 
-                            if (! this.bigramCountRev[word]) {
+                            if (!this.bigramCountRev[word]) {
                                 this.bigramCountRev[word] = {};
-                                }
-                            
+                            }
+
                             if (!this.bigramCount[prevWord][word]) {
                                 this.bigramCount[prevWord][word] = 0;
-                                }
-                            
+                            }
+
                             if (!this.bigramCountRev[word][prevWord]) {
                                 this.bigramCountRev[word][prevWord] = 0;
-                                }
-                            
+                            }
+
                             if (!this.bigramWord2Count[word]) {
                                 this.bigramWord2Count[word] = 0;
-                                }
+                            }
 
                             this.bigramCount[prevWord][word] += 1;
                             this.bigramCountRev[word][prevWord] += 1;
                             this.bigramWord1Count[prevWord] += 1;
-                            this.bigramWord2Count[word]+= 1;
+                            this.bigramWord2Count[word] += 1;
                             this.totalBigramCount += 1;
-                            }
+                        }
                     }
                     prevWord = word;
                 }
             });
-            }
-            this.scoreBigram();
-            this.bigramInitialized = true;
-            this._changeBigramStatus(true);
         }
+        this.scoreBigram();
+        this.bigramInitialized = true;
+        this._changeBigramStatus(true);
+    }
 
     sortTopicWords() {
-            this.topicWordCounts = [];
-            for (let topic = 0; topic < this.numTopics; topic++) {
-                this.topicWordCounts[topic] = [];
+        this.topicWordCounts = [];
+        for (let topic = 0; topic < this.numTopics; topic++) {
+            this.topicWordCounts[topic] = [];
+        }
+        for (let word in this.wordTopicCounts) {
+            for (let topic in this.wordTopicCounts[word]) {
+                this.topicWordCounts[topic].push({word, "count": this.wordTopicCounts[word][topic]});
             }
-            for (let word in this.wordTopicCounts) {
-              for (let topic in this.wordTopicCounts[word]) {
-                this.topicWordCounts[topic].push({"word":word, "count":this.wordTopicCounts[word][topic]});
-              }
-            }
-          
-            for (let topic = 0; topic < this.numTopics; topic++) {
-                this.topicWordCounts[topic].sort(this.byCountDescending);
-            }
+        }
+
+        for (let topic = 0; topic < this.numTopics; topic++) {
+            this.topicWordCounts[topic].sort(this.byCountDescending);
+        }
         this.updateWebpage();
     }
 
     /**
      * This function carries out the necessary functions after a model is uploaded
      */
-    modelUploaded = () => {
+    modelUploaded() {
         console.log("Corrected Model")
         // Date Objects get uploaded as strings not object, and thus must be remade
         this._remakeDateObjects()
@@ -452,50 +574,49 @@ class LDAModel {
      * @returns {Object} {"id":index, "text":index, "date_tag":index, 
      *  "metadata": {"columnName1":index,..."columnNameN":index}}
      */
-    _getColumnInfo(header) {
-        let columnInfo = {"metadata":{}};
-        let lookFor = ["id","text","date_tag"]; // special columns
+    _getColumnInfo(header: readonly string[]): LDAColumnInfo {
+        let columnInfo = {"metadata": {}};
+        let lookFor = ["id", "text", "date_tag"]; // special columns
         let columnIsMetadata = Array(header.length).fill(true);
         header = header.map((s) => s.toLocaleLowerCase());
 
         // Process special columns
-        for (let columnName of lookFor){
+        for (let columnName of lookFor) {
             let index = header.indexOf(columnName);
             columnInfo[columnName] = index;
 
-            if(index !== -1) {
-                columnIsMetadata[index] = false; 
+            if (index !== -1) {
+                columnIsMetadata[index] = false;
             }
         }
         // Process metadata
         for (let i = 0; i < header.length; i++) {
-            if(columnIsMetadata[i]) {
+            if (columnIsMetadata[i]) {
                 // Add this column to metadata object
-                columnInfo["metadata"][header[i]]=i;
+                columnInfo["metadata"][header[i]] = i;
             }
         }
-        return columnInfo;
+        return columnInfo as LDAColumnInfo;
     }
 
     /**
-     * @summary documents sorted in order of the prevalence 
+     * @summary documents sorted in order of the prevalence
      * of the selected topic
      */
-    get sortedDocuments() {
+    get sortedDocuments(): LDADocument[] | SortedLDADocument[] {
         const selectedTopic = this.selectedTopic;
         const sumDocSortSmoothing = LDAModel.DOC_SORT_SMOOTHING * this.numTopics;
-        let sortedDocuments = this.documents;
 
         // Return default order if no topic is selected
-        if (this.selectedTopic === -1) return sortedDocuments;
+        if (this.selectedTopic === -1) return this.documents;
 
-        sortedDocuments = sortedDocuments.map(function (doc, i) {
-            doc["score"] = 
-                (doc.topicCounts[selectedTopic] + LDAModel.DOC_SORT_SMOOTHING)/
+        let sortedDocuments: SortedLDADocument[] = this.documents.map(function (doc, i) {
+            doc["score"] =
+                (doc.topicCounts[selectedTopic] + LDAModel.DOC_SORT_SMOOTHING) /
                 (doc.tokens.length + sumDocSortSmoothing)
-            return doc
+            return doc as SortedLDADocument
         });
-        sortedDocuments.sort(function(a, b) {
+        sortedDocuments.sort(function (a, b) {
             return b.score - a.score;
         });
         return sortedDocuments;
@@ -506,7 +627,7 @@ class LDAModel {
      * the selected topic was assigned
      */
     get highestWordTopicCount() {
-        if(this.selectedTopic===-1) return 0;
+        if (this.selectedTopic === -1) return 0;
         return this.topicWordCounts[this.selectedTopic][0]["count"]
     }
 
@@ -514,20 +635,20 @@ class LDAModel {
      * lazy getter for the Date object of the earliest document
      * @note memo stored in this._memoMinDocTime
      */
-    get minDocTime() {
+    get minDocTime(): Date | undefined {
         // If already calculated, return that
-        if(this._memoMinDocTime) return this._memoMinDocTime 
+        if (this._memoMinDocTime) return this._memoMinDocTime
 
         // Protect against no documents
-        if(!this.documents[0]) {
+        if (!this.documents[0]) {
             console.log("Tried to get minDocTime without any documents")
-            return null;
+            return undefined;
         }
 
-        let minTime = this.documents[0].dateObject
+        let minTime = this.documents[0].dateObject.getTime()
         // Iterate through docs and keep min found time
         this.documents.forEach((doc) => {
-            minTime = Math.min(minTime, doc.dateObject)
+            minTime = Math.min(minTime, doc.dateObject.getTime())
         })
         this._memoMinDocTime = new Date(minTime)
         return this._memoMinDocTime
@@ -537,20 +658,20 @@ class LDAModel {
      * Lazily loaded Date object for the latest document
      * @note memo stored in this._memoMaxDocTime
      */
-    get maxDocTime() {
+    get maxDocTime(): Date | undefined {
         // If already calculated, return that
-        if(this._memoMaxDocTime) return this._memoMaxDocTime 
+        if (this._memoMaxDocTime) return this._memoMaxDocTime
 
         // Protect against no documents
-        if(!this.documents[0]) {
+        if (!this.documents[0]) {
             console.log("Tried to get maxDocTime without any documents")
-            return null;
+            return undefined;
         }
 
-        let maxTime = this.documents[0].dateObject
+        let maxTime = this.documents[0].dateObject.getTime()
         // Iterate through docs and keep min found time
         this.documents.forEach((doc) => {
-            maxTime = Math.max(maxTime, doc.dateObject)
+            maxTime = Math.max(maxTime, doc.dateObject.getTime())
         })
         this._memoMaxDocTime = new Date(maxTime)
         return this._memoMaxDocTime
@@ -564,7 +685,7 @@ class LDAModel {
     scoreBigram() {
         var tempFinalBigram = {};
         var tempFinalBigramRev = {};
-        for (var word1 in this.bigramCount){
+        for (var word1 in this.bigramCount) {
             tempFinalBigram[word1] = {};
             for (var word2 in this.bigramCount[word1]) {
                 var n_oo = this.totalBigramCount;
@@ -572,10 +693,10 @@ class LDAModel {
                 var n_io = this.bigramWord1Count[word1];
                 var n_oi = this.bigramWord2Count[word2];
 
-                var score = n_oo *((n_ii*n_oo - n_io*n_oi)**2 /
-                        ((n_ii + n_io) * (n_ii + n_oi) * (n_io + n_oo) * (n_oi + n_oo)))
+                var score = n_oo * ((n_ii * n_oo - n_io * n_oi) ** 2 /
+                    ((n_ii + n_io) * (n_ii + n_oi) * (n_io + n_oo) * (n_oi + n_oo)))
 
-             // check to see if more than 20 occurance in total
+                // check to see if more than 20 occurance in total
                 var scoreCheck = score > this.bigramThreshold;
                 var freqCheck = n_ii > 20;
                 if (scoreCheck && freqCheck) {
@@ -604,8 +725,8 @@ class LDAModel {
     }
 
     /**
-     * 
-     * @param {String} text 
+     *
+     * @param {String} text
      * @returns An array of strings in text that match LDAModel.tokenRegex
      */
     getRawTokens(text) {
@@ -616,15 +737,15 @@ class LDAModel {
      * Get the salience and location of every token in some text
      * @param {String} text the text to parse
      * @param {Number} topic the topic to get saliency for
-     * @returns {[{string:String,salience:Number,startIndex:Number}]} 
+     * @returns {[{string:String,salience:Number,startIndex:Number}]}
      */
-    textToTokenSaliences(text,topic) {
+    textToTokenSaliences(text, topic) {
         const tokensItter = this.getRawTokensWithIndices(text)
         const tokens = [...tokensItter]
         return tokens.map((token) => {
             return {
                 string: token[0],
-                salience: this.topicSaliency(token[0],topic),
+                salience: this.topicSaliency(token[0], topic),
                 startIndex: token.index
             }
         })
@@ -636,43 +757,43 @@ class LDAModel {
      * @param {Number} topic topic to get salience of
      * @returns {Number} the average token salience in text for topic
      */
-    textSalience(text,topic) {
-        const tokensSals = this.textToTokenSaliences(text,topic)
-        const addSal = (sumSals, token) => (token.salience+sumSals)
-        const totalSal = tokensSals.reduce(addSal,0)
-        return totalSal/tokensSals.length
+    textSalience(text: string, topic: number): number {
+        const tokensSals = this.textToTokenSaliences(text, topic)
+        const addSal = (sumSals, token) => (token.salience + sumSals)
+        const totalSal = tokensSals.reduce(addSal, 0)
+        return totalSal / tokensSals.length
     }
 
     /**
      * @summary Computes the salience score of a word for a topic
      * @param {String} w Word to analyze
      * @param {Number} t Topic to analyze
-     * @description This calculation is an adaptation of Chuang et al's 2012 
+     * @description This calculation is an adaptation of Chuang et al's 2012
      * work. It is calculated by multiplying the distinctiveness of a word in
      * a given topic, by the probability that any given word in a topic is w.
      */
-    topicSaliency = (w,t) => {
-        if(this.stopwords[w]===1) return 0;
-        return this.topicDistinctiveness(w,t)*this.pWordGivenTopic(w,t);
+    topicSaliency(w: string, t: number): number {
+        if (this.stopwords[w] === 1) return 0;
+        return this.topicDistinctiveness(w, t) * this.pWordGivenTopic(w, t);
     }
 
     /**
      * @summary Computes the distinctiveness of a word for a topic
      * @param {String} w Word to analyze
      * @param {Number} t Topic to analyze
-     * @description This calculation is an adaptation of Chuang et al's 2012 
-     * work. It is described by them as "This formulation describes (in an 
-     * information-theoretic sense) how informative the specific term w is 
+     * @description This calculation is an adaptation of Chuang et al's 2012
+     * work. It is described by them as "This formulation describes (in an
+     * information-theoretic sense) how informative the specific term w is
      * for determining the generating topic, versus a randomly-selected term w.
      * For example, if a word w occurs in all topics, observing the word tells
-     * us little about the document’s topical mixture; thus the word would 
+     * us little about the document’s topical mixture; thus the word would
      * receive a low distinctiveness score."
      */
-    topicDistinctiveness = (w,t) => {
-        if(this.stopwords[w]===1) return 0;
+    topicDistinctiveness(w: string, t: number): number {
+        if (this.stopwords[w] === 1) return 0;
         let sigma = 1e-50; // To avoid a log of 0
-        return this.pTopicGivenWord(w,t)*Math.log(
-            this.pTopicGivenWord(w,t)/this.pTopic(t)+sigma)
+        return this.pTopicGivenWord(w, t) * Math.log(
+            this.pTopicGivenWord(w, t) / this.pTopic(t) + sigma)
     }
 
     /**
@@ -680,15 +801,14 @@ class LDAModel {
      * @param {String} w Word to analyze
      * @param {Number} t Topic to analyze
      */
-    pTopicGivenWord = (w,t) => {
+    pTopicGivenWord(w: string, t: number): number {
         let smoother = 1;
-        if(!this.wordTopicCounts[w]) return 0; // If it isnt a token
+        if (!this.wordTopicCounts[w]) return 0; // If it isnt a token
         let numWInT = this.wordTopicCounts[w][t];
-        if(!numWInT) numWInT = 0;
-        let totalWs = Object.keys(this.wordTopicCounts[w])
-            .reduce((sum,key)=>sum+parseFloat(this.wordTopicCounts[w][key]||0),0);
+        if (!numWInT) numWInT = 0;
+        let totalWs = Object.keys(this.wordTopicCounts[w]).reduce((sum, key) => sum + this.wordTopicCounts[w][key], 0);
 
-        return (numWInT + smoother)/(totalWs + this.numTopics*smoother);
+        return (numWInT + smoother) / (totalWs + this.numTopics * smoother);
     }
 
     /**
@@ -696,20 +816,20 @@ class LDAModel {
      * @param {String} w Word to analyze
      * @param {Number} t Topic to analyze
      */
-    pWordGivenTopic = (w,t) => {
-        if(!this.wordTopicCounts[w]) return 0; // If it isnt a token
+    pWordGivenTopic(w: string, t: number): number {
+        if (!this.wordTopicCounts[w]) return 0; // If it isnt a token
         let numWInT = this.wordTopicCounts[w][t];
-        if(!numWInT) numWInT = 0;
+        if (!numWInT) numWInT = 0;
         let numTokensInT = this.tokensPerTopic[t];
-        return numWInT/numTokensInT;
+        return numWInT / numTokensInT;
     }
 
     /**
      * @summary The probability of any word being assigned to topic t
      * @param {Number} t Topic to analyze
      */
-    pTopic = (t) => {
-        return 1/this.numTopics;
+    pTopic(t: number): number {
+        return 1 / this.numTopics;
     }
 
     /**
@@ -718,18 +838,18 @@ class LDAModel {
      * @description Parses at most the most common 1000 tokens in topic t
      * and returns the value of the highest salience.
      */
-    _calcMaxTopicSaliency(t) {
-        if (t===-1) return 0; // If no topic selected
+    _calcMaxTopicSaliency(t: number): number {
+        if (t === -1) return 0; // If no topic selected
 
         // Set to at most 1000
         let endIndex = 1000;
-        if(endIndex > this.topicWordCounts[t].length) {
+        if (endIndex > this.topicWordCounts[t].length) {
             endIndex = this.topicWordCounts[t].length;
         }
         // Calculate max Saliency
         let maxS = 0;
-        for(let i = 0; i < endIndex; i++) {
-            let salience = this.topicSaliency(this.topicWordCounts[t][i]["word"],t);
+        for (let i = 0; i < endIndex; i++) {
+            let salience = this.topicSaliency(this.topicWordCounts[t][i]["word"], t);
             if (salience > maxS) maxS = salience;
         }
         console.log("Calculated a maximum saliency of: " + maxS);
@@ -739,11 +859,11 @@ class LDAModel {
     /**
      * @summary Returns the highest salience value for all tokens of topic t
      * @param {Number} topicNum Topic to analyze
-     * @description Check if the maxTopicSaliency for a given topic has already been 
-     * calculated before calculating it. 
+     * @description Check if the maxTopicSaliency for a given topic has already been
+     * calculated before calculating it.
      */
-    maxTopicSaliency = (topicNum) => {
-        if(this._maxTopicSaliency[topicNum]) return this._maxTopicSaliency[topicNum];
+    maxTopicSaliency(topicNum: number): number {
+        if (this._maxTopicSaliency[topicNum]) return this._maxTopicSaliency[topicNum];
         this._maxTopicSaliency[topicNum] = this._calcMaxTopicSaliency(topicNum);
         return this._maxTopicSaliency[topicNum];
     }
@@ -752,7 +872,7 @@ class LDAModel {
      * @summary Shifts model to have a dif number of topics
      * @param {Number} numTopics new number of topics
      */
-    changeNumTopics(numTopics) {
+    changeNumTopics(numTopics: number) {
         this.numTopics = numTopics;
         this.selectedTopic = -1;
         this.topicVisibility = this.initTopicVisibility(this.numTopics);
@@ -766,24 +886,25 @@ class LDAModel {
         this._documentTopicSmoothing = zeros(numTopics).fill(0.1);
 
         d3.select("#iters").text(this._completeSweeps);
-        
-        Object.keys(this.vocabularyCounts).forEach((word) => { this.wordTopicCounts[word] = {} });
 
-        this.documents.forEach(( currentDoc, i ) => {
+        Object.keys(this.vocabularyCounts).forEach((word) => {
+            this.wordTopicCounts[word] = {}
+        });
+
+        this.documents.forEach((currentDoc, i) => {
             currentDoc.topicCounts = zeros(this.numTopics);
             for (let position = 0; position < currentDoc.tokens.length; position++) {
                 let token = currentDoc.tokens[position];
                 token.topic = Math.floor(Math.random() * this.numTopics);
-                
-                if (! token.isStopword) {
+
+                if (!token.isStopword) {
                     this.tokensPerTopic[token.topic]++;
-                if (! this.wordTopicCounts[token.word][token.topic]) {
-                    this.wordTopicCounts[token.word][token.topic] = 1;
-                }
-                else {
-                    this.wordTopicCounts[token.word][token.topic] += 1;
-                }
-                currentDoc.topicCounts[token.topic] += 1;
+                    if (!this.wordTopicCounts[token.word][token.topic]) {
+                        this.wordTopicCounts[token.word][token.topic] = 1;
+                    } else {
+                        this.wordTopicCounts[token.word][token.topic] += 1;
+                    }
+                    currentDoc.topicCounts[token.topic] += 1;
                 }
             }
         });
@@ -794,19 +915,18 @@ class LDAModel {
     /**
      * @summary Turns on/off hyptertuning option
      */
-    hyperTune = (tune) => {
-        if (this.modelIsRunning == false)
-        this._changeAlpha = tune;
+    hyperTune(tune: boolean) {
+        if (!this.modelIsRunning)
+            this._changeAlpha = tune;
     }
 
     /**
      * @summary Turns on/off Bigrams option
      */
-     _changeBigramStatus = (bigramStatus) => {
+    _changeBigramStatus = (bigramStatus) => {
         if (bigramStatus) {
             this.addBigram();
-        }
-        else {
+        } else {
             this.removeBigram();
         }
         this.bigram = bigramStatus;
@@ -816,89 +936,92 @@ class LDAModel {
      * @summary completes one training iteration
      */
     _sweep = () => {
-        var startTime = Date.now();
-        var topicNormalizers = zeros(this.numTopics);
-        var doOptimizeAlpha = false;
+        let startTime = Date.now();
+        let topicNormalizers = zeros(this.numTopics);
+        let doOptimizeAlpha = false;
+        let docLength = 0;
         if (this._changeAlpha && this._completeSweeps > this._burninPeriod && this._optimizeInterval != 0 &&
-          this._completeSweeps % this._optimizeInterval == 0)
-          {doOptimizeAlpha = true;} 
-        
-        for (let topic = 0; topic < this.numTopics; topic++) {
-          topicNormalizers[topic] = 1.0 / 
-          (this._vocabularySize * this._topicWordSmoothing + 
-            this.tokensPerTopic[topic]);
+            this._completeSweeps % this._optimizeInterval === 0) {
+            doOptimizeAlpha = true;
         }
-    
+
+        for (let topic = 0; topic < this.numTopics; topic++) {
+            topicNormalizers[topic] = 1.0 /
+                (this._vocabularySize * this._topicWordSmoothing +
+                    this.tokensPerTopic[topic]);
+        }
+
         for (let doc = 0; doc < this.documents.length; doc++) {
-          let currentDoc = this.documents[doc];
-          let docTopicCounts = currentDoc.topicCounts;
-          if (doOptimizeAlpha) {var docLength = 0;}
-    
-          for (let position = 0; position < currentDoc.tokens.length; position++) {
-            let token = currentDoc.tokens[position];
-            if (token.isStopword) { continue; }
-            if (doOptimizeAlpha) {docLength++;}
-    
-            this.tokensPerTopic[ token.topic ]--;
-            let currentWordTopicCounts = this.wordTopicCounts[ token.word ];
-            currentWordTopicCounts[ token.topic ]--;
-            if (currentWordTopicCounts[ token.topic ] === 0) {
-            }
-            docTopicCounts[ token.topic ]--;
-            topicNormalizers[ token.topic ] = 1.0 / 
-              (this._vocabularySize * this._topicWordSmoothing +
-                this.tokensPerTopic[ token.topic ]);
-    
-            let sum = 0.0;
-            for (let topic = 0; topic < this.numTopics; topic++) {
-              if (currentWordTopicCounts[ topic ]) {
-                this._topicWeights[topic] =
-                  (this._documentTopicSmoothing[topic] + docTopicCounts[topic]) *
-                  (this._topicWordSmoothing + currentWordTopicCounts[ topic ]) *
-                topicNormalizers[topic];
-              }
-              else {
-                this._topicWeights[topic] =
-                  (this._documentTopicSmoothing[topic] + docTopicCounts[topic]) *
-                  this._topicWordSmoothing *
-                topicNormalizers[topic];
-              }
-              sum += this._topicWeights[topic];
-    
-            }
-    
-            // Sample from an unnormalized discrete distribution
-            var sample = sum * Math.random();
-              var i = 0;
-              sample -= this._topicWeights[i];
-              while (sample > 0.0) {
-                i++;
+            let currentDoc = this.documents[doc];
+            let docTopicCounts = currentDoc.topicCounts;
+
+            for (let position = 0; position < currentDoc.tokens.length; position++) {
+                let token = currentDoc.tokens[position];
+                if (token.isStopword) {
+                    continue;
+                }
+                if (doOptimizeAlpha) {
+                    docLength++;
+                }
+
+                this.tokensPerTopic[token.topic]--;
+                let currentWordTopicCounts = this.wordTopicCounts[token.word];
+                currentWordTopicCounts[token.topic]--;
+                if (currentWordTopicCounts[token.topic] === 0) {
+                }
+                docTopicCounts[token.topic]--;
+                topicNormalizers[token.topic] = 1.0 /
+                    (this._vocabularySize * this._topicWordSmoothing +
+                        this.tokensPerTopic[token.topic]);
+
+                let sum = 0.0;
+                for (let topic = 0; topic < this.numTopics; topic++) {
+                    if (currentWordTopicCounts[topic]) {
+                        this._topicWeights[topic] =
+                            (this._documentTopicSmoothing[topic] + docTopicCounts[topic]) *
+                            (this._topicWordSmoothing + currentWordTopicCounts[topic]) *
+                            topicNormalizers[topic];
+                    } else {
+                        this._topicWeights[topic] =
+                            (this._documentTopicSmoothing[topic] + docTopicCounts[topic]) *
+                            this._topicWordSmoothing *
+                            topicNormalizers[topic];
+                    }
+                    sum += this._topicWeights[topic];
+
+                }
+
+                // Sample from an unnormalized discrete distribution
+                var sample = sum * Math.random();
+                var i = 0;
                 sample -= this._topicWeights[i];
+                while (sample > 0.0) {
+                    i++;
+                    sample -= this._topicWeights[i];
+                }
+                token.topic = i;
+
+                this.tokensPerTopic[token.topic]++;
+
+                if (!currentWordTopicCounts[token.topic]) {
+                    currentWordTopicCounts[token.topic] = 1;
+                } else {
+                    currentWordTopicCounts[token.topic] += 1;
+                }
+                docTopicCounts[token.topic]++;
+
+                topicNormalizers[token.topic] = 1.0 /
+                    (this._vocabularySize * this._topicWordSmoothing +
+                        this.tokensPerTopic[token.topic]);
+
             }
-            token.topic = i;
-    
-            this.tokensPerTopic[ token.topic ]++;
-    
-            if (! currentWordTopicCounts[ token.topic ]) {
-              currentWordTopicCounts[ token.topic ] = 1;
+
+            if (doOptimizeAlpha) {
+                this.docLengthCounts[docLength]++;
+                for (let topic = 0; topic < this.numTopics; topic++) {
+                    this.topicDocCounts[topic][docTopicCounts[topic]]++;
+                }
             }
-            else {
-              currentWordTopicCounts[ token.topic ] += 1;
-            }
-            docTopicCounts[ token.topic ]++;
-    
-            topicNormalizers[ token.topic ] = 1.0 / 
-              (this._vocabularySize * this._topicWordSmoothing +
-              this.tokensPerTopic[ token.topic ]);
-              
-          }
-    
-          if (doOptimizeAlpha) {
-            this.docLengthCounts[docLength]++;
-            for (let topic = 0; topic < this.numTopics; topic++) {
-              this.topicDocCounts[topic][docTopicCounts[topic]]++;
-            }
-          }
         }
 
         if (doOptimizeAlpha) {
@@ -909,20 +1032,20 @@ class LDAModel {
         }
 
         console.log("sweep in " + (Date.now() - startTime) + " ms");
-        this._completeSweeps += 1;    
-    
+        this._completeSweeps += 1;
+
         // TODO: Update completed sweeps outside of this function
         d3.select("#iters").text(this._completeSweeps);
-    
+
         if (this._completeSweeps >= this._requestedSweeps) {
-          this.update = true;
-          this.sortTopicWords();
-          this._timer.stop();
-          this._sweeps = 0;
-          this.modelIsRunning = false;
-          this._maxTopicSaliency = new Array(this.numTopics);
-          this.updateWebpage();
-          console.log(this._documentTopicSmoothing);
+            // this.update = true;
+            this.sortTopicWords();
+            this._timer?.stop();
+            this._sweeps = 0;
+            this.modelIsRunning = false;
+            this._maxTopicSaliency = new Array(this.numTopics);
+            this.updateWebpage();
+            console.log(this._documentTopicSmoothing);
         }
     }
 
@@ -930,8 +1053,8 @@ class LDAModel {
         return this._completeSweeps;
     }
 
-    /** 
-     *  Gather statistics on the size of documents 
+    /**
+     *  Gather statistics on the size of documents
      *  and create histograms for use in Dirichlet hyperparameter
      *  optimization.
      */
@@ -954,29 +1077,31 @@ class LDAModel {
 
         // alternative would be to initialise the index in the
         // 2d array only after they are accessed
+
+        // @ts-ignore this array is being initialized
         this.topicDocCounts = zeros(this.numTopics);
         for (let i = 0; i < this.topicDocCounts.length; i++) {
             this.topicDocCounts[i] = zeros(maxTokens + 1);
         }
     }
 
-    /** 
+    /**
      * Learn Dirichlet parameters using frequency histograms, with an assumption of a Gamma distributions.
-     * 
+     *
      * @param {Number[]} parameters A reference to the current values of the parameters, which will be updated in place
      * @param {Number[][]} observations An array of count histograms. <code>observations[10][3]</code> could be the number of documents that contain exactly 3 tokens of word type 10.
      * @param {Number[]} observationLengths A histogram of sample lengths, for example <code>observationLengths[20]</code> could be the number of documents that are exactly 20 tokens long.
      * @param {Number} shape Gamma prior E(X) = shape * scale, var(X) = shape * scale<sup>2</sup>
-     * @param {Number} scale 
+     * @param {Number} scale
      * @param {Number} numIterations 200 to 1000 generally insures convergence, but 1-5 is often enough to step in the right direction
      * @returns The sum of the learned parameters.
-     */ 
+     */
     _learnParameters = (parameters,
-        observations,
-        observationLengths,
-        shape,
-        scale,
-        numIterations) => {
+                        observations,
+                        observationLengths,
+                        shape,
+                        scale,
+                        numIterations) => {
 
         var i;
         var k;
@@ -1001,36 +1126,36 @@ class LDAModel {
 
         var histogram;
 
-        for (i=0; i<observations.length; i++) {
+        for (i = 0; i < observations.length; i++) {
             histogram = observations[i];
 
             for (k = 0; k < histogram.length; k++) {
                 if (histogram[k] > 0) {
-                nonZeroLimits[i] = k;
+                    nonZeroLimits[i] = k;
                 }
             }
         }
 
-        for (let iteration=0; iteration<numIterations; iteration++) {
+        for (let iteration = 0; iteration < numIterations; iteration++) {
 
             // Calculate the denominator
             denominator = 0;
             currentDigamma = 0;
 
             // Iterate over the histogram:
-            for (i=1; i<observationLengths.length; i++) {
+            for (i = 1; i < observationLengths.length; i++) {
                 currentDigamma += 1 / (parametersSum + i - 1);
                 denominator += observationLengths[i] * currentDigamma;
             }
 
             // Bayesian estimation Part I
-            denominator -= 1/scale;
+            denominator -= 1 / scale;
 
             // Calculate the individual parameters
 
             parametersSum = 0;
 
-            for (k=0; k<parameters.length; k++) {
+            for (k = 0; k < parameters.length; k++) {
 
                 // What's the largest non-zero element in the histogram?
                 nonZeroLimit = nonZeroLimits[k];
@@ -1041,7 +1166,7 @@ class LDAModel {
 
                 histogram = observations[k];
 
-                for (i=1; i <= nonZeroLimit; i++) {
+                for (i = 1; i <= nonZeroLimit; i++) {
                     currentDigamma += 1 / (oldParametersK + i - 1);
                     parameters[k] += histogram[i] * currentDigamma;
                 }
@@ -1053,7 +1178,9 @@ class LDAModel {
             }
         }
 
-        if (parametersSum < 0.0) { throw "sum: " + parametersSum; }
+        if (parametersSum < 0.0) {
+            throw "sum: " + parametersSum;
+        }
         return parametersSum;
     }
 
@@ -1063,40 +1190,42 @@ class LDAModel {
      * @param {String} word the word to be added to stoplist
      * @param {Boolean} refresh whether or not to run sortTopicWords
      */
-    addStop = (word, refresh=false) => {  
-            this.addStopHelper(word);
-            if (this.bigram) {
-                for (let w in this.finalBigram[word]) {
-                    this.addStopHelper(word+"_"+w)
-                }
-                for (let w in this.finalBigramRev[word]) {
-                    this.addStopHelper(w+"_"+word)
-                }
+    addStop = (word, refresh = false) => {
+        this.addStopHelper(word);
+        if (this.bigram) {
+            for (let w in this.finalBigram[word]) {
+                this.addStopHelper(word + "_" + w)
             }
-            if (refresh) {this.sortTopicWords()}
+            for (let w in this.finalBigramRev[word]) {
+                this.addStopHelper(w + "_" + word)
+            }
+        }
+        if (refresh) {
+            this.sortTopicWords()
+        }
     }
 
     /**
      * @summary adds a word to model's stoplist
      * @param {String} word the word to be added to stoplist
      */
-     addStopHelper = (word) => { 
-        if (!this.stopwords[word]) { 
-        this.stopwords[word] = 1;
-        this._vocabularySize--;
-        delete this.wordTopicCounts[word];
+    addStopHelper = (word) => {
+        if (!this.stopwords[word]) {
+            this.stopwords[word] = 1;
+            this._vocabularySize--;
+            delete this.wordTopicCounts[word];
 
-        this.documents.forEach(( currentDoc, i ) => {
-            var docTopicCounts = currentDoc.topicCounts;
-            for (var position = 0; position < currentDoc.tokens.length; position++) {
-                var token = currentDoc.tokens[position];
-                if (token.word === word) {
-                    token.isStopword = true;
-                    this.tokensPerTopic[ token.topic ]--;
-                    docTopicCounts[ token.topic ]--;
+            this.documents.forEach((currentDoc, i) => {
+                let docTopicCounts = currentDoc.topicCounts;
+                for (var position = 0; position < currentDoc.tokens.length; position++) {
+                    var token = currentDoc.tokens[position];
+                    if (token.word === word) {
+                        token.isStopword = true;
+                        this.tokensPerTopic[token.topic]--;
+                        docTopicCounts[token.topic]--;
+                    }
                 }
-            }
-        });
+            });
         }
     }
 
@@ -1109,13 +1238,13 @@ class LDAModel {
         this.removeStopHelper(word);
         if (this.bigram) {
             for (let w in this.finalBigram[word]) {
-                if (this.stopwords[word+"_"+w] && !this.stopwords[w]) {
-                    this.removeStopHelper(word+"_"+w)
+                if (this.stopwords[word + "_" + w] && !this.stopwords[w]) {
+                    this.removeStopHelper(word + "_" + w)
                 }
             }
             for (let w in this.finalBigramRev[word]) {
-                if (this.stopwords[w+"_"+word] && !this.stopwords[w]) {
-                    this.removeStopHelper(w+"_"+word)
+                if (this.stopwords[w + "_" + word] && !this.stopwords[w]) {
+                    this.removeStopHelper(w + "_" + word)
                 }
             }
         }
@@ -1125,25 +1254,24 @@ class LDAModel {
      * @summary removes a word from stoplist
      * @param {String} word the word to remove
      */
-     removeStopHelper = (word) => {
+    removeStopHelper = (word) => {
         delete this.stopwords[word];
         this._vocabularySize++;
         this.wordTopicCounts[word] = {};
-        var currentWordTopicCounts = this.wordTopicCounts[ word ];
-        
-        this.documents.forEach(( currentDoc, i ) => {
-            var docTopicCounts = currentDoc.topicCounts;
+        var currentWordTopicCounts = this.wordTopicCounts[word];
+
+        this.documents.forEach((currentDoc, i) => {
+            let docTopicCounts = currentDoc.topicCounts;
             for (var position = 0; position < currentDoc.tokens.length; position++) {
                 var token = currentDoc.tokens[position];
                 if (token.word === word) {
                     token.isStopword = false;
-                    this.tokensPerTopic[ token.topic ]++;
-                    docTopicCounts[ token.topic ]++;
-                    if (! currentWordTopicCounts[ token.topic ]) {
-                        currentWordTopicCounts[ token.topic ] = 1;
-                    }
-                    else {
-                        currentWordTopicCounts[ token.topic ] += 1;
+                    this.tokensPerTopic[token.topic]++;
+                    docTopicCounts[token.topic]++;
+                    if (!currentWordTopicCounts[token.topic]) {
+                        currentWordTopicCounts[token.topic] = 1;
+                    } else {
+                        currentWordTopicCounts[token.topic] += 1;
                     }
                 }
             }
@@ -1158,12 +1286,14 @@ class LDAModel {
      */
     addBigram = () => {
         for (let word1 in this.finalBigram) {
-            if (!this.stopwords[word1]){
-            for (let word2 in this.finalBigram[word1]) {
-                if (!this.stopwords[word2]) {
-                this.addBigramHelper(word1, word2);
+            if (!this.stopwords[word1]) {
+                for (let word2 in this.finalBigram[word1]) {
+                    if (!this.stopwords[word2]) {
+                        this.addBigramHelper(word1, word2);
+                    }
+                }
             }
-        }}}
+        }
         for (let w in this.stopwords) {
             if (this.stopwords[w]) {
                 this.addStop(w);
@@ -1180,65 +1310,65 @@ class LDAModel {
     addBigramHelper = (word1, word2) => {
         // Makes word1_word2 into a “word” by adding it to the wordTopicCounts, vocaburaryCounts, 
         // and increasing the vocaburarySize.
-        var curBigram = word1+"_"+word2
+        var curBigram = word1 + "_" + word2
         this.wordTopicCounts[curBigram] = {};
         this.vocabularyCounts[curBigram] = 0;
-        var currentWordTopicCounts = this.wordTopicCounts[ curBigram ];
+        var currentWordTopicCounts = this.wordTopicCounts[curBigram];
         this._vocabularySize++;
-        
-        this.documents.forEach(( currentDoc, i ) => {
-            var docTopicCounts = currentDoc.topicCounts;
-            var skipNext = false;
-            var tempTokens = [];
+
+        this.documents.forEach((currentDoc, i) => {
+            let docTopicCounts = currentDoc.topicCounts;
+            let skipNext = false;
+            let tempTokens: LDAToken[] = [];
             for (var position = 0; position < currentDoc.tokens.length; position++) {
                 if (skipNext) {
                     skipNext = false;
-                }
-                else {
-                var token = currentDoc.tokens[position];
-                if (position==currentDoc.tokens.length-1) {tempTokens.push(token)}
-                else {
-                var nextToken = currentDoc.tokens[position+1];
-                // We look for all occurrences of word1 followed directly by word2 in this.documents
-                // Then, we replace the two tokens for word1 and word2 by one token for
-                // word1_word2 in this.documents
-                // For every bigram occurrence, we subtract the vocaburaryCounts of word 1
-                // and word2 and add to the vocaburaryCounts of the bigram
-                if (token.word == word1 && nextToken.word == word2) {
-                    var random_boolean = Math.random() < 0.5;
-                    this.wordTopicCounts[word1][token.topic]--;
-                    this.wordTopicCounts[word2][nextToken.topic]--;
-                    this.vocabularyCounts[curBigram]++;
-                    this.vocabularyCounts[word1]--;
-                    this.vocabularyCounts[word2]--;
-                    // Half the time, we put the bigram in the same topic as word1,
-                    // and half the time we put the bigram in the same topic as word2
-                    if (random_boolean) {
-                        this.tokensPerTopic[nextToken.topic]--;
-                        docTopicCounts[nextToken.topic]--;
-                        if (!currentWordTopicCounts[token.topic]) {
-                            currentWordTopicCounts[token.topic] = 0;
+                } else {
+                    var token = currentDoc.tokens[position];
+                    if (position === currentDoc.tokens.length - 1) {
+                        tempTokens.push(token)
+                    } else {
+                        var nextToken = currentDoc.tokens[position + 1];
+                        // We look for all occurrences of word1 followed directly by word2 in this.documents
+                        // Then, we replace the two tokens for word1 and word2 by one token for
+                        // word1_word2 in this.documents
+                        // For every bigram occurrence, we subtract the vocaburaryCounts of word 1
+                        // and word2 and add to the vocaburaryCounts of the bigram
+                        if (token.word === word1 && nextToken.word === word2) {
+                            var random_boolean = Math.random() < 0.5;
+                            this.wordTopicCounts[word1][token.topic]--;
+                            this.wordTopicCounts[word2][nextToken.topic]--;
+                            this.vocabularyCounts[curBigram]++;
+                            this.vocabularyCounts[word1]--;
+                            this.vocabularyCounts[word2]--;
+                            // Half the time, we put the bigram in the same topic as word1,
+                            // and half the time we put the bigram in the same topic as word2
+                            if (random_boolean) {
+                                this.tokensPerTopic[nextToken.topic]--;
+                                docTopicCounts[nextToken.topic]--;
+                                if (!currentWordTopicCounts[token.topic]) {
+                                    currentWordTopicCounts[token.topic] = 0;
+                                }
+                                currentWordTopicCounts[token.topic] += 1;
+                                token.word = curBigram;
+                                tempTokens.push(token);
+                            } else {
+                                this.tokensPerTopic[token.topic]--;
+                                docTopicCounts[token.topic]--;
+                                if (!currentWordTopicCounts[nextToken.topic]) {
+                                    currentWordTopicCounts[nextToken.topic] = 0;
+                                }
+                                currentWordTopicCounts[nextToken.topic] += 1;
+                                nextToken.word = curBigram;
+                                tempTokens.push(nextToken);
                             }
-                        currentWordTopicCounts[ token.topic ]+=1;
-                        token.word = curBigram;
-                        tempTokens.push(token);
+                            skipNext = true;
+                        } else {
+                            tempTokens.push(token)
+                        }
                     }
-                    else {
-                        this.tokensPerTopic[token.topic]--;
-                        docTopicCounts[token.topic]--;
-                        if (!currentWordTopicCounts[nextToken.topic]) {
-                            currentWordTopicCounts[nextToken.topic] = 0;
-                            }
-                        currentWordTopicCounts[ nextToken.topic ]+=1;
-                        nextToken.word = curBigram;
-                        tempTokens.push(nextToken);
-                    }
-                    skipNext = true;
                 }
-                else {
-                    tempTokens.push(token)
-                    }}
-            }}
+            }
             currentDoc.tokens = tempTokens;
         })
     }
@@ -1263,28 +1393,32 @@ class LDAModel {
      * We effectively reverse what was done in addBigramHelper. We replace word1_word2
      * token with two tokens, placing the words in the same topic as the bigram
      */
-    removeBigramHelper = (word1, word2) => {
-        var curBigram = word1+"_"+word2
+    removeBigramHelper(word1: string, word2: string) {
+        var curBigram = word1 + "_" + word2
         delete this.wordTopicCounts[curBigram];
         delete this.vocabularyCounts[curBigram];
         var firstAppearance = true;
-        
-        this.documents.forEach(( currentDoc, i ) => {
-            var docTopicCounts = currentDoc.topicCounts;
-            var tempTokens = [];
+
+        this.documents.forEach((currentDoc, i) => {
+            let docTopicCounts = currentDoc.topicCounts;
+            let tempTokens: LDAToken[] = [];
             for (var position = 0; position < currentDoc.tokens.length; position++) {
                 var token = currentDoc.tokens[position];
-                if (token.word == curBigram) {
+                if (token.word === curBigram) {
                     if (firstAppearance) {
                         this._vocabularySize--;
                         firstAppearance = false;
                     }
                     if (!this.stopwords[word1]) {
-                    this.wordTopicCounts[word1][token.topic]++;
-                    this.docTopicCounts--;}
+                        this.wordTopicCounts[word1][token.topic]++;
+                        //TODO: fix this
+
+                        // this.docTopicCounts--;
+                    }
                     if (!this.stopwords[word2]) {
-                    this.wordTopicCounts[word2][token.topic]++;
-                    this.docTopicCounts--;}
+                        this.wordTopicCounts[word2][token.topic]++;
+                        // this.docTopicCounts--;
+                    }
                     this.vocabularyCounts[word1]++;
                     this.vocabularyCounts[word2]++;
                     docTopicCounts[token.topic]++;
@@ -1292,13 +1426,12 @@ class LDAModel {
                     token.isStopword = this.stopwords[word1];
                     tempTokens.push(token);
                     let isStopword = this.stopwords[word2];
-                    tempTokens.push({"word":word2, "topic":token.topic, "isStopword":isStopword });
-                }
-                else {
+                    tempTokens.push({"word": word2, "topic": token.topic, "isStopword": isStopword});
+                } else {
                     tempTokens.push(token);
-                    }
+                }
             }
-            
+
             currentDoc.tokens = tempTokens;
         })
     }
@@ -1306,26 +1439,26 @@ class LDAModel {
     /**
      * @summary This function will compute pairwise correlations between topics.
      * @returns {Array<Array<Number>>} 2d array of correlation values
-     * @description Unlike the correlated topic model (CTM) LDA doesn't have 
+     * @description Unlike the correlated topic model (CTM) LDA doesn't have
      * parameters that represent topic correlations. But that doesn't mean that
      * topics are not correlated, it just means we have to estimate those values
      * by measuring which topics appear in documents together.
      */
-    getTopicCorrelations = () => {
+    getTopicCorrelations() {
         // initialize the matrix
-        var correlationMatrix = new Array(this.numTopics);
-        for (var t1 = 0; t1 < this.numTopics; t1++) {
+        let correlationMatrix: number[][] = new Array(this.numTopics);
+        for (let t1 = 0; t1 < this.numTopics; t1++) {
             correlationMatrix[t1] = zeros(this.numTopics);
         }
 
-        var topicProbabilities = zeros(this.numTopics);
+        let topicProbabilities = zeros(this.numTopics);
 
         // iterate once to get mean log topic proportions
         this.documents.forEach((d, i) => {
 
             // We want to find the subset of topics that occur with non-trivial concentration in this document.
             // Only consider topics with at least the minimum number of tokens that are at least 5% of the doc.
-            var documentTopics = [];
+            var documentTopics: number[] = [];
             var tokenCutoff = Math.max(this._correlationMinTokens,
                 this._correlationMinProportion * d.tokens.length);
 
@@ -1365,11 +1498,11 @@ class LDAModel {
         this.updateWebpage();
 
         // Protect against stopSweeps messing up _requestedSweeps
-        if(this._requestedSweeps < this._completeSweeps) {
+        if (this._requestedSweeps < this._completeSweeps) {
             this._requestedSweeps = this._completeSweeps;
         }
 
-        this._requestedSweeps += numRequests 
+        this._requestedSweeps += numRequests
 
         if (this._sweeps === 0) {
             this._sweeps = 1;
@@ -1380,8 +1513,8 @@ class LDAModel {
         }
 
         console.log("Has sweeped")
-        
-        
+
+
     }
 
     /**
@@ -1394,13 +1527,13 @@ class LDAModel {
     /**
      * @summary a list of the metadata fields in the model
      */
-    get metaFields(){
-        if(!this.documents[0]){
+    get metaFields(): string[] {
+        if (!this.documents[0]) {
             throw(Error("No documents in model"));
         }
-        
-        let fields = []
-        for (const [key,] of Object.entries(this.documents[0].metadata)){
+
+        let fields: string[] = []
+        for (const [key,] of Object.entries(this.documents[0].metadata)) {
             fields.push(key)
         }
 
@@ -1409,38 +1542,38 @@ class LDAModel {
 
     /**
      * @summary Returns all values in a metadata field
-     * @param {String} field 
+     * @param {String} field
      * @returns {Array} Values in field
      */
-    metaValues = (field) => {
-        if(!this.metaFields.includes(field)){
+    metaValues(field: string): string[] {
+        if (!this.metaFields.includes(field)) {
             console.log("Given metadata field is not in model");
         }
 
         // Reduce to unique values
-        return this.documents.reduce((values,doc) => {
-            if(!values.includes(doc.metadata[field])) {
+        return this.documents.reduce((values: string[], doc: LDADocument) => {
+            if (!values.includes(doc.metadata[field])) {
                 values.push(doc.metadata[field])
             }
             return values
-        },[])
+        }, [])
     }
 
     /**
-     * @summary Calculates the average topic value for every value 
+     * @summary Calculates the average topic value for every value
      * in a metadata field
      * @param {String} field metadata field to get summary of
      * @param {*} topic topic number to get summary of
      */
-    metaTopicAverages = (field,topic) => {
-        if(!this.metaFields.includes(field)){
+    metaTopicAverages(field: string, topic: number) {
+        if (!this.metaFields.includes(field)) {
             throw(Error("Given metadata field is not in model"))
         }
 
         const metaValues = this.metaValues(field)
-        let averages = {}
-        for(let value of metaValues) {
-            averages[value] = this.averageTopicValInCatagory(field,value,topic)
+        let averages: { [key: string]: number } = {}
+        for (let value of metaValues) {
+            averages[value] = this.averageTopicValInCatagory(field, value, topic)
         }
         return averages;
     }
@@ -1451,18 +1584,18 @@ class LDAModel {
      * @param {String} category The category to get average of
      * @param {Number} topic The number of the topic to get average of
      */
-    averageTopicValInCatagory = (field, category, topic) => {
+    averageTopicValInCatagory(field: string, category: string, topic: number): number {
         // Reduce to scores of documents with this metadata value
-        let topicScores = this.documents.reduce((scores,doc) => {
+        let topicScores = this.documents.reduce((scores: number[], doc: LDADocument) => {
             // If in category add topic average
-            if(doc.metadata[field] === category){
-                scores.push(doc.topicCounts[topic]/doc.tokens.length)
+            if (doc.metadata[field] === category) {
+                scores.push(doc.topicCounts[topic] / doc.tokens.length)
             }
             return scores
-        },[]);
+        }, []);
 
         // Return the average
-        return topicScores.reduce((a,b) => a + b, 0) / topicScores.length
+        return topicScores.reduce((a, b) => a + b, 0) / topicScores.length
     }
 
     /**
@@ -1471,10 +1604,10 @@ class LDAModel {
      * @param {String} category Metadata category to analyze
      * @returns {Array<Number>} Average topic vals with index matching topic num
      */
-    topicAvgsForCatagory = (field,category) => {
-        let averages = []
-        for(let topic = 0; topic < this.numTopics; topic++) {
-            averages.push(this.averageTopicValInCatagory(field,category,topic))
+    topicAvgsForCatagory(field: string, category: string): number[] {
+        let averages: number[] = []
+        for (let topic = 0; topic < this.numTopics; topic++) {
+            averages.push(this.averageTopicValInCatagory(field, category, topic))
         }
         return averages;
     }
@@ -1486,11 +1619,13 @@ class LDAModel {
      * @returns {Array<{topicVal:Number,label:String,metaVal:any}>}
      */
     docTopicMetaValues = (field, topic) => {
-        return this.documents.map((doc) => { return {
-            topicVal:doc.topicCounts[topic]/doc.tokens.length,
-            label: doc.id,
-            metaVal: doc.metadata[field]
-        }})
+        return this.documents.map((doc) => {
+            return {
+                topicVal: doc.topicCounts[topic] / doc.tokens.length,
+                label: doc.id,
+                metaVal: doc.metadata[field]
+            }
+        })
     }
 
     /**
@@ -1501,39 +1636,45 @@ class LDAModel {
      * @returns {Array<{key:Date,value:Number}>} rolling average topic
      * value over time
      */
-    topicTimeRollingAvg = (topic,numberToAvg) => {
-        numberToAvg = Math.max(numberToAvg,1);
+    topicTimeRollingAvg(topic:number, numberToAvg:number): {key:Date,value:number}[] {
+        numberToAvg = Math.max(numberToAvg, 1);
 
         // Sort documents by time
-        let documents = this.documents.sort((a,b) => a.dateObject-b.dateObject)
+        let documents = this.documents.sort((a, b) => a.dateObject.getTime() - b.dateObject.getTime())
 
         // Calculate rolling average
-        documents = documents.map((doc, i) => {
+        let averaged = documents.map((doc, i) => {
             // Control for out of bounds
-            let startIndex = Math.max(0,Math.round(i-numberToAvg/2));
-            let endIndex = Math.min(documents.length,Math.round(i+numberToAvg/2));
+            let startIndex = Math.max(0, Math.round(i - numberToAvg / 2));
+            let endIndex = Math.min(documents.length, Math.round(i + numberToAvg / 2));
             // Gather values
-            let vals = [];
-            for(let j = startIndex; j < endIndex; j++) {
-                vals.push(documents[j].topicCounts[topic]/
+            let vals:number[] = [];
+            for (let j = startIndex; j < endIndex; j++) {
+                vals.push(documents[j].topicCounts[topic] /
                     documents[j].tokens.length);
             }
             return {
-                rollingAvg: vals.reduce((a,b) => a+b)/vals.length,
+                rollingAvg: vals.reduce((a, b) => a + b) / vals.length,
                 date: doc.dateObject,
             }
         })
 
         // Combine documents with the same time stamp
         let topicMeans = d3
+            // @ts-ignore this function clearly exists
             .nest()
-            .key(function (d) {return d.date; })
-            .rollup(function (d) {return d3
-                .mean(d, function (x) {return x.rollingAvg}); })
-            .entries(documents);
+            .key(function (d) {
+                return d.date;
+            })
+            .rollup(function (d) {
+                return d3.mean<{rollingAvg:number}>(d, x=>x.rollingAvg);
+            })
+            .entries(averaged);
 
         // Turn key back into Date object
-        return topicMeans.map((d)=>{return{key:new Date(d.key),value:d.value}})
+        return topicMeans.map((d) => {
+            return {key: new Date(d.key), value: d.value}
+        })
     }
 
     /**
@@ -1541,25 +1682,26 @@ class LDAModel {
      * @param {Number} topic number id of topic to get info for
      * @param {Number} numBins number of bins to devide timespan into
      * @param {Boolean} stdError whether or not to include stdError margin
-     * @returns {Array<{key:Date,value:Number,upperEr:Number,lowerEr:Number}>} 
-     * Array of average topic values. Entries are sorted by key. 
+     * @returns {Array<{key:Date,value:Number,upperEr:Number,lowerEr:Number}>}
+     * Array of average topic values. Entries are sorted by key.
      * Date refers to the max date for that bin. upperEr/lowerEr are only
      * included if stdError is set to true.
      */
-    topicTimesBinnedAverage = (topic, numBins, stdError=false) => {
-        let bins = this.topicTimesBinned(topic, numBins)
+    topicTimesBinnedAverage(topic, numBins, stdError = false): LDATopicTimeBinAveraged[]{
+        let bins: LDATopicTimeBin[]=this.topicTimesBinned(topic, numBins);
 
-        if(stdError) {
+        if (stdError) {
             bins = this.addStdErrorMargins(bins)
         }
 
         // Calc average for every bin
-        bins.forEach((bin) => {
-            const total = bin.value.reduce((a,b) => a + b,0);
-            const avg = total/bin.value.length;
-            bin.value = avg
+        return bins.map(bin => {
+            const total = bin.value.reduce((a, b) => a + b, 0);
+            return {
+                ...bin,
+                value: total/ bin.value.length,
+            }
         })
-        return bins
     }
 
     /**
@@ -1570,21 +1712,19 @@ class LDAModel {
      * where upperEr/lowerEr are the margins of error of value at the 90%
      * confidence level.
      */
-    addStdErrorMargins(valArray) {
-        
-        valArray = valArray.map((dict) => {
+    addStdErrorMargins(valArray: LDATopicTimeBin[]): LDATopicTimeBinWithStd[] {
+        return valArray.map((dict) => {
             const n = dict.value.length
-            const mean = dict.value.reduce((a,b) => a + b) / n
+            const mean = dict.value.reduce((a, b) => a + b) / n
             const stdDev = Math.sqrt(dict.value.map(
                 x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n)
-            const stdError = stdDev/Math.sqrt(n)
+            const stdError = stdDev / Math.sqrt(n)
             const z = 1.645
-            let newDict = {...dict}
-            newDict.upperEr = mean + z*stdError
-            newDict.lowerEr = Math.max(mean - z*stdError,0)
+            let newDict = {...dict} as  LDATopicTimeBinWithStd
+            newDict.upperEr = mean + z * stdError
+            newDict.lowerEr = Math.max(mean - z * stdError, 0)
             return newDict
         })
-        return valArray
     }
 
     /**
@@ -1592,33 +1732,37 @@ class LDAModel {
      * bins over time
      * @param {Number} topic number id of topic to get info for
      * @param {Number} numBins number of bins to devide timespan into
-     * @returns {Array<{key:Date,value:Array<Number>}>} Array of average 
-     * topic values for every document in bin. Entries are sorted by key. 
+     * @returns {Array<{key:Date,value:Array<Number>}>} Array of average
+     * topic values for every document in bin. Entries are sorted by key.
      * Date refers to the max date for that bin.
      */
-    topicTimesBinned = (topic, numBins) => {
-        numBins = Math.max(numBins,1);
-        
-        // Make bins
-        let timeSpan = this.maxDocTime - this.minDocTime;
-        let binSize = Math.ceil(timeSpan/numBins); // ceil to make sure all docs have a bin
+    topicTimesBinned(topic: number, numBins: number): LDATopicTimeBin[] {
+        numBins = Math.max(numBins, 1);
 
-        let bins = []
-        for(let binNum = 0; binNum < numBins; binNum++) {
+        if (this.maxDocTime===undefined || this.minDocTime===undefined){
+            throw Error("Time not yet calculated");
+        }
+
+        // Make bins
+        let timeSpan = this.maxDocTime.getTime() - this.minDocTime.getTime();
+        let binSize = Math.ceil(timeSpan / numBins); // ceil to make sure all docs have a bin
+
+        let bins:LDATopicTimeBin[] = []
+        for (let binNum = 0; binNum < numBins; binNum++) {
             bins.push({
-                key: new Date(this.minDocTime.valueOf() + binSize*(binNum+1)),
+                key: new Date(this.minDocTime.getTime() + binSize * (binNum + 1)),
                 value: []
             })
         }
 
         // Group topic values into bins
-        let documents = this.documents.sort((a,b) => a.dateObject-b.dateObject)
+        let documents = this.documents.sort((a, b) => a.dateObject.getTime() - b.dateObject.getTime())
         let currentBin = 0; // Keep track of which bin section of doc array we're in
         documents.forEach((doc) => {
-            if(bins[currentBin].key < doc.dateObject) currentBin++;
+            if (bins[currentBin].key < doc.dateObject) currentBin++;
 
             // Record average topic value for doc
-            bins[currentBin].value.push(doc.topicCounts[topic]/
+            bins[currentBin].value.push(doc.topicCounts[topic] /
                 doc.tokens.length)
         })
 
