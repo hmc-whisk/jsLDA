@@ -201,7 +201,7 @@ class TopBar extends React.Component {
         return (
             <div id="form" className="top">
                 <form onSubmit = {this.handleSubmit} className = "topForm">
-                    <label for="number">Enter Number of Iterations: &nbsp;</label>
+                    <label htmlFor="number">Enter Number of Iterations: &nbsp;</label>
 
                     <input onChange = {this.handleChange} id="number" type="number" value = {this.state.formValue} placeholder="# Sweeps" min="1" max="100000" required></input>
 
