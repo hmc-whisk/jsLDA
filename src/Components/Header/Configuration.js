@@ -72,7 +72,7 @@ class Configuration extends Component {
 
       return (
         <div style={{float: "right", }}> 
-        <button type="button" onClick={this.overlayOn}  class="configButton" onMouseEnter={this.toggleHover} onMouseLeave={this.toggleHover}>Configure...</button>
+        <button type="button" onClick={this.overlayOn}  className="configButton" onMouseEnter={this.toggleHover} onMouseLeave={this.toggleHover}>Configure...</button>
         <div id="overlay" style= {this.overlayStyle} onClick={this.overlayOff}>
           <div onClick={(e) => {
             //stop clicks getting to the overlay
