@@ -13,7 +13,7 @@ export function topNWords(wordCounts: any[], n: number): string {
  * @summary returns an array filled with 0.0
  * @param {Number} n length of array
  */
-export function zeros(n) {
+export function zeros(n: number): number[] {
     var x = new Array(n);
     for (var i = 0; i < n; i++) {
         x[i] = 0.0;
