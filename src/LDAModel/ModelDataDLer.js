@@ -9,9 +9,9 @@ export default class LDAModelDataDLer {
     /**
      * A class that allows users to download information about an LDA model
      * @param {LDAModel} model the model to dl data from
-     * @param {Ojbect} annotationHolder an object that has an annotations 
+     * @param {Ojbect} annotationHolder an object that has an annotations
      * member variable with an array of topic annotations
-     * @note Okay yes, annotationHolder is a weird object to pass. 
+     * @note Okay yes, annotationHolder is a weird object to pass.
      * But, App likes to change the refference of the annotations, so
      * that reference cannot be passed. This ensures the correct annotations
      * are used.
@@ -21,7 +21,7 @@ export default class LDAModelDataDLer {
         this._annotationHolder = annotationHolder;
     }
 
-    get _annotations () {
+    get _annotations() {
         return this._annotationHolder.annotations;
     }
 
@@ -31,7 +31,7 @@ export default class LDAModelDataDLer {
      * @param {String} w word to sterilize
      */
     _sterilizeWord(w) {
-        return w.replace(/"/g,"");
+        return w.replace(/"/g, "");
     }
 
     /**
@@ -43,7 +43,7 @@ export default class LDAModelDataDLer {
      * CSV of topics over time
      * - Columns:
      *  - Topic Number
-     *  - One column for every date - ISO date: mean topic proportion over docs from date  
+     *  - One column for every date - ISO date: mean topic proportion over docs from date
      */
     saveTopicsTime = () => {
         // Set up CSV column names
@@ -52,23 +52,29 @@ export default class LDAModelDataDLer {
         // Add a csv row for every topic
         for (let topic = 0; topic < this._model.numTopics; topic++) {
             var topicProportions = this._model.documents
-                .map(function (d) { 
+                .map(function (d) {
                     return {
-                        date: d.date, 
+                        date: d.date,
                         p: d.topicCounts[topic] / d.tokens.length
-                    }; 
+                    };
                 });
             var topicMeans = d3
                 .nest()
-                .key(function (d) {return d.date; })
-                .rollup(function (d) {return d3
-                    .mean(d, function (x) {return x.p}); })
+                .key(function (d) {
+                    return d.date;
+                })
+                .rollup(function (d) {
+                    return d3
+                        .mean(d, function (x) {
+                            return x.p
+                        });
+                })
                 .entries(topicProportions);
-            
+
             // Add column names on first pass
-            if(topic === 0) {
+            if (topic === 0) {
                 for (let i = 0; i < topicMeans.length; i++) {
-                    topicTimeCSV += ',"' + topicMeans[i].key.replace('"','') + '"'
+                    topicTimeCSV += ',"' + topicMeans[i].key.replace('"', '') + '"'
                 }
                 topicTimeCSV += "\n"
             }
@@ -77,14 +83,14 @@ export default class LDAModelDataDLer {
             topicTimeCSV += topic + ",";
 
             // Add mean values
-            for (let i = 0; i < topicMeans.length; i++){
+            for (let i = 0; i < topicMeans.length; i++) {
                 topicTimeCSV += topicMeans[i].value + ",";
             }
-            topicTimeCSV = topicTimeCSV.slice(0,-1); // Remove last comma
+            topicTimeCSV = topicTimeCSV.slice(0, -1); // Remove last comma
             topicTimeCSV = topicTimeCSV += "\n";
         }
 
-        saveFile("topicsTime.csv",topicTimeCSV,"text/csv");
+        saveFile("topicsTime.csv", topicTimeCSV, "text/csv");
     }
 
     /**
@@ -96,30 +102,34 @@ export default class LDAModelDataDLer {
     saveDocTopics = () => {
         // Set up header
         var docTopicsCSV = "Document ID";
-        for(let i = 0; i < this._model.numTopics; i++) {
+        for (let i = 0; i < this._model.numTopics; i++) {
             docTopicsCSV += ",Topic " + i;
         }
         docTopicsCSV += "\n";
-      
+
         // Add rows of each document's topic values
-        this._model.documents.forEach(function(d, i) {
-            docTopicsCSV += '"' + d.id + '",' + d.topicCounts.map((x) => { return d3.format(".8")(x / d.tokens.length); }).join(",") + "\n";
+        this._model.documents.forEach(function (d, i) {
+            docTopicsCSV += '"' + d.id + '",' + d.topicCounts.map((x) => {
+                return d3.format(".8")(x / d.tokens.length);
+            }).join(",") + "\n";
         });
-      
+
         // Download file
-        saveFile("docTopics.csv",docTopicsCSV,"text/csv");
+        saveFile("docTopics.csv", docTopicsCSV, "text/csv");
     }
 
     /**
-     * CSV of word topic counts. 
-     * - Columns: 
-     *  - word: word of row, 
+     * CSV of word topic counts.
+     * - Columns:
+     *  - word: word of row,
      *  - one column for every topic: number of times word is assigned to each topic
      */
     saveTopicWords = () => {
         var topicWordsCSV = "word," + d3
             .range(0, this._model.numTopics)
-            .map(function(t) {return "Topic " + t; } )
+            .map(function (t) {
+                return "Topic " + t;
+            })
             .join(",") + "\n";
         for (let word in this._model.wordTopicCounts) {
             // Strip double quotes because CSV readers can't agree how to deal
@@ -129,38 +139,40 @@ export default class LDAModelDataDLer {
             let topicProbabilities = zeros(this._model.numTopics);
             for (let topic in this._model.wordTopicCounts[word]) {
                 topicProbabilities[topic] = this._eightDigits(
-                    this._model.wordTopicCounts[word][topic] / 
+                    this._model.wordTopicCounts[word][topic] /
                     this._model.tokensPerTopic[topic]);
             }
             topicWordsCSV += '"' + word + '",' + topicProbabilities.join(",") + "\n";
         }
-      
-        saveFile("topicWords.csv",topicWordsCSV,"text/csv");
+
+        saveFile("topicWords.csv", topicWordsCSV, "text/csv");
     }
-      
+
     /**
      * CSV of highlevel topic information.
-     * - Columns: 
-     *  - Topic: topic number 
+     * - Columns:
+     *  - Topic: topic number
      *  - Annotation: user annotation
      *  - TokenCount: number of tokens assigned to topic
      *  - Words: top 10 words
      */
     saveTopicKeys = () => {
         var keysCSV = "Topic,Annotation,TokenCount,Words\n";
-      
-        if (this._model.topicWordCounts.length === 0) { this._model.sortTopicWords(); }
-      
-            for (var topic = 0; topic < this._model.numTopics; topic++) {
-                let annotation = this._annotations[topic] ? this._annotations[topic]: "";
-                keysCSV += topic + "," + annotation + "," + this._model.tokensPerTopic[topic] + 
+
+        if (this._model.topicWordCounts.length === 0) {
+            this._model.sortTopicWords();
+        }
+
+        for (var topic = 0; topic < this._model.numTopics; topic++) {
+            let annotation = this._annotations[topic] ? this._annotations[topic] : "";
+            keysCSV += topic + "," + annotation + "," + this._model.tokensPerTopic[topic] +
                 ",\"" + topNWords(this._model.topicWordCounts[topic], 10)
                 + "\"\n";
-            }
-      
-        saveFile("topicKeys.csv",keysCSV,"text/csv")
+        }
+
+        saveFile("topicKeys.csv", keysCSV, "text/csv")
     }
-      
+
     /**
      * Downloads a csv of topic - topic pointwise mutual information.
      * - Columns:
@@ -170,25 +182,25 @@ export default class LDAModelDataDLer {
     saveTopicPMI = () => {
         // Add top row of column names
         var pmiCSV = "Topic Number";
-        for(let i = 0; i < this._model.numTopics; i++) {
+        for (let i = 0; i < this._model.numTopics; i++) {
             pmiCSV += "," + i;
         }
         pmiCSV += "\n";
 
         var matrix = this._model.getTopicCorrelations();
-        matrix.forEach((row,i) => { 
+        matrix.forEach((row, i) => {
             // Insert topic number
             pmiCSV += i + ",";
 
             // Insert PMI values
-            pmiCSV += row.map((x) => { 
-                return this._eightDigits(x); 
-            }).join(",") + "\n"; 
+            pmiCSV += row.map((x) => {
+                return this._eightDigits(x);
+            }).join(",") + "\n";
         });
 
-        saveFile("topicCorrelations.csv",pmiCSV,"text/csv");
+        saveFile("topicCorrelations.csv", pmiCSV, "text/csv");
     }
-    
+
     /**
      * A doc-topics graph file formated for the program Gephi
      * - Colunms:
@@ -203,17 +215,17 @@ export default class LDAModelDataDLer {
         this._model.documents.forEach((d) => {
             d.topicCounts.forEach((x, topic) => {
                 if (x > 0.0) {
-                graphCSV += '"' + d.id + '",' + topic + "," + this._eightDigits(x / d.tokens.length) + ",undirected\n";
+                    graphCSV += '"' + d.id + '",' + topic + "," + this._eightDigits(x / d.tokens.length) + ",undirected\n";
                 }
             });
         });
 
-        saveFile("documentGraph.csv",graphCSV,"text/csv");
+        saveFile("documentGraph.csv", graphCSV, "text/csv");
     }
-      
+
     /**
      * Save CSV with the topic assignment for every token.
-     * - Columns: 
+     * - Columns:
      *  - DocID: doc word token is in
      *  - Word: symbol of token
      *  - Topic: num of topic token is assigned to
@@ -222,13 +234,13 @@ export default class LDAModelDataDLer {
         var state = "DocID,Word,Topic\n";
         this._model.documents.forEach((d) => {
             d.tokens.forEach((token) => {
-                if (! token.isStopword) {
+                if (!token.isStopword) {
                     state += d.id + ",\"" + this._sterilizeWord(token.word) + "\"," + token.topic + "\n";
                 }
             });
         });
 
-        saveFile("state.csv",state,"text/csv");
+        saveFile("state.csv", state, "text/csv");
     }
 
     /**
@@ -238,7 +250,7 @@ export default class LDAModelDataDLer {
         const fileName = "jsLDA_Model.json";
         const json = JSON.stringify(this._model);
         const fileType = 'application/json'
-        saveFile(fileName,json,fileType)   
+        saveFile(fileName, json, fileType)
     }
 
     /**
@@ -246,19 +258,19 @@ export default class LDAModelDataDLer {
      */
     downloadStopwords = () => {
         let stopwordFile = ""
-        Object.keys(this._model.stopwords).forEach( stopword => {
+        Object.keys(this._model.stopwords).forEach(stopword => {
             stopwordFile += stopword + "\n";
         })
         let fileName = "stopwords.txt"
         let fileType = "text/txt";
-        saveFile(fileName,stopwordFile,fileType);
+        saveFile(fileName, stopwordFile, fileType);
     }
 
     /**
-     * Downloads a CSV with the average topic value for every topic - catagory 
+     * Downloads a CSV with the average topic value for every topic - catagory
      * pair in metaField
      * @param {String} metaField The data field of interest
-     * 
+     *
      * - Columns:
      *  - Topic: the topic associated with a row
      *  - For every catagory - catagory label: the average topic proportion for
@@ -269,7 +281,7 @@ export default class LDAModelDataDLer {
         var sel = document.getElementById("categorySelect").options;
 
         var categories = []
-        for(let i = 0; i < sel.length; i++) {
+        for (let i = 0; i < sel.length; i++) {
             categories.push(sel[i].text);
         }
 
@@ -285,12 +297,12 @@ export default class LDAModelDataDLer {
         for (let i = 0; i < categories.length; i++) {
             let averages = this._model.topicAvgsForCatagory(
                 metaField, categories[i]);
-    
+
             let data = []
             for (let [topic, value] of Object.entries(averages)) {
                 let topicLabel = "[" + topic + "] " + topNWords(
                     this._model.topicWordCounts[topic], 3);
-                data.push({ "label": topicLabel, "value": value })
+                data.push({"label": topicLabel, "value": value})
             }
             all_data.push(data)
         }
@@ -306,7 +318,7 @@ export default class LDAModelDataDLer {
         }
         var fileName = "barPlot.csv"
         let fileType = "text/csv";
-        saveFile(fileName,barPlotCSV,fileType);
+        saveFile(fileName, barPlotCSV, fileType);
     }
 
     /**
@@ -327,7 +339,7 @@ export default class LDAModelDataDLer {
                 metaField, i);
             let data = []
             for (let [key, value] of Object.entries(averages)) {
-                data.push({ "label": key, "value": value })
+                data.push({"label": key, "value": value})
 
 
             }
@@ -354,7 +366,7 @@ export default class LDAModelDataDLer {
 
         var fileName = metaField + ".csv";
         let fileType = "text/csv";
-        saveFile(fileName,barPlotCSV,fileType);
+        saveFile(fileName, barPlotCSV, fileType);
 
     }
 }
