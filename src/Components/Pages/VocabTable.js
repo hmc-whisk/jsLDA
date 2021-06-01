@@ -1,4 +1,4 @@
-import React, { Component } from 'react'; 
+import React, { Component } from 'react';
 import * as d3 from 'd3';
 import './pages.css';
 
@@ -9,22 +9,22 @@ class VocabTable extends Component {
           displayingStopwords: false,
           searchText: "",
         };
-      }      
-    
+      }
+
 
     specificityScale = d3.scaleLinear().domain([0,1]).range([
-      getComputedStyle(document.documentElement).getPropertyValue('--color3'), 
+      getComputedStyle(document.documentElement).getPropertyValue('--color3'),
       getComputedStyle(document.documentElement).getPropertyValue('--color2')]);
 
 
       // used by toggleTopicDocuments in topicdocuments, ready, changeNumTopics in processing, sweep in sweep
     vocabTable() {
-      var shouldDisable = this.props.modelIsRunning || null; 
+      var shouldDisable = this.props.modelIsRunning || null;
       var format = d3.format(".2g");
       var wordFrequencies = this.mostFrequentWords(this.state.displayingStopwords, this.props.sortVocabByTopic).slice(0, 499);
       var table = d3.select("#vocab-table tbody");
       table.selectAll("tr").remove();
-      
+
       let stopwords = this.props.stopwords;
       let specificity = this.specificity;
       let specificityScale = this.specificityScale;
@@ -32,7 +32,7 @@ class VocabTable extends Component {
       let removeStop = this.props.removeStop;
       let sortTopicWords = this.props.sortTopicWords;
 
-      // TL: SEARCH 
+      // TL: SEARCH
       if (this.state.searchText !== "") {
         wordFrequencies = wordFrequencies.filter(d => d.word.includes(this.state.searchText));
       }
@@ -56,12 +56,12 @@ class VocabTable extends Component {
         .attr("disabled", shouldDisable);
       });
     }
-  
+
     mostFrequentWords(includeStops, sortByTopic) {
       // Convert the random-access map to a list of word:count pairs that
       //  we can then sort.
       var wordCounts = [];
-    
+
       if (sortByTopic) {
         for (let word in this.props.vocabularyCounts) {
           if (this.props.wordTopicCounts[word] &&
@@ -79,16 +79,16 @@ class VocabTable extends Component {
           }
         }
       }
-    
+
       wordCounts.sort(this.props.byCountDescending);
       return wordCounts;
     }
-  
+
     specificity = (word)=> {
 
       return 1.0 - (this.entropy(d3.values(this.props.wordTopicCounts[word])) / Math.log(this.props.numTopics));
     }
-  
+
     entropy(counts) {
       counts = counts.filter(function (x) { return x > 0.0; });
       var sum = d3.sum(counts);
@@ -118,7 +118,7 @@ class VocabTable extends Component {
         //   vocabTable();
         }
       });
-      
+
       d3.select("#sortVocabByTopic").on("click", function () {
         console.log(selectedTopic);
         if(selectedTopic === -1) {
@@ -143,7 +143,7 @@ class VocabTable extends Component {
     handleChange = (e) => {
       this.setState({ searchText: e.target.value })
     }
-  
+
     componentDidMount() {
       this.vocabTable();
       this.setUp();
@@ -163,34 +163,34 @@ class VocabTable extends Component {
 
     render() {
         return (
-            <div 
-              id="vocab-page" 
-              style={{ 
+            <div
+              id="vocab-page"
+              style={{
                 flex: "1",
                 display: "flex",
-                marginTop: "20px", 
+                marginTop: "20px",
                 overflow: "hidden",
               }}
             className="page">
               <div style={{
-                flex: "1", 
-                marginTop: "10px", 
-                height: "100%", 
-                overflow: "hidden", 
-                display: "flex", 
+                flex: "1",
+                marginTop: "10px",
+                height: "100%",
+                overflowX: "auto",
+                display: "flex",
                 flexDirection: "column",
                 alignItems: "flex-start",
                 width: "90%",
                 padding: "10px 10px 10px 10px"
               }}>
-                <input 
-                  type="text" 
-                  placeholder="Search Vocab" 
-                  onChange={this.handleChange} 
+                <input
+                  type="text"
+                  placeholder="Search Vocab"
+                  onChange={this.handleChange}
                   style={{
                     height: "30px",
-                    width: "320px", 
-                    borderRadius: "10px", 
+                    width: "320px",
+                    borderRadius: "10px",
                     border: "1px var(--color1) solid",
                     outline: "none",
                   }}
@@ -202,7 +202,7 @@ class VocabTable extends Component {
                   </table>
                 </div>
                 </div>
-                
+
                 <div style={{display: "flex", flexDirection: "column", flex: "1"}}>
                 <div className="help">
                   Words occurring in only one topic have specificity 1.0, words evenly distributed among all topics have specificity 0.0.
@@ -222,7 +222,7 @@ class VocabTable extends Component {
           <>
               <button id="stopword-dl" className="lightButton" style={{marginTop: "15px"}}
                   onClick={() => this.props.modelDataDLer.downloadStopwords()}>
-                  Download stopwords 
+                  Download stopwords
               </button>
           </>
       )
@@ -230,4 +230,3 @@ class VocabTable extends Component {
 }
 
 export default VocabTable
-  
