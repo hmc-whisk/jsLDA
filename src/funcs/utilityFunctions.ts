@@ -29,7 +29,7 @@ export function zeros(n: number): number[] {
  * From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
  */
 export function getObjectKeys() {
-    var hasOwnProperty = Object.prototype.hasOwnProperty,
+    let hasOwnProperty = Object.prototype.hasOwnProperty,
         hasDontEnumBug = !({toString: null}).propertyIsEnumerable('toString'),
         dontEnums = [
             'toString',
@@ -78,7 +78,7 @@ export function truncate(s: string, n: number = 300) {
 /**
  * @summary This function wraps event handlers to confirm that the model will be reset.
  */
-export function confirmReset(event, callback) {
+export function confirmReset(event:Event, callback:()=>void) {
     event.preventDefault();
     if (window.confirm('This will cause your model to reset.')) callback();
 }
