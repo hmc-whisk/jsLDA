@@ -237,7 +237,6 @@ class LDAModel {
 
     // Used by sidebar to change selectedTopic and sortVocabByTopic
     selectedTopicChange=(topic: number)=> {
-        console.log("Topic",this)
         this.selectedTopic = topic;
         if (topic === -1) {
             this.sortVocabByTopic = false;
@@ -740,7 +739,9 @@ class LDAModel {
     getRawTokens(text:string):RegExpMatchArray {
         let match=text.toLowerCase().match(this.tokenRegex)
         if (!match){
-            throw Error("Regex did not match anything")
+            // @ts-ignore: XRegExp
+            console.warn(`Regex ${this.tokenRegex.xregexp.source} did not match anything in: `,text)
+            return []
         }
         return match
     }
@@ -1422,7 +1423,7 @@ class LDAModel {
                     }
                     if (!this.stopwords[word1]) {
                         this.wordTopicCounts[word1][token.topic]++;
-                        //TODO: fix this
+                        // TODO: fix this
 
                         // this.docTopicCounts--;
                     }
@@ -1556,7 +1557,7 @@ class LDAModel {
      * @param {String} field
      * @returns {Array} Values in field
      */
-    metaValues(field: string): string[] {
+    metaValues=(field: string): string[] => {
         if (!this.metaFields.includes(field)) {
             console.log("Given metadata field is not in model");
         }
@@ -1576,7 +1577,7 @@ class LDAModel {
      * @param {String} field metadata field to get summary of
      * @param {*} topic topic number to get summary of
      */
-    metaTopicAverages(field: string, topic: number) {
+    metaTopicAverages=(field: string, topic: number)=> {
         if (!this.metaFields.includes(field)) {
             throw(Error("Given metadata field is not in model"))
         }
@@ -1584,7 +1585,7 @@ class LDAModel {
         const metaValues = this.metaValues(field)
         let averages: { [key: string]: number } = {}
         for (let value of metaValues) {
-            averages[value] = this.averageTopicValInCatagory(field, value, topic)
+            averages[value] = this.averageTopicValInCategory(field, value, topic)
         }
         return averages;
     }
@@ -1595,7 +1596,7 @@ class LDAModel {
      * @param {String} category The category to get average of
      * @param {Number} topic The number of the topic to get average of
      */
-    averageTopicValInCatagory(field: string, category: string, topic: number): number {
+    averageTopicValInCategory(field: string, category: string, topic: number): number {
         // Reduce to scores of documents with this metadata value
         let topicScores = this.documents.reduce((scores: number[], doc: LDADocument) => {
             // If in category add topic average
@@ -1618,7 +1619,7 @@ class LDAModel {
     topicAvgsForCatagory(field: string, category: string): number[] {
         let averages: number[] = []
         for (let topic = 0; topic < this.numTopics; topic++) {
-            averages.push(this.averageTopicValInCatagory(field, category, topic))
+            averages.push(this.averageTopicValInCategory(field, category, topic))
         }
         return averages;
     }
