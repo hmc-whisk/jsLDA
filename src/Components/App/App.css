@@ -1,5 +1,5 @@
-body { 
-    font-family: Calibri, Verdana; 
+body {
+    font-family: Calibri, Verdana, sans-serif;
     background-color: var(--color3); 
     margin: 0;
     line-height: 1;
