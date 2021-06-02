@@ -54,25 +54,25 @@ type LDATopicVisibility = {
 
 // type reverse-engineered from LDAModel.topicTimesBinned
 type LDATopicTimeBin = {
-    key:Date,
+    key: Date,
     value: number[]
 }
 
 // type reverse-engineered from LDAModel.addStdErrorMargins
 interface LDATopicTimeBinWithStd extends LDATopicTimeBin {
-    upperEr:number,
-    lowerEr:number
+    upperEr: number,
+    lowerEr: number
 }
 
 // type reverse-engineered from LDAModel.topicTimesBinnedAverage
-type LDATopicTimeBinAveraged ={
-    key:Date,
+type LDATopicTimeBinAveraged = {
+    key: Date,
     value: number
 }
 
 type LDABigram = {
-    [key:string]:{
-        [key:string]:number
+    [key: string]: {
+        [key: string]: number
     }
 }
 
@@ -101,7 +101,7 @@ class LDAModel {
     public vocabularyCounts: { [key: string]: number }; // reversed from _parseDoc
     public numTopics: number;
     public updateWebpage: () => void;
-    public stopwords: { [key:string]: 1|undefined };
+    public stopwords: { [key: string]: 1 | undefined };
     public selectedTopic: number;
     public topicVisibility: LDATopicVisibility;
     public wordTopicCounts: { [key: string]: { [key: number]: number } };  // reversed from _parseDoc
@@ -114,8 +114,8 @@ class LDAModel {
     public bigramInitialized: boolean;
     public bigramCount: LDABigram;
     public bigramCountRev: LDABigram;
-    public bigramWord1Count: { [key:string]:number }
-    public bigramWord2Count: { [key:string]:number }
+    public bigramWord1Count: { [key: string]: number }
+    public bigramWord2Count: { [key: string]: number }
     public totalBigramCount: number
     public finalBigram: LDABigram
     public finalBigramRev: LDABigram
@@ -142,7 +142,7 @@ class LDAModel {
 
         this._vocabularySize = 0;
 
-        // Constants for calculating topic correlation. 
+        // Constants for calculating topic correlation.
         // A doc with 5% or more tokens in a topic is "about" that topic.
         this._correlationMinTokens = 2;
         this._correlationMinProportion = 0.05;
@@ -192,7 +192,7 @@ class LDAModel {
         this.finalBigramRev = {};
         this.bigramThreshold = 10.828; // Threshold for exceeding critical value 0.001
 
-        // Array of dictionaries with keys 
+        // Array of dictionaries with keys
         // {"originalOrder", "id", "date", "originalText", "tokens", "topicCounts", "metadata"}
         this.documents = [];
 
@@ -236,7 +236,7 @@ class LDAModel {
     }
 
     // Used by sidebar to change selectedTopic and sortVocabByTopic
-    selectedTopicChange=(topic: number)=> {
+    selectedTopicChange = (topic: number) => {
         this.selectedTopic = topic;
         if (topic === -1) {
             this.sortVocabByTopic = false;
@@ -254,7 +254,7 @@ class LDAModel {
      * @param {Object} a
      * @param {Object} b
      */
-    byCountDescending(a:{count:number}, b:{count:number}) {
+    byCountDescending(a: { count: number }, b: { count: number }) {
         return b.count - a.count;
     };
 
@@ -291,7 +291,7 @@ class LDAModel {
      * current model
      */
     initTopicVisibility(numTops: number): LDATopicVisibility {
-        let visDict:LDATopicVisibility = {};
+        let visDict: LDATopicVisibility = {};
         for (let i = 0; i < numTops; i++)
             visDict[i] = "default"
         return visDict;
@@ -316,7 +316,7 @@ class LDAModel {
      *  - Lines should not have column names included
      *  - See parseDoc for
      */
-    ready(error:Error, stops: string, doc: string) {
+    ready(error: Error, stops: string, doc: string) {
         if (error) {
             //alert("File upload failed. Please try again."); TODO: uncomment this for deployment
             throw error;
@@ -417,7 +417,7 @@ class LDAModel {
                         this.vocabularyCounts[word] += 1;
                         topicCounts[topic] += 1;
                     }
-                    tokens.push({word, topic, "isStopword":Boolean(isStopword)});
+                    tokens.push({word, topic, "isStopword": Boolean(isStopword)});
                 }
             });
 
@@ -458,7 +458,7 @@ class LDAModel {
      * "text/csv" then it will assume it is a tsv.
      * The function acts to process through all potential bigrams
      */
-    _parseBigram = (docText:string) => {
+    _parseBigram = (docText: string) => {
         let parsedDoc
         if (this.documentType === "text/csv") {
             parsedDoc = d3.csvParseRows(docText);
@@ -578,7 +578,7 @@ class LDAModel {
     /**
      * @summary Parses column names to get column index info
      * @param {Array<String>} header an array of column names
-     * @returns {Object} {"id":index, "text":index, "date_tag":index, 
+     * @returns {Object} {"id":index, "text":index, "date_tag":index,
      *  "metadata": {"columnName1":index,..."columnNameN":index}}
      */
     _getColumnInfo(header: readonly string[]): LDAColumnInfo {
@@ -690,8 +690,8 @@ class LDAModel {
      * https://tedboy.github.io/nlps/_modules/nltk/metrics/association.html#BigramAssocMeasures.chi_sq
      */
     scoreBigram() {
-        let tempFinalBigram:LDABigram= {};
-        let tempFinalBigramRev:LDABigram = {};
+        let tempFinalBigram: LDABigram = {};
+        let tempFinalBigramRev: LDABigram = {};
         for (let word1 in this.bigramCount) {
             tempFinalBigram[word1] = {};
             for (let word2 in this.bigramCount[word1]) {
@@ -726,7 +726,7 @@ class LDAModel {
      * match LDAModel.tokenRegex. match[0] yields the string matched
      * and match.index yields the location in the text where it matched
      */
-    getRawTokensWithIndices(text:string) {
+    getRawTokensWithIndices(text: string) {
         let tokens = text.toLowerCase().matchAll(this.tokenRegex)
         return tokens
     }
@@ -736,11 +736,11 @@ class LDAModel {
      * @param {String} text
      * @returns An array of strings in text that match LDAModel.tokenRegex
      */
-    getRawTokens(text:string):RegExpMatchArray {
-        let match=text.toLowerCase().match(this.tokenRegex)
-        if (!match){
+    getRawTokens(text: string): RegExpMatchArray {
+        let match = text.toLowerCase().match(this.tokenRegex)
+        if (!match) {
             // @ts-ignore: XRegExp
-            console.warn(`Regex ${this.tokenRegex.xregexp.source} did not match anything in: `,text)
+            console.warn(`Regex ${this.tokenRegex.xregexp.source} did not match anything in: `, text)
             return []
         }
         return match
@@ -752,7 +752,7 @@ class LDAModel {
      * @param {Number} topic the topic to get saliency for
      * @returns {[{string:String,salience:Number,startIndex:Number}]}
      */
-    textToTokenSaliences(text:string, topic:number):{string:string,salience:number,startIndex:number}[] {
+    textToTokenSaliences(text: string, topic: number): { string: string, salience: number, startIndex: number }[] {
         const tokensItter = this.getRawTokensWithIndices(text)
         const tokens = [...tokensItter]
         return tokens.map((token) => {
@@ -760,7 +760,7 @@ class LDAModel {
                 string: token[0],
                 salience: this.topicSaliency(token[0], topic),
                 startIndex: token.index
-            } as {string:string,salience:number,startIndex:number}
+            } as { string: string, salience: number, startIndex: number }
         })
     }
 
@@ -935,7 +935,7 @@ class LDAModel {
     /**
      * @summary Turns on/off Bigrams option
      */
-    _changeBigramStatus = (bigramStatus:boolean) => {
+    _changeBigramStatus = (bigramStatus: boolean) => {
         if (bigramStatus) {
             this.addBigram();
         } else {
@@ -1038,7 +1038,7 @@ class LDAModel {
 
         if (doOptimizeAlpha) {
             // Values 1.001, 1.0 and 1 are from parameters used for ParallelTopicModel
-            // in Mallet, 2/10/2021. 
+            // in Mallet, 2/10/2021.
             this._learnParameters(this._documentTopicSmoothing, this.topicDocCounts,
                 this.docLengthCounts, 1.001, 1.0, 1);
         }
@@ -1108,12 +1108,12 @@ class LDAModel {
      * @param {Number} numIterations 200 to 1000 generally insures convergence, but 1-5 is often enough to step in the right direction
      * @returns The sum of the learned parameters.
      */
-    _learnParameters = (parameters:number[],
-                        observations:number[][],
-                        observationLengths:number[],
-                        shape:number,
-                        scale:number,
-                        numIterations:number) => {
+    _learnParameters = (parameters: number[],
+                        observations: number[][],
+                        observationLengths: number[],
+                        shape: number,
+                        scale: number,
+                        numIterations: number) => {
 
         let i;
         let k;
@@ -1202,7 +1202,7 @@ class LDAModel {
      * @param {String} word the word to be added to stoplist
      * @param {Boolean} refresh whether or not to run sortTopicWords
      */
-    addStop = (word:string, refresh = false) => {
+    addStop = (word: string, refresh = false) => {
         this.addStopHelper(word);
         if (this.bigram) {
             for (let w in this.finalBigram[word]) {
@@ -1221,7 +1221,7 @@ class LDAModel {
      * @summary adds a word to model's stoplist
      * @param {String} word the word to be added to stoplist
      */
-    addStopHelper = (word:string) => {
+    addStopHelper = (word: string) => {
         if (!this.stopwords[word]) {
             this.stopwords[word] = 1;
             this._vocabularySize--;
@@ -1246,7 +1246,7 @@ class LDAModel {
      * if the bigram option is on, we remove bigrams that contain the stopword as well.
      * @param {String} word the word to remove
      */
-    removeStop = (word:string) => {
+    removeStop = (word: string) => {
         this.removeStopHelper(word);
         if (this.bigram) {
             for (let w in this.finalBigram[word]) {
@@ -1266,7 +1266,7 @@ class LDAModel {
      * @summary removes a word from stoplist
      * @param {String} word the word to remove
      */
-    removeStopHelper = (word:string) => {
+    removeStopHelper = (word: string) => {
         delete this.stopwords[word];
         this._vocabularySize++;
         this.wordTopicCounts[word] = {};
@@ -1319,8 +1319,8 @@ class LDAModel {
      * @param {String} word1 first word of the bigram to add
      * @param {String} word2 second word of the bigram to add
      */
-    addBigramHelper = (word1:string, word2:string) => {
-        // Makes word1_word2 into a “word” by adding it to the wordTopicCounts, vocaburaryCounts, 
+    addBigramHelper = (word1: string, word2: string) => {
+        // Makes word1_word2 into a “word” by adding it to the wordTopicCounts, vocaburaryCounts,
         // and increasing the vocaburarySize.
         let curBigram = word1 + "_" + word2
         this.wordTopicCounts[curBigram] = {};
@@ -1505,7 +1505,7 @@ class LDAModel {
      * @summary Adds the appropriate number of sweeps to be performed
      * @param {Number} numRequests number of iterations to be requested
      */
-    addSweepRequest(numRequests:number) {
+    addSweepRequest(numRequests: number) {
         this.modelIsRunning = true;
         this.updateWebpage();
 
@@ -1557,7 +1557,7 @@ class LDAModel {
      * @param {String} field
      * @returns {Array} Values in field
      */
-    metaValues=(field: string): string[] => {
+    metaValues = (field: string): string[] => {
         if (!this.metaFields.includes(field)) {
             console.log("Given metadata field is not in model");
         }
@@ -1577,7 +1577,7 @@ class LDAModel {
      * @param {String} field metadata field to get summary of
      * @param {*} topic topic number to get summary of
      */
-    metaTopicAverages=(field: string, topic: number)=> {
+    metaTopicAverages = (field: string, topic: number) => {
         if (!this.metaFields.includes(field)) {
             throw(Error("Given metadata field is not in model"))
         }
@@ -1630,7 +1630,7 @@ class LDAModel {
      * @param {Number} topic Topic to pull values from
      * @returns {Array<{topicVal:Number,label:String,metaVal:any}>}
      */
-    docTopicMetaValues = (field:string, topic:number):{topicVal:number,label:string|number,metaVal:string}[] => {
+    docTopicMetaValues = (field: string, topic: number): { topicVal: number, label: string | number, metaVal: string }[] => {
         return this.documents.map((doc) => {
             return {
                 topicVal: doc.topicCounts[topic] / doc.tokens.length,
@@ -1648,7 +1648,7 @@ class LDAModel {
      * @returns {Array<{key:Date,value:Number}>} rolling average topic
      * value over time
      */
-    topicTimeRollingAvg(topic:number, numberToAvg:number): {key:Date,value:number}[] {
+    topicTimeRollingAvg(topic: number, numberToAvg: number): { key: Date, value: number }[] {
         numberToAvg = Math.max(numberToAvg, 1);
 
         // Sort documents by time
@@ -1660,7 +1660,7 @@ class LDAModel {
             let startIndex = Math.max(0, Math.round(i - numberToAvg / 2));
             let endIndex = Math.min(documents.length, Math.round(i + numberToAvg / 2));
             // Gather values
-            let vals:number[] = [];
+            let vals: number[] = [];
             for (let j = startIndex; j < endIndex; j++) {
                 vals.push(documents[j].topicCounts[topic] /
                     documents[j].tokens.length);
@@ -1675,11 +1675,11 @@ class LDAModel {
         let topicMeans = d3
             // @ts-ignore this function clearly exists
             .nest()
-            .key(function (d:{date:Date}) {
+            .key(function (d: { date: Date }) {
                 return d.date;
             })
-            .rollup(function (d:typeof averaged) {
-                return d3.mean<{rollingAvg:number}>(d, x=>x.rollingAvg);
+            .rollup(function (d: typeof averaged) {
+                return d3.mean<{ rollingAvg: number }>(d, x => x.rollingAvg);
             })
             .entries(averaged);
 
@@ -1699,8 +1699,8 @@ class LDAModel {
      * Date refers to the max date for that bin. upperEr/lowerEr are only
      * included if stdError is set to true.
      */
-    topicTimesBinnedAverage(topic:number, numBins:number, stdError = false): LDATopicTimeBinAveraged[]{
-        let bins: LDATopicTimeBin[]=this.topicTimesBinned(topic, numBins);
+    topicTimesBinnedAverage(topic: number, numBins: number, stdError = false): LDATopicTimeBinAveraged[] {
+        let bins: LDATopicTimeBin[] = this.topicTimesBinned(topic, numBins);
 
         if (stdError) {
             bins = this.addStdErrorMargins(bins)
@@ -1711,7 +1711,7 @@ class LDAModel {
             const total = bin.value.reduce((a, b) => a + b, 0);
             return {
                 ...bin,
-                value: total/ bin.value.length,
+                value: total / bin.value.length,
             }
         })
     }
@@ -1732,7 +1732,7 @@ class LDAModel {
                 x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n)
             const stdError = stdDev / Math.sqrt(n)
             const z = 1.645
-            let newDict = {...dict} as  LDATopicTimeBinWithStd
+            let newDict = {...dict} as LDATopicTimeBinWithStd
             newDict.upperEr = mean + z * stdError
             newDict.lowerEr = Math.max(mean - z * stdError, 0)
             return newDict
@@ -1751,7 +1751,7 @@ class LDAModel {
     topicTimesBinned(topic: number, numBins: number): LDATopicTimeBin[] {
         numBins = Math.max(numBins, 1);
 
-        if (this.maxDocTime===undefined || this.minDocTime===undefined){
+        if (this.maxDocTime === undefined || this.minDocTime === undefined) {
             throw Error("Time not yet calculated");
         }
 
@@ -1759,7 +1759,7 @@ class LDAModel {
         let timeSpan = this.maxDocTime.getTime() - this.minDocTime.getTime();
         let binSize = Math.ceil(timeSpan / numBins); // ceil to make sure all docs have a bin
 
-        let bins:LDATopicTimeBin[] = []
+        let bins: LDATopicTimeBin[] = []
         for (let binNum = 0; binNum < numBins; binNum++) {
             bins.push({
                 key: new Date(this.minDocTime.getTime() + binSize * (binNum + 1)),

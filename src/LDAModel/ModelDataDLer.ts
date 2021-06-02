@@ -1,5 +1,6 @@
-import {topNWords, zeros, saveFile} from '../funcs/utilityFunctions'
+import {topNWords, saveFile} from '../funcs/utilityFunctions'
 import * as d3 from "d3"
+import LDAModel from "./LDAModel";
 
 /**
  * A class that allows users to download information about an LDA model
@@ -10,13 +11,17 @@ export default class LDAModelDataDLer {
      * A class that allows users to download information about an LDA model
      * @param {LDAModel} model the model to dl data from
      * @param {Ojbect} annotationHolder an object that has an annotations
-     * member variable with an array of topic annotations
+     * member letiable with an array of topic annotations
      * @note Okay yes, annotationHolder is a weird object to pass.
      * But, App likes to change the refference of the annotations, so
      * that reference cannot be passed. This ensures the correct annotations
      * are used.
      */
-    constructor(model, annotationHolder) {
+
+    readonly _model: LDAModel
+    private _annotationHolder: { annotations: string[] }
+
+    constructor(model: LDAModel, annotationHolder: { annotations: string[] }) {
         this._model = model;
         this._annotationHolder = annotationHolder;
     }
@@ -30,14 +35,14 @@ export default class LDAModelDataDLer {
      * Mostly, quotations need to be stripped.
      * @param {String} w word to sterilize
      */
-    _sterilizeWord(w) {
+    _sterilizeWord(w: string): string {
         return w.replace(/"/g, "");
     }
 
     /**
      * Truncates number to 8 digits
      */
-    _eightDigits = d3.format(".8");
+    _eightDigits: (number) => string = d3.format(".8");
 
     /**
      * CSV of topics over time
@@ -47,23 +52,24 @@ export default class LDAModelDataDLer {
      */
     saveTopicsTime = () => {
         // Set up CSV column names
-        var topicTimeCSV = "Topic Number";
+        let topicTimeCSV = "Topic Number";
 
         // Add a csv row for every topic
         for (let topic = 0; topic < this._model.numTopics; topic++) {
-            var topicProportions = this._model.documents
+            let topicProportions = this._model.documents
                 .map(function (d) {
                     return {
                         date: d.date,
                         p: d.topicCounts[topic] / d.tokens.length
                     };
                 });
-            var topicMeans = d3
+            let topicMeans = d3
+                // @ts-ignore: TS2339. This function exists
                 .nest()
                 .key(function (d) {
                     return d.date;
                 })
-                .rollup(function (d) {
+                .rollup(function (d:typeof topicProportions) {
                     return d3
                         .mean(d, function (x) {
                             return x.p
@@ -101,7 +107,7 @@ export default class LDAModelDataDLer {
      */
     saveDocTopics = () => {
         // Set up header
-        var docTopicsCSV = "Document ID";
+        let docTopicsCSV = "Document ID";
         for (let i = 0; i < this._model.numTopics; i++) {
             docTopicsCSV += ",Topic " + i;
         }
@@ -125,7 +131,7 @@ export default class LDAModelDataDLer {
      *  - one column for every topic: number of times word is assigned to each topic
      */
     saveTopicWords = () => {
-        var topicWordsCSV = "word," + d3
+        let topicWordsCSV = "word," + d3
             .range(0, this._model.numTopics)
             .map(function (t) {
                 return "Topic " + t;
@@ -136,7 +142,7 @@ export default class LDAModelDataDLer {
             // with them.
             word = this._sterilizeWord(word);
 
-            let topicProbabilities = zeros(this._model.numTopics);
+            let topicProbabilities: string[] = new Array(this._model.numTopics);
             for (let topic in this._model.wordTopicCounts[word]) {
                 topicProbabilities[topic] = this._eightDigits(
                     this._model.wordTopicCounts[word][topic] /
@@ -157,13 +163,13 @@ export default class LDAModelDataDLer {
      *  - Words: top 10 words
      */
     saveTopicKeys = () => {
-        var keysCSV = "Topic,Annotation,TokenCount,Words\n";
+        let keysCSV = "Topic,Annotation,TokenCount,Words\n";
 
         if (this._model.topicWordCounts.length === 0) {
             this._model.sortTopicWords();
         }
 
-        for (var topic = 0; topic < this._model.numTopics; topic++) {
+        for (let topic = 0; topic < this._model.numTopics; topic++) {
             let annotation = this._annotations[topic] ? this._annotations[topic] : "";
             keysCSV += topic + "," + annotation + "," + this._model.tokensPerTopic[topic] +
                 ",\"" + topNWords(this._model.topicWordCounts[topic], 10)
@@ -181,13 +187,13 @@ export default class LDAModelDataDLer {
      */
     saveTopicPMI = () => {
         // Add top row of column names
-        var pmiCSV = "Topic Number";
+        let pmiCSV = "Topic Number";
         for (let i = 0; i < this._model.numTopics; i++) {
             pmiCSV += "," + i;
         }
         pmiCSV += "\n";
 
-        var matrix = this._model.getTopicCorrelations();
+        let matrix = this._model.getTopicCorrelations();
         matrix.forEach((row, i) => {
             // Insert topic number
             pmiCSV += i + ",";
@@ -210,7 +216,7 @@ export default class LDAModelDataDLer {
      *  - Type: The type of graph connection (always undirected)
      */
     saveGraph = () => {
-        var graphCSV = "Source,Target,Weight,Type\n";
+        let graphCSV = "Source,Target,Weight,Type\n";
 
         this._model.documents.forEach((d) => {
             d.topicCounts.forEach((x, topic) => {
@@ -231,7 +237,7 @@ export default class LDAModelDataDLer {
      *  - Topic: num of topic token is assigned to
      */
     saveState = () => {
-        var state = "DocID,Word,Topic\n";
+        let state = "DocID,Word,Topic\n";
         this._model.documents.forEach((d) => {
             d.tokens.forEach((token) => {
                 if (!token.isStopword) {
@@ -276,16 +282,17 @@ export default class LDAModelDataDLer {
      *  - For every catagory - catagory label: the average topic proportion for
      *    documents with that label.
      */
-    topicBarDownload = (metaField) => {
+    topicBarDownload = (metaField:string) => {
         // get the list of categories without needing to parse entire form again
-        var sel = document.getElementById("categorySelect").options;
+        let sel = document.getElementById("categorySelect") as HTMLSelectElement;
+        let options=sel.options;
 
-        var categories = []
-        for (let i = 0; i < sel.length; i++) {
-            categories.push(sel[i].text);
+        let categories:string[] = []
+        for (let i = 0; i < options.length; i++) {
+            categories.push(options[i].text);
         }
 
-        var barPlotCSV = "";
+        let barPlotCSV = "";
         barPlotCSV += "Topic";
         for (let i = 0; i < categories.length; i++) {
             barPlotCSV += ", " + categories[i];
@@ -293,12 +300,12 @@ export default class LDAModelDataDLer {
         barPlotCSV += "\n"
 
         // First gather all the data for current md field.
-        let all_data = []
+        let all_data:{label:string,value:number}[][] = []
         for (let i = 0; i < categories.length; i++) {
             let averages = this._model.topicAvgsForCatagory(
                 metaField, categories[i]);
 
-            let data = []
+            let data:{label:string,value:number}[] = []
             for (let [topic, value] of Object.entries(averages)) {
                 let topicLabel = "[" + topic + "] " + topNWords(
                     this._model.topicWordCounts[topic], 3);
@@ -316,7 +323,7 @@ export default class LDAModelDataDLer {
             }
             barPlotCSV += "\n"
         }
-        var fileName = "barPlot.csv"
+        let fileName = "barPlot.csv"
         let fileType = "text/csv";
         saveFile(fileName, barPlotCSV, fileType);
     }
@@ -330,25 +337,23 @@ export default class LDAModelDataDLer {
      *  - for every topic - topic x: the the average proportion of that topic
      *    over every document in that catagory.
      */
-    barPlotValueDownload = (metaField) => {
+    barPlotValueDownload = (metaField:string) => {
 
         // First gather all the data for current md field.
-        let all_data = []
+        let all_data:{label:string,value:number}[][] = []
         for (let i = 0; i < this._model.numTopics; i++) {
             let averages = this._model.metaTopicAverages(
                 metaField, i);
-            let data = []
+            let data:{label:string,value:number}[] = []
             for (let [key, value] of Object.entries(averages)) {
                 data.push({"label": key, "value": value})
-
-
             }
             all_data.push(data)
         }
 
 
         // add heading to csv
-        var barPlotCSV = "";
+        let barPlotCSV = "";
         barPlotCSV += metaField;
         for (let i = 0; i < this._model.numTopics; i++) {
             barPlotCSV += ", topic " + i;
@@ -364,7 +369,7 @@ export default class LDAModelDataDLer {
             barPlotCSV += "\n"
         }
 
-        var fileName = metaField + ".csv";
+        let fileName = metaField + ".csv";
         let fileType = "text/csv";
         saveFile(fileName, barPlotCSV, fileType);
 
