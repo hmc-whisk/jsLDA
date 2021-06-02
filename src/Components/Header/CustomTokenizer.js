@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import './header.css';
 
 var XRegExp = require('xregexp');
@@ -34,10 +34,10 @@ class CustomTokenizer extends Component {
             <div className="configMenu">
                 <h3>Tokenization</h3>
                 <div>
-                    <input onChange={this.handleChange} id="regex" value={this.state.inputRegex} />
-                    <button 
-                        type="submit" 
-                        id="submitRegex" 
+                    <input onChange={this.handleChange} id="regex" value={this.state.inputRegex}/>
+                    <button
+                        type="submit"
+                        id="submitRegex"
                         className="darkButton"
                         onClick={this.handleSubmit}
                         style={{marginLeft: "5px"}}

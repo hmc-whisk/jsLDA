@@ -1,6 +1,6 @@
 body {
     font-family: Calibri, Verdana, sans-serif;
-    background-color: var(--color3); 
+    background-color: var(--color3);
     margin: 0;
     line-height: 1;
 }
@@ -9,5 +9,7 @@ code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-text { font-size: small; vertical-align: baseline; }
-  
+text {
+    font-size: small;
+    vertical-align: baseline;
+}

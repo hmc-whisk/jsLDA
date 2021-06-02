@@ -1,62 +1,105 @@
-
 /* NavBar.js */
-.tabs{ height: auto; margin-top: 20px;}
-.tabs > ul { font-size: 1em; list-style: none; }
-.tabs > ul > li { border: solid var(--color1) 2px; margin:0 2px 0 0; padding:7px 10px; display:block; float:left; color:#333; -webkit-user-select: none; -moz-user-select: none; user-select: none; -moz-border-radius: 4px; border-radius: 4px; background: var(--color3); }
-.tabs > ul > li:hover { background: var(--color1); cursor:pointer; }
-.tabs > ul > li.selected { background: var(--color1); cursor:pointer; font-weight: bold; }
-.tabs > ul > li.selected:hover { color: #000; }
+.tabs {
+    height: auto;
+    margin-top: 20px;
+}
 
-#vocab-tab  { float: right; }
-#dl-tab { float: right; }
+.tabs > ul {
+    font-size: 1em;
+    list-style: none;
+}
+
+.tabs > ul > li {
+    border: solid var(--color1) 2px;
+    margin: 0 2px 0 0;
+    padding: 7px 10px;
+    display: block;
+    float: left;
+    color: #333;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    background: var(--color3);
+}
+
+.tabs > ul > li:hover {
+    background: var(--color1);
+    cursor: pointer;
+}
+
+.tabs > ul > li.selected {
+    background: var(--color1);
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.tabs > ul > li.selected:hover {
+    color: #000;
+}
+
+#vocab-tab {
+    float: right;
+}
+
+#dl-tab {
+    float: right;
+}
 
 
 /* Configuration.js */
-.configButton { 
-    border: solid var(--color1) 2px; 
+.configButton {
+    border: solid var(--color1) 2px;
     font-family: Calibri, Verdana;
     float: right;
-    padding:7px 10px; 
-    -webkit-user-select: none; -moz-user-select: none; user-select: none; -moz-border-radius: 4px; 
-    border-radius: 4px; 
+    padding: 7px 10px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
     background: var(--color3);
-  }
-  
-.configButton:hover:enabled{
-    background: var(--color3Dark); 
+}
+
+.configButton:hover:enabled {
+    background: var(--color3Dark);
 }
 
 /* TopBar.js*/
 .topForm {
     margin-bottom: 0px;
     margin-left: 10px;
-}  
+}
 
-.configMenu { 
-    background-color: var(--color1); 
+.configMenu {
+    background-color: var(--color1);
     /* float: right;  */
-    padding-right: 20px; 
-    border-radius: 10px; 
-    margin: 5px; 
+    padding-right: 20px;
+    border-radius: 10px;
+    margin: 5px;
     padding: 10px;
-  }
-.configMenu div { padding: 0 10px; }
+}
+
+.configMenu div {
+    padding: 0 10px;
+}
 
 .configMenu form {
-  padding: 0;
-  margin: 0;
+    padding: 0;
+    margin: 0;
 }
 
 .fileInput {
-  margin: 0 5px;
+    margin: 0 5px;
 }
-  
-div.top { 
-    background-color: var(--color1); 
-    margin: 5px; 
-    padding: 10px; 
-    -moz-border-radius: 10px; 
-    border-radius: 10px; 
+
+div.top {
+    background-color: var(--color1);
+    margin: 5px;
+    padding: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
     display: flex;
     justify-content: space-between;
     font-size: 16px;
@@ -64,4 +107,6 @@ div.top {
 }
 
 /* NumTopicSlider.js */
-div.top #num_topics_control { float:right; }
+div.top #num_topics_control {
+    float: right;
+}

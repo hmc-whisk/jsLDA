@@ -14,7 +14,9 @@ class DLPage extends React.Component {
             <div id="pages">
 
                 <div id="dl-page" className="page">
-                    <div className="help">All of the following downloads, except for the model download, are in CSV format. Quotation marks are stripped from words upon download to avoid CSV errors.</div>
+                    <div className="help">All of the following downloads, except for the model download, are in CSV
+                        format. Quotation marks are stripped from words upon download to avoid CSV errors.
+                    </div>
                     <ul>
                         <li>{this.modelSaver}</li>
                         <li>{this.docTopics}</li>
@@ -38,7 +40,7 @@ class DLPage extends React.Component {
         return (
             <>
                 <button id="model-dl" className="darkButton"
-                    onClick={() => this.props.modelDataDLer.downloadModel()}>
+                        onClick={() => this.props.modelDataDLer.downloadModel()}>
                     LDA Model
                 </button>
                 : {description}
@@ -51,7 +53,7 @@ class DLPage extends React.Component {
         return (
             <>
                 <button id="doctopics-dl" className="darkButton"
-                    onClick={() => this.props.modelDataDLer.saveDocTopics()}>
+                        onClick={() => this.props.modelDataDLer.saveDocTopics()}>
                     Document Topics
                 </button>
                 : {description}
@@ -64,7 +66,7 @@ class DLPage extends React.Component {
         return (
             <>
                 <button id="topicwords-dl" className="darkButton"
-                    onClick={() => this.props.modelDataDLer.saveTopicWords()}>
+                        onClick={() => this.props.modelDataDLer.saveTopicWords()}>
                     Topic Words
                 </button>
                 : {description}
@@ -77,7 +79,7 @@ class DLPage extends React.Component {
         return (
             <>
                 <button id="keys-dl" className="darkButton"
-                    onClick={() => this.props.modelDataDLer.saveTopicKeys()}>
+                        onClick={() => this.props.modelDataDLer.saveTopicKeys()}>
                     Topic Summaries
                 </button>
                 : {description}
@@ -90,7 +92,7 @@ class DLPage extends React.Component {
         return (
             <>
                 <button id="topictopic-dl" className="darkButton"
-                    onClick={() => this.props.modelDataDLer.saveTopicPMI()}>
+                        onClick={() => this.props.modelDataDLer.saveTopicPMI()}>
                     Topic-Topic Correlations
                 </button>
                 : {description}
@@ -103,7 +105,7 @@ class DLPage extends React.Component {
         return (
             <>
                 <button id="graph-dl" className="darkButton"
-                    onClick={() => this.props.modelDataDLer.saveGraph()}>
+                        onClick={() => this.props.modelDataDLer.saveGraph()}>
                     Doc-Topic Graph File
                 </button>
                 : {description}
@@ -116,7 +118,7 @@ class DLPage extends React.Component {
         return (
             <>
                 <button id="state-dl" className="darkButton"
-                    onClick={() => this.props.modelDataDLer.saveState()}>
+                        onClick={() => this.props.modelDataDLer.saveState()}>
                     Complete Sampling State
                 </button>
                 : {description}
@@ -129,7 +131,7 @@ class DLPage extends React.Component {
         return (
             <>
                 <button id="topicstime-dl" className="darkButton"
-                    onClick={() => this.props.modelDataDLer.saveTopicsTime()}>
+                        onClick={() => this.props.modelDataDLer.saveTopicsTime()}>
                     Topic Values Over Time
                 </button>
                 : {description}
@@ -142,7 +144,7 @@ class DLPage extends React.Component {
         return (
             <>
                 <button id="stopword-dl" className="darkButton"
-                    onClick={() => this.props.modelDataDLer.downloadStopwords()}>
+                        onClick={() => this.props.modelDataDLer.downloadStopwords()}>
                     Stopwords
                 </button>
                 : {description}
