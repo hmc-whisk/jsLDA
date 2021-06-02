@@ -1,6 +1,13 @@
-import React, { Component } from 'react'; 
+import React, { Component } from 'react';
 
-class Tooltip extends Component {
+// TODO: resolve props
+
+class Tooltip extends Component<any,{
+    hover:boolean,
+    width: number,
+    height: number,
+    display: boolean
+}> {
     constructor(props) {
       super(props);
       this.state = {
@@ -9,11 +16,8 @@ class Tooltip extends Component {
         height: window.innerHeight,
         display: false
       };
-
-      
-
     }
-    
+
     componentDidMount() {
       window.addEventListener("resize", this.updateDimensions);
     }
@@ -22,7 +26,7 @@ class Tooltip extends Component {
       console.log(this.state.width, this.state.height)
     }
 
-    get overlayStyle() { 
+    get overlayStyle() {
       return {
         position: 'fixed',
         display: this.state.display ? 'block' : 'none',
@@ -35,10 +39,10 @@ class Tooltip extends Component {
         backgroundColor: 'rgba(0,0,0,0.5)',
         zIndex: 2,
         cursor: 'pointer',
-      }
+      } as React.CSSProperties
     }
 
-    textstyle = {
+    textStyle: React.CSSProperties = {
       position: 'absolute',
       top: '50%',
       left: '50%',
@@ -48,6 +52,10 @@ class Tooltip extends Component {
       msTransform: 'translate(-50%,-50%)',
     }
 
+    public static defaultProps = {
+        floatRight: true,
+    }
+
     overlayOn = () => {
       // if (document.getElementById("overlay")) {
       // document.getElementById("overlay").style.display = "block";}
@@ -55,7 +63,7 @@ class Tooltip extends Component {
         display: true
       })
     }
-  
+
     overlayOff = () => {
 
       this.setState({
@@ -70,9 +78,9 @@ class Tooltip extends Component {
     render() {
 
       return (
-        <div > 
+        <div >
         <div id="overlay" style= {this.overlayStyle} onClick={this.overlayOff}>
-          <div id="text" style= {this.textstyle}> 
+          <div id="text" style= {this.textStyle}>
             <img src= {this.props.tooltip} className="media-object"
               alt={this.props.altText} height = {'auto'} width = {this.state.width*0.8}
               draggable= 'false'/>
@@ -85,10 +93,6 @@ class Tooltip extends Component {
       </div>
       )
     }
-}
-
-Tooltip.defaultProps = {
-  floatRight: true,
 }
 
 export default Tooltip;
