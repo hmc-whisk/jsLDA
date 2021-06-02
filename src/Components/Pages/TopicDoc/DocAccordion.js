@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React from 'react';
 import Accordion from 'react-bootstrap/Accordion';
 import DocCard from './DocCard';
 import './topicDoc.css';
@@ -8,23 +8,23 @@ class DocAccordion extends React.Component {
 
     render() {
         return (
-        <div>
-            <Accordion defaultActiveKey={this.props.ldaModel.documents[this.props.startDoc].originalOrder}>
-                {this.props.documents
-                    .slice(this.props.startDoc,this.props.endDoc)
-                    .map( (document) => {
-                        return <DocCard
-                            ldaModel = {this.props.ldaModel}
-                            document = {document}
-                            key = {document.originalOrder}
-                            showMetaData = {this.props.showMetaData}
-                            maxTopicValue = {this.maxTopicValue}
-                            useSalience = {this.props.useSalience}
-                        />
-                    }
-                )}
-            </Accordion>
-        </div>
+            <div>
+                <Accordion defaultActiveKey={this.props.ldaModel.documents[this.props.startDoc].originalOrder}>
+                    {this.props.documents
+                        .slice(this.props.startDoc, this.props.endDoc)
+                        .map((document) => {
+                                return <DocCard
+                                    ldaModel={this.props.ldaModel}
+                                    document={document}
+                                    key={document.originalOrder}
+                                    showMetaData={this.props.showMetaData}
+                                    maxTopicValue={this.maxTopicValue}
+                                    useSalience={this.props.useSalience}
+                                />
+                            }
+                        )}
+                </Accordion>
+            </div>
         )
     }
 

@@ -1,7 +1,7 @@
-import React, { Component } from 'react'; 
+import React, {Component} from 'react';
 import TopicDoc from './TopicDoc'
 
-class DocPage extends Component { 
+class DocPage extends Component {
     render() {
         return (
             <div id={"docPage"}>
@@ -11,4 +11,5 @@ class DocPage extends Component {
         )
     }
 }
+
 export default DocPage

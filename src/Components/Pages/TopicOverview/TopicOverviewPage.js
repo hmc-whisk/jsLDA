@@ -7,7 +7,7 @@ import LabeledToggleButton from '../../LabeledToggleButton';
  * @summary Component for Topic Overview page
  * @requires
  *  @prop ldaModel
- * 
+ *
  * @author Theo Bayard de Volo
  */
 class TopicOverviewPage extends React.Component {
@@ -17,7 +17,7 @@ class TopicOverviewPage extends React.Component {
     static annotationFontSize = 16
 
     render() {
-        
+
         if (this.props.ldaModel.selectedTopic === -1) {
             return this.noTopicSelected()
         }
@@ -57,13 +57,15 @@ class TopicOverviewPage extends React.Component {
         return (
             <div id="label">
                 <h2>Topic {topicNum}</h2>
-                <pre style={{fontSize:TopicOverviewPage.annotationFontSize,
-                             whiteSpace: "pre-wrap"}}>
+                <pre style={{
+                    fontSize: TopicOverviewPage.annotationFontSize,
+                    whiteSpace: "pre-wrap"
+                }}>
                     <i>{this.props.annotations[topicNum]}</i>
                 </pre>
-                <p className="subtitle" style={{textAlign:"left"}}>
-                    <b>Top Words: </b> 
-                    {topNWords(this.props.ldaModel.topicWordCounts[topicNum], 
+                <p className="subtitle" style={{textAlign: "left"}}>
+                    <b>Top Words: </b>
+                    {topNWords(this.props.ldaModel.topicWordCounts[topicNum],
                         TopicOverviewPage.numWordsToShow)}
                 </p>
             </div>
@@ -82,13 +84,13 @@ class TopicOverviewPage extends React.Component {
     /**
      * Returns an element displaying things that are correlated with
      * the currently selected topic
-     * 
-     * For now, only correlations between topics and other topics are 
+     *
+     * For now, only correlations between topics and other topics are
      * shown. In the future, correlations between topics and metadata
      * may be shown as well
      */
     correlations() {
-        return(
+        return (
             <div class="grid-item" id="correlations"> topic correlations </div>
         )
     }
@@ -100,11 +102,11 @@ class TopicOverviewPage extends React.Component {
     documents() {
         return (
             <div id="documents">
-                <h3 style={{float:"left",margin:"10 0 0 0"}}>
+                <h3 style={{float: "left", margin: "10 0 0 0"}}>
                     Documents:
-                </h3>   
+                </h3>
                 <TopicDoc
-                    ldaModel = {this.props.ldaModel}/>
+                    ldaModel={this.props.ldaModel}/>
             </div>
         )
     }

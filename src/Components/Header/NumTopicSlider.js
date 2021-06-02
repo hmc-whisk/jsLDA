@@ -14,16 +14,16 @@ class NumTopicSlider extends React.Component {
         return (
             <div style={{display: "flex", justifyContent: "center", margin: "10px"}}>
                 <span id="num_topics_control">
-                    Train with 
+                    Train with
                     <input id="num-topics-input" type="range" name="topics"
                            onChange={this.handleChange}
-                        value={this.props.sliderValue}
-                        min="3" max="100" 
-                        disabled = {this.props.modelIsRunning}
-                        onMouseUp={(e) => this.handleChange(e)}
-                        onInput={(e) => this.props.onInput(e)}
+                           value={this.props.sliderValue}
+                           min="3" max="100"
+                           disabled={this.props.modelIsRunning}
+                           onMouseUp={(e) => this.handleChange(e)}
+                           onInput={(e) => this.props.onInput(e)}
                     />
-                    <span id="num_topics_display"> </span>  
+                    <span id="num_topics_display"> </span>
                     {this.props.sliderValue} Topics
                 </span>
             </div>

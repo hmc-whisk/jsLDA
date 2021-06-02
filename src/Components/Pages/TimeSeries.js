@@ -1,15 +1,16 @@
-import React, { Component } from 'react'; 
+import React, {Component} from 'react';
 import * as d3 from 'd3';
 import {topNWords} from '../../funcs/utilityFunctions';
 import './pages.css';
 
 class TimeSeries extends Component {
     graphMargin = 20;
+
     constructor(props) {
         super(props);
         this.state = {
             // Constants for metadata time series views.
-            timeSeriesWidth: 600, 
+            timeSeriesWidth: 600,
             timeSeriesHeight: 75,
             timeSeriesHeightTopic: 300,
             numberOfBins: 20,
@@ -17,32 +18,33 @@ class TimeSeries extends Component {
             errorBarColor: getComputedStyle(document.documentElement).getPropertyValue('--color2Light'),
             strokeColor: getComputedStyle(document.documentElement).getPropertyValue('--color4'),
         };
-        
+
     }
+
     topicTimeGroups = []
 
 
     _setRef(componentNode) {
         this._rootNode = componentNode;
     }
-    
+
     /**
      * @summary Creates skeleton of svg component when no topic is selected
      */
-    createTimeSVGs () {
+    createTimeSVGs() {
         var tsPage = d3.select(this._rootNode);
         // Restart the visualizations
         tsPage.select("svg").remove();
         let temp_topicTimeGroups = [];
-        
-        let height = (this.state.timeSeriesHeight + this.graphMargin) * this.props.ldaModel.numTopics+50
-        
+
+        let height = (this.state.timeSeriesHeight + this.graphMargin) * this.props.ldaModel.numTopics + 50
+
         var tsSVG = tsPage
             .append("svg")
             .attr("height", height)
             .attr("width", this.state.timeSeriesWidth)
-            .style("overflow","visible");
-        
+            .style("overflow", "visible");
+
         for (var topic = 0; topic < this.props.ldaModel.numTopics; topic++) {
             temp_topicTimeGroups
                 .push(tsSVG
@@ -62,17 +64,17 @@ class TimeSeries extends Component {
     /**
      * @summary Creates skeleton of svg component when a topic is selected
      */
-    createTimeSVGsTopic () {
+    createTimeSVGsTopic() {
         var tsPage = d3.select(this._rootNode);
         // Restart the visualizations
         tsPage.select("svg").remove();
         let temp_topicTimeGroups = [];
-                
+
         var tsSVG = tsPage
             .append("svg")
             .attr("height", 600)
-            .attr("width", this.state.timeSeriesWidth+200);
-        
+            .attr("width", this.state.timeSeriesWidth + 200);
+
         temp_topicTimeGroups
             .push(tsSVG
                 .append("g")
@@ -116,13 +118,17 @@ class TimeSeries extends Component {
                 .range([this.state.timeSeriesHeight, 0]);
 
             let scale = d3.scaleTime()
-                .domain([topicMeans[0].key, topicMeans[topicMeans.length-1].key])
+                .domain([topicMeans[0].key, topicMeans[topicMeans.length - 1].key])
                 .range([0, this.state.timeSeriesWidth])
                 .nice();
 
             var area = d3.area()
-                .x(function (d, i) { return scale(d.key); })
-                .y1(function (d) { return yScale(d.value); })
+                .x(function (d, i) {
+                    return scale(d.key);
+                })
+                .y1(function (d) {
+                    return yScale(d.value);
+                })
                 .y0(yScale(0));
 
             var x_axis = d3.axisBottom()
@@ -160,11 +166,11 @@ class TimeSeries extends Component {
         bins.unshift(firstPoint)
 
         // Add rest of points
-        for(let binNum = 1; binNum < originalBins.length; binNum++) {
-            let newPosition = binNum*2 // Acount for previous inserts on array
+        for (let binNum = 1; binNum < originalBins.length; binNum++) {
+            let newPosition = binNum * 2 // Acount for previous inserts on array
             let startOfBin = {...originalBins[binNum]}
-            startOfBin.key = originalBins[binNum-1].key
-            bins.splice(newPosition,0,startOfBin)
+            startOfBin.key = originalBins[binNum - 1].key
+            bins.splice(newPosition, 0, startOfBin)
         }
         return bins
     }
@@ -175,19 +181,19 @@ class TimeSeries extends Component {
      * @param {Boolean} flatLines whether or not to add extra points
      * to flatten graph lines
      * @param {Boolean} errorBars whether or not to add error bars to
-     * graph 
-     * @returns {Array<{key:Date,value:Number}>} Array of average 
-     * topic values for every document in bin. Entries are sorted by key. 
+     * graph
+     * @returns {Array<{key:Date,value:Number}>} Array of average
+     * topic values for every document in bin. Entries are sorted by key.
      * Date refers to the max date for that bin.
      */
-    getBins(topic, flatLines=true, errorBars=false) {
+    getBins(topic, flatLines = true, errorBars = false) {
         let bins = this.props.ldaModel
-            .topicTimesBinnedAverage(topic,this.state.numberOfBins,errorBars);
+            .topicTimesBinnedAverage(topic, this.state.numberOfBins, errorBars);
 
-        if(flatLines) {
+        if (flatLines) {
             bins = this.flattenTimeBinPoints(bins)
         }
-        
+
         return bins
     }
 
@@ -200,7 +206,7 @@ class TimeSeries extends Component {
 
         let topic = this.props.ldaModel.selectedTopic;
 
-        var topicMeans = this.getBins(topic,true,true)
+        var topicMeans = this.getBins(topic, true, true)
 
         let thisMaxTopicMean = Math.max(...topicMeans.map(function (d) {
             return d.upperEr
@@ -215,24 +221,34 @@ class TimeSeries extends Component {
             .range([this.state.timeSeriesHeightTopic, 0]);
 
         var scale = d3.scaleTime()
-            .domain([topicMeans[0].key, topicMeans[topicMeans.length-1].key])
-            .range([0, this.state.timeSeriesWidth-50]);
+            .domain([topicMeans[0].key, topicMeans[topicMeans.length - 1].key])
+            .range([0, this.state.timeSeriesWidth - 50]);
 
         // Function to draw line
         var line = d3.line()
-            .x(function (d) { return scale(d.key); })
-            .y(function (d) { return yScale(d.value); })
+            .x(function (d) {
+                return scale(d.key);
+            })
+            .y(function (d) {
+                return yScale(d.value);
+            })
 
         // Function to draw confidence interval
         const confInterval = d3.area()
-            .x(function (d) { return scale(d.key); })
-            .y0(function (d) { return yScale(d.lowerEr); })
-            .y1(function (d) { return yScale(d.upperEr); })
+            .x(function (d) {
+                return scale(d.key);
+            })
+            .y0(function (d) {
+                return yScale(d.lowerEr);
+            })
+            .y1(function (d) {
+                return yScale(d.upperEr);
+            })
 
         var x_axis = d3.axisBottom()
             .scale(scale)
             .tickFormat(d3.timeFormat("%Y-%m-%d"))
-        
+
         var y_axis = d3.axisLeft()
             .scale(yScale);
 
@@ -247,7 +263,7 @@ class TimeSeries extends Component {
                 .append("path")
                 .attr("fill", this.state.errorBarColor)
                 .attr("stroke", "none")
-                .attr("d",confInterval(topicMeans))
+                .attr("d", confInterval(topicMeans))
             // Chart line
             this.topicTimeGroups[0]
                 .append("path")
@@ -265,9 +281,9 @@ class TimeSeries extends Component {
                 .attr("transform", "translate(0," + this.state.timeSeriesHeightTopic + ")")
                 .call(x_axis)
                 .selectAll("text")
-                    .attr("transform", "rotate(45)")
-                    .attr("dx", "3em")
-                    .attr("dy", ".1em");
+                .attr("transform", "rotate(45)")
+                .attr("dx", "3em")
+                .attr("dy", ".1em");
             // Y axis
             this.topicTimeGroups[0]
                 .append("g")
@@ -279,23 +295,25 @@ class TimeSeries extends Component {
                 .style("text-anchor", "middle")
                 .attr("transform", "translate(-10,-10)")
                 .text("Proportion")
-                .attr("font-weight", 'bold');;      
-            
+                .attr("font-weight", 'bold');
+            ;
+
             this.topicTimeGroups[0]
                 .append("text")
                 .style("text-anchor", "middle")
-                .attr("transform", "translate(" + (this.state.timeSeriesWidth/2-20)+ "," + (this.state.timeSeriesHeightTopic+ 80)+ ")")
+                .attr("transform", "translate(" + (this.state.timeSeriesWidth / 2 - 20) + "," + (this.state.timeSeriesHeightTopic + 80) + ")")
                 .text("Time")
-                .attr("font-weight", 'bold');;    
+                .attr("font-weight", 'bold');
+            ;
 
             var focus = this.topicTimeGroups[0].append("g")
                 .attr("class", "focus")
                 .style("display", "none");
-    
+
             focus.append("circle")
                 .attr("fill", "steelblue")
                 .attr("r", 5);
-    
+
             focus.append("rect")
                 .attr("class", "tooltip")
                 .attr("width", 150)
@@ -305,8 +323,8 @@ class TimeSeries extends Component {
                 .attr("rx", 4)
                 .attr("ry", 4)
                 .attr("fill", 'white')
-                .attr("stroke", '#000');    
-    
+                .attr("stroke", '#000');
+
             focus.append("text")
                 .attr("class", "tooltip-year")
                 .attr("x", 20)
@@ -318,7 +336,7 @@ class TimeSeries extends Component {
                 .attr("y", 18)
                 .attr("font-size", '14px')
                 .text("Proportion:");
-    
+
             focus.append("text")
                 .attr("class", "tooltip-prop")
                 .attr("x", 95)
@@ -328,23 +346,28 @@ class TimeSeries extends Component {
                 .attr("class", "overlay")
                 .attr("fill", 'none')
                 .attr('pointer-events', 'all')
-                .attr("width", this.state.timeSeriesWidth-55)
+                .attr("width", this.state.timeSeriesWidth - 55)
                 .attr("height", 300)
-                .on("mouseover", function() { focus.style("display", null); })
-                .on("mouseout", function() { focus.style("display", "none"); })
-                .on("mousemove", function() {
+                .on("mouseover", function () {
+                    focus.style("display", null);
+                })
+                .on("mouseout", function () {
+                    focus.style("display", "none");
+                })
+                .on("mousemove", function () {
                     if (d3.mouse(this)[0] > 0) {
-                    let x0 = scale.invert(d3.mouse(this)[0]),
-                    i = d3.bisectLeft(topicKeys, x0),
-                    d0 = topicMeans[i - 1],
-                    d1 = topicMeans[i],
-                    d = x0 - d0.key > d1.key - x0 ? d1 : d0;
-                    focus.attr("transform", "translate(" + scale(d.key) + "," + yScale(d.value) + ")");
-                    focus.select(".tooltip-year").text(d3.timeFormat("%Y-%m-%d")(d.key));
-                    focus.select(".tooltip-prop").text(d.value.toPrecision(4));}
+                        let x0 = scale.invert(d3.mouse(this)[0]),
+                            i = d3.bisectLeft(topicKeys, x0),
+                            d0 = topicMeans[i - 1],
+                            d1 = topicMeans[i],
+                            d = x0 - d0.key > d1.key - x0 ? d1 : d0;
+                        focus.attr("transform", "translate(" + scale(d.key) + "," + yScale(d.value) + ")");
+                        focus.select(".tooltip-year").text(d3.timeFormat("%Y-%m-%d")(d.key));
+                        focus.select(".tooltip-prop").text(d.value.toPrecision(4));
+                    }
                 });
         }
-        
+
     }
 
     /**
@@ -354,27 +377,25 @@ class TimeSeries extends Component {
     formatDate(date) {
         return d3.timeFormat("%Y-%m-%d")(date);
     }
-  
+
     componentDidMount() {
         if (this.props.ldaModel.selectedTopic === -1) {
             this.createTimeSVGs();
             this.timeSeries0()
-        }
-        else {
+        } else {
             this.createTimeSVGsTopic();
             this.timeSeriesTopic()
         }
     }
 
     componentDidUpdate(prevProps) {
-        if(prevProps.ldaModel.numTopics !== this.props.ldaModel.numTopics) {
+        if (prevProps.ldaModel.numTopics !== this.props.ldaModel.numTopics) {
             this.createTimeSVGs();
         }
         if (this.props.ldaModel.selectedTopic === -1) {
             this.createTimeSVGs();
             this.timeSeries0()
-        }
-        else {
+        } else {
             this.createTimeSVGsTopic();
             this.timeSeriesTopic()
         }
@@ -390,43 +411,44 @@ class TimeSeries extends Component {
     handleNumAvgChange = (event) => {
         event.preventDefault();
 
-        if(!event.target.value) event.target.value = 1; // Protect from empty field
+        if (!event.target.value) event.target.value = 1; // Protect from empty field
 
         this.setState({
-            numberOfBins: Math.max(1,event.target.value),
+            numberOfBins: Math.max(1, event.target.value),
         })
     }
 
     render() {
         return (
             <>
-                <div className="help">Documents are grouped by their "date_tag" 
-                field. These plots 
-                show the average document proportion of each topic in each time bin. 
-                Date values are parsed as ISO date time strings.
-                When a topic is selected a more detailed graph of just that topic
-                is shown.
-                Hover only shows the time fields that are filled. The light blue
-                area around the line represents the 90% confidence interval calculated 
-                using standard error.
-                The graphs bin documents into time periods to smooth
-                out the data and make it more interpretable. You can change the number 
-                of bins that are used below.
-                Data for plots are available in downloads page.</div>
+                <div className="help">Documents are grouped by their "date_tag"
+                    field. These plots
+                    show the average document proportion of each topic in each time bin.
+                    Date values are parsed as ISO date time strings.
+                    When a topic is selected a more detailed graph of just that topic
+                    is shown.
+                    Hover only shows the time fields that are filled. The light blue
+                    area around the line represents the 90% confidence interval calculated
+                    using standard error.
+                    The graphs bin documents into time periods to smooth
+                    out the data and make it more interpretable. You can change the number
+                    of bins that are used below.
+                    Data for plots are available in downloads page.
+                </div>
                 <div>
-                <label for="numberOfBins">Number of Bins:</label>
-                <input 
-                    onChange = {this.handleNumAvgChange} 
-                    type="number" id="numberOfBins" 
-                    value = {this.state.numberOfBins} 
-                    max="1000"
-                    min="5"
-                    step="5"
-                />
+                    <label for="numberOfBins">Number of Bins:</label>
+                    <input
+                        onChange={this.handleNumAvgChange}
+                        type="number" id="numberOfBins"
+                        value={this.state.numberOfBins}
+                        max="1000"
+                        min="5"
+                        step="5"
+                    />
                 </div>
                 <div id="ts-page" className="page" ref={this._setRef.bind(this)}>
-                </div>    
-            </>    
+                </div>
+            </>
         )
     }
 }

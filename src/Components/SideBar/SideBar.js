@@ -1,34 +1,34 @@
-import React, { Component } from 'react'; 
+import React, {Component} from 'react';
 import * as d3 from 'd3';
 import {topNWords} from '../../funcs/utilityFunctions';
 
-import { PinAngle, PinAngleFill, EyeSlash, EyeSlashFill } from 'react-bootstrap-icons';
+import {PinAngle, PinAngleFill, EyeSlash, EyeSlashFill} from 'react-bootstrap-icons';
 import Spinner from 'react-bootstrap/Spinner';
 import './sidebar.css';
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
 const TopicBox = ({
-    topNum,
-    selectedTopic,
-    topicsDict,
-    topicVisibility,
-    toggleVisibility,
-    toggleTopicDocuments,
-    changeAnnotation,
-}) => {
-    
+                      topNum,
+                      selectedTopic,
+                      topicsDict,
+                      topicVisibility,
+                      toggleVisibility,
+                      toggleTopicDocuments,
+                      changeAnnotation,
+                  }) => {
+
     return (
         <div id="topics" className="sidebox">
             {/* Pin and Hide buttons */}
-            <div 
+            <div
                 className={ // topicbar color change if selected or hidden
-                    (topNum === selectedTopic) ? 
+                    (topNum === selectedTopic) ?
                         "topicbar topicbar-selected"
                         :
                         (topicVisibility[topNum] === "hidden" ?
-                            "topicbar topicbar-hidden"
-                            :
-                            "topicbar"
+                                "topicbar topicbar-hidden"
+                                :
+                                "topicbar"
                         )
                 }
                 onClick={() => toggleTopicDocuments(topNum)}
@@ -40,39 +40,39 @@ const TopicBox = ({
 
                 {/* Pin/Unpin buttons */}
                 <div>
-                <button
-                    type="button"
-                    onClick={(e) => toggleVisibility(e, topNum, "pin")}
-                    className="topic-button"
-                >
-                    { topicVisibility[topNum] === "pinned" ? 
-                        <PinAngleFill className="topic-button-icon" />
-                        :
-                        <PinAngle className="topic-button-icon" />
-                    }
-                </button>
-                
-                {/* Hide/Unhide button */}
-                <button
-                    type="button"
-                    onClick={(e) => toggleVisibility(e, topNum, "hide")}
-                    className="topic-button"
-                >
-                    { topicVisibility[topNum] === "hidden" ? 
-                        <EyeSlashFill className="topic-button-icon" />
-                        :
-                        <EyeSlash className="topic-button-icon" />
-                    }
-                </button>
+                    <button
+                        type="button"
+                        onClick={(e) => toggleVisibility(e, topNum, "pin")}
+                        className="topic-button"
+                    >
+                        {topicVisibility[topNum] === "pinned" ?
+                            <PinAngleFill className="topic-button-icon"/>
+                            :
+                            <PinAngle className="topic-button-icon"/>
+                        }
+                    </button>
+
+                    {/* Hide/Unhide button */}
+                    <button
+                        type="button"
+                        onClick={(e) => toggleVisibility(e, topNum, "hide")}
+                        className="topic-button"
+                    >
+                        {topicVisibility[topNum] === "hidden" ?
+                            <EyeSlashFill className="topic-button-icon"/>
+                            :
+                            <EyeSlash className="topic-button-icon"/>
+                        }
+                    </button>
                 </div>
             </div>
 
             {/* Annotation text field */}
-            <textarea 
+            <textarea
                 className="textField"
                 style={{
-                    whiteSpace: "preLine", 
-                    backgroundColor: "var(--color3Dark)", 
+                    whiteSpace: "preLine",
+                    backgroundColor: "var(--color3Dark)",
                     borderCollapse: "separate",
                     color: "black",
                     borderRadius: "3px",
@@ -84,18 +84,18 @@ const TopicBox = ({
                 wrap="soft"
                 placeholder="Enter annotation"
                 onBlur={(e) => {
-                    if(e.target.value && e.target.value[e.target.value.length-1] === '\n'){
-                        e.target.value = e.target.value.slice(0,-1);
-                    }    
+                    if (e.target.value && e.target.value[e.target.value.length - 1] === '\n') {
+                        e.target.value = e.target.value.slice(0, -1);
+                    }
                     changeAnnotation(e.target.value, topNum);
                 }}
             />
-            
+
             {/* List of top words */}
-            <div 
+            <div
                 className={(topNum === selectedTopic) ? "topicwords selected" : "topicwords"}
                 onClick={() => toggleTopicDocuments(topNum)}
-                style={{ color: "inherit" }}
+                style={{color: "inherit"}}
             >
                 {`${topicsDict[topNum]}`}
             </div>
@@ -119,8 +119,7 @@ class SideBar extends Component {
             //sortVocabByTopic = false;
             d3.select("#sortVocabByTopic").text("Sort by topic")
             this.props.selectedTopicChange(-1);
-        }
-        else {
+        } else {
             this.props.selectedTopicChange(topic);
         }
     }
@@ -131,7 +130,7 @@ class SideBar extends Component {
         if (topWordCounts.length > 0) {
             let topicsDict = {};
             for (let topic = 0; topic < numTops; topic++) {
-                if (topWordCounts[topic]) { 
+                if (topWordCounts[topic]) {
                     topicsDict[topic] = topNWords(this.props.topicWordCounts[topic], 10)
                 }
             }
@@ -150,13 +149,13 @@ class SideBar extends Component {
 
         let dispOrderCopy = [...this.state.displayOrder];
         dispOrderCopy = dispOrderCopy.filter(tn => tn !== topNum);
-        
+
         const currentVis = this.props.topicVisibility[topNum];
 
         if (toggledButton === "pin") {
             if (currentVis === "pinned") { // unpin
                 let i;
-                for (i = 0; i < dispOrderCopy.length+1; i++) {
+                for (i = 0; i < dispOrderCopy.length + 1; i++) {
                     let currTop = this.state.displayOrder[i];
                     // should insert unpinned topics before hidden topics
                     if (this.props.topicVisibility[currTop] === "hidden") {
@@ -167,17 +166,15 @@ class SideBar extends Component {
                         break;
                     }
                 }
-                dispOrderCopy.splice(i-1, 0, topNum);
+                dispOrderCopy.splice(i - 1, 0, topNum);
 
                 this.props.setTopicVisibility(topNum, "default");
-            }
-            else { // pin
+            } else { // pin
                 dispOrderCopy.unshift(topNum);
 
                 this.props.setTopicVisibility(topNum, "pinned");
             }
-        }
-        else if (toggledButton === "hide") {
+        } else if (toggledButton === "hide") {
             if (currentVis === "hidden") { // unhide
                 let i;
                 for (i = dispOrderCopy.length; i > -1; i--) {
@@ -191,21 +188,20 @@ class SideBar extends Component {
                         break;
                     }
                 }
-                dispOrderCopy.splice(i+1, 0, topNum);
-    
+                dispOrderCopy.splice(i + 1, 0, topNum);
+
                 this.props.setTopicVisibility(topNum, "default")
-            }
-            else { // hide
+            } else { // hide
                 dispOrderCopy.push(topNum);
 
                 this.props.setTopicVisibility(topNum, "hidden");
             }
         }
-        this.setState({ displayOrder: dispOrderCopy })
+        this.setState({displayOrder: dispOrderCopy})
     }
 
     // When number of topics is changed, model resets and annotations
-    // should be cleared 
+    // should be cleared
     clearAnnotations = () => {
         document.getElementById("topic-annotations").reset();
     }
@@ -217,60 +213,60 @@ class SideBar extends Component {
     componentDidUpdate(prevProps) {
         // if numTopics has changed, should reinitialize topics and clear annotations
         // if topicWordCounts just finished loading, call initTopics
-        if (prevProps.numTopics !== this.props.numTopics 
+        if (prevProps.numTopics !== this.props.numTopics
             || (prevProps.topicWordCounts.length === 0 && this.props.topicWordCounts.length > 0)) {
             if (this.state.topicWords !== null) { // already initialized once so must clear annotations
                 this.clearAnnotations();
             }
-            
+
             this.initTopics(this.props.numTopics, this.props.topicWordCounts);
         }
 
-        // after init, if iterations have run creating new topicWordCounts
+            // after init, if iterations have run creating new topicWordCounts
         // update topWords but do not reinitialize everything
-        else if(this.state.topicWords && prevProps.topicWordCounts !== this.props.topicWordCounts) {
+        else if (this.state.topicWords && prevProps.topicWordCounts !== this.props.topicWordCounts) {
             let topicWordsCopy = {...this.state.topicWords};
             for (let topic = 0; topic < this.props.numTopics; topic++) {
-                if (this.props.topicWordCounts[topic]) { 
+                if (this.props.topicWordCounts[topic]) {
                     topicWordsCopy[topic] = topNWords(this.props.topicWordCounts[topic], 10);
                 }
             }
-            this.setState({ topicWords: topicWordsCopy });
+            this.setState({topicWords: topicWordsCopy});
         }
     }
 
     render() {
-        const { changeAnnotation, topicVisibility, selectedTopic } = this.props;
+        const {changeAnnotation, topicVisibility, selectedTopic} = this.props;
         return (
             this.state.topicWords
-            ?
-            <div className="sidebar">
-                <form id="topic-annotations">
-                {
-                    this.state.displayOrder.map((topNum) => (
-                        <TopicBox
-                            key={topNum}
-                            topNum={topNum}
-                            selectedTopic={selectedTopic}
-                            topicsDict={this.state.topicWords}
-                            topicVisibility={topicVisibility}
-                            toggleVisibility={this.toggleTopicVisibility}
-                            toggleTopicDocuments={this.toggleTopicDocuments}
-                            changeAnnotation={changeAnnotation}
-                        />
-                        )
-                    )
-                }
-                </form>
-            </div>
-            :
-            <div className="sidebar">
-                <Spinner 
-                    animation="grow" 
-                    style={{width: "50px", height: "50px", marginLeft: "45%"}}
-                    variant="secondary"
-                />
-            </div>
+                ?
+                <div className="sidebar">
+                    <form id="topic-annotations">
+                        {
+                            this.state.displayOrder.map((topNum) => (
+                                    <TopicBox
+                                        key={topNum}
+                                        topNum={topNum}
+                                        selectedTopic={selectedTopic}
+                                        topicsDict={this.state.topicWords}
+                                        topicVisibility={topicVisibility}
+                                        toggleVisibility={this.toggleTopicVisibility}
+                                        toggleTopicDocuments={this.toggleTopicDocuments}
+                                        changeAnnotation={changeAnnotation}
+                                    />
+                                )
+                            )
+                        }
+                    </form>
+                </div>
+                :
+                <div className="sidebar">
+                    <Spinner
+                        animation="grow"
+                        style={{width: "50px", height: "50px", marginLeft: "45%"}}
+                        variant="secondary"
+                    />
+                </div>
         )
     }
 }

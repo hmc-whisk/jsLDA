@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React from 'react';
 import Card from 'react-bootstrap/Card';
 import Accordion from 'react-bootstrap/Accordion';
 import {format as d3Format} from 'd3';
@@ -11,27 +11,27 @@ class DocCard extends React.Component {
     render() {
         const format = d3Format(".2g");
         const document = this.props.document;
-        return(
+        return (
             <Card>
                 <Accordion.Toggle as={Card.Header} eventKey={document.id}>
-                    <b>ID: </b>{document.id} 
-                    <span style={{float:"right"}}>
-                        { this.props.useSalience ?
-                            <b> Saliency Score: </b>:
+                    <b>ID: </b>{document.id}
+                    <span style={{float: "right"}}>
+                        {this.props.useSalience ?
+                            <b> Saliency Score: </b> :
                             <b> Topic Score: </b>}
-                        {this.props.ldaModel.selectedTopic !== -1 ? 
-                            this.score(document): 
+                        {this.props.ldaModel.selectedTopic !== -1 ?
+                            this.score(document) :
                             "No topic selected"}
                     </span>
                     <div>{this.metaInfo}</div>
                 </Accordion.Toggle>
                 <Accordion.Collapse eventKey={document.id}>
                     <span>
-                        <div className="preview">{truncate(document.originalText,100)}</div>
-                        <DocView 
-                            document = {this.props.document}
-                            ldaModel = {this.props.ldaModel}
-                            maxTopicValue = {this.props.maxTopicValue}
+                        <div className="preview">{truncate(document.originalText, 100)}</div>
+                        <DocView
+                            document={this.props.document}
+                            ldaModel={this.props.ldaModel}
+                            maxTopicValue={this.props.maxTopicValue}
                         />
                     </span>
                 </Accordion.Collapse>
@@ -43,26 +43,27 @@ class DocCard extends React.Component {
      * @summary Metadata info from document in displayable jsx form
      */
     get metaInfo() {
-        if(!this.props.showMetaData) return null;
+        if (!this.props.showMetaData) return null;
         const document = this.props.document;
-        let metaInfo = [this.formatInfo("Date",document.date)]
+        let metaInfo = [this.formatInfo("Date", document.date)]
         for (const [key, value] of Object.entries(document.metadata)) {
-            metaInfo.push(this.formatInfo(key,value))
+            metaInfo.push(this.formatInfo(key, value))
         }
         return metaInfo;
     }
+
     /**
      * @summary Formats the document score, based on salience score vs topic score
      */
     score(document) {
         const format = d3Format(".2g");
-        let score = this.props.useSalience?
-            format(document.score):
+        let score = this.props.useSalience ?
+            format(document.score) :
             format(document.score * 100);
         return score;
     }
 
-    formatInfo(key,value){
+    formatInfo(key, value) {
         return (
             <div key={key} style={{}}>
                 <b>{key}: </b> {value + "  "}

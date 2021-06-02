@@ -1,4 +1,4 @@
-import React, { Component } from 'react'; 
+import React, {Component} from 'react';
 import PageController from './PageController';
 import DocAccordion from './DocAccordion';
 import LabeledToggleButton from '../../LabeledToggleButton';
@@ -13,7 +13,7 @@ class TopicDoc extends Component {
     static DOC_SORT_SMOOTHING = 10.0;
 
     constructor(props) {
-        super (props);
+        super(props);
         this.state = {
             currentPage: 1,
             showMetaData: false,
@@ -22,7 +22,7 @@ class TopicDoc extends Component {
     }
 
     /**
-     * @summary documents sorted in order of the prevalence 
+     * @summary documents sorted in order of the prevalence
      * of the selected topic
      */
     get sortedDocuments() {
@@ -34,12 +34,12 @@ class TopicDoc extends Component {
         if (this.props.ldaModel.selectedTopic === -1) return sortedDocuments;
 
         sortedDocuments = sortedDocuments.map(function (doc, i) {
-            doc["score"] = 
-                (doc.topicCounts[selectedTopic] + TopicDoc.DOC_SORT_SMOOTHING)/
+            doc["score"] =
+                (doc.topicCounts[selectedTopic] + TopicDoc.DOC_SORT_SMOOTHING) /
                 (doc.tokens.length + sumDocSortSmoothing)
             return doc
         });
-        sortedDocuments.sort(function(a, b) {
+        sortedDocuments.sort(function (a, b) {
             return b.score - a.score;
         });
         return sortedDocuments;
@@ -53,24 +53,24 @@ class TopicDoc extends Component {
         // Return default order if no topic is selected
         if (this.props.ldaModel.selectedTopic === -1) return sortedDocuments;
 
-        sortedDocuments = sortedDocuments.map((doc) => { 
+        sortedDocuments = sortedDocuments.map((doc) => {
             doc["score"] = this.props.ldaModel.textSalience(
-                                doc.originalText,
-                                this.props.ldaModel.selectedTopic)
+                doc.originalText,
+                this.props.ldaModel.selectedTopic)
             return doc
         })
-        sortedDocuments.sort(function(a, b) {
+        sortedDocuments.sort(function (a, b) {
             return b.score - a.score;
         });
         return sortedDocuments;
     }
 
     get lastPage() {
-        return Math.ceil(this.props.ldaModel.documents.length/TopicDoc.DOCS_PER_PAGE);
+        return Math.ceil(this.props.ldaModel.documents.length / TopicDoc.DOCS_PER_PAGE);
     }
 
     get startDoc() {
-        return (this.state.currentPage - 1 ) * TopicDoc.DOCS_PER_PAGE
+        return (this.state.currentPage - 1) * TopicDoc.DOCS_PER_PAGE
     }
 
     /**
@@ -88,7 +88,7 @@ class TopicDoc extends Component {
 
     /**
      * @summary changes the current page to n
-     * @param {Number} n 
+     * @param {Number} n
      */
     changePage = (n) => {
         this.setState({
@@ -113,56 +113,56 @@ class TopicDoc extends Component {
     }
 
     render() {
-        return(
+        return (
             <div>
 
                 {this.toggleMetaDataButton()}
                 {this.toggleSalienceDataButton()}
-                
-                <div className = "docNav">
-                <PageController
-                    currentPage = {this.state.currentPage}
-                    changePage = {this.changePage}
-                    lastPage = {this.lastPage}/>
+
+                <div className="docNav">
+                    <PageController
+                        currentPage={this.state.currentPage}
+                        changePage={this.changePage}
+                        lastPage={this.lastPage}/>
                 </div>
-                    
+
 
                 <DocAccordion
-                    documents = {this.state.useSalience?
-                                    this.sortedDocumentsSalient:
-                                    this.sortedDocuments}
-                    ldaModel = {this.props.ldaModel}
-                    startDoc = {this.startDoc}
-                    endDoc = {this.endDoc}
-                    showMetaData = {this.state.showMetaData}
-                    useSalience = {this.state.useSalience}
+                    documents={this.state.useSalience ?
+                        this.sortedDocumentsSalient :
+                        this.sortedDocuments}
+                    ldaModel={this.props.ldaModel}
+                    startDoc={this.startDoc}
+                    endDoc={this.endDoc}
+                    showMetaData={this.state.showMetaData}
+                    useSalience={this.state.useSalience}
                 />
             </div>
         )
     }
 
     toggleMetaDataButton() {
-        return(
-            <LabeledToggleButton 
-                label= {"Show Metadata"}
-                style = {{
-                            float:"right",
-                            borderTopRightRadius: "4px",
-                        }}
-                checked = {this.state.showMetaData}
-                onChange = {this.toggleMetaData}/>
+        return (
+            <LabeledToggleButton
+                label={"Show Metadata"}
+                style={{
+                    float: "right",
+                    borderTopRightRadius: "4px",
+                }}
+                checked={this.state.showMetaData}
+                onChange={this.toggleMetaData}/>
         )
     }
 
     toggleSalienceDataButton() {
-        return(
-            <LabeledToggleButton 
-                label= {"Sort by Saliency"}
-                style = {{
-                            float:"right",
-                        }}
-                checked = {this.state.useSalience}
-                onChange = {this.toggleSalience}/>
+        return (
+            <LabeledToggleButton
+                label={"Sort by Saliency"}
+                style={{
+                    float: "right",
+                }}
+                checked={this.state.useSalience}
+                onChange={this.toggleSalience}/>
         )
     }
 
