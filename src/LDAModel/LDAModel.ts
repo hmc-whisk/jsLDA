@@ -89,13 +89,13 @@ class LDAModel {
      * @param {Function} forceUpdate callback that updates the webpage
      */
 
-    private _vocabularySize: number;
-    private _correlationMinTokens: number;
-    private _correlationMinProportion: number;
-    private _wordPattern: RegExp;
-    private _completeSweeps: number;
-    private _requestedSweeps: number;
-    private _topicWeights: number[];
+    public _vocabularySize: number;
+    public _correlationMinTokens: number;
+    public _correlationMinProportion: number;
+    public _wordPattern: RegExp;
+    public _completeSweeps: number;
+    public _requestedSweeps: number;
+    public _topicWeights: number[];
 
     public sortVocabByTopic: boolean;
     public vocabularyCounts: { [key: string]: number }; // reversed from _parseDoc
@@ -124,18 +124,18 @@ class LDAModel {
     public documentType: string;
     public modelIsRunning: boolean;
 
-    private _specificityScale: d3.ScaleLinear<string, string>;
+    public _specificityScale: d3.ScaleLinear<string, string>;
 
-    private _timer?: d3.Timer;
-    private _documentTopicSmoothing: number[];
-    private _topicWordSmoothing: number;
-    private _sweeps: number;
-    private _optimizeInterval: number;
-    private _burninPeriod: number;
-    private _changeAlpha: boolean;
-    private _memoMinDocTime?: Date;
-    private _memoMaxDocTime?: Date;
-    private _maxTopicSaliency: number[];
+    public _timer?: d3.Timer;
+    public _documentTopicSmoothing: number[];
+    public _topicWordSmoothing: number;
+    public _sweeps: number;
+    public _optimizeInterval: number;
+    public _burninPeriod: number;
+    public _changeAlpha: boolean;
+    public _memoMinDocTime?: Date;
+    public _memoMaxDocTime?: Date;
+    public _maxTopicSaliency: number[];
 
 
     constructor(numTopics: number, forceUpdate: () => void) {
@@ -316,7 +316,7 @@ class LDAModel {
      *  - Lines should not have column names included
      *  - See parseDoc for
      */
-    ready(error: Error, stops: string, doc: string) {
+    ready(error: Error|null, stops: string, doc: string) {
         if (error) {
             //alert("File upload failed. Please try again."); TODO: uncomment this for deployment
             throw error;

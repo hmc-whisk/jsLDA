@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {ChangeEvent, Component} from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -33,8 +33,25 @@ if (!Object.keys) {
     Object.keys = (getObjectKeys());
 }
 
+interface AppProps {
+}
 
-class App extends Component {
+interface AppStates {
+    ldaModel: LDAModel,
+    modelDataDLer: ModelDataDLer,
+    docName: string,
+    documentsURL: string,
+    stopwordsURL: string,
+    defaultExt: string,
+    documentsFileArray: File[][]
+    stoplistFileArray: File[][],
+    modelFileArray: File[][]
+    selectedTab: string,
+    sweepParameter: number,
+    update: boolean
+}
+
+class App extends Component<AppProps, AppStates> {
     constructor(props) {
         super(props)
 
@@ -53,6 +70,7 @@ class App extends Component {
             // Location to store uploaded files
             documentsFileArray: [],
             stoplistFileArray: [],
+            modelFileArray: [],
 
             selectedTab: "home-tab",
             sweepParameter: 100,
@@ -97,7 +115,7 @@ class App extends Component {
     }
 
     // Data and functions for annotations in sidebar (placed here instead of as a state to avoid re-rendering)
-    annotations = [];
+    annotations: string[] = [];
 
     changeAnnotation = (text, i) => {
         this.annotations[i] = text;
@@ -139,7 +157,7 @@ class App extends Component {
     /**
      * @summary Load in new default document
      */
-    onDefaultDocChange = (event) => {
+    onDefaultDocChange = (event:ChangeEvent<HTMLSelectElement>) => {
         event.preventDefault();
 
         let docName = event.target.value;
@@ -169,11 +187,11 @@ class App extends Component {
     /**
      * @summary Retrieve doc files from upload component and set documentType
      */
-    onDocumentFileChange = (event) => {
+    onDocumentFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         event.preventDefault();
 
         // Prevent empty file change errors
-        if (!event.target.files[0]) {
+        if (event.target.files === null) {
             return;
         }
 
@@ -186,11 +204,11 @@ class App extends Component {
     /**
      * @summary Retrieve stop word files from upload component
      */
-    onStopwordFileChange = (event) => {
+    onStopwordFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         event.preventDefault();
 
         // Prevent empty file change errors
-        if (!event.target.files[0]) {
+        if (event.target.files === null) {
             return;
         }
 
@@ -204,11 +222,11 @@ class App extends Component {
      * @summary Retrieve model file from upload component
      * @param {Event} event file change event
      */
-    onModelFileChange = (event) => {
+    onModelFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         event.preventDefault();
 
         // Prevent empty file change errors
-        if (!event.target.files[0]) {
+        if (event.target.files === null) {
             return;
         }
 
@@ -218,7 +236,7 @@ class App extends Component {
     }
 
     onModelUpload = () => {
-        new Promise((resolve, reject) => {
+        new Promise<LDAModel>((resolve, reject) => {
             const fileSelection = this.state.modelFileArray[0].slice();
 
             // Read file
@@ -228,7 +246,7 @@ class App extends Component {
                 try {
                     resolve(Object.assign(
                         new LDAModel(this.startingNumTopics, this.modelForceUpdate),
-                        JSON.parse(reader.result)));
+                        JSON.parse(reader.result as string)));
 
                 } catch {
                     reject("Could not interpret model file. Upload canceled.")
@@ -252,14 +270,14 @@ class App extends Component {
      *  - first document in documentsFileArray state if it exists
      *  - stopwordsURL resource file otherwise
      */
-    getStoplistUpload = () => (new Promise((resolve) => {
+    getStoplistUpload = (): Promise<string> => (new Promise((resolve) => {
         if (this.state.stoplistFileArray.length === 0) {
             resolve(d3.text(this.state.stopwordsURL));
         } else {
             const fileSelection = this.state.stoplistFileArray[0].slice();
             let reader = new FileReader();
             reader.onload = function () {
-                resolve(reader.result);
+                resolve(reader.result as string);
             };
             reader.readAsText(fileSelection[0]);
         }
@@ -271,15 +289,15 @@ class App extends Component {
      *  - first document in documentsFileArray state if it exists
      *  - documentsURL resource file otherwise
      */
-    getDocsUpload = () => (new Promise((resolve) => {
+    getDocsUpload = (): Promise<string> => (new Promise((resolve) => {
         if (this.state.documentsFileArray.length === 0) {
             this.state.ldaModel.setDocumentType(this.state.defaultExt);
             resolve(d3.text(this.state.documentsURL));
         } else {
             const fileSelection = this.state.documentsFileArray[0].slice();
-            var reader = new FileReader();
+            let reader = new FileReader();
             reader.onload = function () {
-                resolve(reader.result);
+                resolve(reader.result as string);
             };
             reader.readAsText(fileSelection[0]);
         }
@@ -292,11 +310,15 @@ class App extends Component {
     queueLoad = () => {
         this.resetNotes(this.state.ldaModel.numTopics)
         this.state.ldaModel.reset();
-        Promise.all([this.getStoplistUpload(), this.getDocsUpload()])
+        Promise.all<string, string>([this.getStoplistUpload(), this.getDocsUpload()])
             .then(([stops, lines]) => {
                 this.state.ldaModel.ready(null, stops, lines)
             })
-            .catch(err => this.state.ldaModel.ready(err, null, null));
+            .catch(err => {
+                console.error("Error during queueLoad")
+                console.error(err)
+                this.state.ldaModel.ready(err, '', '')
+            });
     }
 
     /**
@@ -312,7 +334,7 @@ class App extends Component {
     /**
      * @summary changes bigram status in ldamodel
      */
-    changeBigramStatus = (bigramStatus) => {
+    changeBigramStatus = (bigramStatus:boolean) => {
         if (!this.state.ldaModel.bigramInitialized) {
             this._initializeBigram();
         } else {
@@ -325,16 +347,17 @@ class App extends Component {
      * @summary This function is the callback for "input", it changes as we move the slider without releasing it.
      */
     updateTopicCount(input) {
+        // TODO: is this used anywhere?
         d3.select("#num_topics_display").text(input.value);
     }
 
     /**
      * @summary This function is the callback for "change"
      */
-    onTopicsChange = (val) => {
+    onTopicsChange = (val:string) => {
         console.log("Changing # of topics: " + val);
 
-        var newNumTopics = Number(val);
+        let newNumTopics = Number(val);
         if (!isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.state.ldaModel.numTopics) {
             this.state.ldaModel.changeNumTopics(Number(val));
         }
@@ -352,7 +375,7 @@ class App extends Component {
     /**
      * @summary Callback function for pressing the run iterations button
      */
-    changeSweepAmount = (val) => {
+    changeSweepAmount = (val:string) => {
         this.setState({
             sweepParameter: parseInt(val, 10)
         })
@@ -370,7 +393,7 @@ class App extends Component {
     }
 
     render() {
-        var DisplayPage;
+        let DisplayPage;
         switch (this.state.selectedTab) {
             case "docs-tab":
                 DisplayPage = <DocPage
@@ -475,6 +498,7 @@ class App extends Component {
                             onDefaultDocChange={this.onDefaultDocChange}
                             docName={this.state.docName}
                             optimizeValue={this.state.ldaModel._changeAlpha}
+                        // @ts-ignore TS2551 TODO: Fix this
                             bigramValue={this.state.ldaModel.bigrams}
                             tokenRegex={this.state.ldaModel.tokenRegex}
                             changeTokenRegex={this.onTokenRegexChange}
