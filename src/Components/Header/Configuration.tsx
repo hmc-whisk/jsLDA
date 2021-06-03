@@ -1,8 +1,8 @@
-import React, {Component} from 'react';
+import React, {Component, ReactElement} from 'react';
 import './header.css';
 
 interface ConfigurationProps{
-    displayElement:Element
+    displayElement:ReactElement
 }
 interface ConfigurationState{
     hover:boolean,

@@ -55,7 +55,7 @@ class App extends Component<AppProps, AppStates> {
     constructor(props) {
         super(props)
 
-        let ldaModel = new LDAModel(this.startingNumTopics, this.modelForceUpdate);
+        let ldaModel = new LDAModel(this.startingNumTopics, this.modelForceUpdate.bind(this));
 
         this.state = {
             ldaModel: ldaModel,
@@ -149,7 +149,7 @@ class App extends Component<AppProps, AppStates> {
     /**
      * @summary Change regex tokenizer and update model
      */
-    onTokenRegexChange(inputRegex) {
+    onTokenRegexChange(inputRegex:RegExp) {
         this.state.ldaModel.setTokenRegex(inputRegex);
         this.queueLoad();
     }
