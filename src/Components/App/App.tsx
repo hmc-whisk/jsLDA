@@ -84,12 +84,12 @@ class App extends Component<AppProps, AppStates> {
     /**
      * @summary function used by model to force update of webpage
      */
-    modelForceUpdate = () => {
+    modelForceUpdate() {
         this.forceUpdate();
         console.log("Forced Update");
     }
 
-    downloadModel = () => {
+    downloadModel() {
         const fileName = "jsLDA_Model";
         const json = JSON.stringify(this.state.ldaModel);
         const blob = new Blob([json], {type: 'application/json'});
@@ -106,23 +106,23 @@ class App extends Component<AppProps, AppStates> {
     corNotes = ``;
 
     // Functions for notes in correlation
-    changeNotes = (notes) => {
+    changeNotes(notes) {
         this.corNotes = notes;
     }
 
-    provideNotes = () => {
+    provideNotes() {
         return this.corNotes;
     }
 
     // Data and functions for annotations in sidebar (placed here instead of as a state to avoid re-rendering)
     annotations: string[] = [];
 
-    changeAnnotation = (text, i) => {
+    changeAnnotation(text, i) {
         this.annotations[i] = text;
         this.modelForceUpdate();
     }
 
-    resetNotes = (i) => {
+    resetNotes(i) {
         this.annotations = new Array(i);
     }
 
@@ -130,7 +130,7 @@ class App extends Component<AppProps, AppStates> {
      * @summary Gets the annotaion for a topic
      * @param {Number} topic Number of topic to get annotations for
      */
-    getAnnotation = (topic) => {
+    getAnnotation(topic) {
         return this.annotations[topic];
     }
 
@@ -138,7 +138,7 @@ class App extends Component<AppProps, AppStates> {
     /**
      * @summary Update the page/tab user is looking at, causing rerender of components
      */
-    changeTab = (tabID) => {
+    changeTab(tabID) {
         this.setState({
             selectedTab: tabID
         });
@@ -149,7 +149,7 @@ class App extends Component<AppProps, AppStates> {
     /**
      * @summary Change regex tokenizer and update model
      */
-    onTokenRegexChange = (inputRegex) => {
+    onTokenRegexChange(inputRegex) {
         this.state.ldaModel.setTokenRegex(inputRegex);
         this.queueLoad();
     }
@@ -157,7 +157,7 @@ class App extends Component<AppProps, AppStates> {
     /**
      * @summary Load in new default document
      */
-    onDefaultDocChange = (event:ChangeEvent<HTMLSelectElement>) => {
+    onDefaultDocChange(event: ChangeEvent<HTMLSelectElement>) {
         event.preventDefault();
 
         let docName = event.target.value;
@@ -187,7 +187,7 @@ class App extends Component<AppProps, AppStates> {
     /**
      * @summary Retrieve doc files from upload component and set documentType
      */
-    onDocumentFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onDocumentFileChange(event: ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
 
         // Prevent empty file change errors
@@ -204,7 +204,7 @@ class App extends Component<AppProps, AppStates> {
     /**
      * @summary Retrieve stop word files from upload component
      */
-    onStopwordFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onStopwordFileChange(event: ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
 
         // Prevent empty file change errors
@@ -222,7 +222,7 @@ class App extends Component<AppProps, AppStates> {
      * @summary Retrieve model file from upload component
      * @param {Event} event file change event
      */
-    onModelFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onModelFileChange(event: ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
 
         // Prevent empty file change errors
@@ -235,13 +235,13 @@ class App extends Component<AppProps, AppStates> {
         });
     }
 
-    onModelUpload = () => {
+    onModelUpload() {
         new Promise<LDAModel>((resolve, reject) => {
             const fileSelection = this.state.modelFileArray[0].slice();
 
             // Read file
             let reader = new FileReader();
-            reader.onload = () => {
+            reader.onload=()=> {
                 // Create a new LDAModel to put uploaded info into
                 try {
                     resolve(Object.assign(
@@ -251,7 +251,8 @@ class App extends Component<AppProps, AppStates> {
                 } catch {
                     reject("Could not interpret model file. Upload canceled.")
                 }
-            };
+            }
+            ;
             reader.readAsText(fileSelection[0]);
         }).then((result) => {
             result.modelUploaded()
@@ -270,18 +271,20 @@ class App extends Component<AppProps, AppStates> {
      *  - first document in documentsFileArray state if it exists
      *  - stopwordsURL resource file otherwise
      */
-    getStoplistUpload = (): Promise<string> => (new Promise((resolve) => {
-        if (this.state.stoplistFileArray.length === 0) {
-            resolve(d3.text(this.state.stopwordsURL));
-        } else {
-            const fileSelection = this.state.stoplistFileArray[0].slice();
-            let reader = new FileReader();
-            reader.onload = function () {
-                resolve(reader.result as string);
-            };
-            reader.readAsText(fileSelection[0]);
-        }
-    }));
+    getStoplistUpload(): Promise<string> {
+        return new Promise((resolve) => {
+            if (this.state.stoplistFileArray.length === 0) {
+                resolve(d3.text(this.state.stopwordsURL));
+            } else {
+                const fileSelection = this.state.stoplistFileArray[0].slice();
+                let reader = new FileReader();
+                reader.onload = function () {
+                    resolve(reader.result as string);
+                };
+                reader.readAsText(fileSelection[0]);
+            }
+        })
+    };
 
     /**
      * @summary Returns a promise of the correct document text
@@ -289,25 +292,27 @@ class App extends Component<AppProps, AppStates> {
      *  - first document in documentsFileArray state if it exists
      *  - documentsURL resource file otherwise
      */
-    getDocsUpload = (): Promise<string> => (new Promise((resolve) => {
-        if (this.state.documentsFileArray.length === 0) {
-            this.state.ldaModel.setDocumentType(this.state.defaultExt);
-            resolve(d3.text(this.state.documentsURL));
-        } else {
-            const fileSelection = this.state.documentsFileArray[0].slice();
-            let reader = new FileReader();
-            reader.onload = function () {
-                resolve(reader.result as string);
-            };
-            reader.readAsText(fileSelection[0]);
-        }
-    }));
+    getDocsUpload(): Promise<string> {
+        return new Promise((resolve) => {
+            if (this.state.documentsFileArray.length === 0) {
+                this.state.ldaModel.setDocumentType(this.state.defaultExt);
+                resolve(d3.text(this.state.documentsURL));
+            } else {
+                const fileSelection = this.state.documentsFileArray[0].slice();
+                let reader = new FileReader();
+                reader.onload = function () {
+                    resolve(reader.result as string);
+                };
+                reader.readAsText(fileSelection[0]);
+            }
+        })
+    };
 
 
     /**
      * @summary Runs the document processing pipeline
      */
-    queueLoad = () => {
+    queueLoad() {
         this.resetNotes(this.state.ldaModel.numTopics)
         this.state.ldaModel.reset();
         Promise.all<string, string>([this.getStoplistUpload(), this.getDocsUpload()])
@@ -324,7 +329,7 @@ class App extends Component<AppProps, AppStates> {
     /**
      * @summary Runs the document processing pipeline for bigrams
      */
-    _initializeBigram = () => {
+    _initializeBigram() {
         Promise.all([this.getDocsUpload()])
             .then(([lines]) => {
                 this.state.ldaModel._parseBigram(lines)
@@ -334,7 +339,7 @@ class App extends Component<AppProps, AppStates> {
     /**
      * @summary changes bigram status in ldamodel
      */
-    changeBigramStatus = (bigramStatus:boolean) => {
+    changeBigramStatus(bigramStatus: boolean) {
         if (!this.state.ldaModel.bigramInitialized) {
             this._initializeBigram();
         } else {
@@ -354,7 +359,7 @@ class App extends Component<AppProps, AppStates> {
     /**
      * @summary This function is the callback for "change"
      */
-    onTopicsChange = (val:string) => {
+    onTopicsChange(val: string) {
         console.log("Changing # of topics: " + val);
 
         let newNumTopics = Number(val);
@@ -375,7 +380,7 @@ class App extends Component<AppProps, AppStates> {
     /**
      * @summary Callback function for pressing the run iterations button
      */
-    changeSweepAmount = (val:string) => {
+    changeSweepAmount(val: string) {
         this.setState({
             sweepParameter: parseInt(val, 10)
         })
@@ -384,11 +389,12 @@ class App extends Component<AppProps, AppStates> {
     /**
      * @summary Callback function for pressing the stop button
      */
-    stopButtonClick = () => {
+    stopButtonClick() {
         this.state.ldaModel.stopSweeps();
     }
 
-    runIterationsClick = () => {
+    runIterationsClick() {
+        console.log(this.state.ldaModel, 'clicked')
         this.state.ldaModel.addSweepRequest(this.state.sweepParameter);
     }
 
@@ -405,24 +411,24 @@ class App extends Component<AppProps, AppStates> {
                     topicWordCounts={this.state.ldaModel.topicWordCounts}
                     numTopics={this.state.ldaModel.numTopics}
                     documents={this.state.ldaModel.documents}
-                    getTopicCorrelations={this.state.ldaModel.getTopicCorrelations}
-                    changeNotes={this.changeNotes}
-                    provideNotes={this.provideNotes}
+                    getTopicCorrelations={this.state.ldaModel.getTopicCorrelations.bind(this.state.ldaModel)}
+                    changeNotes={this.changeNotes.bind(this)}
+                    provideNotes={this.provideNotes.bind(this)}
                     tooltip={corrTooltip}
                     update={this.state.update}/>;
                 break;
             case "vocab-tab":
                 DisplayPage = <VocabTable
                     sortVocabByTopic={this.state.ldaModel.sortVocabByTopic}
-                    sortbyTopicChange={this.state.ldaModel.sortbyTopicChange}
+                    sortbyTopicChange={this.state.ldaModel.sortbyTopicChange.bind(this.state.ldaModel)}
                     vocabularyCounts={this.state.ldaModel.vocabularyCounts}
                     wordTopicCounts={this.state.ldaModel.wordTopicCounts}
                     selectedTopic={this.state.ldaModel.selectedTopic}
                     stopwords={this.state.ldaModel.stopwords}
                     numTopics={this.state.ldaModel.numTopics}
                     byCountDescending={this.state.ldaModel.byCountDescending}
-                    addStop={this.state.ldaModel.addStop}
-                    removeStop={this.state.ldaModel.removeStop}
+                    addStop={this.state.ldaModel.addStop.bind(this.state.ldaModel)}
+                    removeStop={this.state.ldaModel.removeStop.bind(this.state.ldaModel)}
                     update={this.state.update}
                     modelIsRunning={this.state.ldaModel.modelIsRunning}
                     modelDataDLer={this.state.modelDataDLer}
@@ -441,24 +447,24 @@ class App extends Component<AppProps, AppStates> {
                 break;
             case "home-tab":
                 DisplayPage = <HomePage
-                    onDocumentFileChange={this.onDocumentFileChange}
-                    onStopwordFileChange={this.onStopwordFileChange}
-                    onModelFileChange={this.onModelFileChange}
-                    onFileUpload={this.queueLoad}
-                    onModelUpload={this.onModelUpload}
+                    onDocumentFileChange={this.onDocumentFileChange.bind(this)}
+                    onStopwordFileChange={this.onStopwordFileChange.bind(this)}
+                    onModelFileChange={this.onModelFileChange.bind(this)}
+                    onFileUpload={this.queueLoad.bind(this)}
+                    onModelUpload={this.onModelUpload.bind(this)}
                     modelIsRunning={this.state.ldaModel.modelIsRunning}
-                    onDefaultDocChange={this.onDefaultDocChange}
+                    onDefaultDocChange={this.onDefaultDocChange.bind(this)}
                     docName={this.state.docName}
                 />
                 break;
             case "meta-tab":
                 DisplayPage = <MetaData
-                    metaTopicAverages={this.state.ldaModel.metaTopicAverages}
+                    metaTopicAverages={this.state.ldaModel.metaTopicAverages.bind(this.state.ldaModel)}
                     metaFields={this.state.ldaModel.metaFields}
                     selectedTopic={this.state.ldaModel.selectedTopic}
-                    topicAvgsForCatagory={this.state.ldaModel.topicAvgsForCatagory}
-                    metaValues={this.state.ldaModel.metaValues}
-                    docTopicMetaValues={this.state.ldaModel.docTopicMetaValues}
+                    topicAvgsForCatagory={this.state.ldaModel.topicAvgsForCatagory.bind(this.state.ldaModel)}
+                    metaValues={this.state.ldaModel.metaValues.bind(this.state.ldaModel)}
+                    docTopicMetaValues={this.state.ldaModel.docTopicMetaValues.bind(this.state.ldaModel)}
                     topicWordCounts={this.state.ldaModel.topicWordCounts}
                     modelDataDLer={this.state.modelDataDLer}/>
                 break;
@@ -481,43 +487,43 @@ class App extends Component<AppProps, AppStates> {
                     <TopBar completeSweeps={this.state.ldaModel._completeSweeps}
                             requestedSweeps={this.state.ldaModel._requestedSweeps}
                             numTopics={this.state.ldaModel.numTopics}
-                            onClick={this.runIterationsClick}
-                            updateNumTopics={this.onTopicsChange}
+                            onClick={this.runIterationsClick.bind(this)}
+                            updateNumTopics={this.onTopicsChange.bind(this)}
                             sweepParameter={this.state.sweepParameter}
-                            hyperTune={this.state.ldaModel.hyperTune}
-                            bigrams={this.changeBigramStatus}
-                            onChange={this.changeSweepAmount}
-                            stopButtonClick={this.state.ldaModel.stopSweeps}
+                            hyperTune={this.state.ldaModel.hyperTune.bind(this.state.ldaModel)}
+                            bigrams={this.changeBigramStatus.bind(this)}
+                            onChange={this.changeSweepAmount.bind(this)}
+                            stopButtonClick={this.state.ldaModel.stopSweeps.bind(this.state.ldaModel)}
                             iter={this.state.ldaModel._completeSweeps}
                             modelIsRunning={this.state.ldaModel.modelIsRunning}
-                            onDocumentFileChange={this.onDocumentFileChange}
-                            onStopwordFileChange={this.onStopwordFileChange}
-                            onModelFileChange={this.onModelFileChange}
-                            onFileUpload={this.queueLoad}
-                            onModelUpload={this.onModelUpload}
-                            onDefaultDocChange={this.onDefaultDocChange}
+                            onDocumentFileChange={this.onDocumentFileChange.bind(this)}
+                            onStopwordFileChange={this.onStopwordFileChange.bind(this)}
+                            onModelFileChange={this.onModelFileChange.bind(this)}
+                            onFileUpload={this.queueLoad.bind(this)}
+                            onModelUpload={this.onModelUpload.bind(this)}
+                            onDefaultDocChange={this.onDefaultDocChange.bind(this)}
                             docName={this.state.docName}
                             optimizeValue={this.state.ldaModel._changeAlpha}
                         // @ts-ignore TS2551 TODO: Fix this
                             bigramValue={this.state.ldaModel.bigrams}
                             tokenRegex={this.state.ldaModel.tokenRegex}
-                            changeTokenRegex={this.onTokenRegexChange}
+                            changeTokenRegex={this.onTokenRegexChange.bind(this)}
                     />
 
                     <div style={{display: "flex", flex: "1", overflow: "hidden"}}>
                         <SideBar selectedTopic={this.state.ldaModel.selectedTopic}
-                                 changeAnnotation={this.changeAnnotation}
-                                 getAnnotation={this.getAnnotation}
+                                 changeAnnotation={this.changeAnnotation.bind(this)}
+                                 getAnnotation={this.getAnnotation.bind(this)}
                                  sortVocabByTopic={this.state.ldaModel.sortVocabByTopic}
                                  numTopics={this.state.ldaModel.numTopics}
                                  topicVisibility={this.state.ldaModel.topicVisibility}
-                                 setTopicVisibility={this.state.ldaModel.setTopicVisibility}
+                                 setTopicVisibility={this.state.ldaModel.setTopicVisibility.bind(this.state.ldaModel)}
                                  topicWordCounts={this.state.ldaModel.topicWordCounts}
-                                 selectedTopicChange={this.state.ldaModel.selectedTopicChange}
+                                 selectedTopicChange={this.state.ldaModel.selectedTopicChange.bind(this.state.ldaModel)}
                         />
 
                         <div id="tabwrapper">
-                            <NavBar onClick={this.changeTab}/>
+                            <NavBar onClick={this.changeTab.bind(this)}/>
                             <div id="pages">
                             </div>
 
