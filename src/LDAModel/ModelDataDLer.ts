@@ -1,12 +1,13 @@
 import {topNWords, saveFile} from '../funcs/utilityFunctions'
 import * as d3 from "d3"
 import LDAModel from "./LDAModel";
+import exp from "constants";
 
 /**
  * A class that allows users to download information about an LDA model
  * @author Theo Bayard de Volo
  */
-export default class LDAModelDataDLer {
+export class LDAModelDataDLer {
     /**
      * A class that allows users to download information about an LDA model
      * @param {LDAModel} model the model to dl data from
@@ -375,3 +376,5 @@ export default class LDAModelDataDLer {
 
     }
 }
+
+export default LDAModelDataDLer;
