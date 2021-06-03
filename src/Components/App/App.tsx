@@ -138,12 +138,12 @@ class App extends Component<AppProps, AppStates> {
     /**
      * @summary Update the page/tab user is looking at, causing rerender of components
      */
-    changeTab(tabID) {
+    changeTab(tabID:string) {
         this.setState({
             selectedTab: tabID
         });
 
-        console.log("Tab   is now: " + tabID)
+        console.log("Tab is now: " + tabID)
     }
 
     /**
