@@ -1,4 +1,4 @@
-import React from "react";
+import React, {ChangeEvent, CSSProperties, MouseEventHandler, SyntheticEvent} from "react";
 import NumTopicSlider from "./NumTopicSlider"
 import Checkbox from '@material-ui/core/Checkbox';
 import Configuration from './Configuration'
@@ -6,14 +6,48 @@ import Uploader from './Uploader';
 import CustomTokenizer from './CustomTokenizer';
 import './header.css';
 
-class TopBar extends React.Component {
+interface TopBarProps {
+    completeSweeps: number,
+    requestedSweeps: number,
+    numTopics: number,
+    onClick: () => void,
+    updateNumTopics: (val: string) => void,
+    sweepParameter: number,
+    hyperTune: (tune: boolean) => void,
+    bigrams: (bigramStatus: boolean) => void,
+    onChange: (val: string) => void,
+    stopButtonClick: () => void,
+    iter: number,
+    modelIsRunning: boolean,
+    onDocumentFileChange: (event: ChangeEvent<HTMLInputElement>) => void,
+    onStopwordFileChange: (event: ChangeEvent<HTMLInputElement>) => void,
+    onModelFileChange: (event: ChangeEvent<HTMLInputElement>) => void,
+    onFileUpload: () => void,
+    onModelUpload: () => void,
+    onDefaultDocChange: (event: ChangeEvent<HTMLSelectElement>) => void,
+    docName: string,
+    optimizeValue: boolean,
+    bigramValue: boolean,
+    tokenRegex: RegExp,
+    changeTokenRegex: (inputRegex: RegExp) => void
+}
+
+interface TopBarState {
+    sliderValue: number,
+    formValue: string,
+    numTopics: number,
+    checkedOptimize: boolean,
+    checkedBigram: boolean
+}
+
+class TopBar extends React.Component<TopBarProps, TopBarState> {
 
     constructor(props) {
         super(props);
 
         this.state = {
             sliderValue: props.numTopics,
-            formValue: this.props.sweepParameter,
+            formValue: this.props.sweepParameter.toString(),
             numTopics: props.numTopics,
             checkedOptimize: this.props.optimizeValue,
             checkedBigram: this.props.bigramValue,
@@ -21,7 +55,7 @@ class TopBar extends React.Component {
     }
 
 
-    static getDerivedStateFromProps(props, state) {
+    static getDerivedStateFromProps(props: TopBarProps, state: TopBarState) {
         if (props.numTopics !== state.numTopics) {
             return {
                 sliderValue: props.numTopics,
@@ -36,51 +70,54 @@ class TopBar extends React.Component {
     /**
      * @summary
      */
-    handleSubmit = (event) => {
+    handleSubmit<E extends SyntheticEvent>(event: E) {
         //  TODO Check back with onClick, can it be reduces to songle function, or renate
-        this.props.onClick();
         event.preventDefault();
+        this.props.onClick();
     }
 
     /**
      * @summary Calls the function that will stop the model
      */
-    handleClick = (event) => {
+    handleClick<E extends SyntheticEvent>(event: E) {
         this.props.stopButtonClick();
         event.preventDefault();
     }
+
     /**
      * @summary This function updates the value being displayed on slider as user drags it around
      */
-    updateNumDisplay = (event) => {
+    updateNumDisplay(event: ChangeEvent<HTMLInputElement>) {
         if (!event.target.value) {
             return
         }
-        let val = event.target.value;
+        let val = parseInt(event.target.value);
         this.setState({
             sliderValue: val
         });
     }
+
     /**
      * @summary This value sets the display used for the run # iteratison
      */
-    handleChange = (event) => {
+    handleChange(event: ChangeEvent<HTMLInputElement>) {
 
         // Forces display value number or 0 (avoids NaN) on run button
         const val = event.target.value;
         this.setState({formValue: val});
         if (val === "")
-            this.props.onChange(0);
+            this.props.onChange("0");
         else
             this.props.onChange(val);
 
 
     }
+
     /**
      * @summary This function handles reseting the entire model
      * as well as moving slider if the user does not wish to reset the model.
      */
-    confirmUpdate = (val) => {
+    confirmUpdate(val: string) {
         // does not use confrimReset bc of the slider needs to reset to original positions
         if (window.confirm('This will cause your model to reset.')) {
             this.props.updateNumTopics(val);
@@ -95,7 +132,7 @@ class TopBar extends React.Component {
     /**
      * @summary This function handles changing the bigram option
      */
-    confirmBigramUpdate = (checked) => {
+    confirmBigramUpdate(checked: boolean) {
         // does not use confrimReset bc of the slider needs to reset to original positions
         if (window.confirm('This will take some time and may result in loss of data.')) {
             this.setState({checkedBigram: checked});
@@ -103,16 +140,16 @@ class TopBar extends React.Component {
         }
     }
 
-    handleCheckOptimize = (event) => {
+    handleCheckOptimize(event: ChangeEvent<HTMLInputElement>) {
         this.setState({checkedOptimize: event.target.checked});
         this.props.hyperTune(event.target.checked);
     };
 
-    handleCheckBigram = (event) => {
+    handleCheckBigram(event: ChangeEvent<HTMLInputElement>) {
         this.confirmBigramUpdate(event.target.checked);
     };
 
-    helpTextStyle = {
+    helpTextStyle: CSSProperties = {
         backgroundColor: "var(--color3)",
         position: "fixed",
         top: "10%",
@@ -124,7 +161,7 @@ class TopBar extends React.Component {
         overflowY: "scroll"
     }
 
-    get uploadHelp() {
+    get configuration() {
         return (
             <Configuration
                 displayElement={
@@ -135,17 +172,16 @@ class TopBar extends React.Component {
                                 <div>
                                     <h5> Set number of topics: </h5>
                                     <NumTopicSlider
-                                        onChange={this.updateNumDisplay}
+                                        onChange={this.updateNumDisplay.bind(this)}
                                         sliderValue={this.state.sliderValue}
-                                        updateNumTopics={this.confirmUpdate}
-                                        onInput={(event) => this.updateNumDisplay(event)}
+                                        updateNumTopics={this.confirmUpdate.bind(this)}
+                                        onInput={this.updateNumDisplay.bind(this)}
                                         modelIsRunning={this.props.modelIsRunning}
                                     />
 
                                     <h6>
                                         <Checkbox
-                                            checked={this.checked}
-                                            onChange={this.handleCheck}
+                                            onChange={this.handleCheckOptimize.bind(this)}
                                             inputProps={{'aria-label': 'primary checkbox'}}
                                             color="primary"
                                             style={{paddingLeft: "0"}}
@@ -163,8 +199,7 @@ class TopBar extends React.Component {
                                 <div>
                                     <h6>
                                         <Checkbox
-                                            checked={this.checkedBigram}
-                                            onChange={this.handleCheckBigram}
+                                            onChange={this.handleCheckBigram.bind(this)}
                                             inputProps={{'aria-label': 'primary checkbox'}}
                                             color="primary"
                                             style={{paddingLeft: "0"}}
@@ -201,16 +236,17 @@ class TopBar extends React.Component {
         console.log(this.props.iter);
         return (
             <div id="form" className="top">
-                <form onSubmit={this.handleSubmit} className="topForm">
+                <form onSubmit={this.handleSubmit.bind(this)} className="topForm">
                     <label htmlFor="number">Enter Number of Iterations: &nbsp;</label>
 
-                    <input onChange={this.handleChange} id="number" type="number" value={this.state.formValue}
-                           placeholder="# Sweeps" min="1" max="100000" required></input>
+                    <input onChange={this.handleChange.bind(this)} id="number" type="number"
+                           value={this.state.formValue}
+                           placeholder="# Sweeps" min="1" max="100000" required/>
 
                     <button type="submit" id="sweep" className="darkButton">Run {this.props.sweepParameter} iterations
                     </button>
 
-                    <button id="stopSweep" onClick={this.handleClick} className="darkButton"
+                    <button id="stopSweep" onClick={this.handleClick.bind(this)} className="darkButton"
                             disabled={!this.props.modelIsRunning}>Stop
                     </button>
 
@@ -218,8 +254,7 @@ class TopBar extends React.Component {
 
 
                 </form>
-                {this.uploadHelp}
-
+                {this.configuration}
             </div>
 
 
