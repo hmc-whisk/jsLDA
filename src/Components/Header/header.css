@@ -48,7 +48,7 @@
 }
 
 
-/* Configuration.js */
+/* Configuration.tsx */
 .configButton {
     border: solid var(--color1) 2px;
     font-family: Calibri, Verdana;

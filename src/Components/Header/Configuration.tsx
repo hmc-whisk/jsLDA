@@ -1,8 +1,18 @@
 import React, {Component} from 'react';
 import './header.css';
 
-class Configuration extends Component {
-    constructor(props) {
+interface ConfigurationProps{
+    displayElement:Element
+}
+interface ConfigurationState{
+    hover:boolean,
+    width:number,
+    height:number,
+    display:boolean
+}
+
+class Configuration extends Component<ConfigurationProps,ConfigurationState> {
+    constructor(props:ConfigurationProps) {
         super(props);
         this.state = {
             hover: false,
@@ -10,20 +20,18 @@ class Configuration extends Component {
             height: window.innerHeight,
             display: false
         };
-
-
     }
 
     componentDidMount() {
-        window.addEventListener("resize", this.updateDimensions);
+        window.addEventListener("resize", this.updateDimensions.bind(this));
     }
 
-    updateDimensions = () => {
+    updateDimensions() {
         this.setState({width: window.innerWidth, height: window.innerHeight})
         console.log(this.state.width, this.state.height)
     }
 
-    get overlayStyle() {
+    get overlayStyle(): React.CSSProperties{
         return {
             position: 'fixed',
             display: this.state.display ? 'block' : 'none',
@@ -39,7 +47,7 @@ class Configuration extends Component {
         }
     }
 
-    textstyle = {
+    textstyle:React.CSSProperties = {
         position: 'absolute',
         top: '50%',
         left: '50%',
@@ -49,7 +57,7 @@ class Configuration extends Component {
         msTransform: 'translate(-50%,-50%)',
     }
 
-    overlayOn = () => {
+    overlayOn(){
         // if (document.getElementById("overlay")) {
         // document.getElementById("overlay").style.display = "block";}
         this.setState({
@@ -57,25 +65,28 @@ class Configuration extends Component {
         })
     }
 
-    overlayOff = () => {
+    overlayOff(){
 
         this.setState({
             display: false
         });
     }
 
-    toggleHover = () => {
+    toggleHover() {
         this.setState({hover: !this.state.hover})
     }
 
-    render() {
+    static defaultProps={
+        floatRight: true
+    }
 
+    render() {
         return (
             <div style={{float: "right",}}>
-                <button type="button" onClick={this.overlayOn} className="configButton" onMouseEnter={this.toggleHover}
-                        onMouseLeave={this.toggleHover}>Configure...
+                <button type="button" onClick={this.overlayOn.bind(this)} className="configButton" onMouseEnter={this.toggleHover.bind(this)}
+                        onMouseLeave={this.toggleHover.bind(this)}>Configure...
                 </button>
-                <div id="overlay" style={this.overlayStyle} onClick={this.overlayOff}>
+                <div id="overlay" style={this.overlayStyle} onClick={this.overlayOff.bind(this)}>
                     <div onClick={(e) => {
                         //stop clicks getting to the overlay
                         e.stopPropagation();
@@ -88,10 +99,6 @@ class Configuration extends Component {
             </div>
         )
     }
-}
-
-Configuration.defaultProps = {
-    floatRight: true,
 }
 
 export default Configuration;
