@@ -446,16 +446,7 @@ class App extends Component<AppProps, AppStates> {
                     modelDataDLer={this.state.modelDataDLer}/>;
                 break;
             case "home-tab":
-                DisplayPage = <HomePage
-                    onDocumentFileChange={this.onDocumentFileChange.bind(this)}
-                    onStopwordFileChange={this.onStopwordFileChange.bind(this)}
-                    onModelFileChange={this.onModelFileChange.bind(this)}
-                    onFileUpload={this.queueLoad.bind(this)}
-                    onModelUpload={this.onModelUpload.bind(this)}
-                    modelIsRunning={this.state.ldaModel.modelIsRunning}
-                    onDefaultDocChange={this.onDefaultDocChange.bind(this)}
-                    docName={this.state.docName}
-                />
+                DisplayPage = <HomePage/>
                 break;
             case "meta-tab":
                 DisplayPage = <MetaData

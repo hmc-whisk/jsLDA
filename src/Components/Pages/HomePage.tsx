@@ -1,4 +1,4 @@
-import React from "react";
+import React, {CSSProperties} from "react";
 import Tooltip from '../Tooltip';
 import './pages.css';
 
@@ -16,7 +16,7 @@ class HomePage extends React.Component {
         margin: "10px",
         height: "70%",
         overflowY: "scroll"
-    }
+    } as CSSProperties
 
     get uploadHelp() {
         return (
