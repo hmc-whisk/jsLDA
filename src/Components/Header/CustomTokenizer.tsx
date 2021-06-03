@@ -1,20 +1,29 @@
-import React, {Component} from 'react';
+import React, {Component, SyntheticEvent} from 'react';
 import './header.css';
+import XRegExp from "xregexp";
 
-var XRegExp = require('xregexp');
+interface CustomTokenizerProps {
+    tokenRegex: RegExp
+    changeTokenRegex: (inputRegex: RegExp) => void
+}
 
-class CustomTokenizer extends Component {
+interface CustomTokenizerState {
+    inputRegex: string
+}
+
+class CustomTokenizer extends Component<CustomTokenizerProps, CustomTokenizerState> {
     state = {
+        // @ts-ignore a bug in xregexp's type
         inputRegex: this.props.tokenRegex.xregexp.source
     }
 
-    handleChange = (e) => {
+    handleChange(e: SyntheticEvent<HTMLInputElement>) {
         this.setState({
-            inputRegex: e.target.value
+            inputRegex: (e.target as HTMLInputElement).value
         })
     }
 
-    handleSubmit = (e) => {
+    handleSubmit(e: SyntheticEvent) {
         e.preventDefault();
         let newRegex;
         try {
@@ -34,12 +43,12 @@ class CustomTokenizer extends Component {
             <div className="configMenu">
                 <h3>Tokenization</h3>
                 <div>
-                    <input onChange={this.handleChange} id="regex" value={this.state.inputRegex}/>
+                    <input onChange={this.handleChange.bind(this)} id="regex" value={this.state.inputRegex}/>
                     <button
                         type="submit"
                         id="submitRegex"
                         className="darkButton"
-                        onClick={this.handleSubmit}
+                        onClick={this.handleSubmit.bind(this)}
                         style={{marginLeft: "5px"}}
                     >
                         Change Tokenizer
