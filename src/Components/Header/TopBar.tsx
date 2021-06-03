@@ -1,10 +1,12 @@
-import React, {ChangeEvent, CSSProperties, MouseEventHandler, SyntheticEvent} from "react";
+import React, {BaseSyntheticEvent, ChangeEvent, CSSProperties, FormEvent, SyntheticEvent} from "react";
 import NumTopicSlider from "./NumTopicSlider"
 import Checkbox from '@material-ui/core/Checkbox';
 import Configuration from './Configuration'
 import Uploader from './Uploader';
 import CustomTokenizer from './CustomTokenizer';
 import './header.css';
+
+type SliderInputEvent<E> = ChangeEvent<E> & FormEvent<E>;
 
 interface TopBarProps {
     completeSweeps: number,
@@ -70,7 +72,7 @@ class TopBar extends React.Component<TopBarProps, TopBarState> {
     /**
      * @summary
      */
-    handleSubmit<E extends SyntheticEvent>(event: E) {
+    handleSubmit(event: SyntheticEvent) {
         //  TODO Check back with onClick, can it be reduces to songle function, or renate
         event.preventDefault();
         this.props.onClick();
@@ -87,11 +89,13 @@ class TopBar extends React.Component<TopBarProps, TopBarState> {
     /**
      * @summary This function updates the value being displayed on slider as user drags it around
      */
-    updateNumDisplay(event: ChangeEvent<HTMLInputElement>) {
-        if (!event.target.value) {
+
+    updateNumDisplay(event: SyntheticEvent<HTMLInputElement>) {
+        let target = event.target as HTMLInputElement;
+        if (!target.value) {
             return
         }
-        let val = parseInt(event.target.value);
+        let val = parseInt(target.value);
         this.setState({
             sliderValue: val
         });
