@@ -51,7 +51,7 @@
 /* Configuration.tsx */
 .configButton {
     border: solid var(--color1) 2px;
-    font-family: Calibri, Verdana;
+    font-family: Calibri, Verdana, sans-serif;
     float: right;
     padding: 7px 10px;
     -webkit-user-select: none;
@@ -68,14 +68,13 @@
 
 /* TopBar.ts*/
 .topForm {
-    margin-bottom: 0px;
+    margin-bottom: 0;
     margin-left: 10px;
 }
 
 .configMenu {
     background-color: var(--color1);
     /* float: right;  */
-    padding-right: 20px;
     border-radius: 10px;
     margin: 5px;
     padding: 10px;
