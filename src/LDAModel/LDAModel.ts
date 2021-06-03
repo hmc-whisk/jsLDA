@@ -236,7 +236,7 @@ class LDAModel {
     }
 
     // Used by sidebar to change selectedTopic and sortVocabByTopic
-    selectedTopicChange = (topic: number) => {
+    selectedTopicChange(topic: number) {
         this.selectedTopic = topic;
         if (topic === -1) {
             this.sortVocabByTopic = false;
@@ -458,7 +458,7 @@ class LDAModel {
      * "text/csv" then it will assume it is a tsv.
      * The function acts to process through all potential bigrams
      */
-    _parseBigram = (docText: string) => {
+    _parseBigram(docText: string){
         let parsedDoc
         if (this.documentType === "text/csv") {
             parsedDoc = d3.csvParseRows(docText);
@@ -935,7 +935,7 @@ class LDAModel {
     /**
      * @summary Turns on/off Bigrams option
      */
-    _changeBigramStatus = (bigramStatus: boolean) => {
+    _changeBigramStatus(bigramStatus: boolean) {
         if (bigramStatus) {
             this.addBigram();
         } else {
@@ -947,7 +947,7 @@ class LDAModel {
     /**
      * @summary completes one training iteration
      */
-    _sweep = () => {
+    _sweep() {
         let startTime = Date.now();
         let topicNormalizers = zeros(this.numTopics);
         let doOptimizeAlpha = false;
@@ -1202,7 +1202,7 @@ class LDAModel {
      * @param {String} word the word to be added to stoplist
      * @param {Boolean} refresh whether or not to run sortTopicWords
      */
-    addStop = (word: string, refresh = false) => {
+    addStop(word: string, refresh = false) {
         this.addStopHelper(word);
         if (this.bigram) {
             for (let w in this.finalBigram[word]) {
@@ -1221,7 +1221,7 @@ class LDAModel {
      * @summary adds a word to model's stoplist
      * @param {String} word the word to be added to stoplist
      */
-    addStopHelper = (word: string) => {
+    addStopHelper (word: string) {
         if (!this.stopwords[word]) {
             this.stopwords[word] = 1;
             this._vocabularySize--;
@@ -1246,7 +1246,7 @@ class LDAModel {
      * if the bigram option is on, we remove bigrams that contain the stopword as well.
      * @param {String} word the word to remove
      */
-    removeStop = (word: string) => {
+    removeStop (word: string){
         this.removeStopHelper(word);
         if (this.bigram) {
             for (let w in this.finalBigram[word]) {
@@ -1266,7 +1266,7 @@ class LDAModel {
      * @summary removes a word from stoplist
      * @param {String} word the word to remove
      */
-    removeStopHelper = (word: string) => {
+    removeStopHelper (word: string) {
         delete this.stopwords[word];
         this._vocabularySize++;
         this.wordTopicCounts[word] = {};
@@ -1296,7 +1296,7 @@ class LDAModel {
      * After adding, we call addStop to every word in the stopwords to add bigram
      * to stopword if their constituent word is a stopword
      */
-    addBigram = () => {
+    addBigram () {
         for (let word1 in this.finalBigram) {
             if (!this.stopwords[word1]) {
                 for (let word2 in this.finalBigram[word1]) {
@@ -1319,7 +1319,7 @@ class LDAModel {
      * @param {String} word1 first word of the bigram to add
      * @param {String} word2 second word of the bigram to add
      */
-    addBigramHelper = (word1: string, word2: string) => {
+    addBigramHelper(word1: string, word2: string) {
         // Makes word1_word2 into a “word” by adding it to the wordTopicCounts, vocaburaryCounts,
         // and increasing the vocaburarySize.
         let curBigram = word1 + "_" + word2
@@ -1389,7 +1389,7 @@ class LDAModel {
      * @summary Remove bigrams from the model
      * Calls helper removeBigramHelper on each bigram deemed valid in finalBigram.
      */
-    removeBigram = () => {
+    removeBigram (){
         for (let word1 in this.finalBigram) {
             for (let word2 in this.finalBigram[word1]) {
                 this.removeBigramHelper(word1, word2);
@@ -1518,7 +1518,8 @@ class LDAModel {
 
         if (this._sweeps === 0) {
             this._sweeps = 1;
-            this._timer = d3.timer(this._sweep);
+            // TODO Remove this timer
+            this._timer = d3.timer(this._sweep.bind(this));
             //hyperedit
             this._initializeHistograms();
             console.log("Requested Sweeps Now: " + this._requestedSweeps);
@@ -1532,7 +1533,7 @@ class LDAModel {
     /**
      * @summary Stops the model from continuing it's sweeps
      */
-    stopSweeps = () => {
+    stopSweeps (){
         this._requestedSweeps = this._completeSweeps;
     }
 
@@ -1557,7 +1558,7 @@ class LDAModel {
      * @param {String} field
      * @returns {Array} Values in field
      */
-    metaValues = (field: string): string[] => {
+    metaValues(field: string): string[] {
         if (!this.metaFields.includes(field)) {
             console.log("Given metadata field is not in model");
         }
@@ -1577,7 +1578,7 @@ class LDAModel {
      * @param {String} field metadata field to get summary of
      * @param {*} topic topic number to get summary of
      */
-    metaTopicAverages = (field: string, topic: number) => {
+    metaTopicAverages (field: string, topic: number){
         if (!this.metaFields.includes(field)) {
             throw(Error("Given metadata field is not in model"))
         }
@@ -1630,7 +1631,7 @@ class LDAModel {
      * @param {Number} topic Topic to pull values from
      * @returns {Array<{topicVal:Number,label:String,metaVal:any}>}
      */
-    docTopicMetaValues = (field: string, topic: number): { topicVal: number, label: string | number, metaVal: string }[] => {
+    docTopicMetaValues (field: string, topic: number): { topicVal: number, label: string | number, metaVal: string }[] {
         return this.documents.map((doc) => {
             return {
                 topicVal: doc.topicCounts[topic] / doc.tokens.length,
