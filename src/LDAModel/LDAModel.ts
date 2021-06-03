@@ -8,14 +8,14 @@ if (!Object.keys) {
 }
 
 // type reverse-engineered from LDAModel.parseDoc
-type LDAToken = {
+export type LDAToken = {
     word: string,
     topic: number,
     isStopword: boolean;
 }
 
 // type reverse-engineered from LDAModel.parseDoc
-type LDADocument = {
+export type LDADocument = {
     originalOrder: number
     id: string | number,
     date: string,
@@ -27,7 +27,7 @@ type LDADocument = {
 }
 
 
-type SortedLDADocument = {
+export type SortedLDADocument = {
     originalOrder: number
     id: string,
     date: string,
@@ -40,7 +40,7 @@ type SortedLDADocument = {
 }
 
 // type reverse-engineered from LDAModel._getColumnInfo
-type LDAColumnInfo = {
+export type LDAColumnInfo = {
     metadata: { [key: string]: number },
     id: number,
     text: number,
@@ -48,29 +48,29 @@ type LDAColumnInfo = {
 };
 
 // type reverse-engineered from LDAModel.setTopicVisibility
-type LDATopicVisibility = {
+export type LDATopicVisibility = {
     [key: number]: "default" | "pinned" | "hidden"
 }
 
 // type reverse-engineered from LDAModel.topicTimesBinned
-type LDATopicTimeBin = {
+export type LDATopicTimeBin = {
     key: Date,
     value: number[]
 }
 
 // type reverse-engineered from LDAModel.addStdErrorMargins
-interface LDATopicTimeBinWithStd extends LDATopicTimeBin {
+export interface LDATopicTimeBinWithStd extends LDATopicTimeBin {
     upperEr: number,
     lowerEr: number
 }
 
 // type reverse-engineered from LDAModel.topicTimesBinnedAverage
-type LDATopicTimeBinAveraged = {
+export type LDATopicTimeBinAveraged = {
     key: Date,
     value: number
 }
 
-type LDABigram = {
+export type LDABigram = {
     [key: string]: {
         [key: string]: number
     }
@@ -81,7 +81,7 @@ type LDABigram = {
  * @param {Number} numTopics the starting
  * @param {Function} forceUpdate callback that updates the webpage
  */
-class LDAModel {
+export class LDAModel {
     // Duplicate docstrings so my IDE shows it on hover
     /**
      * @summary Creates/maintains a topic model over a corpus

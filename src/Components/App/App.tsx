@@ -117,7 +117,7 @@ class App extends Component<AppProps, AppStates> {
     // Data and functions for annotations in sidebar (placed here instead of as a state to avoid re-rendering)
     annotations: string[] = [];
 
-    changeAnnotation(text, i) {
+    changeAnnotation(text:string, i:number) {
         this.annotations[i] = text;
         this.modelForceUpdate();
     }
@@ -130,7 +130,7 @@ class App extends Component<AppProps, AppStates> {
      * @summary Gets the annotaion for a topic
      * @param {Number} topic Number of topic to get annotations for
      */
-    getAnnotation(topic) {
+    getAnnotation(topic:number) {
         return this.annotations[topic];
     }
 

@@ -1,22 +1,35 @@
-import React, {Component} from 'react';
+import React, {Component, SyntheticEvent} from 'react';
 import * as d3 from 'd3';
 import {topNWords} from '../../funcs/utilityFunctions';
 
 import {PinAngle, PinAngleFill, EyeSlash, EyeSlashFill} from 'react-bootstrap-icons';
 import Spinner from 'react-bootstrap/Spinner';
 import './sidebar.css';
+import {LDATopicVisibility} from "../../LDAModel/LDAModel";
+
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
-const TopicBox = ({
-                      topNum,
-                      selectedTopic,
-                      topicsDict,
-                      topicVisibility,
-                      toggleVisibility,
-                      toggleTopicDocuments,
-                      changeAnnotation,
-                  }) => {
+interface TopicBoxProps {
+    key: number
+    topNum: number
+    selectedTopic: number
+    topicsDict: { [key:number]:string }
+    topicVisibility: LDATopicVisibility
+    toggleVisibility: (event: SyntheticEvent, topNum: number, toggledButton: string) => void
+    toggleTopicDocuments: (topic: number) => void
+    changeAnnotation: (text: string, i: number) => void
+}
 
+function TopicBox(props: TopicBoxProps) {
+    let {
+        topNum,
+        selectedTopic,
+        topicsDict,
+        topicVisibility,
+        toggleVisibility,
+        toggleTopicDocuments,
+        changeAnnotation,
+    } = props
     return (
         <div id="topics" className="sidebox">
             {/* Pin and Hide buttons */}
@@ -71,7 +84,7 @@ const TopicBox = ({
             <textarea
                 className="textField"
                 style={{
-                    whiteSpace: "preLine",
+                    whiteSpace: "pre-line",
                     backgroundColor: "var(--color3Dark)",
                     borderCollapse: "separate",
                     color: "black",
@@ -97,22 +110,42 @@ const TopicBox = ({
                 onClick={() => toggleTopicDocuments(topNum)}
                 style={{color: "inherit"}}
             >
-                {`${topicsDict[topNum]}`}
+                {topicsDict[topNum]}
             </div>
         </div>
     )
 }
 
-class SideBar extends Component {
+interface SideBarProps {
+    selectedTopic: number
+    changeAnnotation: (text: string, i: number) => void
+    getAnnotation: (topic: number) => string
+    sortVocabByTopic: boolean
+    numTopics: number
+    topicVisibility: LDATopicVisibility
+    setTopicVisibility: (topicNum: number, visibility: "default" | "pinned" | "hidden") => void
+    topicWordCounts: { word: string, count: number }[][]
+    selectedTopicChange: (topic: number) => void
+}
 
-    state = {
-        topicWords: null, // {topic#: "string of top words", ...}
-        displayOrder: [], // keeps track of pinning and hiding
+interface SideBarState {
+    topicWords: { [key: number]: string }
+    displayOrder: number[]
+}
+
+class SideBar extends Component<SideBarProps, SideBarState> {
+
+    constructor(props: SideBarProps) {
+        super(props);
+        this.state={
+            topicWords: {},
+            displayOrder: []
+        };
     }
 
     // NOTE: kept the d3 implementation of this function because
     // it affects an external element (sortVocabByTopic)
-    toggleTopicDocuments = (topic) => {
+    toggleTopicDocuments(topic: number) {
         if (topic === this.props.selectedTopic) {
             // unselect the topic
             // d3.selectAll("div.topicwords").attr("class", "topicwords");
@@ -126,7 +159,7 @@ class SideBar extends Component {
 
     // initialize state with top 10 words for each topic and
     // reset display order
-    initTopics = (numTops, topWordCounts) => {
+    initTopics(numTops: number, topWordCounts: { word: string, count: number }[][]) {
         if (topWordCounts.length > 0) {
             let topicsDict = {};
             for (let topic = 0; topic < numTops; topic++) {
@@ -144,7 +177,7 @@ class SideBar extends Component {
     // update topic visibility according to UI action with
     // pin/hide buttons
     // also updates topicVisibility in ldaModel
-    toggleTopicVisibility = (event, topNum, toggledButton) => {
+    toggleTopicVisibility(event: SyntheticEvent, topNum: number, toggledButton: string) {
         event.stopPropagation();
 
         let dispOrderCopy = [...this.state.displayOrder];
@@ -202,8 +235,8 @@ class SideBar extends Component {
 
     // When number of topics is changed, model resets and annotations
     // should be cleared
-    clearAnnotations = () => {
-        document.getElementById("topic-annotations").reset();
+    clearAnnotations() {
+        (document.getElementById("topic-annotations") as HTMLFormElement).reset();
     }
 
     componentDidMount() {
@@ -215,7 +248,7 @@ class SideBar extends Component {
         // if topicWordCounts just finished loading, call initTopics
         if (prevProps.numTopics !== this.props.numTopics
             || (prevProps.topicWordCounts.length === 0 && this.props.topicWordCounts.length > 0)) {
-            if (this.state.topicWords !== null) { // already initialized once so must clear annotations
+            if (this.state.topicWords) { // already initialized once so must clear annotations
                 this.clearAnnotations();
             }
 
@@ -250,8 +283,8 @@ class SideBar extends Component {
                                         selectedTopic={selectedTopic}
                                         topicsDict={this.state.topicWords}
                                         topicVisibility={topicVisibility}
-                                        toggleVisibility={this.toggleTopicVisibility}
-                                        toggleTopicDocuments={this.toggleTopicDocuments}
+                                        toggleVisibility={this.toggleTopicVisibility.bind(this)}
+                                        toggleTopicDocuments={this.toggleTopicDocuments.bind(this)}
                                         changeAnnotation={changeAnnotation}
                                     />
                                 )
