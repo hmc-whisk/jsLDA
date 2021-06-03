@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {ChangeEvent} from 'react';
 import {confirmReset} from '../../funcs/utilityFunctions'
 
 /**
@@ -28,12 +28,23 @@ import {confirmReset} from '../../funcs/utilityFunctions'
  */
 
 // returns true if the input has a file selected, false otherwise
-const isFileAdded = (inputId) => {
-    let inp = document.getElementById(inputId);
-    return inp && inp.files.length;
+function isFileAdded(inputId: string) {
+    let inp = document.getElementById(inputId) as HTMLInputElement;
+    return inp && inp.files && inp.files.length;
 }
 
-export function Uploader(props) {
+interface UploaderProps {
+    onDocumentFileChange: (event: ChangeEvent<HTMLInputElement>) => void,
+    onStopwordFileChange: (event: ChangeEvent<HTMLInputElement>) => void,
+    onModelFileChange: (event: ChangeEvent<HTMLInputElement>) => void,
+    onFileUpload: () => void,
+    onModelUpload: () => void,
+    onDefaultDocChange: (event: ChangeEvent<HTMLSelectElement>) => void,
+    modelIsRunning: boolean
+    docName: string
+}
+
+export function Uploader(props: UploaderProps) {
     return (
         <div>
             <div className="configMenu">
@@ -60,11 +71,11 @@ export function Uploader(props) {
                         <div className="fileInput">
                             <label htmlFor="docs-file-input">Documents: </label>
                             <input id="docs-file-input" type="file"
-                                   onChange={(event) => props.onDocumentFileChange(event)} size="10"/>
+                                   onChange={(event) => props.onDocumentFileChange(event)} size={10}/>
 
                             <label htmlFor="stops-file-input"> Stoplist: </label>
                             <input id="stops-file-input" type="file"
-                                   onChange={(event) => props.onStopwordFileChange(event)} size="10"/>
+                                   onChange={(event) => props.onStopwordFileChange(event)} size={10}/>
                         </div>
                         <input
                             type="submit"
@@ -87,7 +98,7 @@ export function Uploader(props) {
                         <div className="fileInput">
                             <label htmlFor="saved-model-input">Model: </label>
                             <input id="saved-model-input" type="file"
-                                   onChange={(event) => props.onModelFileChange(event)} size="10"/>
+                                   onChange={(event) => props.onModelFileChange(event)} size={10}/>
                         </div>
                         <input type="submit" id="load-inputs" value="Upload" className="darkButton"
                                disabled={props.modelIsRunning || !isFileAdded("saved-model-input")}/>

@@ -1,12 +1,10 @@
-import React, {BaseSyntheticEvent, ChangeEvent, CSSProperties, FormEvent, SyntheticEvent} from "react";
+import React, {ChangeEvent, CSSProperties, SyntheticEvent} from "react";
 import NumTopicSlider from "./NumTopicSlider"
 import Checkbox from '@material-ui/core/Checkbox';
 import Configuration from './Configuration'
 import Uploader from './Uploader';
 import CustomTokenizer from './CustomTokenizer';
 import './header.css';
-
-type SliderInputEvent<E> = ChangeEvent<E> & FormEvent<E>;
 
 interface TopBarProps {
     completeSweeps: number,
