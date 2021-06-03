@@ -4,6 +4,8 @@
  * @param {Int} n number of words to return
  * @returns {String} the top n words
  */
+import {SyntheticEvent} from "react";
+
 // TODO: resolve this any[]
 export function topNWords(wordCounts: any[], n: number): string {
     return wordCounts.slice(0, n).map((d) => d.word).join(" ");
@@ -78,7 +80,7 @@ export function truncate(s: string, n: number = 300) {
 /**
  * @summary This function wraps event handlers to confirm that the model will be reset.
  */
-export function confirmReset(event:Event, callback:()=>void) {
+export function confirmReset(event:SyntheticEvent, callback:()=>void) {
     event.preventDefault();
     if (window.confirm('This will cause your model to reset.')) callback();
 }
