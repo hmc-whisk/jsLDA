@@ -1,7 +1,7 @@
 import React from "react";
 import {topNWords} from '../../../funcs/utilityFunctions';
 import TopicDoc from '../TopicDoc/TopicDoc';
-import LabeledToggleButton from '../../LabeledToggleButton';
+import LDAModel from '../../../LDAModel/LDAModel'
 
 /**
  * @summary Component for Topic Overview page
@@ -10,7 +10,16 @@ import LabeledToggleButton from '../../LabeledToggleButton';
  *
  * @author Theo Bayard de Volo
  */
-class TopicOverviewPage extends React.Component {
+
+interface TopicOverviewPageProps{
+    ldaModel:LDAModel,
+    annotations:string[]
+}
+
+interface TopicOverviewPageState{}
+
+
+class TopicOverviewPage extends React.Component<TopicOverviewPageProps,TopicOverviewPageState> {
     // Some settings
     static numWordsToShow = 50 // Number of topic words in label
     static numDocuments = 20 // Number of documents to display
@@ -77,7 +86,7 @@ class TopicOverviewPage extends React.Component {
      */
     timeline() {
         return (
-            <div class="grid-item" id="timeline"> topic timeline </div>
+            <div className="grid-item" id="timeline"> topic timeline </div>
         )
     }
 
@@ -91,7 +100,7 @@ class TopicOverviewPage extends React.Component {
      */
     correlations() {
         return (
-            <div class="grid-item" id="correlations"> topic correlations </div>
+            <div className="grid-item" id="correlations"> topic correlations </div>
         )
     }
 
