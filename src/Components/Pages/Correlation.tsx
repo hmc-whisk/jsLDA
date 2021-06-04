@@ -3,6 +3,7 @@ import React, {Component} from 'react';
 import {topNWords} from '../../funcs/utilityFunctions'
 import Tooltip from '../Tooltip';
 import './pages.css';
+import {LDADocument} from "../../LDAModel/LDAModel";
 
 /* This function will compute pairwise correlations between topics.
  * Unlike the correlated topic model (CTM) LDA doesn't have parameters
@@ -12,8 +13,35 @@ import './pages.css';
  */
 
 
-class Correlation extends Component {
-    constructor(props) {
+interface CorrelationProps {
+    topicWordCounts: { word: string, count: number }[][],
+    numTopics: number,
+    documents: LDADocument[],
+    getTopicCorrelations: () => number[][],
+    changeNotes: (notes: string) => void,
+    provideNotes: () => string,
+    tooltip: string,
+    update: boolean
+}
+
+interface CorrelationState {
+    w: number,
+    h: number,
+    correlationMinTokens: number,
+    correlationMinProportion: number,
+    hover: boolean
+}
+
+type CorrelationNode = { name: number, group: number, words: string }
+type CorrelationLink = { source: number, target: number, value: number }
+
+type CorrelationGraph = {
+    nodes: CorrelationNode[],
+    links: CorrelationLink[]
+}
+
+class Correlation extends Component<CorrelationProps, CorrelationState> {
+    constructor(props: CorrelationProps) {
         super(props);
         this.state = {
             w: 1000,
@@ -23,38 +51,38 @@ class Correlation extends Component {
             correlationMinProportion: 0.05,
             hover: false
         };
-
-
+        this.vis = d3.select("#corr-page")
     }
 
+    vis: d3.Selection<any, any, HTMLElement, any>
     notes = ``;
 
     plotMatrix = () => {
-        var left = 50;
-        // var top = 50;
+        let left = 50;
+        // let top = 50;
         // right and bottom found by trial and error
         // originally set to 550
 
-        var right = this.props.numTopics * 4.6 + 430;
-        var bottom = this.props.numTopics * 4.6 + 430;
+        let right = this.props.numTopics * 4.6 + 430;
+        let bottom = this.props.numTopics * 4.6 + 430;
         console.log()
-        var fontSize = this.props.numTopics * -.3 + 25;
+        let fontSize = this.props.numTopics * -.3 + 25;
 
 
-        var correlationMatrix = this.props.getTopicCorrelations();
-        var correlationGraph = this.getCorrelationGraph(correlationMatrix, -100.0);
+        let correlationMatrix = this.props.getTopicCorrelations();
+        let correlationGraph = this.getCorrelationGraph(correlationMatrix, -100.0);
 
-        var topicScale = d3.scalePoint().domain(d3.range(this.props.numTopics)).range([left, right]);
-        var radiusScale = d3.scaleSqrt().domain([0, 1.0]).range([0, 450 / (2 * this.props.numTopics)]);
+        let topicScale = d3.scalePoint<number>().domain(d3.range(this.props.numTopics)).range([left, right]);
+        let radiusScale = d3.scaleSqrt().domain([0, 1.0]).range([0, 450 / (2 * this.props.numTopics)]);
 
-        var horizontalTopics = this.vis.selectAll("text.hor").data(correlationGraph.nodes);
+        let horizontalTopics = this.vis.selectAll("text.hor").data(correlationGraph.nodes) as d3.Selection<any, CorrelationNode, HTMLElement, any>;
         horizontalTopics.exit().remove();
         horizontalTopics = horizontalTopics.enter().append("text")
             .attr("class", "hor")
             .merge(horizontalTopics)
             .style("font-size", fontSize);
 
-        var verticalTopics = this.vis.selectAll("text.ver").data(correlationGraph.nodes);
+        let verticalTopics = this.vis.selectAll("text.ver").data(correlationGraph.nodes) as d3.Selection<any, CorrelationNode, HTMLElement, any>;
         verticalTopics.exit().remove();
         verticalTopics = verticalTopics.enter().append("text")
             .attr("class", "ver")
@@ -65,30 +93,37 @@ class Correlation extends Component {
             horizontalTopics
                 .attr("x", right + 50)
                 .attr("y", function (node) {
-                    return topicScale(node.name);
+                    let t = topicScale(node.name)
+                    return t ? t : null;
                 })
                 .text(function (node) {
-                    if (node.name % 5 === 0) return '[' + node.name + '] ';
+                    if (node.name % 5 === 0)
+                        return '[' + node.name + '] '
+                    else return null;
                 })
                 .style("font-size", 16);
 
             verticalTopics
                 .attr("x", function (node) {
-                    return topicScale(node.name);
+                    let t = topicScale(node.name)
+                    return t ? t : null;
                 })
                 .attr("y", bottom + 50)
                 .attr("transform", function (node) {
                     return "rotate(90," + topicScale(node.name) + "," + (bottom + 50) + ")";
                 })
                 .text(function (node) {
-                    if (node.name % 5 === 0) return '[' + node.name + '] ';
+                    if (node.name % 5 === 0)
+                        return '[' + node.name + '] '
+                    else return null;
                 })
                 .style("font-size", 16);
         } else {
             horizontalTopics
                 .attr("x", right + 50)
                 .attr("y", function (node) {
-                    return topicScale(node.name);
+                    let t = topicScale(node.name)
+                    return t ? t : null;
                 })
                 .text(function (node) {
                     return '[' + node.name + '] ' + node.words;
@@ -96,7 +131,8 @@ class Correlation extends Component {
                 .style("font-size", fontSize);
             verticalTopics
                 .attr("x", function (node) {
-                    return topicScale(node.name);
+                    let t = topicScale(node.name)
+                    return t ? t : null;
                 })
                 .attr("y", bottom + 50)
                 .attr("transform", function (node) {
@@ -108,20 +144,22 @@ class Correlation extends Component {
         }
 
 
-        var circles = this.vis.selectAll("circle").data(correlationGraph.links);
+        let circles = this.vis.selectAll("circle").data(correlationGraph.links) as d3.Selection<any, CorrelationLink, HTMLElement, any>;
         circles.exit().remove();
         circles = circles.enter().append("circle").merge(circles);
 
-        var posColor = getComputedStyle(document.documentElement)
+        let posColor = getComputedStyle(document.documentElement)
             .getPropertyValue('--positiveCorrelationColor');
-        var negColor = getComputedStyle(document.documentElement)
+        let negColor = getComputedStyle(document.documentElement)
             .getPropertyValue('--negativeCorrelationColor');
 
         circles.attr("cx", function (link) {
-            return topicScale(link.source);
+            let t = topicScale(link.source)
+            return t ? t : null;
         })
             .attr("cy", function (link) {
-                return topicScale(link.target);
+                let t = topicScale(link.target)
+                return t ? t : null;
             })
             .attr("r", function (link) {
                 return radiusScale(Math.abs(link.value));
@@ -130,9 +168,9 @@ class Correlation extends Component {
                 return link.value > 0.0 ? posColor : negColor;
             })
             .on("mouseover", function (link) {
-                var tooltip = d3.select("#tooltip");
-                var tooltipX = this.getBoundingClientRect().x + window.scrollX;
-                var tooltipY = this.getBoundingClientRect().y + window.scrollY;
+                let tooltip = d3.select("#tooltip");
+                let tooltipX = this.getBoundingClientRect().x + window.scrollX;
+                let tooltipY = this.getBoundingClientRect().y + window.scrollY;
                 tooltip.style("visibility", "visible")
                     .style("top", (tooltipY - 10) + "px").style("left", (tooltipX + 20) + "px")
                     .text('[' + correlationGraph.nodes[link.target].name + '] '
@@ -142,23 +180,26 @@ class Correlation extends Component {
                         + ": " + link.value.toFixed(3));
             })
             .on("mouseout", function () {
-                var tooltip = d3.select("#tooltip");
+                let tooltip = d3.select("#tooltip");
                 tooltip.style("visibility", "hidden");
             });
     }
 
 
-    getCorrelationGraph = (correlationMatrix, cutoff) => {
-        var graph = {"nodes": [], "links": []};
-        for (var topic = 0; topic < this.props.numTopics; topic++) {
+    getCorrelationGraph(correlationMatrix: number[][], cutoff: number) {
+        let graph: CorrelationGraph = {
+            nodes: [] as CorrelationNode[],
+            links: [] as CorrelationLink[]
+        };
+        for (let topic = 0; topic < this.props.numTopics; topic++) {
             if (this.props.topicWordCounts[topic]) {
                 graph.nodes.push({"name": topic, "group": 1, "words": topNWords(this.props.topicWordCounts[topic], 3)});
             } else {
                 graph.nodes.push({"name": topic, "group": 1, "words": ""})
             }
         }
-        for (var t1 = 0; t1 < this.props.numTopics; t1++) {
-            for (var t2 = 0; t2 < this.props.numTopics; t2++) {
+        for (let t1 = 0; t1 < this.props.numTopics; t1++) {
+            for (let t2 = 0; t2 < this.props.numTopics; t2++) {
                 if (t1 !== t2 && correlationMatrix[t1][t2] > cutoff) {
                     graph.links.push({"source": t1, "target": t2, "value": correlationMatrix[t1][t2]});
                 }
@@ -179,7 +220,7 @@ class Correlation extends Component {
             .attr("dataText", "Write your notes here")
             .attr("contentEditable", true)
             .on("blur", function () {
-                var innerText = this.innerText
+                let innerText = this.innerText
                 if (innerText[innerText.length - 1] === '\n') {
                     innerText = innerText.slice(0, -1)
                 }
@@ -191,15 +232,12 @@ class Correlation extends Component {
         this.plotMatrix();
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate() {
         this.plotMatrix();
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.update === false) {
-            return false;
-        }
-        return true;
+    shouldComponentUpdate(nextProps: CorrelationProps) {
+        return nextProps.update
     }
 
 
@@ -229,13 +267,13 @@ class Correlation extends Component {
 
     overlayOn = () => {
         if (document.getElementById("overlay")) {
-            document.getElementById("overlay").style.display = "block";
+            document.getElementById("overlay")!.style.display = "block";
         }
     }
 
     overlayOff = () => {
         if (document.getElementById("overlay")) {
-            document.getElementById("overlay").style.display = "none";
+            document.getElementById("overlay")!.style.display = "none";
         }
     }
 
