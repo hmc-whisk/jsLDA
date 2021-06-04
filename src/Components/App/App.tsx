@@ -106,7 +106,7 @@ class App extends Component<AppProps, AppStates> {
     corNotes = ``;
 
     // Functions for notes in correlation
-    changeNotes(notes) {
+    changeNotes(notes:string) {
         this.corNotes = notes;
     }
 
