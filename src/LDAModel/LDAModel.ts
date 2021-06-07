@@ -229,10 +229,22 @@ export class LDAModel {
     /**
      * Used to set the type of file LDAModel will
      * treat a documents file as
-     * @param {String} type
+     * @param {String} fileName
      */
-    setDocumentType(type: string) {
-        this.documentType = type;
+    setDocumentType(fileName: string) {
+        const fileExtension = fileName.split('.').pop();
+        if (fileExtension === "csv") {
+            this.documentType = "text/csv";
+        }
+        else if (fileExtension === "tsv") {
+            this.documentType = "text/tsv";
+        }
+        else if (fileExtension === "text/csv") { // need this case since documentType is set to "text/csv" by default
+            this.documentType = "text/csv";
+        }
+        else {
+            alert("Uploaded file does not have the correct extension (.csv or .tsv)");
+        }
     }
 
     // Used by sidebar to change selectedTopic and sortVocabByTopic
