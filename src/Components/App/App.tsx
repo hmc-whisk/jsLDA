@@ -198,7 +198,9 @@ class App extends Component<AppProps, AppStates> {
         this.setState({
             documentsFileArray: [Array.prototype.slice.call(event.target.files)],
         });
-        this.state.ldaModel.setDocumentType(event.target.files[0].type);
+        if (event.target.files[0] != null) {
+            this.state.ldaModel.setDocumentType(event.target.files[0].name);
+        }
     }
 
     /**
