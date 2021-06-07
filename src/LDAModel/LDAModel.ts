@@ -363,8 +363,11 @@ export class LDAModel {
         let parsedDoc: string[][];
         if (this.documentType === "text/csv") {
             parsedDoc = d3.csvParseRows(docText);
-        } else {
+        } else if (this.documentType === "text/tsv") {
             parsedDoc = d3.tsvParseRows(docText);
+        }
+        else {
+            return;
         }
 
         // Handle empty documents
