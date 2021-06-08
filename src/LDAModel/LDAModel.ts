@@ -231,15 +231,11 @@ export class LDAModel {
             this.documentType = "text/tsv";
         } else if (fileExtension === "text/csv") { // need this case since documentType is set to "text/csv" by default
             this.documentType = "text/csv";
-<<<<<<< HEAD
         }
         else if (fileExtension === "text/txt") { // need this case since documentType is set to "text/txt" by State of the Union default doc
             this.documentType = "text/tsv"; // previous implemention used text/tsv as documentType for SOTU doc
         }
         else {
-=======
-        } else {
->>>>>>> 222c8dcf1fe964d1d96bc899bddd7dc2a3671343
             alert("Uploaded file does not have the correct extension (.csv or .tsv)");
         }
     }
