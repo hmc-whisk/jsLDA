@@ -1,19 +1,29 @@
-import React from 'react';
+import React, {ReactElement} from 'react';
 import Card from 'react-bootstrap/Card';
 import Accordion from 'react-bootstrap/Accordion';
 import {format as d3Format} from 'd3';
 import {truncate} from '../../../funcs/utilityFunctions';
 import DocView from './DocView';
 import './topicDoc.css';
+import LDAModel, {SortedLDADocument} from "../../../LDAModel/LDAModel";
+
+interface DocCardProps{
+    ldaModel:LDAModel,
+    document:SortedLDADocument,
+    key:number,
+    showMetaData:boolean,
+    maxTopicValue:number,
+    useSalience:boolean
+}
+interface DocCardState{}
 
 
-class DocCard extends React.Component {
+class DocCard extends React.Component<DocCardProps,DocCardState> {
     render() {
-        const format = d3Format(".2g");
         const document = this.props.document;
         return (
             <Card>
-                <Accordion.Toggle as={Card.Header} eventKey={document.id}>
+                <Accordion.Toggle as={Card.Header} eventKey={document.id.toString()}>
                     <b>ID: </b>{document.id}
                     <span style={{float: "right"}}>
                         {this.props.useSalience ?
@@ -25,7 +35,7 @@ class DocCard extends React.Component {
                     </span>
                     <div>{this.metaInfo}</div>
                 </Accordion.Toggle>
-                <Accordion.Collapse eventKey={document.id}>
+                <Accordion.Collapse eventKey={document.id.toString()}>
                     <span>
                         <div className="preview">{truncate(document.originalText, 100)}</div>
                         <DocView
@@ -55,15 +65,14 @@ class DocCard extends React.Component {
     /**
      * @summary Formats the document score, based on salience score vs topic score
      */
-    score(document) {
+    score(document:SortedLDADocument):string {
         const format = d3Format(".2g");
-        let score = this.props.useSalience ?
+        return this.props.useSalience ?
             format(document.score) :
             format(document.score * 100);
-        return score;
     }
 
-    formatInfo(key, value) {
+    formatInfo(key:string, value:string):ReactElement {
         return (
             <div key={key} style={{}}>
                 <b>{key}: </b> {value + "  "}
