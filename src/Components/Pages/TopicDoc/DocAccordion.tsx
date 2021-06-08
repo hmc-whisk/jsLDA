@@ -2,10 +2,10 @@ import React from 'react';
 import Accordion from 'react-bootstrap/Accordion';
 import DocCard from './DocCard';
 import './topicDoc.css';
-import LDAModel, {LDADocument} from "../../../LDAModel/LDAModel";
+import LDAModel, {SortedLDADocument} from "../../../LDAModel/LDAModel";
 
 interface DocAccordionProps{
-    documents:LDADocument[],
+    documents:SortedLDADocument[],
     ldaModel:LDAModel,
     startDoc:number,
     endDoc:number,

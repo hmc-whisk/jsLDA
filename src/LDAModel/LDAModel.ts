@@ -27,15 +27,7 @@ export type LDADocument = {
 }
 
 
-export type SortedLDADocument = {
-    originalOrder: number
-    id: string,
-    date: string,
-    originalText: string,
-    tokens: LDAToken[],
-    topicCounts: number[],
-    metadata: { [key: string]: string },
-    dateObject: Date,
+export interface SortedLDADocument extends LDADocument {
     score: number
 }
 
@@ -235,14 +227,11 @@ export class LDAModel {
         const fileExtension = fileName.split('.').pop();
         if (fileExtension === "csv") {
             this.documentType = "text/csv";
-        }
-        else if (fileExtension === "tsv") {
+        } else if (fileExtension === "tsv") {
             this.documentType = "text/tsv";
-        }
-        else if (fileExtension === "text/csv") { // need this case since documentType is set to "text/csv" by default
+        } else if (fileExtension === "text/csv") { // need this case since documentType is set to "text/csv" by default
             this.documentType = "text/csv";
-        }
-        else {
+        } else {
             alert("Uploaded file does not have the correct extension (.csv or .tsv)");
         }
     }
@@ -328,7 +317,7 @@ export class LDAModel {
      *  - Lines should not have column names included
      *  - See parseDoc for
      */
-    ready(error: Error|null, stops: string, doc: string) {
+    ready(error: Error | null, stops: string, doc: string) {
         if (error) {
             //alert("File upload failed. Please try again."); TODO: uncomment this for deployment
             throw error;
@@ -365,8 +354,7 @@ export class LDAModel {
             parsedDoc = d3.csvParseRows(docText);
         } else if (this.documentType === "text/tsv") {
             parsedDoc = d3.tsvParseRows(docText);
-        }
-        else {
+        } else {
             return;
         }
 
@@ -473,7 +461,7 @@ export class LDAModel {
      * "text/csv" then it will assume it is a tsv.
      * The function acts to process through all potential bigrams
      */
-    _parseBigram(docText: string){
+    _parseBigram(docText: string) {
         let parsedDoc
         if (this.documentType === "text/csv") {
             parsedDoc = d3.csvParseRows(docText);
@@ -625,19 +613,39 @@ export class LDAModel {
      * @summary documents sorted in order of the prevalence
      * of the selected topic
      */
-    get sortedDocuments(): LDADocument[] | SortedLDADocument[] {
+    get sortedDocuments(): SortedLDADocument[] {
         const selectedTopic = this.selectedTopic;
         const sumDocSortSmoothing = LDAModel.DOC_SORT_SMOOTHING * this.numTopics;
 
         // Return default order if no topic is selected
-        if (this.selectedTopic === -1) return this.documents;
+        if (this.selectedTopic === -1) return this.documents.map(doc => {
+            doc['score']=0;
+            return doc as SortedLDADocument
+        });
 
         let sortedDocuments: SortedLDADocument[] = this.documents.map(function (doc, i) {
-            doc["score"] =
-                (doc.topicCounts[selectedTopic] + LDAModel.DOC_SORT_SMOOTHING) /
+            doc["score"] = (doc.topicCounts[selectedTopic] + LDAModel.DOC_SORT_SMOOTHING) /
                 (doc.tokens.length + sumDocSortSmoothing)
             return doc as SortedLDADocument
         });
+        sortedDocuments.sort(function (a, b) {
+            return b.score - a.score;
+        });
+        return sortedDocuments;
+    }
+
+    get sortedDocumentsSalient():SortedLDADocument[]{
+        if (this.selectedTopic === -1) return this.documents.map(doc => {
+            doc['score']=0;
+            return doc as SortedLDADocument
+        });
+
+        let sortedDocuments: SortedLDADocument[] = this.documents.map((doc) => {
+            doc["score"] = this.textSalience(
+                doc.originalText,
+                this.selectedTopic)
+            return doc as SortedLDADocument
+        })
         sortedDocuments.sort(function (a, b) {
             return b.score - a.score;
         });
@@ -1236,7 +1244,7 @@ export class LDAModel {
      * @summary adds a word to model's stoplist
      * @param {String} word the word to be added to stoplist
      */
-    addStopHelper (word: string) {
+    addStopHelper(word: string) {
         if (!this.stopwords[word]) {
             this.stopwords[word] = 1;
             this._vocabularySize--;
@@ -1261,7 +1269,7 @@ export class LDAModel {
      * if the bigram option is on, we remove bigrams that contain the stopword as well.
      * @param {String} word the word to remove
      */
-    removeStop (word: string){
+    removeStop(word: string) {
         this.removeStopHelper(word);
         if (this.bigram) {
             for (let w in this.finalBigram[word]) {
@@ -1281,7 +1289,7 @@ export class LDAModel {
      * @summary removes a word from stoplist
      * @param {String} word the word to remove
      */
-    removeStopHelper (word: string) {
+    removeStopHelper(word: string) {
         delete this.stopwords[word];
         this._vocabularySize++;
         this.wordTopicCounts[word] = {};
@@ -1311,7 +1319,7 @@ export class LDAModel {
      * After adding, we call addStop to every word in the stopwords to add bigram
      * to stopword if their constituent word is a stopword
      */
-    addBigram () {
+    addBigram() {
         for (let word1 in this.finalBigram) {
             if (!this.stopwords[word1]) {
                 for (let word2 in this.finalBigram[word1]) {
@@ -1404,7 +1412,7 @@ export class LDAModel {
      * @summary Remove bigrams from the model
      * Calls helper removeBigramHelper on each bigram deemed valid in finalBigram.
      */
-    removeBigram (){
+    removeBigram() {
         for (let word1 in this.finalBigram) {
             for (let word2 in this.finalBigram[word1]) {
                 this.removeBigramHelper(word1, word2);
@@ -1548,7 +1556,7 @@ export class LDAModel {
     /**
      * @summary Stops the model from continuing it's sweeps
      */
-    stopSweeps (){
+    stopSweeps() {
         this._requestedSweeps = this._completeSweeps;
     }
 
@@ -1593,7 +1601,7 @@ export class LDAModel {
      * @param {String} field metadata field to get summary of
      * @param {*} topic topic number to get summary of
      */
-    metaTopicAverages (field: string, topic: number){
+    metaTopicAverages(field: string, topic: number) {
         if (!this.metaFields.includes(field)) {
             throw(Error("Given metadata field is not in model"))
         }
@@ -1646,7 +1654,7 @@ export class LDAModel {
      * @param {Number} topic Topic to pull values from
      * @returns {Array<{topicVal:Number,label:String,metaVal:any}>}
      */
-    docTopicMetaValues (field: string, topic: number): { topicVal: number, label: string | number, metaVal: string }[] {
+    docTopicMetaValues(field: string, topic: number): { topicVal: number, label: string | number, metaVal: string }[] {
         return this.documents.map((doc) => {
             return {
                 topicVal: doc.topicCounts[topic] / doc.tokens.length,

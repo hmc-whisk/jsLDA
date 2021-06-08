@@ -3,7 +3,7 @@ import PageController from './PageController';
 import DocAccordion from './DocAccordion';
 import LabeledToggleButton from '../../LabeledToggleButton';
 import './topicDoc.css';
-import LDAModel, {LDADocument, SortedLDADocument} from "../../../LDAModel/LDAModel";
+import LDAModel, {SortedLDADocument} from "../../../LDAModel/LDAModel";
 
 interface TopicDocProps {
     ldaModel: LDAModel
@@ -36,27 +36,15 @@ class TopicDoc extends Component<TopicDocProps, TopicDocState> {
      * @summary documents sorted in order of the prevalence
      * of the selected topic
      */
-    get sortedDocuments(): LDADocument[] {
+    get sortedDocuments(): SortedLDADocument[] {
         return this.props.ldaModel.sortedDocuments
     }
 
     /**
      * @summary documents sorted in order of the saliency score of documents
      */
-    get sortedDocumentsSalient(): LDADocument[] {
-        // Return default order if no topic is selected
-        if (this.props.ldaModel.selectedTopic === -1) return this.props.ldaModel.documents;
-
-        let sortedDocuments: SortedLDADocument[] = this.props.ldaModel.documents.map((doc) => {
-            doc["score"] = this.props.ldaModel.textSalience(
-                doc.originalText,
-                this.props.ldaModel.selectedTopic)
-            return doc as SortedLDADocument
-        })
-        sortedDocuments.sort(function (a, b) {
-            return b.score - a.score;
-        });
-        return sortedDocuments;
+    get sortedDocumentsSalient(): SortedLDADocument[] {
+        return this.props.ldaModel.sortedDocumentsSalient
     }
 
     get lastPage(): number {
