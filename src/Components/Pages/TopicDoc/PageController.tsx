@@ -2,6 +2,13 @@ import React from 'react';
 import Pagination from 'react-bootstrap/Pagination';
 import './topicDoc.css';
 
+interface PageControllerProps{
+    currentPage:number,
+    changePage:(n:number)=>void,
+    lastPage:number
+}
+interface PageControllerState{}
+
 /**
  * @summary a class for changing between pages
  * @requires
@@ -9,7 +16,7 @@ import './topicDoc.css';
  *  @prop {Number} lastPage
  *  @prop {Function(Number)} changePage
  */
-class PageController extends React.Component {
+class PageController extends React.Component<PageControllerProps,PageControllerState> {
     render() {
         return (
             <div>
