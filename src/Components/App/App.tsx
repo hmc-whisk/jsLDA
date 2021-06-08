@@ -1,4 +1,4 @@
-import React, {ChangeEvent, Component} from 'react';
+import React, {ChangeEvent, Component, CSSProperties} from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -18,7 +18,6 @@ import NavBar from '../Header/NavBar';
 import TopBar from '../Header/TopBar';
 import DLPage from '../Pages/DLPage';
 import HomePage from '../Pages/HomePage';
-import MetaData from '../Pages/MetaData/MetaData';
 import TopicOverviewPage from '../Pages/TopicOverview/TopicOverviewPage';
 
 import stateOfUnionDocs from '../../defaultDocs/stateOfUnionDocs.txt';
@@ -352,14 +351,6 @@ class App extends Component<AppProps, AppStates> {
     }
 
     /**
-     * @summary This function is the callback for "input", it changes as we move the slider without releasing it.
-     */
-    updateTopicCount(input) {
-        // TODO: is this used anywhere?
-        d3.select("#num_topics_display").text(input.value);
-    }
-
-    /**
      * @summary This function is the callback for "change"
      */
     onTopicsChange(val: string) {
@@ -374,9 +365,8 @@ class App extends Component<AppProps, AppStates> {
     }
 
     componentDidMount() {
-        // TODO turn d3 into react
         // Set upon initialisation, changed to new numTopics in reset
-        d3.select("#num-topics-input").attr("value", this.state.ldaModel.numTopics);
+        document.getElementById("num-topics-input")!.setAttribute("value", this.state.ldaModel.numTopics.toString());
         this.queueLoad();
     }
 
@@ -452,15 +442,14 @@ class App extends Component<AppProps, AppStates> {
                 DisplayPage = <HomePage/>
                 break;
             case "meta-tab":
-                DisplayPage = <MetaData
-                    metaTopicAverages={this.state.ldaModel.metaTopicAverages.bind(this.state.ldaModel)}
-                    metaFields={this.state.ldaModel.metaFields}
-                    selectedTopic={this.state.ldaModel.selectedTopic}
-                    topicAvgsForCatagory={this.state.ldaModel.topicAvgsForCatagory.bind(this.state.ldaModel)}
-                    metaValues={this.state.ldaModel.metaValues.bind(this.state.ldaModel)}
-                    docTopicMetaValues={this.state.ldaModel.docTopicMetaValues.bind(this.state.ldaModel)}
-                    topicWordCounts={this.state.ldaModel.topicWordCounts}
-                    modelDataDLer={this.state.modelDataDLer}/>
+                DisplayPage = <div id="meta-page" style={
+                    {
+                        marginTop:"2em",
+                        textAlign:"center",
+                        fontWeight:"bold",
+                        fontSize:"150%"
+                    } as CSSProperties
+                }> Page under construction</div>
                 break;
             case "to-tab":
                 DisplayPage = <TopicOverviewPage
