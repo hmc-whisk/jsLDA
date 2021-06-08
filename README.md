@@ -7,7 +7,7 @@ Installation:
 ------------
 
 You will need [npm](https://www.npmjs.com/) installed in order to build and run this code. After downloading the code, navigate to the home directory using the terminal and run `npm install`. To run a local test instance of a development server, run `npm start`. To create a deployable build of the current website, run `npm run build`. The `build/` directory can be copied to any location for use. 
-
+To deploy to the hmc website, run `npm deploy`.
 
 Instructions:
 ------------
