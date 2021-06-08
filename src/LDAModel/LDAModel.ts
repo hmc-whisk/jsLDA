@@ -242,6 +242,9 @@ export class LDAModel {
         else if (fileExtension === "text/csv") { // need this case since documentType is set to "text/csv" by default
             this.documentType = "text/csv";
         }
+        else if (fileExtension === "text/txt") { // need this case since documentType is set to "text/txt" by State of the Union default doc
+            this.documentType = "text/tsv"; // previous implemention used text/tsv as documentType for SOTU doc
+        }
         else {
             alert("Uploaded file does not have the correct extension (.csv or .tsv)");
         }
@@ -330,7 +333,7 @@ export class LDAModel {
      */
     ready(error: Error|null, stops: string, doc: string) {
         if (error) {
-            //alert("File upload failed. Please try again."); TODO: uncomment this for deployment
+            alert("File upload failed. Please try again.");
             throw error;
         } else {
             // Create the stoplist
@@ -367,7 +370,7 @@ export class LDAModel {
             parsedDoc = d3.tsvParseRows(docText);
         }
         else {
-            return;
+            throw(Error("File does not have a useable extension"));
         }
 
         // Handle empty documents
