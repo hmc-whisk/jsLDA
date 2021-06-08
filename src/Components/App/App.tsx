@@ -326,6 +326,7 @@ class App extends Component<AppProps, AppStates> {
                 console.error(err)
                 this.state.ldaModel.ready(err, '', '')
             });
+            this.setState({documentsFileArray: []});
     }
 
     /**
