@@ -2,14 +2,24 @@ import React from 'react';
 import Accordion from 'react-bootstrap/Accordion';
 import DocCard from './DocCard';
 import './topicDoc.css';
+import LDAModel, {LDADocument} from "../../../LDAModel/LDAModel";
 
+interface DocAccordionProps{
+    documents:LDADocument[],
+    ldaModel:LDAModel,
+    startDoc:number,
+    endDoc:number,
+    showMetaData:boolean,
+    useSalience:boolean
+}
+interface DocAccordionState{}
 
-class DocAccordion extends React.Component {
+class DocAccordion extends React.Component<DocAccordionProps,DocAccordionState> {
 
     render() {
         return (
             <div>
-                <Accordion defaultActiveKey={this.props.ldaModel.documents[this.props.startDoc].originalOrder}>
+                <Accordion defaultActiveKey={this.props.ldaModel.documents[this.props.startDoc].originalOrder.toString()}>
                     {this.props.documents
                         .slice(this.props.startDoc, this.props.endDoc)
                         .map((document) => {
