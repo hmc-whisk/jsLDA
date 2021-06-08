@@ -19,7 +19,7 @@ cd "${0%/*}"
 USERNAME=$1
 print "Using username $1"
 
-URL_PREFIX="https://cs.hmc.edu/~$USERNAME/jsLDA/"
+URL_PREFIX="https://www.cs.hmc.edu/~$USERNAME/jsLDA/"
 printf "Website will be deployed under \033[1;95m%s\033[0m\n" "$URL_PREFIX"
 
 if [ -d build ]; then
