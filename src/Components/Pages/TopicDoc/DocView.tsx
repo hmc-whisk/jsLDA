@@ -1,12 +1,22 @@
-import React from 'react';
+import React, {CSSProperties, ReactElement} from 'react';
 import Card from 'react-bootstrap/Card'
 import * as d3 from 'd3';
+import LDAModel, {SortedLDADocument} from "../../../LDAModel/LDAModel";
+
+interface DocViewProps {
+    document: SortedLDADocument,
+    ldaModel: LDAModel,
+    maxTopicValue: number
+}
+
+interface DocViewState {
+}
 
 /**
  * @todo finish writing this class to highlight text
  * based on topic values
  */
-class DocView extends React.Component {
+class DocView extends React.Component<DocViewProps, DocViewState> {
     static minHighlight = getComputedStyle(document.documentElement).getPropertyValue('--color3');
     static maxHighlight = getComputedStyle(document.documentElement).getPropertyValue('--color2');
 
@@ -19,16 +29,16 @@ class DocView extends React.Component {
     /**
      * @summary The text of the document formatted with topic highlighting
      */
-    get highlightedText() {
+    get highlightedText(): ReactElement {
         const topic = this.props.ldaModel.selectedTopic;
         const originalText = this.props.document.originalText;
 
-        if (topic === -1) return originalText; // No topic selected
+        if (topic === -1) return <>originalText</>; // No topic selected
 
         const tokens = this.props.ldaModel.textToTokenSaliences(originalText, topic)
 
         // If no tokens found, just return text
-        if (tokens.length === 0) return originalText;
+        if (tokens.length === 0) return <>originalText</>;
 
         return <>
             {/* highlighted text before first token */}
@@ -56,10 +66,10 @@ class DocView extends React.Component {
     /**
      * @summary Formats a word in jsx with it's topic value highlighting
      * @param {String} w the word to add highlighting to
-     * @param {Number} salience the
+     * @param {Number} value salience
      * @param key The key to be used in the element
      */
-    highlightWord(w, value, key) {
+    highlightWord(w: string, value: number, key: number): ReactElement {
         return (
             <span key={key} style={this.getComputedStyle(value)}>{w}</span>
         )
@@ -69,8 +79,8 @@ class DocView extends React.Component {
      * @summary Creates a style object for w
      * @param {Number} value Value to be generate styling for
      */
-    getComputedStyle(value) {
-        let colorScale = d3.scaleLinear().domain([0, this.props.maxTopicValue])
+    getComputedStyle(value: number): CSSProperties {
+        let colorScale = d3.scaleLinear<string>().domain([0, this.props.maxTopicValue])
             .range([DocView.minHighlight, DocView.maxHighlight]);
         return {backgroundColor: colorScale(value)}
     }
