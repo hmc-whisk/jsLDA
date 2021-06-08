@@ -9,7 +9,7 @@ import {getObjectKeys} from '../../funcs/utilityFunctions'
 import LDAModel from '../../LDAModel/LDAModel'
 import ModelDataDLer from '../../LDAModel/ModelDataDLer'
 
-import DocPage from '../Pages/TopicDoc/DocPage';
+import TopicDoc from '../Pages/TopicDoc/TopicDoc';
 import Correlation from '../Pages/Correlation';
 import SideBar from '../SideBar/SideBar';
 import VocabTable from '../Pages/VocabTable';
@@ -404,7 +404,7 @@ class App extends Component<AppProps, AppStates> {
         let DisplayPage;
         switch (this.state.selectedTab) {
             case "docs-tab":
-                DisplayPage = <DocPage
+                DisplayPage = <TopicDoc
                     ldaModel={this.state.ldaModel}
                 />;
                 break;
