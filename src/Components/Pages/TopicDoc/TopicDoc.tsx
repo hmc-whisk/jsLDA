@@ -96,29 +96,31 @@ class TopicDoc extends Component<TopicDocProps, TopicDocState> {
 
     render() {
         return (
-            <div>
+            <div id="docPage">
+                <div>
 
-                {this.toggleMetaDataButton()}
-                {this.toggleSalienceDataButton()}
+                    {this.toggleMetaDataButton()}
+                    {this.toggleSalienceDataButton()}
 
-                <div className="docNav">
-                    <PageController
-                        currentPage={this.state.currentPage}
-                        changePage={this.changePage.bind(this)}
-                        lastPage={this.lastPage}/>
+                    <div className="docNav">
+                        <PageController
+                            currentPage={this.state.currentPage}
+                            changePage={this.changePage.bind(this)}
+                            lastPage={this.lastPage}/>
+                    </div>
+
+
+                    <DocAccordion
+                        documents={this.state.useSalience ?
+                            this.sortedDocumentsSalient :
+                            this.sortedDocuments}
+                        ldaModel={this.props.ldaModel}
+                        startDoc={this.startDoc}
+                        endDoc={this.endDoc}
+                        showMetaData={this.state.showMetaData}
+                        useSalience={this.state.useSalience}
+                    />
                 </div>
-
-
-                <DocAccordion
-                    documents={this.state.useSalience ?
-                        this.sortedDocumentsSalient :
-                        this.sortedDocuments}
-                    ldaModel={this.props.ldaModel}
-                    startDoc={this.startDoc}
-                    endDoc={this.endDoc}
-                    showMetaData={this.state.showMetaData}
-                    useSalience={this.state.useSalience}
-                />
             </div>
         )
     }
