@@ -1,18 +1,29 @@
-import React, {Component} from 'react';
+import React, {Component, CSSProperties} from 'react';
 import PageController from './PageController';
 import DocAccordion from './DocAccordion';
 import LabeledToggleButton from '../../LabeledToggleButton';
 import './topicDoc.css';
+import LDAModel, {LDADocument, SortedLDADocument} from "../../../LDAModel/LDAModel";
+
+interface TopicDocProps {
+    ldaModel: LDAModel
+}
+
+interface TopicDocState {
+    currentPage: number,
+    showMetaData: boolean,
+    useSalience: boolean
+}
 
 /**
  * @summary A page that displays the documents in the model
  */
-class TopicDoc extends Component {
+class TopicDoc extends Component<TopicDocProps, TopicDocState> {
 
     static DOCS_PER_PAGE = 20;
     static DOC_SORT_SMOOTHING = 10.0;
 
-    constructor(props) {
+    constructor(props: TopicDocProps) {
         super(props);
         this.state = {
             currentPage: 1,
@@ -25,39 +36,22 @@ class TopicDoc extends Component {
      * @summary documents sorted in order of the prevalence
      * of the selected topic
      */
-    get sortedDocuments() {
-        const selectedTopic = this.props.ldaModel.selectedTopic;
-        const sumDocSortSmoothing = TopicDoc.DOC_SORT_SMOOTHING * this.props.ldaModel.numTopics;
-        let sortedDocuments = this.props.ldaModel.documents;
-
-        // Return default order if no topic is selected
-        if (this.props.ldaModel.selectedTopic === -1) return sortedDocuments;
-
-        sortedDocuments = sortedDocuments.map(function (doc, i) {
-            doc["score"] =
-                (doc.topicCounts[selectedTopic] + TopicDoc.DOC_SORT_SMOOTHING) /
-                (doc.tokens.length + sumDocSortSmoothing)
-            return doc
-        });
-        sortedDocuments.sort(function (a, b) {
-            return b.score - a.score;
-        });
-        return sortedDocuments;
+    get sortedDocuments(): LDADocument[] {
+        return this.props.ldaModel.sortedDocuments
     }
 
     /**
      * @summary documents sorted in order of the saliency score of documents
      */
-    get sortedDocumentsSalient() {
-        let sortedDocuments = this.props.ldaModel.documents;
+    get sortedDocumentsSalient(): LDADocument[] {
         // Return default order if no topic is selected
-        if (this.props.ldaModel.selectedTopic === -1) return sortedDocuments;
+        if (this.props.ldaModel.selectedTopic === -1) return this.props.ldaModel.documents;
 
-        sortedDocuments = sortedDocuments.map((doc) => {
+        let sortedDocuments: SortedLDADocument[] = this.props.ldaModel.documents.map((doc) => {
             doc["score"] = this.props.ldaModel.textSalience(
                 doc.originalText,
                 this.props.ldaModel.selectedTopic)
-            return doc
+            return doc as SortedLDADocument
         })
         sortedDocuments.sort(function (a, b) {
             return b.score - a.score;
@@ -65,18 +59,18 @@ class TopicDoc extends Component {
         return sortedDocuments;
     }
 
-    get lastPage() {
+    get lastPage(): number {
         return Math.ceil(this.props.ldaModel.documents.length / TopicDoc.DOCS_PER_PAGE);
     }
 
-    get startDoc() {
+    get startDoc(): number {
         return (this.state.currentPage - 1) * TopicDoc.DOCS_PER_PAGE
     }
 
     /**
      * @summary one past the index of the last doc to be displayed
      */
-    get endDoc() {
+    get endDoc(): number {
         const endDoc = this.startDoc + TopicDoc.DOCS_PER_PAGE
 
         // Avoid giving document past the end of documents
@@ -90,7 +84,7 @@ class TopicDoc extends Component {
      * @summary changes the current page to n
      * @param {Number} n
      */
-    changePage = (n) => {
+    changePage(n: number) {
         this.setState({
             currentPage: n
         })
@@ -99,14 +93,14 @@ class TopicDoc extends Component {
     /**
      * @summary Toggles option to show meta data of documents
      */
-    toggleMetaData = () => {
+    toggleMetaData() {
         this.setState({showMetaData: !this.state.showMetaData})
     }
 
     /**
      * @summary Toggles option to sort by salinence score
      */
-    toggleSalience = () => {
+    toggleSalience() {
         this.setState({
             useSalience: !this.state.useSalience
         })
@@ -122,7 +116,7 @@ class TopicDoc extends Component {
                 <div className="docNav">
                     <PageController
                         currentPage={this.state.currentPage}
-                        changePage={this.changePage}
+                        changePage={this.changePage.bind(this)}
                         lastPage={this.lastPage}/>
                 </div>
 
@@ -144,25 +138,27 @@ class TopicDoc extends Component {
     toggleMetaDataButton() {
         return (
             <LabeledToggleButton
-                label={"Show Metadata"}
+                id="toggleMetaData"
+                label="Show Metadata"
                 style={{
                     float: "right",
                     borderTopRightRadius: "4px",
-                }}
+                } as CSSProperties}
                 checked={this.state.showMetaData}
-                onChange={this.toggleMetaData}/>
+                onChange={this.toggleMetaData.bind(this)}/>
         )
     }
 
     toggleSalienceDataButton() {
         return (
             <LabeledToggleButton
+                id="toggleSalience"
                 label={"Sort by Saliency"}
                 style={{
                     float: "right",
                 }}
                 checked={this.state.useSalience}
-                onChange={this.toggleSalience}/>
+                onChange={this.toggleSalience.bind(this)}/>
         )
     }
 
