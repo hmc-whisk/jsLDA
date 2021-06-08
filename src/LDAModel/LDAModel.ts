@@ -362,14 +362,9 @@ export class LDAModel {
             parsedDoc = d3.csvParseRows(docText);
         } else if (this.documentType === "text/tsv") {
             parsedDoc = d3.tsvParseRows(docText);
-<<<<<<< HEAD
         }
         else {
             throw(Error("File does not have a useable extension"));
-=======
-        } else {
-            return;
->>>>>>> 222c8dcf1fe964d1d96bc899bddd7dc2a3671343
         }
 
         // Handle empty documents
