@@ -47,7 +47,8 @@ interface AppStates {
     modelFileArray: File[][]
     selectedTab: string,
     sweepParameter: number,
-    update: boolean
+    update: boolean,
+    currentDocIsDefault: boolean,
 }
 
 class App extends Component<AppProps, AppStates> {
@@ -75,6 +76,8 @@ class App extends Component<AppProps, AppStates> {
             sweepParameter: 100,
 
             update: true,
+
+            currentDocIsDefault: true,
         };
     };
 
@@ -162,6 +165,7 @@ class App extends Component<AppProps, AppStates> {
         let docName = event.target.value;
         this.setState({
             docName: docName,
+            currentDocIsDefault: true,
         });
 
         if (docName === "State Of The Union") {
@@ -196,6 +200,7 @@ class App extends Component<AppProps, AppStates> {
 
         this.setState({
             documentsFileArray: [Array.prototype.slice.call(event.target.files)],
+            currentDocIsDefault: false,
         });
         if (event.target.files[0] != null) {
             this.state.ldaModel.setDocumentType(event.target.files[0].name);
@@ -295,9 +300,11 @@ class App extends Component<AppProps, AppStates> {
      */
     getDocsUpload(): Promise<string> {
         return new Promise((resolve) => {
-            if (this.state.documentsFileArray.length === 0) {
+            // if (this.state.documentsFileArray.length === 0) {
+            if (this.state.currentDocIsDefault) {
                 this.state.ldaModel.setDocumentType(this.state.defaultExt);
                 resolve(d3.text(this.state.documentsURL));
+                this.setState({currentDocIsDefault: false});
             } else {
                 const fileSelection = this.state.documentsFileArray[0].slice();
                 let reader = new FileReader();
@@ -305,6 +312,7 @@ class App extends Component<AppProps, AppStates> {
                     resolve(reader.result as string);
                 };
                 reader.readAsText(fileSelection[0]);
+                this.setState({currentDocIsDefault: true});
             }
         })
     };
@@ -325,7 +333,6 @@ class App extends Component<AppProps, AppStates> {
                 console.error(err)
                 this.state.ldaModel.ready(err, '', '')
             });
-            this.setState({documentsFileArray: []});
     }
 
     /**
