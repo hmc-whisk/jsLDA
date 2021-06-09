@@ -235,7 +235,6 @@ class TopBar extends React.Component<TopBarProps, TopBarState> {
     }
 
     render() {
-        console.log(this.props.iter);
         return (
             <div id="form" className="top">
                 <form onSubmit={this.handleSubmit.bind(this)} className="topForm">
