@@ -61,6 +61,11 @@ export type LDATopicTimeBinAveraged = {
     key: Date,
     value: number
 }
+// type reverse-engineered from LDAModel.topicTimesBinnedAverage
+export interface LDATopicTimeBinAveragedWithStd extends LDATopicTimeBinAveraged {
+    upperEr: number,
+    lowerEr: number
+}
 
 export type LDABigram = {
     [key: string]: {

@@ -2,9 +2,29 @@ import React, {Component} from 'react';
 import * as d3 from 'd3';
 import {topNWords} from '../../funcs/utilityFunctions';
 import './pages.css';
+import LDAModel, {LDATopicTimeBinAveraged, LDATopicTimeBinAveragedWithStd} from "../../LDAModel/LDAModel";
 
-class TimeSeries extends Component {
-    graphMargin = 20;
+interface TimeSeriesProps {
+    ldaModel: LDAModel,
+    update: boolean
+}
+
+interface TimeSeriesState {
+    timeSeriesWidth: number,
+    timeSeriesHeight: number,
+    timeSeriesHeightTopic: number,
+    numberOfBins: number,
+    fillColor: string,
+    errorBarColor: string,
+    strokeColor: string,
+}
+
+
+class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
+
+    _rootNode: HTMLDivElement
+    topicTimeGroups: d3.Selection<SVGGElement, any, HTMLElement | null, any>[]
+    graphMargin: number
 
     constructor(props) {
         super(props);
@@ -18,13 +38,13 @@ class TimeSeries extends Component {
             errorBarColor: getComputedStyle(document.documentElement).getPropertyValue('--color2Light'),
             strokeColor: getComputedStyle(document.documentElement).getPropertyValue('--color4'),
         };
-
+        this._rootNode = document.createElement('div')
+        this.topicTimeGroups = []
+        this.graphMargin = 0
     }
 
-    topicTimeGroups = []
 
-
-    _setRef(componentNode) {
+    _setRef(componentNode: HTMLDivElement) {
         this._rootNode = componentNode;
     }
 
@@ -32,20 +52,20 @@ class TimeSeries extends Component {
      * @summary Creates skeleton of svg component when no topic is selected
      */
     createTimeSVGs() {
-        var tsPage = d3.select(this._rootNode);
+        let tsPage = d3.select(this._rootNode);
         // Restart the visualizations
         tsPage.select("svg").remove();
-        let temp_topicTimeGroups = [];
+        let temp_topicTimeGroups: d3.Selection<SVGGElement, any, HTMLElement | null, any>[] = [];
 
         let height = (this.state.timeSeriesHeight + this.graphMargin) * this.props.ldaModel.numTopics + 50
 
-        var tsSVG = tsPage
+        let tsSVG = tsPage
             .append("svg")
             .attr("height", height)
             .attr("width", this.state.timeSeriesWidth)
             .style("overflow", "visible");
 
-        for (var topic = 0; topic < this.props.ldaModel.numTopics; topic++) {
+        for (let topic = 0; topic < this.props.ldaModel.numTopics; topic++) {
             temp_topicTimeGroups
                 .push(tsSVG
                     .append("g")
@@ -65,12 +85,12 @@ class TimeSeries extends Component {
      * @summary Creates skeleton of svg component when a topic is selected
      */
     createTimeSVGsTopic() {
-        var tsPage = d3.select(this._rootNode);
+        let tsPage = d3.select(this._rootNode);
         // Restart the visualizations
         tsPage.select("svg").remove();
-        let temp_topicTimeGroups = [];
+        let temp_topicTimeGroups: d3.Selection<SVGGElement, any, null, any>[] = [];
 
-        var tsSVG = tsPage
+        let tsSVG = tsPage
             .append("svg")
             .attr("height", 600)
             .attr("width", this.state.timeSeriesWidth + 200);
@@ -79,7 +99,6 @@ class TimeSeries extends Component {
             .push(tsSVG
                 .append("g")
                 .attr("transform", "translate(50,50)"));
-        //temp_topicTimeGroups[0].append("text").attr("transform", "translate(5,20)");
 
         this.topicTimeGroups = temp_topicTimeGroups
     }
@@ -90,10 +109,10 @@ class TimeSeries extends Component {
      */
     timeSeries0() {
         let maxTopicMean = 0;
-        let allTopicMeans = [];
+        let allTopicMeans: LDATopicTimeBinAveraged[][] = [];
 
         for (let topic = 0; topic < this.props.ldaModel.numTopics; topic++) {
-            var topicMeans = this.getBins(topic)
+            let topicMeans = this.getBins(topic)
 
             let thisMaxTopicMean = Math.max(...topicMeans.map(function (d) {
                 return d.value
@@ -106,9 +125,9 @@ class TimeSeries extends Component {
         }
 
         for (let topic = 0; topic < this.props.ldaModel.numTopics; topic++) {
-            topicMeans = allTopicMeans[topic];
+            let topicMeans = allTopicMeans[topic];
 
-            // var xScale = d3.scaleLinear()
+            // let xScale = d3.scaleLinear()
             //     .domain([0, topicMeans.length])
             //     .range([0, this.state.timeSeriesWidth]);
 
@@ -122,7 +141,7 @@ class TimeSeries extends Component {
                 .range([0, this.state.timeSeriesWidth])
                 .nice();
 
-            var area = d3.area()
+            let area = d3.area<LDATopicTimeBinAveraged>()
                 .x(function (d, i) {
                     return scale(d.key);
                 })
@@ -131,12 +150,13 @@ class TimeSeries extends Component {
                 })
                 .y0(yScale(0));
 
-            var x_axis = d3.axisBottom()
-                .scale(scale)
+            let x_axis = d3.axisBottom(scale)
 
             if (this.topicTimeGroups[topic]) {
                 this.topicTimeGroups[topic]
                     .select("path")
+                    // @ts-ignore: TS2769. There's an issue with TS overload resolution
+                    // see https://github.com/microsoft/TypeScript/issues/14107
                     .attr("d", area(topicMeans));
                 this.topicTimeGroups[topic]
                     .append("text")
@@ -145,6 +165,7 @@ class TimeSeries extends Component {
                 this.topicTimeGroups[topic]
                     .select("g")
                     .attr("transform", "translate(0,75)")
+                    // @ts-ignore: TS2345
                     .call(x_axis)
                     .selectAll("text")
             }
@@ -206,7 +227,7 @@ class TimeSeries extends Component {
 
         let topic = this.props.ldaModel.selectedTopic;
 
-        var topicMeans = this.getBins(topic, true, true)
+        let topicMeans = this.getBins(topic, true, true) as unknown as LDATopicTimeBinAveragedWithStd[]
 
         let thisMaxTopicMean = Math.max(...topicMeans.map(function (d) {
             return d.upperEr
@@ -215,17 +236,17 @@ class TimeSeries extends Component {
             maxTopicMean = thisMaxTopicMean;
         }
 
-        var yScale = d3
+        let yScale = d3
             .scaleLinear()
             .domain([0, maxTopicMean])
             .range([this.state.timeSeriesHeightTopic, 0]);
 
-        var scale = d3.scaleTime()
+        let scale = d3.scaleTime()
             .domain([topicMeans[0].key, topicMeans[topicMeans.length - 1].key])
             .range([0, this.state.timeSeriesWidth - 50]);
 
         // Function to draw line
-        var line = d3.line()
+        let line = d3.line<LDATopicTimeBinAveragedWithStd>()
             .x(function (d) {
                 return scale(d.key);
             })
@@ -234,7 +255,7 @@ class TimeSeries extends Component {
             })
 
         // Function to draw confidence interval
-        const confInterval = d3.area()
+        const confInterval = d3.area<LDATopicTimeBinAveragedWithStd>()
             .x(function (d) {
                 return scale(d.key);
             })
@@ -245,16 +266,16 @@ class TimeSeries extends Component {
                 return yScale(d.upperEr);
             })
 
-        var x_axis = d3.axisBottom()
-            .scale(scale)
+        let x_axis = d3.axisBottom(scale)
+            // @ts-ignore: TS2769. There's an issue with TS overload resolution
+            // see https://github.com/microsoft/TypeScript/issues/14107
             .tickFormat(d3.timeFormat("%Y-%m-%d"))
 
-        var y_axis = d3.axisLeft()
-            .scale(yScale);
+        let y_axis = d3.axisLeft(yScale)
 
         if (this.topicTimeGroups[0]) {
 
-            var topicKeys = [];
+            let topicKeys:Date[] = [];
             for (let i = 0; i < topicMeans.length; i += 1) {
                 topicKeys.push(topicMeans[i].key);
             }
@@ -263,12 +284,16 @@ class TimeSeries extends Component {
                 .append("path")
                 .attr("fill", this.state.errorBarColor)
                 .attr("stroke", "none")
+                // @ts-ignore: TS2769. There's an issue with TS overload resolution
+                // see https://github.com/microsoft/TypeScript/issues/14107
                 .attr("d", confInterval(topicMeans))
             // Chart line
             this.topicTimeGroups[0]
                 .append("path")
                 .attr("fill", "none")
                 .attr("stroke", this.state.strokeColor)
+                // @ts-ignore: TS2769. There's an issue with TS overload resolution
+                // see https://github.com/microsoft/TypeScript/issues/14107
                 .attr("d", line(topicMeans));
             // Topic Label
             this.topicTimeGroups[0]
@@ -296,7 +321,7 @@ class TimeSeries extends Component {
                 .attr("transform", "translate(-10,-10)")
                 .text("Proportion")
                 .attr("font-weight", 'bold');
-            ;
+
 
             this.topicTimeGroups[0]
                 .append("text")
@@ -304,9 +329,9 @@ class TimeSeries extends Component {
                 .attr("transform", "translate(" + (this.state.timeSeriesWidth / 2 - 20) + "," + (this.state.timeSeriesHeightTopic + 80) + ")")
                 .text("Time")
                 .attr("font-weight", 'bold');
-            ;
 
-            var focus = this.topicTimeGroups[0].append("g")
+
+            let focus = this.topicTimeGroups[0].append("g")
                 .attr("class", "focus")
                 .style("display", "none");
 
@@ -355,12 +380,14 @@ class TimeSeries extends Component {
                     focus.style("display", "none");
                 })
                 .on("mousemove", function () {
+                    // @ts-ignore: TS2339
                     if (d3.mouse(this)[0] > 0) {
-                        let x0 = scale.invert(d3.mouse(this)[0]),
+                        // @ts-ignore: TS2339
+                        let x0:Date = scale.invert(d3.mouse(this)[0]),
                             i = d3.bisectLeft(topicKeys, x0),
                             d0 = topicMeans[i - 1],
                             d1 = topicMeans[i],
-                            d = x0 - d0.key > d1.key - x0 ? d1 : d0;
+                            d = x0.getTime() - d0.key.getTime() > d1.key.getTime() - x0.getTime() ? d1 : d0;
                         focus.attr("transform", "translate(" + scale(d.key) + "," + yScale(d.value) + ")");
                         focus.select(".tooltip-year").text(d3.timeFormat("%Y-%m-%d")(d.key));
                         focus.select(".tooltip-prop").text(d.value.toPrecision(4));
@@ -436,7 +463,7 @@ class TimeSeries extends Component {
                     Data for plots are available in downloads page.
                 </div>
                 <div>
-                    <label for="numberOfBins">Number of Bins:</label>
+                    <label htmlFor="numberOfBins">Number of Bins:</label>
                     <input
                         onChange={this.handleNumAvgChange}
                         type="number" id="numberOfBins"
