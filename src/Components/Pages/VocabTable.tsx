@@ -1,8 +1,30 @@
-import React, {Component} from 'react';
+import React, {ChangeEvent, Component} from 'react';
 import * as d3 from 'd3';
 import './pages.css';
+import ModelDataDLer from "../../LDAModel/ModelDataDLer";
 
-class VocabTable extends Component {
+interface VocabTableProps {
+    sortVocabByTopic: boolean,
+    sortByTopicChange: (sort: boolean) => void,
+    vocabularyCounts: { [key: string]: number },
+    wordTopicCounts: { [key: string]: { [key: string]: number } },
+    selectedTopic: number,
+    stopwords: { [key: string]: 1 | undefined },
+    numTopics: number,
+    byCountDescending: (a: { count: number }, b: { count: number }) => number,
+    addStop: (word: string, refresh?: boolean) => void,
+    removeStop: (word: string) => void,
+    update: boolean,
+    modelIsRunning: boolean,
+    modelDataDLer: ModelDataDLer
+}
+
+interface VocabTableState {
+    displayingStopwords: boolean,
+    searchText: string
+}
+
+class VocabTable extends Component<VocabTableProps, VocabTableState> {
     constructor(props) {
         super(props);
         this.state = {
@@ -12,65 +34,64 @@ class VocabTable extends Component {
     }
 
 
-    specificityScale = d3.scaleLinear().domain([0, 1]).range([
+    specificityScale = d3.scaleLinear<string>().domain([0, 1]).range([
         getComputedStyle(document.documentElement).getPropertyValue('--color3'),
         getComputedStyle(document.documentElement).getPropertyValue('--color2')]);
 
 
     // used by toggleTopicDocuments in topicdocuments, ready, changeNumTopics in processing, sweep in sweep
-    vocabTable() {
-        var shouldDisable = this.props.modelIsRunning || null;
-        var format = d3.format(".2g");
-        var wordFrequencies = this.mostFrequentWords(this.state.displayingStopwords, this.props.sortVocabByTopic).slice(0, 499);
-        var table = d3.select("#vocab-table tbody");
+    createVocabTable() {
+        let format = d3.format(".2g");
+        let wordFrequencies = this.mostFrequentWords(this.state.displayingStopwords, this.props.sortVocabByTopic).slice(0, 499);
+        let table = d3.select("#vocab-table tbody");
         table.selectAll("tr").remove();
 
         let stopwords = this.props.stopwords;
-        let specificity = this.specificity;
         let specificityScale = this.specificityScale;
         let addStop = this.props.addStop;
         let removeStop = this.props.removeStop;
-        let sortTopicWords = this.props.sortTopicWords;
 
         // TL: SEARCH
         if (this.state.searchText !== "") {
             wordFrequencies = wordFrequencies.filter(d => d.word.includes(this.state.searchText));
         }
+        let shouldDisable = this.props.modelIsRunning? "true" : null
+        wordFrequencies.forEach((d) => {
+            let isStopword = stopwords[d.word];
+            let score = this.specificity(d.word);
 
-        wordFrequencies.forEach(function (d) {
-            var isStopword = stopwords[d.word];
-            var score = specificity(d.word);
-
-            var row = table.append("tr");
+            let row = table.append("tr");
             row.append("td").text(d.word).style("color", isStopword ? "#444444" : "#000000");
             row.append("td").text(d.count);
             row.append("td").text(isStopword ? "NA" : format(score))
                 .style("background-color", specificityScale(score));
-            row.append("td").append("button").text(stopwords[d.word] ? "unstop" : "stop").attr("class", "lightButton")
+            row.append("td").append("button").text(stopwords[d.word] ? "unstop" : "stop")
+                .attr("class", "lightButton")
                 .on("click", function () {
                     console.log(d.word);
                     if (!isStopword) {
                         addStop(d.word, true);
                     } else {
-                        removeStop(d.word, true);
+                        removeStop(d.word);
                     }
-
                 })
-                .attr("disabled", shouldDisable);
+                // @ts-ignore: TS2769. There's an open issue with typescript overload resolution
+                // see https://github.com/microsoft/TypeScript/issues/14107
+                .attr("disabled", shouldDisable)
         });
     }
 
-    mostFrequentWords(includeStops, sortByTopic) {
+    mostFrequentWords(includeStops: boolean, sortByTopic: boolean) {
         // Convert the random-access map to a list of word:count pairs that
         //  we can then sort.
-        var wordCounts = [];
+        let wordCounts: { word: string, count: number }[] = [];
 
         if (sortByTopic) {
             for (let word in this.props.vocabularyCounts) {
                 if (this.props.wordTopicCounts[word] &&
                     this.props.wordTopicCounts[word][this.props.selectedTopic]) {
                     wordCounts.push({
-                        "word": word,
+                        word,
                         "count": this.props.wordTopicCounts[word][this.props.selectedTopic]
                     });
                 }
@@ -90,33 +111,33 @@ class VocabTable extends Component {
         return wordCounts;
     }
 
-    specificity = (word) => {
-
+    specificity(word: string): number {
+        // @ts-ignore TS2339: d3.values does exist
         return 1.0 - (this.entropy(d3.values(this.props.wordTopicCounts[word])) / Math.log(this.props.numTopics));
     }
 
-    entropy(counts) {
+    entropy(counts: number[]) {
         counts = counts.filter(function (x) {
             return x > 0.0;
         });
-        var sum = d3.sum(counts);
+        let sum = d3.sum(counts);
         return Math.log(sum) - (1.0 / sum) * d3.sum(counts, function (x) {
             return x * Math.log(x);
         });
     }
 
-    setDisplay = (displayingStopwords) => {
+    setDisplay(displayingStopwords: boolean) {
         this.setState({displayingStopwords: displayingStopwords})
     }
 
-    setUp = () => {
+    setUp() {
         let displayingStopwords = this.state.displayingStopwords;
         let sortVocabByTopic = this.props.sortVocabByTopic;
         let setDisplay = this.setDisplay;
-        let setSort = this.props.sortbyTopicChange;
+        let setSort = this.props.sortByTopicChange;
         let selectedTopic = this.props.selectedTopic;
 
-        d3.select("#showStops").on("click", function () {
+        d3.select<HTMLButtonElement, never>("#showStops").on("click", function () {
             if (displayingStopwords) {
                 this.innerText = "Show stopwords";
                 setDisplay(false);
@@ -128,7 +149,7 @@ class VocabTable extends Component {
             }
         });
 
-        d3.select("#sortVocabByTopic").on("click", function () {
+        d3.select<HTMLButtonElement, never>("#sortVocabByTopic").on("click", function () {
             console.log(selectedTopic);
             if (selectedTopic === -1) {
                 alert("Please first select a topic from the left.")
@@ -147,25 +168,22 @@ class VocabTable extends Component {
 
     }
 
-    handleChange = (e) => {
+    handleChange(e: ChangeEvent<HTMLInputElement>) {
         this.setState({searchText: e.target.value})
     }
 
     componentDidMount() {
-        this.vocabTable();
+        this.createVocabTable();
         this.setUp();
     }
 
-    componentDidUpdate(prevProps) {
-        this.vocabTable();
+    componentDidUpdate() {
+        this.createVocabTable();
         this.setUp();
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.update === false) {
-            return false
-        }
-        return true
+    shouldComponentUpdate(nextProps: VocabTableProps) {
+        return nextProps.update;
     }
 
     render() {
@@ -193,12 +211,12 @@ class VocabTable extends Component {
                     <input
                         type="text"
                         placeholder="Search Vocab"
-                        onChange={this.handleChange}
+                        onChange={this.handleChange.bind(this)}
                         style={{
                             height: "30px",
                             width: "320px",
                             borderRadius: "10px",
-                            border: "1px var(--color1) solid",
+                            border: "1px let(--color1) solid",
                             outline: "none",
                         }}
                     />
@@ -212,7 +230,7 @@ class VocabTable extends Component {
                                 <th>Stoplist</th>
                             </tr>
                             </thead>
-                            <tbody></tbody>
+                            <tbody/>
                         </table>
                     </div>
                 </div>
@@ -239,7 +257,7 @@ class VocabTable extends Component {
         return (
             <>
                 <button id="stopword-dl" className="lightButton" style={{marginTop: "15px"}}
-                        onClick={() => this.props.modelDataDLer.downloadStopwords()}>
+                        onClick={this.props.modelDataDLer.downloadStopwords.bind(this.props.modelDataDLer)}>
                     Download stopwords
                 </button>
             </>

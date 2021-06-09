@@ -413,13 +413,13 @@ class App extends Component<AppProps, AppStates> {
             case "vocab-tab":
                 DisplayPage = <VocabTable
                     sortVocabByTopic={this.state.ldaModel.sortVocabByTopic}
-                    sortbyTopicChange={this.state.ldaModel.sortbyTopicChange.bind(this.state.ldaModel)}
+                    sortByTopicChange={this.state.ldaModel.sortByTopicChange.bind(this.state.ldaModel)}
                     vocabularyCounts={this.state.ldaModel.vocabularyCounts}
                     wordTopicCounts={this.state.ldaModel.wordTopicCounts}
                     selectedTopic={this.state.ldaModel.selectedTopic}
                     stopwords={this.state.ldaModel.stopwords}
                     numTopics={this.state.ldaModel.numTopics}
-                    byCountDescending={this.state.ldaModel.byCountDescending}
+                    byCountDescending={this.state.ldaModel.byCountDescending.bind(this.state.ldaModel)}
                     addStop={this.state.ldaModel.addStop.bind(this.state.ldaModel)}
                     removeStop={this.state.ldaModel.removeStop.bind(this.state.ldaModel)}
                     update={this.state.update}
