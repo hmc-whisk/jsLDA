@@ -131,6 +131,7 @@ interface SideBarProps {
 interface SideBarState {
     topicWords: { [key: number]: string }
     displayOrder: number[]
+    topicsLoaded: boolean
 }
 
 class SideBar extends Component<SideBarProps, SideBarState> {
@@ -139,7 +140,8 @@ class SideBar extends Component<SideBarProps, SideBarState> {
         super(props);
         this.state = {
             topicWords: {},
-            displayOrder: []
+            displayOrder: [],
+            topicsLoaded: false
         };
     }
 
@@ -169,7 +171,8 @@ class SideBar extends Component<SideBarProps, SideBarState> {
             }
             this.setState({
                 topicWords: topicsDict,
-                displayOrder: Array.from(Array(numTops).keys())
+                displayOrder: Array.from(Array(numTops).keys()),
+                topicsLoaded: true
             });
         }
     }
@@ -248,8 +251,9 @@ class SideBar extends Component<SideBarProps, SideBarState> {
         // if topicWordCounts just finished loading, call initTopics
         if (prevProps.numTopics !== this.props.numTopics
             || (prevProps.topicWordCounts.length === 0 && this.props.topicWordCounts.length > 0)) {
-            if (this.state.topicWords) { // already initialized once so must clear annotations
+            if (this.state.topicsLoaded) { // already initialized once so must clear annotations
                 this.clearAnnotations();
+                this.setState({topicsLoaded: false})
             }
 
             this.initTopics(this.props.numTopics, this.props.topicWordCounts);
@@ -271,8 +275,7 @@ class SideBar extends Component<SideBarProps, SideBarState> {
     render() {
         const {changeAnnotation, topicVisibility, selectedTopic} = this.props;
         return (
-            this.state.topicWords
-                ?
+            this.state.topicsLoaded ?
                 <div className="sidebar">
                     <form id="topic-annotations">
                         {
