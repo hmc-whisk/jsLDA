@@ -1094,7 +1094,6 @@ export class LDAModel {
             this.modelIsRunning = false;
             this._maxTopicSaliency = new Array(this.numTopics);
             this.updateWebpage();
-            console.log(this._documentTopicSmoothing);
         }
     }
 
