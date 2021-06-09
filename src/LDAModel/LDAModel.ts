@@ -249,7 +249,7 @@ export class LDAModel {
         this.updateWebpage();
     }
 
-    sortbyTopicChange(sort: boolean) {
+    sortByTopicChange(sort: boolean) {
         this.sortVocabByTopic = sort
         this.updateWebpage();
     }
