@@ -25,7 +25,7 @@ interface VocabTableState {
 }
 
 class VocabTable extends Component<VocabTableProps, VocabTableState> {
-    constructor(props) {
+    constructor(props:VocabTableProps) {
         super(props);
         this.state = {
             displayingStopwords: false,

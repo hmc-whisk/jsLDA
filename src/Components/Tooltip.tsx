@@ -1,14 +1,22 @@
-import React, {Component} from 'react';
+import React, {Component, ReactElement} from 'react';
 
 // TODO: resolve props
 
-class Tooltip extends Component<any, {
+interface TooltipProps{
+    tooltip?:string,
+    altText?:string,
+    displayElement?: ReactElement
+}
+
+interface TooltipState {
     hover: boolean,
     width: number,
     height: number,
     display: boolean
-}> {
-    constructor(props) {
+}
+
+class Tooltip extends Component<TooltipProps,TooltipState > {
+    constructor(props:TooltipProps) {
         super(props);
         this.state = {
             hover: false,

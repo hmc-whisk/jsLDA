@@ -13,7 +13,7 @@ interface TopicBoxProps {
     key: number
     topNum: number
     selectedTopic: number
-    topicsDict: { [key:number]:string }
+    topicsDict: { [key: number]: string }
     topicVisibility: LDATopicVisibility
     toggleVisibility: (event: SyntheticEvent, topNum: number, toggledButton: string) => void
     toggleTopicDocuments: (topic: number) => void
@@ -137,7 +137,7 @@ class SideBar extends Component<SideBarProps, SideBarState> {
 
     constructor(props: SideBarProps) {
         super(props);
-        this.state={
+        this.state = {
             topicWords: {},
             displayOrder: []
         };
@@ -161,7 +161,7 @@ class SideBar extends Component<SideBarProps, SideBarState> {
     // reset display order
     initTopics(numTops: number, topWordCounts: { word: string, count: number }[][]) {
         if (topWordCounts.length > 0) {
-            let topicsDict = {};
+            let topicsDict: { [key: number]: string } = {};
             for (let topic = 0; topic < numTops; topic++) {
                 if (topWordCounts[topic]) {
                     topicsDict[topic] = topNWords(this.props.topicWordCounts[topic], 10)
@@ -243,7 +243,7 @@ class SideBar extends Component<SideBarProps, SideBarState> {
         this.toggleTopicDocuments(0);
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps: SideBarProps) {
         // if numTopics has changed, should reinitialize topics and clear annotations
         // if topicWordCounts just finished loading, call initTopics
         if (prevProps.numTopics !== this.props.numTopics

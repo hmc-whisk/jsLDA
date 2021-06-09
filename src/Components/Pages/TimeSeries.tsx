@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {ChangeEvent, Component} from 'react';
 import * as d3 from 'd3';
 import {topNWords} from '../../funcs/utilityFunctions';
 import './pages.css';
@@ -26,7 +26,7 @@ class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
     topicTimeGroups: d3.Selection<SVGGElement, any, HTMLElement | null, any>[]
     graphMargin: number
 
-    constructor(props) {
+    constructor(props:TimeSeriesProps) {
         super(props);
         this.state = {
             // Constants for metadata time series views.
@@ -178,12 +178,12 @@ class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
      * @returns {Array<{key:Date}>} Bins now with duplicate dictionaries at
      * start of time span.
      */
-    flattenTimeBinPoints(bins) {
+    flattenTimeBinPoints(bins:LDATopicTimeBinAveraged[]) {
         let originalBins = [...bins]
 
         // Deal with special starting point
         let firstPoint = {...bins[0]}
-        firstPoint.key = this.props.ldaModel.minDocTime
+        firstPoint.key = this.props.ldaModel.minDocTime!
         bins.unshift(firstPoint)
 
         // Add rest of points
@@ -207,7 +207,7 @@ class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
      * topic values for every document in bin. Entries are sorted by key.
      * Date refers to the max date for that bin.
      */
-    getBins(topic, flatLines = true, errorBars = false) {
+    getBins(topic:number, flatLines = true, errorBars = false) {
         let bins = this.props.ldaModel
             .topicTimesBinnedAverage(topic, this.state.numberOfBins, errorBars);
 
@@ -401,7 +401,7 @@ class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
      * @summary Returns date string in appropriate format
      * @param {Date} date date to format
      */
-    formatDate(date) {
+    formatDate(date:Date) {
         return d3.timeFormat("%Y-%m-%d")(date);
     }
 
@@ -415,7 +415,7 @@ class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
         }
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps:TimeSeriesProps) {
         if (prevProps.ldaModel.numTopics !== this.props.ldaModel.numTopics) {
             this.createTimeSVGs();
         }
@@ -428,20 +428,17 @@ class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
         }
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.update === false) {
-            return false
-        }
-        return true
+    shouldComponentUpdate(nextProps:TimeSeriesProps, nextState:TimeSeriesState) {
+        return nextProps.update
     }
 
-    handleNumAvgChange = (event) => {
+    handleNumAvgChange (event:ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
 
-        if (!event.target.value) event.target.value = 1; // Protect from empty field
+        if (!event.target.value) event.target.value = "1"; // Protect from empty field
 
         this.setState({
-            numberOfBins: Math.max(1, event.target.value),
+            numberOfBins: Math.max(1, parseInt(event.target.value)),
         })
     }
 
@@ -465,7 +462,7 @@ class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
                 <div>
                     <label htmlFor="numberOfBins">Number of Bins:</label>
                     <input
-                        onChange={this.handleNumAvgChange}
+                        onChange={this.handleNumAvgChange.bind(this)}
                         type="number" id="numberOfBins"
                         value={this.state.numberOfBins}
                         max="1000"

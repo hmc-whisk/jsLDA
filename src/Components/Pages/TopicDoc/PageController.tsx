@@ -94,7 +94,7 @@ class PageController extends React.Component<PageControllerProps,PageControllerS
     /**
      * @summary returns an interactive Pagination.Item of page n
      */
-    pageButton(n) {
+    pageButton(n:number) {
         return (
             <Pagination.Item key={n}
                              onClick={() => this.props.changePage(n)}>
