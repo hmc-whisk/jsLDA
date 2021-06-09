@@ -1,5 +1,5 @@
-import React, { Component } from 'react'; 
-import { select } from 'd3-selection'
+import React, {Component} from 'react';
+import {select} from 'd3-selection'
 
 /**
  * @summary This is a basic class for displaying d3 plots
@@ -7,13 +7,13 @@ import { select } from 'd3-selection'
  * passed as a prop. The purpose of this class is for it
  * to be extended by other classes who override the createPlot
  * function to display whatever they desire. The height,
- * and width datafields can also be overridden for custom 
+ * and width datafields can also be overridden for custom
  * plot size
  */
 class Plot extends Component {
     proportionLabels = .2
 
-    constructor(props){
+    constructor(props) {
         super(props)
         this.createPlot = this.createPlot.bind(this)
     }
@@ -37,13 +37,13 @@ class Plot extends Component {
     setupPlot() {
         const node = this._rootNode;
         select(node).selectAll("*").remove()
-        
+
         // Create a box for the data
         select(node)
             .append("svg")
-            .attr("width",this.svgWidth-this.svgWidth*this.proportionLabels)
-            .attr("height",this.svgHeight-this.svgHeight*this.proportionLabels)
-            .attr("x", this.proportionLabels*this.svgHeight)
+            .attr("width", this.svgWidth - this.svgWidth * this.proportionLabels)
+            .attr("height", this.svgHeight - this.svgHeight * this.proportionLabels)
+            .attr("x", this.proportionLabels * this.svgHeight)
             .attr("y", 0)
             .attr("overflow", "visible")
             .attr("id", "dataBox")
@@ -52,7 +52,7 @@ class Plot extends Component {
         select(node).select("#dataBox").append("text")
             .style("transform", "rotate(270deg) translate(-250px,-18%)")
             .text(this.props.yLabel);
-        
+
         select(node).select("#dataBox").append("text")
             .style("transform", "translate(50%,118%)")
             .text(this.props.xLabel);
@@ -71,19 +71,19 @@ class Plot extends Component {
         }
         return (
             <>
-                <div style={{transform:"translate(5%,0%)"}}>
+                <div style={{transform: "translate(5%,0%)"}}>
                     <h3>{this.props.title}</h3>
                 </div>
-                <div style = {divStyle} class = {"plot"}>
+                <div style={divStyle} class={"plot"}>
                     <svg ref={this._setRef.bind(this)}
-                        width={this.svgWidth} height={this.svgHeight}
-                        overflow={"visible"}>
+                         width={this.svgWidth} height={this.svgHeight}
+                         overflow={"visible"}>
                     </svg>
                 </div>
             </>
 
         )
-        
+
     }
 
     get width() {

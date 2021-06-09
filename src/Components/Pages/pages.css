@@ -1,28 +1,32 @@
-.page { 
-    padding:10px 10px 25px; 
-    background-color: var(--color3); 
-    margin-top: 4px; 
-    display: block; 
+.page {
+    padding: 10px 10px 25px;
+    background-color: var(--color3);
+    margin-top: 4px;
+    display: block;
 }
 
-div.help { padding: 20px 100px 15px 30px; color: var(--color5); }
-
+div.help {
+    padding: 20px 100px 15px 30px;
+    color: var(--color5);
+}
 
 
 /* VocabTable.js */
-table { 
-    margin: 10px 10px 10px 10px; 
-    border-collapse: collapse; 
-    text-align: left; 
+table {
+    margin: 10px 10px 10px 10px;
+    border-collapse: collapse;
+    text-align: left;
 }
-table th { 
-    font-weight: normal; 
-    padding: 10px 8px; 
-    border-bottom: 2px solid black; 
+
+table th {
+    font-weight: normal;
+    padding: 10px 8px;
+    border-bottom: 2px solid black;
 }
-table td { 
-    text-align: left; 
-    padding: 9px 8px 0px 8px; 
+
+table td {
+    text-align: left;
+    padding: 9px 8px 0px 8px;
 }
 
 /* DLPage.js */
@@ -31,7 +35,9 @@ div#dl-page.page ul li {
 }
 
 /* Correlation.js */
-div#corr-page { display: block; }
+div#corr-page {
+    display: block;
+}
 
 
 /* /MetaData/MetaData.js */
@@ -39,4 +45,3 @@ div#corr-page { display: block; }
     font-size: large;
     text-align: center;
 }
-  
