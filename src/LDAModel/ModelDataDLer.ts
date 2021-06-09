@@ -1,6 +1,6 @@
 import {topNWords, saveFile} from '../funcs/utilityFunctions'
 import * as d3 from "d3"
-import LDAModel from "./LDAModel";
+import LDAModel, {LDADocument} from "./LDAModel";
 import exp from "constants";
 
 /**
@@ -21,6 +21,10 @@ export class LDAModelDataDLer {
 
     readonly _model: LDAModel
     private _annotationHolder: { annotations: string[] }
+    /**
+     * Truncates number to 8 digits
+     */
+    _eightDigits: (n:number) => string = d3.format(".8");
 
     constructor(model: LDAModel, annotationHolder: { annotations: string[] }) {
         this._model = model;
@@ -40,10 +44,6 @@ export class LDAModelDataDLer {
         return w.replace(/"/g, "");
     }
 
-    /**
-     * Truncates number to 8 digits
-     */
-    _eightDigits: (number) => string = d3.format(".8");
 
     /**
      * CSV of topics over time
@@ -67,7 +67,7 @@ export class LDAModelDataDLer {
             let topicMeans = d3
                 // @ts-ignore: TS2339. This function exists
                 .nest()
-                .key(function (d) {
+                .key(function (d:LDADocument) {
                     return d.date;
                 })
                 .rollup(function (d:typeof topicProportions) {
@@ -309,7 +309,7 @@ export class LDAModelDataDLer {
             let data:{label:string,value:number}[] = []
             for (let [topic, value] of Object.entries(averages)) {
                 let topicLabel = "[" + topic + "] " + topNWords(
-                    this._model.topicWordCounts[topic], 3);
+                    this._model.topicWordCounts[parseInt(topic)], 3);
                 data.push({"label": topicLabel, "value": value})
             }
             all_data.push(data)

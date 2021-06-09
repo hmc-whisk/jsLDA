@@ -42,7 +42,7 @@ interface TopBarState {
 
 class TopBar extends React.Component<TopBarProps, TopBarState> {
 
-    constructor(props) {
+    constructor(props:TopBarProps) {
         super(props);
 
         this.state = {

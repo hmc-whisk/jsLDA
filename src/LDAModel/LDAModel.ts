@@ -595,15 +595,19 @@ export class LDAModel {
      *  "metadata": {"columnName1":index,..."columnNameN":index}}
      */
     _getColumnInfo(header: readonly string[]): LDAColumnInfo {
-        let columnInfo = {"metadata": {}};
-        let lookFor = ["id", "text", "date_tag"]; // special columns
+        let columnInfo:
+            {
+                metadata: {[key:string]:number},
+                id:number,text:number,
+                date_tag:number
+            } = {metadata: {},id:-1,text:-1,date_tag:-1};
         let columnIsMetadata = Array(header.length).fill(true);
         header = header.map((s) => s.toLocaleLowerCase());
 
         // Process special columns
-        for (let columnName of lookFor) {
+        for (let columnName of ["id", "text", "date_tag"]) {
             let index = header.indexOf(columnName);
-            columnInfo[columnName] = index;
+            columnInfo[columnName as "id"|"text"|"date_tag"] = index;
 
             if (index !== -1) {
                 columnIsMetadata[index] = false;
@@ -629,12 +633,12 @@ export class LDAModel {
 
         // Return default order if no topic is selected
         if (this.selectedTopic === -1) return this.documents.map(doc => {
-            doc['score']=0;
+            (doc as SortedLDADocument)['score']=0;
             return doc as SortedLDADocument
         });
 
         let sortedDocuments: SortedLDADocument[] = this.documents.map(function (doc, i) {
-            doc["score"] = (doc.topicCounts[selectedTopic] + LDAModel.DOC_SORT_SMOOTHING) /
+            (doc as SortedLDADocument)["score"] = (doc.topicCounts[selectedTopic] + LDAModel.DOC_SORT_SMOOTHING) /
                 (doc.tokens.length + sumDocSortSmoothing)
             return doc as SortedLDADocument
         });
@@ -646,12 +650,12 @@ export class LDAModel {
 
     get sortedDocumentsSalient():SortedLDADocument[]{
         if (this.selectedTopic === -1) return this.documents.map(doc => {
-            doc['score']=0;
+            (doc as SortedLDADocument)['score']=0;
             return doc as SortedLDADocument
         });
 
         let sortedDocuments: SortedLDADocument[] = this.documents.map((doc) => {
-            doc["score"] = this.textSalience(
+            (doc as SortedLDADocument)["score"] = this.textSalience(
                 doc.originalText,
                 this.selectedTopic)
             return doc as SortedLDADocument
@@ -851,7 +855,7 @@ export class LDAModel {
         if (!this.wordTopicCounts[w]) return 0; // If it isnt a token
         let numWInT = this.wordTopicCounts[w][t];
         if (!numWInT) numWInT = 0;
-        let totalWs = Object.keys(this.wordTopicCounts[w]).reduce((sum, key) => sum + this.wordTopicCounts[w][key], 0);
+        let totalWs = Object.keys(this.wordTopicCounts[w]).reduce((sum, key) => sum + this.wordTopicCounts[w][parseInt(key)], 0);
 
         return (numWInT + smoother) / (totalWs + this.numTopics * smoother);
     }
@@ -1718,7 +1722,7 @@ export class LDAModel {
             .entries(averaged);
 
         // Turn key back into Date object
-        return topicMeans.map((d) => {
+        return topicMeans.map((d:{key:number,value:number}) => {
             return {key: new Date(d.key), value: d.value}
         })
     }

@@ -51,7 +51,7 @@ interface AppStates {
 }
 
 class App extends Component<AppProps, AppStates> {
-    constructor(props) {
+    constructor(props:AppProps) {
         super(props)
 
         let ldaModel = new LDAModel(this.startingNumTopics, this.modelForceUpdate.bind(this));
@@ -121,7 +121,7 @@ class App extends Component<AppProps, AppStates> {
         this.modelForceUpdate();
     }
 
-    resetNotes(i) {
+    resetNotes(i:number) {
         this.annotations = new Array(i);
     }
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, {SyntheticEvent} from "react";
 import './header.css';
 
 interface NavBarProps {
@@ -11,14 +11,14 @@ interface NavBarState {
 
 class NavBar extends React.Component<NavBarProps, NavBarState> {
 
-    constructor(props) {
+    constructor(props:NavBarProps) {
         super(props);
 
         this.state = {selected: "home-tab"};
     }
 
-    handleClick(e) {
-        let val = e.target.id;
+    handleClick(e:SyntheticEvent<HTMLLIElement>) {
+        let val = (e.target as HTMLLIElement).id;
         this.setState({selected: val})
         this.props.onClick(val);
     }
