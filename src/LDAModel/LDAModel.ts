@@ -8,14 +8,14 @@ if (!Object.keys) {
 }
 
 // type reverse-engineered from LDAModel.parseDoc
-type LDAToken = {
+export type LDAToken = {
     word: string,
     topic: number,
     isStopword: boolean;
 }
 
 // type reverse-engineered from LDAModel.parseDoc
-type LDADocument = {
+export type LDADocument = {
     originalOrder: number
     id: string | number,
     date: string,
@@ -27,20 +27,12 @@ type LDADocument = {
 }
 
 
-type SortedLDADocument = {
-    originalOrder: number
-    id: string,
-    date: string,
-    originalText: string,
-    tokens: LDAToken[],
-    topicCounts: number[],
-    metadata: { [key: string]: string },
-    dateObject: Date,
+export interface SortedLDADocument extends LDADocument {
     score: number
 }
 
 // type reverse-engineered from LDAModel._getColumnInfo
-type LDAColumnInfo = {
+export type LDAColumnInfo = {
     metadata: { [key: string]: number },
     id: number,
     text: number,
@@ -48,29 +40,34 @@ type LDAColumnInfo = {
 };
 
 // type reverse-engineered from LDAModel.setTopicVisibility
-type LDATopicVisibility = {
+export type LDATopicVisibility = {
     [key: number]: "default" | "pinned" | "hidden"
 }
 
 // type reverse-engineered from LDAModel.topicTimesBinned
-type LDATopicTimeBin = {
+export type LDATopicTimeBin = {
     key: Date,
     value: number[]
 }
 
 // type reverse-engineered from LDAModel.addStdErrorMargins
-interface LDATopicTimeBinWithStd extends LDATopicTimeBin {
+export interface LDATopicTimeBinWithStd extends LDATopicTimeBin {
     upperEr: number,
     lowerEr: number
 }
 
 // type reverse-engineered from LDAModel.topicTimesBinnedAverage
-type LDATopicTimeBinAveraged = {
+export type LDATopicTimeBinAveraged = {
     key: Date,
     value: number
 }
+// type reverse-engineered from LDAModel.topicTimesBinnedAverage
+export interface LDATopicTimeBinAveragedWithStd extends LDATopicTimeBinAveraged {
+    upperEr: number,
+    lowerEr: number
+}
 
-type LDABigram = {
+export type LDABigram = {
     [key: string]: {
         [key: string]: number
     }
@@ -81,7 +78,7 @@ type LDABigram = {
  * @param {Number} numTopics the starting
  * @param {Function} forceUpdate callback that updates the webpage
  */
-class LDAModel {
+export class LDAModel {
     // Duplicate docstrings so my IDE shows it on hover
     /**
      * @summary Creates/maintains a topic model over a corpus
@@ -89,13 +86,13 @@ class LDAModel {
      * @param {Function} forceUpdate callback that updates the webpage
      */
 
-    private _vocabularySize: number;
-    private _correlationMinTokens: number;
-    private _correlationMinProportion: number;
-    private _wordPattern: RegExp;
-    private _completeSweeps: number;
-    private _requestedSweeps: number;
-    private _topicWeights: number[];
+    public _vocabularySize: number;
+    public _correlationMinTokens: number;
+    public _correlationMinProportion: number;
+    public _wordPattern: RegExp;
+    public _completeSweeps: number;
+    public _requestedSweeps: number;
+    public _topicWeights: number[];
 
     public sortVocabByTopic: boolean;
     public vocabularyCounts: { [key: string]: number }; // reversed from _parseDoc
@@ -124,18 +121,18 @@ class LDAModel {
     public documentType: string;
     public modelIsRunning: boolean;
 
-    private _specificityScale: d3.ScaleLinear<string, string>;
+    public _specificityScale: d3.ScaleLinear<string, string>;
 
-    private _timer?: d3.Timer;
-    private _documentTopicSmoothing: number[];
-    private _topicWordSmoothing: number;
-    private _sweeps: number;
-    private _optimizeInterval: number;
-    private _burninPeriod: number;
-    private _changeAlpha: boolean;
-    private _memoMinDocTime?: Date;
-    private _memoMaxDocTime?: Date;
-    private _maxTopicSaliency: number[];
+    public _timer?: d3.Timer;
+    public _documentTopicSmoothing: number[];
+    public _topicWordSmoothing: number;
+    public _sweeps: number;
+    public _optimizeInterval: number;
+    public _burninPeriod: number;
+    public _changeAlpha: boolean;
+    public _memoMinDocTime?: Date;
+    public _memoMaxDocTime?: Date;
+    public _maxTopicSaliency: number[];
 
 
     constructor(numTopics: number, forceUpdate: () => void) {
@@ -229,14 +226,27 @@ class LDAModel {
     /**
      * Used to set the type of file LDAModel will
      * treat a documents file as
-     * @param {String} type
+     * @param {String} fileName
      */
-    setDocumentType(type: string) {
-        this.documentType = type;
+    setDocumentType(fileName: string) {
+        const fileExtension = fileName.split('.').pop();
+        if (fileExtension === "csv") {
+            this.documentType = "text/csv";
+        } else if (fileExtension === "tsv") {
+            this.documentType = "text/tsv";
+        } else if (fileExtension === "text/csv") { // need this case since documentType is set to "text/csv" by default
+            this.documentType = "text/csv";
+        }
+        else if (fileExtension === "text/txt") { // need this case since documentType is set to "text/txt" by State of the Union default doc
+            this.documentType = "text/tsv"; // previous implemention used text/tsv as documentType for SOTU doc
+        }
+        else {
+            alert("Uploaded file does not have the correct extension (.csv or .tsv)");
+        }
     }
 
     // Used by sidebar to change selectedTopic and sortVocabByTopic
-    selectedTopicChange = (topic: number) => {
+    selectedTopicChange(topic: number) {
         this.selectedTopic = topic;
         if (topic === -1) {
             this.sortVocabByTopic = false;
@@ -244,7 +254,7 @@ class LDAModel {
         this.updateWebpage();
     }
 
-    sortbyTopicChange(sort: boolean) {
+    sortByTopicChange(sort: boolean) {
         this.sortVocabByTopic = sort
         this.updateWebpage();
     }
@@ -316,9 +326,9 @@ class LDAModel {
      *  - Lines should not have column names included
      *  - See parseDoc for
      */
-    ready(error: Error, stops: string, doc: string) {
+    ready(error: Error | null, stops: string, doc: string) {
         if (error) {
-            //alert("File upload failed. Please try again."); TODO: uncomment this for deployment
+            alert("File upload failed. Please try again.");
             throw error;
         } else {
             // Create the stoplist
@@ -351,8 +361,11 @@ class LDAModel {
         let parsedDoc: string[][];
         if (this.documentType === "text/csv") {
             parsedDoc = d3.csvParseRows(docText);
-        } else {
+        } else if (this.documentType === "text/tsv") {
             parsedDoc = d3.tsvParseRows(docText);
+        }
+        else {
+            throw(Error("File does not have a useable extension"));
         }
 
         // Handle empty documents
@@ -458,7 +471,7 @@ class LDAModel {
      * "text/csv" then it will assume it is a tsv.
      * The function acts to process through all potential bigrams
      */
-    _parseBigram = (docText: string) => {
+    _parseBigram(docText: string) {
         let parsedDoc
         if (this.documentType === "text/csv") {
             parsedDoc = d3.csvParseRows(docText);
@@ -582,15 +595,19 @@ class LDAModel {
      *  "metadata": {"columnName1":index,..."columnNameN":index}}
      */
     _getColumnInfo(header: readonly string[]): LDAColumnInfo {
-        let columnInfo = {"metadata": {}};
-        let lookFor = ["id", "text", "date_tag"]; // special columns
+        let columnInfo:
+            {
+                metadata: {[key:string]:number},
+                id:number,text:number,
+                date_tag:number
+            } = {metadata: {},id:-1,text:-1,date_tag:-1};
         let columnIsMetadata = Array(header.length).fill(true);
         header = header.map((s) => s.toLocaleLowerCase());
 
         // Process special columns
-        for (let columnName of lookFor) {
+        for (let columnName of ["id", "text", "date_tag"]) {
             let index = header.indexOf(columnName);
-            columnInfo[columnName] = index;
+            columnInfo[columnName as "id"|"text"|"date_tag"] = index;
 
             if (index !== -1) {
                 columnIsMetadata[index] = false;
@@ -610,19 +627,39 @@ class LDAModel {
      * @summary documents sorted in order of the prevalence
      * of the selected topic
      */
-    get sortedDocuments(): LDADocument[] | SortedLDADocument[] {
+    get sortedDocuments(): SortedLDADocument[] {
         const selectedTopic = this.selectedTopic;
         const sumDocSortSmoothing = LDAModel.DOC_SORT_SMOOTHING * this.numTopics;
 
         // Return default order if no topic is selected
-        if (this.selectedTopic === -1) return this.documents;
+        if (this.selectedTopic === -1) return this.documents.map(doc => {
+            (doc as SortedLDADocument)['score']=0;
+            return doc as SortedLDADocument
+        });
 
         let sortedDocuments: SortedLDADocument[] = this.documents.map(function (doc, i) {
-            doc["score"] =
-                (doc.topicCounts[selectedTopic] + LDAModel.DOC_SORT_SMOOTHING) /
+            (doc as SortedLDADocument)["score"] = (doc.topicCounts[selectedTopic] + LDAModel.DOC_SORT_SMOOTHING) /
                 (doc.tokens.length + sumDocSortSmoothing)
             return doc as SortedLDADocument
         });
+        sortedDocuments.sort(function (a, b) {
+            return b.score - a.score;
+        });
+        return sortedDocuments;
+    }
+
+    get sortedDocumentsSalient():SortedLDADocument[]{
+        if (this.selectedTopic === -1) return this.documents.map(doc => {
+            (doc as SortedLDADocument)['score']=0;
+            return doc as SortedLDADocument
+        });
+
+        let sortedDocuments: SortedLDADocument[] = this.documents.map((doc) => {
+            (doc as SortedLDADocument)["score"] = this.textSalience(
+                doc.originalText,
+                this.selectedTopic)
+            return doc as SortedLDADocument
+        })
         sortedDocuments.sort(function (a, b) {
             return b.score - a.score;
         });
@@ -818,7 +855,7 @@ class LDAModel {
         if (!this.wordTopicCounts[w]) return 0; // If it isnt a token
         let numWInT = this.wordTopicCounts[w][t];
         if (!numWInT) numWInT = 0;
-        let totalWs = Object.keys(this.wordTopicCounts[w]).reduce((sum, key) => sum + this.wordTopicCounts[w][key], 0);
+        let totalWs = Object.keys(this.wordTopicCounts[w]).reduce((sum, key) => sum + this.wordTopicCounts[w][parseInt(key)], 0);
 
         return (numWInT + smoother) / (totalWs + this.numTopics * smoother);
     }
@@ -935,7 +972,7 @@ class LDAModel {
     /**
      * @summary Turns on/off Bigrams option
      */
-    _changeBigramStatus = (bigramStatus: boolean) => {
+    _changeBigramStatus(bigramStatus: boolean) {
         if (bigramStatus) {
             this.addBigram();
         } else {
@@ -947,7 +984,7 @@ class LDAModel {
     /**
      * @summary completes one training iteration
      */
-    _sweep = () => {
+    _sweep() {
         let startTime = Date.now();
         let topicNormalizers = zeros(this.numTopics);
         let doOptimizeAlpha = false;
@@ -1057,7 +1094,6 @@ class LDAModel {
             this.modelIsRunning = false;
             this._maxTopicSaliency = new Array(this.numTopics);
             this.updateWebpage();
-            console.log(this._documentTopicSmoothing);
         }
     }
 
@@ -1202,7 +1238,7 @@ class LDAModel {
      * @param {String} word the word to be added to stoplist
      * @param {Boolean} refresh whether or not to run sortTopicWords
      */
-    addStop = (word: string, refresh = false) => {
+    addStop(word: string, refresh = false) {
         this.addStopHelper(word);
         if (this.bigram) {
             for (let w in this.finalBigram[word]) {
@@ -1221,7 +1257,7 @@ class LDAModel {
      * @summary adds a word to model's stoplist
      * @param {String} word the word to be added to stoplist
      */
-    addStopHelper = (word: string) => {
+    addStopHelper(word: string) {
         if (!this.stopwords[word]) {
             this.stopwords[word] = 1;
             this._vocabularySize--;
@@ -1246,7 +1282,7 @@ class LDAModel {
      * if the bigram option is on, we remove bigrams that contain the stopword as well.
      * @param {String} word the word to remove
      */
-    removeStop = (word: string) => {
+    removeStop(word: string) {
         this.removeStopHelper(word);
         if (this.bigram) {
             for (let w in this.finalBigram[word]) {
@@ -1266,7 +1302,7 @@ class LDAModel {
      * @summary removes a word from stoplist
      * @param {String} word the word to remove
      */
-    removeStopHelper = (word: string) => {
+    removeStopHelper(word: string) {
         delete this.stopwords[word];
         this._vocabularySize++;
         this.wordTopicCounts[word] = {};
@@ -1296,7 +1332,7 @@ class LDAModel {
      * After adding, we call addStop to every word in the stopwords to add bigram
      * to stopword if their constituent word is a stopword
      */
-    addBigram = () => {
+    addBigram() {
         for (let word1 in this.finalBigram) {
             if (!this.stopwords[word1]) {
                 for (let word2 in this.finalBigram[word1]) {
@@ -1319,7 +1355,7 @@ class LDAModel {
      * @param {String} word1 first word of the bigram to add
      * @param {String} word2 second word of the bigram to add
      */
-    addBigramHelper = (word1: string, word2: string) => {
+    addBigramHelper(word1: string, word2: string) {
         // Makes word1_word2 into a “word” by adding it to the wordTopicCounts, vocaburaryCounts,
         // and increasing the vocaburarySize.
         let curBigram = word1 + "_" + word2
@@ -1389,7 +1425,7 @@ class LDAModel {
      * @summary Remove bigrams from the model
      * Calls helper removeBigramHelper on each bigram deemed valid in finalBigram.
      */
-    removeBigram = () => {
+    removeBigram() {
         for (let word1 in this.finalBigram) {
             for (let word2 in this.finalBigram[word1]) {
                 this.removeBigramHelper(word1, word2);
@@ -1518,7 +1554,8 @@ class LDAModel {
 
         if (this._sweeps === 0) {
             this._sweeps = 1;
-            this._timer = d3.timer(this._sweep);
+            // TODO Remove this timer
+            this._timer = d3.timer(this._sweep.bind(this));
             //hyperedit
             this._initializeHistograms();
             console.log("Requested Sweeps Now: " + this._requestedSweeps);
@@ -1532,7 +1569,7 @@ class LDAModel {
     /**
      * @summary Stops the model from continuing it's sweeps
      */
-    stopSweeps = () => {
+    stopSweeps() {
         this._requestedSweeps = this._completeSweeps;
     }
 
@@ -1557,7 +1594,7 @@ class LDAModel {
      * @param {String} field
      * @returns {Array} Values in field
      */
-    metaValues = (field: string): string[] => {
+    metaValues(field: string): string[] {
         if (!this.metaFields.includes(field)) {
             console.log("Given metadata field is not in model");
         }
@@ -1577,7 +1614,7 @@ class LDAModel {
      * @param {String} field metadata field to get summary of
      * @param {*} topic topic number to get summary of
      */
-    metaTopicAverages = (field: string, topic: number) => {
+    metaTopicAverages(field: string, topic: number) {
         if (!this.metaFields.includes(field)) {
             throw(Error("Given metadata field is not in model"))
         }
@@ -1630,7 +1667,7 @@ class LDAModel {
      * @param {Number} topic Topic to pull values from
      * @returns {Array<{topicVal:Number,label:String,metaVal:any}>}
      */
-    docTopicMetaValues = (field: string, topic: number): { topicVal: number, label: string | number, metaVal: string }[] => {
+    docTopicMetaValues(field: string, topic: number): { topicVal: number, label: string | number, metaVal: string }[] {
         return this.documents.map((doc) => {
             return {
                 topicVal: doc.topicCounts[topic] / doc.tokens.length,
@@ -1684,7 +1721,7 @@ class LDAModel {
             .entries(averaged);
 
         // Turn key back into Date object
-        return topicMeans.map((d) => {
+        return topicMeans.map((d:{key:number,value:number}) => {
             return {key: new Date(d.key), value: d.value}
         })
     }

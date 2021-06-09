@@ -1,5 +1,5 @@
 import Plot from './Plot'
-import { select, event } from 'd3-selection';
+import {select, event} from 'd3-selection';
 import {scaleLinear} from 'd3-scale'
 import {axisLeft, axisBottom} from 'd3-axis'
 
@@ -20,11 +20,11 @@ class ScatterPlot extends Plot {
         let xVals = this.data.map((d => d.x));
         let yVals = this.data.map((d => d.y));
         let scaleX = scaleLinear()
-            .domain([Math.min(...xVals),Math.max(...xVals)])
-            .range([0,maxCordinates]);
+            .domain([Math.min(...xVals), Math.max(...xVals)])
+            .range([0, maxCordinates]);
         let scaleY = scaleLinear()
-            .domain([Math.min(...yVals),Math.max(...yVals)])
-            .range([maxCordinates,0]);
+            .domain([Math.min(...yVals), Math.max(...yVals)])
+            .range([maxCordinates, 0]);
 
         var Tooltip = select("body")
             .append("div")
@@ -38,7 +38,7 @@ class ScatterPlot extends Plot {
             .style("position", "fixed")
 
         // Three function that change the tooltip when user hover / move / leave a cell
-        var mouseover = function(d) {
+        var mouseover = function (d) {
             let y = event.pageY - window.scrollY // Control for scrolling
             Tooltip
                 .style("opacity", 1)
@@ -49,18 +49,18 @@ class ScatterPlot extends Plot {
                 .style("stroke", "black")
                 .style("opacity", 1)
         }
-        var mousemove = function(d) {
+        var mousemove = function (d) {
             let y = event.pageY - window.scrollY // Control for scrolling
             Tooltip
                 .html("X: " + d.x + "<br>Y: " + d.y + "<br>Label: " + d.label)
                 .style("left", (event.pageX + 10) + "px")
                 .style("top", y + "px")
         }
-        var mouseleave = function(d) {
+        var mouseleave = function (d) {
             Tooltip
                 .style("opacity", 0)
                 .style("left", "0px")
-                .style("top","0px")
+                .style("top", "0px")
             select(this)
                 .style("stroke", "none")
                 .style("opacity", 0.8)
@@ -73,7 +73,7 @@ class ScatterPlot extends Plot {
             .append("circle")
             .attr("cy", (d) => scaleY(d.y))
             .attr("cx", (d) => scaleX(d.x))
-            .attr("r",this.circleRadius)
+            .attr("r", this.circleRadius)
             .attr("fill", this.circleFill)
             .style("opacity", 0.8)
             .on("mouseover", mouseover)
@@ -89,12 +89,12 @@ class ScatterPlot extends Plot {
         const maxCordinates = this.svgHeight * (1 - this.proportionLabels);
 
         let scaleX = scaleLinear()
-            .domain([Math.min(...xVals),Math.max(...xVals)])
-            .range([0,maxCordinates]);
+            .domain([Math.min(...xVals), Math.max(...xVals)])
+            .range([0, maxCordinates]);
         let scaleY = scaleLinear()
-            .domain([Math.min(...yVals),Math.max(...yVals)])
-            .range([maxCordinates,0]);
-        
+            .domain([Math.min(...yVals), Math.max(...yVals)])
+            .range([maxCordinates, 0]);
+
         var yAxis = axisLeft()
             .scale(scaleY);
         var xAxis = axisBottom()
@@ -104,7 +104,7 @@ class ScatterPlot extends Plot {
             .call(yAxis);
         dataBox.append("g")
             .call(xAxis)
-            .style("transform","translate(0%,100%)");
+            .style("transform", "translate(0%,100%)");
     }
 }
 
