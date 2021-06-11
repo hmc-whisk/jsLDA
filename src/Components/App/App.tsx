@@ -251,7 +251,7 @@ class App extends Component<AppProps, AppStates> {
                 // Create a new LDAModel to put uploaded info into
                 try {
                     resolve(Object.assign(
-                        new LDAModel(this.startingNumTopics, this.modelForceUpdate),
+                        new LDAModel(this.startingNumTopics, this.modelForceUpdate.bind(this)),
                         JSON.parse(reader.result as string)));
 
                 } catch {
