@@ -1739,6 +1739,15 @@ export class LDAModel {
     topicTimesBinnedAverage(topic: number, numBins: number, stdError = false): LDATopicTimeBinAveraged[] {
         let bins: LDATopicTimeBin[] = this.topicTimesBinned(topic, numBins);
 
+        // replace any NaN values with 0
+        bins.forEach(bin => {
+            for (let j = 0; j < bin.value.length; j++) {
+                if (isNaN(bin.value[j])) {
+                    bin.value[j] = 0;
+                }
+            }
+        });
+
         if (stdError) {
             bins = this.addStdErrorMargins(bins)
         }
