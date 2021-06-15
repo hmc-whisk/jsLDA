@@ -79,6 +79,13 @@ class App extends Component<AppProps, AppStates> {
 
             currentDocIsDefault: true,
         };
+
+        window.addEventListener("beforeunload",(e:BeforeUnloadEvent)=>{
+            if (this.state.ldaModel._completeSweeps>0) {
+                e.preventDefault()
+                e.returnValue = ''
+            }
+        })
     };
 
     startingNumTopics = 25;

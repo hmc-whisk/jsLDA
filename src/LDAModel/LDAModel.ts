@@ -1089,7 +1089,7 @@ export class LDAModel {
         if (this._completeSweeps >= this._requestedSweeps) {
             // this.update = true;
             this.sortTopicWords();
-            this._timer?.stop();
+            this._timer!.stop();
             this._sweeps = 0;
             this.modelIsRunning = false;
             this._maxTopicSaliency = new Array(this.numTopics);
