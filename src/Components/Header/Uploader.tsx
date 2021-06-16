@@ -69,20 +69,33 @@ export function Uploader(props: UploaderProps) {
                     }}>
                         <h5> Or use a custom collection: </h5>
                         <div className="fileInput">
-                            <label htmlFor="docs-file-input">Documents: </label>
-                            <input id="docs-file-input" type="file"
-                                   onChange={(event) => props.onDocumentFileChange(event)} size={10}/>
-
-                            <label htmlFor="stops-file-input"> Stoplist: </label>
-                            <input id="stops-file-input" type="file"
-                                   onChange={(event) => props.onStopwordFileChange(event)} size={10}/>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <label htmlFor="docs-file-input">Documents: </label>
+                                    </td>
+                                    <td>
+                                        <input id="docs-file-input" type="file"
+                                               onChange={(event) => props.onDocumentFileChange(event)}/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label htmlFor="stops-file-input"> Stoplist: </label>
+                                    </td>
+                                    <td>
+                                        <input id="stops-file-input" type="file"
+                                               onChange={(event) => props.onStopwordFileChange(event)}/>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                         <input
                             type="submit"
                             id="load-inputs"
                             value="Upload"
                             className="darkButton"
-                            disabled={props.modelIsRunning || (!isFileAdded("docs-file-input") && !isFileAdded("stops-file-input"))}
+                            disabled={props.modelIsRunning || !isFileAdded("docs-file-input")}
                         />
                     </form>
                 </div>
