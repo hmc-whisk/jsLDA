@@ -52,7 +52,7 @@ interface AppStates {
 }
 
 class App extends Component<AppProps, AppStates> {
-    constructor(props:AppProps) {
+    constructor(props: AppProps) {
         super(props)
 
         let ldaModel = new LDAModel(this.startingNumTopics, this.modelForceUpdate.bind(this));
@@ -80,8 +80,8 @@ class App extends Component<AppProps, AppStates> {
             currentDocIsDefault: true,
         };
 
-        window.addEventListener("beforeunload",(e:BeforeUnloadEvent)=>{
-            if (this.state.ldaModel._completeSweeps>0) {
+        window.addEventListener("beforeunload", (e: BeforeUnloadEvent) => {
+            if (this.state.ldaModel._completeSweeps > 0) {
                 e.preventDefault()
                 e.returnValue = ''
             }
@@ -115,7 +115,7 @@ class App extends Component<AppProps, AppStates> {
     corNotes = ``;
 
     // Functions for notes in correlation
-    changeNotes(notes:string) {
+    changeNotes(notes: string) {
         this.corNotes = notes;
     }
 
@@ -126,12 +126,12 @@ class App extends Component<AppProps, AppStates> {
     // Data and functions for annotations in sidebar (placed here instead of as a state to avoid re-rendering)
     annotations: string[] = [];
 
-    changeAnnotation(text:string, i:number) {
+    changeAnnotation(text: string, i: number) {
         this.annotations[i] = text;
         this.modelForceUpdate();
     }
 
-    resetNotes(i:number) {
+    resetNotes(i: number) {
         this.annotations = new Array(i);
     }
 
@@ -139,7 +139,7 @@ class App extends Component<AppProps, AppStates> {
      * @summary Gets the annotaion for a topic
      * @param {Number} topic Number of topic to get annotations for
      */
-    getAnnotation(topic:number) {
+    getAnnotation(topic: number) {
         return this.annotations[topic];
     }
 
@@ -147,7 +147,7 @@ class App extends Component<AppProps, AppStates> {
     /**
      * @summary Update the page/tab user is looking at, causing rerender of components
      */
-    changeTab(tabID:string) {
+    changeTab(tabID: string) {
         this.setState({
             selectedTab: tabID
         });
@@ -158,7 +158,7 @@ class App extends Component<AppProps, AppStates> {
     /**
      * @summary Change regex tokenizer and update model
      */
-    onTokenRegexChange(inputRegex:RegExp) {
+    onTokenRegexChange(inputRegex: RegExp) {
         this.state.ldaModel.setTokenRegex(inputRegex);
         this.queueLoad();
     }
@@ -201,7 +201,8 @@ class App extends Component<AppProps, AppStates> {
         event.preventDefault();
 
         // Prevent empty file change errors
-        if (event.target.files === null) {
+        if (event.target.files === null || event.target.files.length === 0) {
+            alert("No document found")
             return;
         }
 
@@ -221,7 +222,7 @@ class App extends Component<AppProps, AppStates> {
         event.preventDefault();
 
         // Prevent empty file change errors
-        if (event.target.files === null) {
+        if (event.target.files === null || event.target.files.length === 0) {
             return;
         }
 
@@ -254,7 +255,7 @@ class App extends Component<AppProps, AppStates> {
 
             // Read file
             let reader = new FileReader();
-            reader.onload=()=> {
+            reader.onload = () => {
                 // Create a new LDAModel to put uploaded info into
                 try {
                     resolve(Object.assign(
@@ -458,10 +459,10 @@ class App extends Component<AppProps, AppStates> {
             case "meta-tab":
                 DisplayPage = <div id="meta-page" style={
                     {
-                        marginTop:"2em",
-                        textAlign:"center",
-                        fontWeight:"bold",
-                        fontSize:"150%"
+                        marginTop: "2em",
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        fontSize: "150%"
                     } as CSSProperties
                 }> Page under construction</div>
                 break;
