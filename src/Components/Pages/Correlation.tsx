@@ -1,9 +1,9 @@
 import * as d3 from 'd3';
 import React, {Component} from 'react';
-import {topNWords} from '../../funcs/utilityFunctions'
+import {topNWords} from 'funcs/utilityFunctions'
 import Tooltip from '../Tooltip';
 import './pages.css';
-import {LDADocument} from "../../LDAModel/LDAModel";
+import type {LDADocument} from "core";
 
 /* This function will compute pairwise correlations between topics.
  * Unlike the correlated topic model (CTM) LDA doesn't have parameters
@@ -40,7 +40,7 @@ type CorrelationGraph = {
     links: CorrelationLink[]
 }
 
-class Correlation extends Component<CorrelationProps, CorrelationState> {
+export class Correlation extends Component<CorrelationProps, CorrelationState> {
     constructor(props: CorrelationProps) {
         super(props);
         this.state = {

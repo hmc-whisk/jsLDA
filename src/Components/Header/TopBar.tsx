@@ -40,7 +40,7 @@ interface TopBarState {
     checkedBigram: boolean
 }
 
-class TopBar extends React.Component<TopBarProps, TopBarState> {
+export class TopBar extends React.Component<TopBarProps, TopBarState> {
 
     constructor(props:TopBarProps) {
         super(props);

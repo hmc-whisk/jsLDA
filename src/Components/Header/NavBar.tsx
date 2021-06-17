@@ -9,7 +9,7 @@ interface NavBarState {
     selected: string
 }
 
-class NavBar extends React.Component<NavBarProps, NavBarState> {
+export class NavBar extends React.Component<NavBarProps, NavBarState> {
 
     constructor(props:NavBarProps) {
         super(props);

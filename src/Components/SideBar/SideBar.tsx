@@ -1,13 +1,12 @@
 import React, {Component, SyntheticEvent} from 'react';
 import * as d3 from 'd3';
-import {topNWords} from '../../funcs/utilityFunctions';
+import {topNWords} from 'funcs/utilityFunctions';
 
 import {PinAngle, PinAngleFill, EyeSlash, EyeSlashFill} from 'react-bootstrap-icons';
 import Spinner from 'react-bootstrap/Spinner';
 import './sidebar.css';
-import {LDATopicVisibility} from "../../LDAModel/LDAModel";
+import {LDATopicVisibility} from "core";
 
-// import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface TopicBoxProps {
     key: number
@@ -134,7 +133,7 @@ interface SideBarState {
     topicsLoaded: boolean
 }
 
-class SideBar extends Component<SideBarProps, SideBarState> {
+export class SideBar extends Component<SideBarProps, SideBarState> {
 
     constructor(props: SideBarProps) {
         super(props);

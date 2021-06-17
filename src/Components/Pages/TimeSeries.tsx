@@ -2,7 +2,7 @@ import React, {ChangeEvent, Component} from 'react';
 import * as d3 from 'd3';
 import {topNWords} from '../../funcs/utilityFunctions';
 import './pages.css';
-import LDAModel, {LDATopicTimeBinAveraged, LDATopicTimeBinAveragedWithStd} from "../../LDAModel/LDAModel";
+import type {LDAModel, LDATopicTimeBinAveraged, LDATopicTimeBinAveragedWithStd} from "core";
 
 interface TimeSeriesProps {
     ldaModel: LDAModel,
@@ -20,13 +20,13 @@ interface TimeSeriesState {
 }
 
 
-class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
+export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
 
     _rootNode: HTMLDivElement
     topicTimeGroups: d3.Selection<SVGGElement, any, HTMLElement | null, any>[]
     graphMargin: number
 
-    constructor(props:TimeSeriesProps) {
+    constructor(props: TimeSeriesProps) {
         super(props);
         this.state = {
             // Constants for metadata time series views.
@@ -178,7 +178,7 @@ class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
      * @returns {Array<{key:Date}>} Bins now with duplicate dictionaries at
      * start of time span.
      */
-    flattenTimeBinPoints(bins:LDATopicTimeBinAveraged[]) {
+    flattenTimeBinPoints(bins: LDATopicTimeBinAveraged[]) {
         let originalBins = [...bins]
 
         // Deal with special starting point
@@ -207,7 +207,7 @@ class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
      * topic values for every document in bin. Entries are sorted by key.
      * Date refers to the max date for that bin.
      */
-    getBins(topic:number, flatLines = true, errorBars = false) {
+    getBins(topic: number, flatLines = true, errorBars = false) {
         let bins = this.props.ldaModel
             .topicTimesBinnedAverage(topic, this.state.numberOfBins, errorBars);
 
@@ -275,7 +275,7 @@ class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
 
         if (this.topicTimeGroups[0]) {
 
-            let topicKeys:Date[] = [];
+            let topicKeys: Date[] = [];
             for (let i = 0; i < topicMeans.length; i += 1) {
                 topicKeys.push(topicMeans[i].key);
             }
@@ -383,7 +383,7 @@ class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
                     // @ts-ignore: TS2339
                     if (d3.mouse(this)[0] > 0) {
                         // @ts-ignore: TS2339
-                        let x0:Date = scale.invert(d3.mouse(this)[0]),
+                        let x0: Date = scale.invert(d3.mouse(this)[0]),
                             i = d3.bisectLeft(topicKeys, x0),
                             d0 = topicMeans[i - 1],
                             d1 = topicMeans[i],
@@ -401,7 +401,7 @@ class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
      * @summary Returns date string in appropriate format
      * @param {Date} date date to format
      */
-    formatDate(date:Date) {
+    formatDate(date: Date) {
         return d3.timeFormat("%Y-%m-%d")(date);
     }
 
@@ -415,7 +415,7 @@ class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
         }
     }
 
-    componentDidUpdate(prevProps:TimeSeriesProps) {
+    componentDidUpdate(prevProps: TimeSeriesProps) {
         if (prevProps.ldaModel.numTopics !== this.props.ldaModel.numTopics) {
             this.createTimeSVGs();
         }
@@ -428,11 +428,11 @@ class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
         }
     }
 
-    shouldComponentUpdate(nextProps:TimeSeriesProps, nextState:TimeSeriesState) {
+    shouldComponentUpdate(nextProps: TimeSeriesProps, nextState: TimeSeriesState) {
         return nextProps.update
     }
 
-    handleNumAvgChange (event:ChangeEvent<HTMLInputElement>) {
+    handleNumAvgChange(event: ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
 
         if (!event.target.value) event.target.value = "1"; // Protect from empty field

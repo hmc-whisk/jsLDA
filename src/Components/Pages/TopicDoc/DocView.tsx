@@ -1,7 +1,7 @@
 import React, {CSSProperties, ReactElement} from 'react';
 import Card from 'react-bootstrap/Card'
 import * as d3 from 'd3';
-import LDAModel, {SortedLDADocument} from "../../../LDAModel/LDAModel";
+import type {LDAModel, SortedLDADocument} from "core";
 
 interface DocViewProps {
     document: SortedLDADocument,
@@ -16,7 +16,7 @@ interface DocViewState {
  * @todo finish writing this class to highlight text
  * based on topic values
  */
-class DocView extends React.Component<DocViewProps, DocViewState> {
+export class DocView extends React.Component<DocViewProps, DocViewState> {
     static minHighlight = getComputedStyle(document.documentElement).getPropertyValue('--color3');
     static maxHighlight = getComputedStyle(document.documentElement).getPropertyValue('--color2');
 

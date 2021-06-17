@@ -11,7 +11,7 @@ interface ConfigurationState{
     display:boolean
 }
 
-class Configuration extends Component<ConfigurationProps,ConfigurationState> {
+export class Configuration extends Component<ConfigurationProps,ConfigurationState> {
     constructor(props:ConfigurationProps) {
         super(props);
         this.state = {

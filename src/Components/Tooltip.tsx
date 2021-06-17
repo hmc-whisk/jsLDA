@@ -15,7 +15,7 @@ interface TooltipState {
     display: boolean
 }
 
-class Tooltip extends Component<TooltipProps,TooltipState > {
+export class Tooltip extends Component<TooltipProps,TooltipState > {
     constructor(props:TooltipProps) {
         super(props);
         this.state = {

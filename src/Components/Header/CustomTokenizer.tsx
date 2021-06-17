@@ -11,7 +11,7 @@ interface CustomTokenizerState {
     inputRegex: string
 }
 
-class CustomTokenizer extends Component<CustomTokenizerProps, CustomTokenizerState> {
+export class CustomTokenizer extends Component<CustomTokenizerProps, CustomTokenizerState> {
     state = {
         // @ts-ignore a bug in xregexp's type
         inputRegex: this.props.tokenRegex.xregexp.source

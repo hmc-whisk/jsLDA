@@ -4,7 +4,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 /**
  * A standard labeled button to toggle anything
  */
-class LabeledToggleButton extends Component<{
+export class LabeledToggleButton extends Component<{
     style: React.CSSProperties,
     id: string,
     label: string,
