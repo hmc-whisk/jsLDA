@@ -2,10 +2,10 @@ import React, {CSSProperties} from "react";
 import Tooltip from '../Tooltip';
 import './pages.css';
 
-var backColor = getComputedStyle(document.documentElement).getPropertyValue('--color3');
+const backColor = getComputedStyle(document.documentElement).getPropertyValue('--color3');
 
 
-class HomePage extends React.Component {
+export class HomePage extends React.Component {
     helpTextStyle = {
         backgroundColor: backColor,
         position: "fixed",

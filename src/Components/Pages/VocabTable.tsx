@@ -1,7 +1,7 @@
 import React, {ChangeEvent, Component} from 'react';
 import * as d3 from 'd3';
 import './pages.css';
-import ModelDataDLer from "../../LDAModel/ModelDataDLer";
+import type {LDAModelDataDLer} from "core";
 
 interface VocabTableProps {
     sortVocabByTopic: boolean,
@@ -16,7 +16,7 @@ interface VocabTableProps {
     removeStop: (word: string) => void,
     update: boolean,
     modelIsRunning: boolean,
-    modelDataDLer: ModelDataDLer
+    modelDataDLer: LDAModelDataDLer
 }
 
 interface VocabTableState {
@@ -24,7 +24,7 @@ interface VocabTableState {
     searchText: string
 }
 
-class VocabTable extends Component<VocabTableProps, VocabTableState> {
+export class VocabTable extends Component<VocabTableProps, VocabTableState> {
     constructor(props:VocabTableProps) {
         super(props);
         this.state = {

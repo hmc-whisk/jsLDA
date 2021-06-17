@@ -11,7 +11,7 @@ interface NumTopicSliderProps{
 
 interface NumTopicSliderState{}
 
-class NumTopicSlider extends React.Component<NumTopicSliderProps,NumTopicSliderState> {
+export class NumTopicSlider extends React.Component<NumTopicSliderProps,NumTopicSliderState> {
 
     handleChange(e:SyntheticEvent<HTMLInputElement>){
         this.props.updateNumTopics((e.target as HTMLInputElement).value);

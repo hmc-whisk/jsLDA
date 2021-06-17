@@ -1,13 +1,13 @@
 import React from "react";
 import './pages.css';
-import LDAModelDataDLer from "../../LDAModel/ModelDataDLer";
+import type {LDAModelDataDLer} from "core";
 
 /**
  * @summary Component for Download page
  *  @prop modelDataDLer
  */
-class DLPage extends React.Component<{
-    modelDataDLer:LDAModelDataDLer
+export class DLPage extends React.Component<{
+    modelDataDLer: LDAModelDataDLer
 }> {
 
     render() {

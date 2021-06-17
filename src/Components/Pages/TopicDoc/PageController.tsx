@@ -16,7 +16,7 @@ interface PageControllerState{}
  *  @prop {Number} lastPage
  *  @prop {Function(Number)} changePage
  */
-class PageController extends React.Component<PageControllerProps,PageControllerState> {
+export class PageController extends React.Component<PageControllerProps,PageControllerState> {
     render() {
         return (
             <div>

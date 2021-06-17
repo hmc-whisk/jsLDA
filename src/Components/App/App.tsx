@@ -5,26 +5,18 @@ import './App.css';
 
 import * as d3 from 'd3';
 
-import {getObjectKeys} from '../../funcs/utilityFunctions'
-import LDAModel from '../../LDAModel/LDAModel'
-import ModelDataDLer from '../../LDAModel/ModelDataDLer'
+import {getObjectKeys} from 'funcs/utilityFunctions'
+import {LDAModel,LDAModelDataDLer} from 'core'
 
-import TopicDoc from '../Pages/TopicDoc/TopicDoc';
-import Correlation from '../Pages/Correlation';
-import SideBar from '../SideBar/SideBar';
-import VocabTable from '../Pages/VocabTable';
-import TimeSeries from '../Pages/TimeSeries';
-import NavBar from '../Header/NavBar';
-import TopBar from '../Header/TopBar';
-import DLPage from '../Pages/DLPage';
-import HomePage from '../Pages/HomePage';
-import TopicOverviewPage from '../Pages/TopicOverview/TopicOverviewPage';
+import {TopicDoc,Correlation,HomePage,TopicOverviewPage,DLPage, VocabTable,TimeSeries} from 'Components/Pages'
+import {NavBar,TopBar} from 'Components/Header'
+import {SideBar} from 'Components/SideBar';
 
-import stateOfUnionDocs from '../../defaultDocs/stateOfUnionDocs.txt';
-import moviePlotsDocs from '../../defaultDocs/wikiMoviePlots.csv';
-import yelpReviews from '../../defaultDocs/yelpReviews.csv';
-import defaultStops from '../../defaultDocs/stoplist.txt';
-import corrTooltip from '../Tooltip/corrTooltip.png';
+import stateOfUnionDocs from 'defaultDocs/stateOfUnionDocs.txt';
+import moviePlotsDocs from 'defaultDocs/wikiMoviePlots.csv';
+import yelpReviews from 'defaultDocs/yelpReviews.csv';
+import defaultStops from 'defaultDocs/stoplist.txt';
+import corrTooltip from 'Components/Tooltip/corrTooltip.png';
 
 
 // This adds the Object.keys() function to some old browsers that don't support it
@@ -37,7 +29,7 @@ interface AppProps {
 
 interface AppStates {
     ldaModel: LDAModel,
-    modelDataDLer: ModelDataDLer,
+    modelDataDLer: LDAModelDataDLer,
     docName: string,
     documentsURL: string,
     stopwordsURL: string,
@@ -59,7 +51,7 @@ class App extends Component<AppProps, AppStates> {
 
         this.state = {
             ldaModel: ldaModel,
-            modelDataDLer: new ModelDataDLer(ldaModel, this),
+            modelDataDLer: new LDAModelDataDLer(ldaModel, this),
 
             // The file location of default files
             docName: "Movie Plots",

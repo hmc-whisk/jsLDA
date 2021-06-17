@@ -2,7 +2,7 @@ import React from 'react';
 import Accordion from 'react-bootstrap/Accordion';
 import DocCard from './DocCard';
 import './topicDoc.css';
-import LDAModel, {SortedLDADocument} from "../../../LDAModel/LDAModel";
+import type {LDAModel, SortedLDADocument} from "core";
 
 interface DocAccordionProps{
     documents:SortedLDADocument[],
@@ -14,7 +14,7 @@ interface DocAccordionProps{
 }
 interface DocAccordionState{}
 
-class DocAccordion extends React.Component<DocAccordionProps,DocAccordionState> {
+export class DocAccordion extends React.Component<DocAccordionProps,DocAccordionState> {
 
     render() {
         return (

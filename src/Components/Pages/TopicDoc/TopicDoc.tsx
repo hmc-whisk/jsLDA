@@ -1,9 +1,9 @@
 import React, {Component, CSSProperties} from 'react';
 import PageController from './PageController';
 import DocAccordion from './DocAccordion';
-import LabeledToggleButton from '../../LabeledToggleButton';
+import LabeledToggleButton from 'Components/LabeledToggleButton';
 import './topicDoc.css';
-import LDAModel, {SortedLDADocument} from "../../../LDAModel/LDAModel";
+import type {LDAModel, SortedLDADocument} from "core";
 
 interface TopicDocProps {
     ldaModel: LDAModel
@@ -18,7 +18,7 @@ interface TopicDocState {
 /**
  * @summary A page that displays the documents in the model
  */
-class TopicDoc extends Component<TopicDocProps, TopicDocState> {
+export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
 
     static DOCS_PER_PAGE = 20;
     static DOC_SORT_SMOOTHING = 10.0;

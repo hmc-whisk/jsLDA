@@ -1,7 +1,7 @@
 import React from "react";
-import {topNWords} from '../../../funcs/utilityFunctions';
+import {topNWords} from 'funcs/utilityFunctions';
 import TopicDoc from '../TopicDoc/TopicDoc';
-import LDAModel from '../../../LDAModel/LDAModel'
+import {LDAModel} from 'core'
 
 /**
  * @summary Component for Topic Overview page
@@ -19,7 +19,7 @@ interface TopicOverviewPageProps{
 interface TopicOverviewPageState{}
 
 
-class TopicOverviewPage extends React.Component<TopicOverviewPageProps,TopicOverviewPageState> {
+export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,TopicOverviewPageState> {
     // Some settings
     static numWordsToShow = 50 // Number of topic words in label
     static numDocuments = 20 // Number of documents to display

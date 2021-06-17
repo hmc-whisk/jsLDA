@@ -5,7 +5,7 @@ import {format as d3Format} from 'd3';
 import {truncate} from '../../../funcs/utilityFunctions';
 import DocView from './DocView';
 import './topicDoc.css';
-import LDAModel, {SortedLDADocument} from "../../../LDAModel/LDAModel";
+import type {LDAModel, SortedLDADocument} from "core";
 
 interface DocCardProps{
     ldaModel:LDAModel,
@@ -18,7 +18,7 @@ interface DocCardProps{
 interface DocCardState{}
 
 
-class DocCard extends React.Component<DocCardProps,DocCardState> {
+export class DocCard extends React.Component<DocCardProps,DocCardState> {
     render() {
         const document = this.props.document;
         return (
