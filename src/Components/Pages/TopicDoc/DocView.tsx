@@ -17,7 +17,7 @@ interface DocViewState {
  * based on topic values
  */
 export class DocView extends React.Component<DocViewProps, DocViewState> {
-    static minHighlight = getComputedStyle(document.documentElement).getPropertyValue('--color3');
+    static minHighlight = getComputedStyle(document.documentElement).getPropertyValue('--color6');
     static maxHighlight = getComputedStyle(document.documentElement).getPropertyValue('--color2');
 
     render() {
@@ -33,12 +33,15 @@ export class DocView extends React.Component<DocViewProps, DocViewState> {
         const topic = this.props.ldaModel.selectedTopic;
         const originalText = this.props.document.originalText;
 
-        if (topic === -1) return <>originalText</>; // No topic selected
+        if (topic === -1) return <div>{originalText}</div>; // No topic selected
+
+        // don't highlight words when no iterations have been trained
+        if (this.props.ldaModel._completeSweeps === 0) return <div>{originalText}</div>;
 
         const tokens = this.props.ldaModel.textToTokenSaliences(originalText, topic)
 
         // If no tokens found, just return text
-        if (tokens.length === 0) return <>originalText</>;
+        if (tokens.length === 0) return <div>{originalText}</div>;
 
         return <>
             {/* highlighted text before first token */}
@@ -64,15 +67,22 @@ export class DocView extends React.Component<DocViewProps, DocViewState> {
     }
 
     /**
-     * @summary Formats a word in jsx with it's topic value highlighting
+     * @summary Formats a word in jsx with its topic value highlighting
      * @param {String} w the word to add highlighting to
      * @param {Number} value salience
      * @param key The key to be used in the element
      */
     highlightWord(w: string, value: number, key: number): ReactElement {
+        if (value > 0){
         return (
             <span key={key} style={this.getComputedStyle(value)}>{w}</span>
         )
+        }
+        else {
+            return (
+                <span key={key}>{w}</span>
+            )
+        }
     }
 
     /**

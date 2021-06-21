@@ -17,6 +17,8 @@
 
   --color4: #373f51;
   --color5: #1b1b1e;
+
+  --color6: #d4dee0;
   
   --negativeCorrelationColor: #df6060;
   --positiveCorrelationColor: var(--color2);
