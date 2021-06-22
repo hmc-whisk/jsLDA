@@ -12,9 +12,9 @@ import {
     LDAColumnInfo,
 } from "./LDAModel";
 import {LDAModelDataDLer} from "./ModelDataDLer";
-import {Message,StatusMessage} from "./message";
+import {Message, StatusMessage, displayMessage, clearMessage} from "./message";
 
-export {LDAModel, LDAModelDataDLer}
+export {LDAModel, LDAModelDataDLer, displayMessage, clearMessage}
 export type {
     LDADocument,
     SortedLDADocument,
