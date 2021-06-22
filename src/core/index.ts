@@ -9,9 +9,10 @@ import {
     LDATopicTimeBinAveragedWithStd,
     LDABigram,
     LDATopicVisibility,
-    LDAColumnInfo
+    LDAColumnInfo,
 } from "./LDAModel";
 import {LDAModelDataDLer} from "./ModelDataDLer";
+import {Message,StatusMessage} from "./message";
 
 export {LDAModel, LDAModelDataDLer}
 export type {
@@ -24,5 +25,7 @@ export type {
     LDATopicTimeBinAveragedWithStd,
     LDABigram,
     LDATopicVisibility,
-    LDAColumnInfo
+    LDAColumnInfo,
+    Message,
+    StatusMessage
 }

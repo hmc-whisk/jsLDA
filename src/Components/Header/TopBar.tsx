@@ -5,6 +5,7 @@ import Configuration from './Configuration'
 import Uploader from './Uploader';
 import CustomTokenizer from './CustomTokenizer';
 import './header.css';
+import {StatusDisplay} from "./Status";
 
 interface TopBarProps {
     completeSweeps: number,
@@ -255,6 +256,7 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
 
 
                 </form>
+                <StatusDisplay/>
                 {this.configuration}
             </div>
 
