@@ -2,6 +2,7 @@ import React from "react";
 import {topNWords} from 'funcs/utilityFunctions';
 import TopicDoc from '../TopicDoc/TopicDoc';
 import {LDAModel} from 'core'
+import './TopicOverview.css';
 
 /**
  * @summary Component for Topic Overview page
@@ -13,7 +14,8 @@ import {LDAModel} from 'core'
 
 interface TopicOverviewPageProps{
     ldaModel:LDAModel,
-    annotations:string[]
+    annotations:string[],
+    getTopicCorrelations: () => number[][]
 }
 
 interface TopicOverviewPageState{}
@@ -24,6 +26,37 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
     static numWordsToShow = 50 // Number of topic words in label
     static numDocuments = 20 // Number of documents to display
     static annotationFontSize = 16
+
+    /**
+     * Getter used in the display of the most correlated topics using the correlationMatrix from LDAModel
+     * @returns the array of topic correlations for the currently selected topic
+     */
+    get selectedTopicCorrelations(): number[] {
+        let correlationMatrix = this.props.getTopicCorrelations();
+        let selectedTopicCorrelations = correlationMatrix[this.props.ldaModel.selectedTopic];
+        return selectedTopicCorrelations;
+    }
+
+    /**
+     * Helper function used to display the 3 most correlated topics for a currently selected topic
+     * @returns the indices of the 3 largest values in an array of numbers
+     * adapted from https://stackoverflow.com/a/11792417
+     */
+    getMax(ar: number[]): number[] {
+        if (ar.length < 3) return [0,1,2];
+        let max = [{value: ar[0], index: 0}, {value: ar[1], index: 1}, {value: ar[2], index: 2}];
+        max.sort((a,b) => b.value - a.value);
+    
+        for (let i = 3; i < ar.length; i++) {
+            if (ar[i] > max[2].value) {
+                max[2].value = ar[i];
+                max[2].index = i;
+            }
+            max.sort((a,b) => b.value - a.value);
+        }
+        let maxIndices: number[] = max.map(x => x.index);
+        return maxIndices;
+    }
 
     render() {
 
@@ -76,7 +109,22 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
                     <b>Top Words: </b>
                     {topNWords(this.props.ldaModel.topicWordCounts[topicNum],
                         TopicOverviewPage.numWordsToShow)}
+
                 </p>
+                <p className="subtitle" style={{textAlign: "left"}}>
+                <b> Most Correlated Topics: </b>
+                </p>
+                <ul className="no-bullets">
+                    {this.getMax(this.selectedTopicCorrelations).map(value => {
+                        return <li key={value.toString()} style={{textAlign: "left"}}>
+                            <b>Topic {value}: </b>
+                            {topNWords(this.props.ldaModel.topicWordCounts[value],
+                            TopicOverviewPage.numWordsToShow)}
+                            </li>
+                    })
+                }
+                </ul>
+
             </div>
         )
     }
