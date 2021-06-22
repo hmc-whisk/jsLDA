@@ -403,7 +403,7 @@ class App extends Component<AppProps, AppStates> {
         switch (this.state.selectedTab) {
             case "docs-tab":
                 DisplayPage = <TopicDoc
-                    ldaModel={this.state.ldaModel}
+                    ldaModel={this.state.ldaModel}                   
                 />;
                 break;
             case "corr-tab":
@@ -461,7 +461,8 @@ class App extends Component<AppProps, AppStates> {
             case "to-tab":
                 DisplayPage = <TopicOverviewPage
                     ldaModel={this.state.ldaModel}
-                    annotations={this.annotations}/>
+                    annotations={this.annotations}
+                    getTopicCorrelations={this.state.ldaModel.getTopicCorrelations.bind(this.state.ldaModel)}/>
                 break;
             default:
                 DisplayPage = null;
