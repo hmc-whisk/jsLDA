@@ -70,6 +70,7 @@ export function Uploader(props: UploaderProps) {
                         <h5> Or use a custom collection: </h5>
                         <div className="fileInput">
                             <table>
+                                <tbody>
                                 <tr>
                                     <td>
                                         <label htmlFor="docs-file-input">Documents: </label>
@@ -88,6 +89,7 @@ export function Uploader(props: UploaderProps) {
                                                onChange={(event) => props.onStopwordFileChange(event)}/>
                                     </td>
                                 </tr>
+                                </tbody>
                             </table>
                         </div>
                         <input

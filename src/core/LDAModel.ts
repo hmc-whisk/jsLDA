@@ -1,6 +1,7 @@
 import {zeros, getObjectKeys, truncate} from '../funcs/utilityFunctions'
 import * as d3 from 'd3';
 import XRegExp from "xregexp";
+import {displayMessage} from "./message";
 
 // This adds the Object.keys() function to some old browsers that don't support it
 if (!Object.keys) {
@@ -1251,6 +1252,8 @@ export class LDAModel {
         if (refresh) {
             this.sortTopicWords()
         }
+        displayMessage(`"${word}" added to stoplist`,4000)
+        this.updateWebpage()
     }
 
     /**
