@@ -15,10 +15,8 @@ export function topNWords(wordCounts: { word:string }[], n: number): string {
  * @param {Number} n length of array
  */
 export function zeros(n: number): number[] {
-    var x = new Array(n);
-    for (var i = 0; i < n; i++) {
-        x[i] = 0.0;
-    }
+    let x = new Array(n);
+    x.fill(0.0);  // doesn't 0.0 look like an emoticon ^_^
     return x;
 }
 
