@@ -1,6 +1,5 @@
 /*
-a skeleton type for all messages in this app. while the only possible target
-right now is status, it is reserved for possible future extensions
+a base type for all messages in this app.
  */
 export interface Message {
     target: string
@@ -9,6 +8,12 @@ export interface Message {
 export interface StatusMessage extends Message {
     target: "status"
     message: string
+    ackRequired: boolean,
+    timeout: number
+}
+
+export interface StatusMessageAck extends Message {
+    target: "statusAck"
 }
 
 /**
@@ -22,15 +27,42 @@ export interface StatusMessage extends Message {
  to actually appear.
 
  @param message - the message to display
- @param timeout - if greater than 0, the message will be cleared after timeout ms. default to 0
+ @param timeout - optional. if greater than 0, the message will be cleared after timeout ms. default to 0
+ @param callback - optional. can be either a function or the string "promise". if set, the callback will be called (or,
+ in the case of a promise, resolved) when the message is indeed displayed.
  */
-export function displayMessage(message: string, timeout: number = 0) {
+export function displayMessage(message: string): void
+export function displayMessage(message: string, timeout: number): void
+export function displayMessage<T extends "promise" | (() => void)>(message: string, timeout: number, callback: T): T extends "promise" ? Promise<void> : void
+export function displayMessage(message: string, timeout: number = 0, callback?: "promise" | (() => void)): Promise<void> | void {
+    let promise: Promise<void> | undefined;
+    if (typeof callback === "function") {
+        let listener = (e: MessageEvent<Message>) => {
+            if (e.origin === window.location.origin && e.data.target === "statusAck") {
+                callback()
+                window.removeEventListener("message", listener)
+            }
+        }
+        window.addEventListener("message", listener)
+    } else if (callback === "promise") {
+        promise = new Promise<void>((resolve) => {
+            let listener = (e: MessageEvent<Message>) => {
+                if (e.origin === window.location.origin && e.data.target === "statusAck") {
+                    resolve()
+                    window.removeEventListener("message", listener)
+                }
+            }
+            window.addEventListener("message", listener)
+        })
+    }
     window.postMessage({
         target: "status",
+        ackRequired: callback !== undefined,
+        timeout,
         message
-    }, window.location.origin)
-    if (timeout > 0) {
-        setTimeout(clearMessage, timeout)
+    } as StatusMessage, window.location.origin)
+    if (callback === "promise") {
+        return promise
     }
 }
 
