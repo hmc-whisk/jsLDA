@@ -6,7 +6,6 @@ interface StatusDisplayProps {
 
 interface StatusDisplayState {
     message: string,
-    ackRequired: boolean
 }
 
 /*
@@ -15,21 +14,22 @@ A class that holds the message displayed on the status bar.
 export class StatusDisplay extends Component<StatusDisplayProps, StatusDisplayState> {
 
     messageHandler: (event: MessageEvent) => void
+    ackRequired: boolean
+    messageCount: number
 
     constructor(props: StatusDisplayProps) {
         super(props);
         this.state = {
-            message: "",
-            ackRequired: false
+            message: ""
         }
+        this.ackRequired = false
+        this.messageCount = 0
         this.messageHandler = this.onMessage.bind(this)
     }
 
     componentDidUpdate(_: any, prev: any) {
-        if (this.state.ackRequired) {
-            this.setState({
-                ackRequired: false
-            })
+        if (this.ackRequired) {
+            this.ackRequired = false
             window.postMessage(
                 {target: "statusAck"} as StatusMessageAck,
                 window.location.origin
@@ -56,18 +56,20 @@ export class StatusDisplay extends Component<StatusDisplayProps, StatusDisplaySt
     onMessage(event: MessageEvent<Message>) {
         if (event.origin !== window.location.origin || !StatusDisplay.checkTarget(event)) return;
         let message: StatusMessage = event.data;
-        if (this.state.ackRequired) {
+        if (this.ackRequired) {
             console.warn("Multiple status messages posted before the status display updated. A race condition happened somewhere.")
             console.warn(`Previous message (not displayed): ${this.state.message}`)
             console.warn(`Newly posted message: ${message.message}`)
         }
+        this.ackRequired = message.ackRequired || this.ackRequired
+        // in case of a race condition we don't want to lock the listener waiting forever
+        // ackRequired has to be set before setState or other components might deadlock
         this.setState({
             message: message.message,
-            ackRequired: message.ackRequired || this.state.ackRequired
-            // in case of a race condition we don't want to lock the listener waiting forever
         })
+        this.messageCount++;
         if (event.data.timeout) {
-            setTimeout(this.onTimeout.bind(this), message.timeout, message.message)
+            setTimeout(this.onTimeout.bind(this), message.timeout, this.messageCount)
         }
     }
 
@@ -75,10 +77,11 @@ export class StatusDisplay extends Component<StatusDisplayProps, StatusDisplaySt
     a function to clear a message after a timeout. however, if another message
     is already displayed over it, nothing happens.
      */
-    onTimeout(message: string) {
-        if (this.state.message === message) {
+    onTimeout(count: number) {
+        if (this.messageCount === count) {
             this.setState({message: ""})
         }
+        this.messageCount++;
     }
 
     render() {
