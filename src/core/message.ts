@@ -36,9 +36,11 @@ export function displayMessage(message: string, timeout: number): void
 export function displayMessage<T extends "promise" | (() => void)>(message: string, timeout: number, callback: T): T extends "promise" ? Promise<void> : void
 export function displayMessage(message: string, timeout: number = 0, callback?: "promise" | (() => void)): Promise<void> | void {
     let promise: Promise<void> | undefined;
+    let time=new Date()
     if (typeof callback === "function") {
         let listener = (e: MessageEvent<Message>) => {
             if (e.origin === window.location.origin && e.data.target === "statusAck") {
+                console.log("Status message update took",new Date().getTime()-time.getTime(),"ms")
                 callback()
                 window.removeEventListener("message", listener)
             }
@@ -48,6 +50,7 @@ export function displayMessage(message: string, timeout: number = 0, callback?: 
         promise = new Promise<void>((resolve) => {
             let listener = (e: MessageEvent<Message>) => {
                 if (e.origin === window.location.origin && e.data.target === "statusAck") {
+                    console.log("Status message update took",new Date().getTime()-time.getTime(),"ms")
                     resolve()
                     window.removeEventListener("message", listener)
                 }
