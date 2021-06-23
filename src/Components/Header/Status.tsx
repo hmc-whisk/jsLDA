@@ -1,11 +1,12 @@
 import {Component, CSSProperties} from "react";
-import {Message, StatusMessage} from "core";
+import {Message, StatusMessage, StatusMessageAck} from "core";
 
 interface StatusDisplayProps {
 }
 
 interface StatusDisplayState {
-    message: string
+    message: string,
+    ackRequired: boolean
 }
 
 /*
@@ -18,21 +19,32 @@ export class StatusDisplay extends Component<StatusDisplayProps, StatusDisplaySt
     constructor(props: StatusDisplayProps) {
         super(props);
         this.state = {
-            message: ""
+            message: "",
+            ackRequired: false
         }
         this.messageHandler = this.onMessage.bind(this)
     }
 
+    componentDidUpdate(_: any, prev: any) {
+        if (this.state.ackRequired) {
+            this.setState({
+                ackRequired: false
+            })
+            window.postMessage(
+                {target: "statusAck"} as StatusMessageAck,
+                window.location.origin
+            )
+        }
+    }
+
     componentDidMount() {
         window.addEventListener("message", this.messageHandler)
-        console.log("listener added")
     }
 
     componentWillUnmount() {
         // we don't want zombie event listeners attached to global so we
         // remove them once the object is removed from dom
         window.removeEventListener("message", this.messageHandler)
-        console.log("listener removed")
     }
 
     // a hacky TS function for type narrowing. it cannot be inlined even though
@@ -43,7 +55,30 @@ export class StatusDisplay extends Component<StatusDisplayProps, StatusDisplaySt
 
     onMessage(event: MessageEvent<Message>) {
         if (event.origin !== window.location.origin || !StatusDisplay.checkTarget(event)) return;
-        this.setState({message: event.data.message})
+        let message: StatusMessage = event.data;
+        if (this.state.ackRequired) {
+            console.warn("Multiple status messages posted before the status display updated. A race condition happened somewhere.")
+            console.warn(`Previous message (not displayed): ${this.state.message}`)
+            console.warn(`Newly posted message: ${message.message}`)
+        }
+        this.setState({
+            message: message.message,
+            ackRequired: message.ackRequired || this.state.ackRequired
+            // in case of a race condition we don't want to lock the listener waiting forever
+        })
+        if (event.data.timeout) {
+            setTimeout(this.onTimeout.bind(this), message.timeout, message.message)
+        }
+    }
+
+    /*
+    a function to clear a message after a timeout. however, if another message
+    is already displayed over it, nothing happens.
+     */
+    onTimeout(message: string) {
+        if (this.state.message === message) {
+            this.setState({message: ""})
+        }
     }
 
     render() {

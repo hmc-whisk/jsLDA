@@ -12,7 +12,7 @@ import {
     LDAColumnInfo,
 } from "./LDAModel";
 import {LDAModelDataDLer} from "./ModelDataDLer";
-import {Message, StatusMessage, displayMessage, clearMessage} from "./message";
+import {Message, StatusMessage, StatusMessageAck, displayMessage, clearMessage} from "./message";
 
 export {LDAModel, LDAModelDataDLer, displayMessage, clearMessage}
 export type {
@@ -27,5 +27,6 @@ export type {
     LDATopicVisibility,
     LDAColumnInfo,
     Message,
-    StatusMessage
+    StatusMessage,
+    StatusMessageAck
 }
