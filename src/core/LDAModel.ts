@@ -62,6 +62,7 @@ export type LDATopicTimeBinAveraged = {
     key: Date,
     value: number
 }
+
 // type reverse-engineered from LDAModel.topicTimesBinnedAverage
 export interface LDATopicTimeBinAveragedWithStd extends LDATopicTimeBinAveraged {
     upperEr: number,
@@ -237,11 +238,9 @@ export class LDAModel {
             this.documentType = "text/tsv";
         } else if (fileExtension === "text/csv") { // need this case since documentType is set to "text/csv" by default
             this.documentType = "text/csv";
-        }
-        else if (fileExtension === "text/txt") { // need this case since documentType is set to "text/txt" by State of the Union default doc
+        } else if (fileExtension === "text/txt") { // need this case since documentType is set to "text/txt" by State of the Union default doc
             this.documentType = "text/tsv"; // previous implemention used text/tsv as documentType for SOTU doc
-        }
-        else {
+        } else {
             alert("Uploaded file does not have the correct extension (.csv or .tsv)");
         }
     }
@@ -364,8 +363,7 @@ export class LDAModel {
             parsedDoc = d3.csvParseRows(docText);
         } else if (this.documentType === "text/tsv") {
             parsedDoc = d3.tsvParseRows(docText);
-        }
-        else {
+        } else {
             throw(Error("File does not have a useable extension"));
         }
 
@@ -598,17 +596,17 @@ export class LDAModel {
     _getColumnInfo(header: readonly string[]): LDAColumnInfo {
         let columnInfo:
             {
-                metadata: {[key:string]:number},
-                id:number,text:number,
-                date_tag:number
-            } = {metadata: {},id:-1,text:-1,date_tag:-1};
+                metadata: { [key: string]: number },
+                id: number, text: number,
+                date_tag: number
+            } = {metadata: {}, id: -1, text: -1, date_tag: -1};
         let columnIsMetadata = Array(header.length).fill(true);
         header = header.map((s) => s.toLocaleLowerCase());
 
         // Process special columns
         for (let columnName of ["id", "text", "date_tag"]) {
             let index = header.indexOf(columnName);
-            columnInfo[columnName as "id"|"text"|"date_tag"] = index;
+            columnInfo[columnName as "id" | "text" | "date_tag"] = index;
 
             if (index !== -1) {
                 columnIsMetadata[index] = false;
@@ -634,7 +632,7 @@ export class LDAModel {
 
         // Return default order if no topic is selected
         if (this.selectedTopic === -1) return this.documents.map(doc => {
-            (doc as SortedLDADocument)['score']=0;
+            (doc as SortedLDADocument)['score'] = 0;
             return doc as SortedLDADocument
         });
 
@@ -649,9 +647,9 @@ export class LDAModel {
         return sortedDocuments;
     }
 
-    get sortedDocumentsSalient():SortedLDADocument[]{
+    get sortedDocumentsSalient(): SortedLDADocument[] {
         if (this.selectedTopic === -1) return this.documents.map(doc => {
-            (doc as SortedLDADocument)['score']=0;
+            (doc as SortedLDADocument)['score'] = 0;
             return doc as SortedLDADocument
         });
 
@@ -1240,20 +1238,22 @@ export class LDAModel {
      * @param {Boolean} refresh whether or not to run sortTopicWords
      */
     addStop(word: string, refresh = false) {
-        this.addStopHelper(word);
-        if (this.bigram) {
-            for (let w in this.finalBigram[word]) {
-                this.addStopHelper(word + "_" + w)
+        displayMessage(`adding "${word}" to stoplist`, 0, () => {
+            this.addStopHelper(word);
+            if (this.bigram) {
+                for (let w in this.finalBigram[word]) {
+                    this.addStopHelper(word + "_" + w)
+                }
+                for (let w in this.finalBigramRev[word]) {
+                    this.addStopHelper(w + "_" + word)
+                }
             }
-            for (let w in this.finalBigramRev[word]) {
-                this.addStopHelper(w + "_" + word)
+            if (refresh) {
+                this.sortTopicWords()
             }
-        }
-        if (refresh) {
-            this.sortTopicWords()
-        }
-        displayMessage(`"${word}" added to stoplist`,4000)
-        this.updateWebpage()
+            displayMessage(`"${word}" added to stoplist`, 4000)
+            this.updateWebpage()
+        })
     }
 
     /**
@@ -1286,19 +1286,23 @@ export class LDAModel {
      * @param {String} word the word to remove
      */
     removeStop(word: string) {
-        this.removeStopHelper(word);
-        if (this.bigram) {
-            for (let w in this.finalBigram[word]) {
-                if (this.stopwords[word + "_" + w] && !this.stopwords[w]) {
-                    this.removeStopHelper(word + "_" + w)
+        displayMessage(`removing "${word}" from stoplist`, 0, () => {
+            this.removeStopHelper(word);
+            if (this.bigram) {
+                for (let w in this.finalBigram[word]) {
+                    if (this.stopwords[word + "_" + w] && !this.stopwords[w]) {
+                        this.removeStopHelper(word + "_" + w)
+                    }
+                }
+                for (let w in this.finalBigramRev[word]) {
+                    if (this.stopwords[w + "_" + word] && !this.stopwords[w]) {
+                        this.removeStopHelper(w + "_" + word)
+                    }
                 }
             }
-            for (let w in this.finalBigramRev[word]) {
-                if (this.stopwords[w + "_" + word] && !this.stopwords[w]) {
-                    this.removeStopHelper(w + "_" + word)
-                }
-            }
-        }
+            displayMessage(`"${word}" removed from stoplist`, 4000)
+            this.updateWebpage()
+        })
     }
 
     /**
@@ -1724,7 +1728,7 @@ export class LDAModel {
             .entries(averaged);
 
         // Turn key back into Date object
-        return topicMeans.map((d:{key:number,value:number}) => {
+        return topicMeans.map((d: { key: number, value: number }) => {
             return {key: new Date(d.key), value: d.value}
         })
     }
