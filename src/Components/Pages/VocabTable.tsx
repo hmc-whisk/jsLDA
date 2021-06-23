@@ -133,7 +133,7 @@ export class VocabTable extends Component<VocabTableProps, VocabTableState> {
     setUp() {
         let displayingStopwords = this.state.displayingStopwords;
         let sortVocabByTopic = this.props.sortVocabByTopic;
-        let setDisplay = this.setDisplay;
+        let setDisplay = this.setDisplay.bind(this);
         let setSort = this.props.sortByTopicChange;
         let selectedTopic = this.props.selectedTopic;
 
