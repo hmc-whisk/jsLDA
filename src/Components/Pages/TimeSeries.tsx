@@ -33,14 +33,14 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
             timeSeriesWidth: 600,
             timeSeriesHeight: 75,
             timeSeriesHeightTopic: 300,
-            numberOfBins: 20,
+            numberOfBins: 30,
             fillColor: getComputedStyle(document.documentElement).getPropertyValue('--color2'),
             errorBarColor: getComputedStyle(document.documentElement).getPropertyValue('--color2Light'),
             strokeColor: getComputedStyle(document.documentElement).getPropertyValue('--color4'),
         };
         this._rootNode = document.createElement('div')
         this.topicTimeGroups = []
-        this.graphMargin = 0
+        this.graphMargin = 25
     }
 
 
@@ -69,7 +69,7 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
             temp_topicTimeGroups
                 .push(tsSVG
                     .append("g")
-                    .attr("transform", "translate(0," + ((this.state.timeSeriesHeight + this.graphMargin) * topic) + ")"));
+                    .attr("transform", "translate(30," + ((this.state.timeSeriesHeight + this.graphMargin) * topic) + ")"));
             temp_topicTimeGroups[topic]
                 .append("path")
                 .style("fill", this.state.fillColor)
@@ -98,7 +98,7 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
         temp_topicTimeGroups
             .push(tsSVG
                 .append("g")
-                .attr("transform", "translate(50,50)"));
+                .attr("transform", "translate(80,25)"));
 
         this.topicTimeGroups = temp_topicTimeGroups
     }
@@ -157,17 +157,18 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
                     .select("path")
                     // @ts-ignore: TS2769. There's an issue with TS overload resolution
                     // see https://github.com/microsoft/TypeScript/issues/14107
-                    .attr("d", area(topicMeans));
+                    .attr("d", area(topicMeans))
+                    .attr("transform", "translate(95,0)");
                 this.topicTimeGroups[topic]
                     .append("text")
-                    .attr("transform", "translate(5,40)")
+                    .attr("transform", "translate(0,45)")
                     .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3));
                 this.topicTimeGroups[topic]
                     .select("g")
-                    .attr("transform", "translate(0,75)")
+                    .attr("transform", "translate(95,75)")
                     // @ts-ignore: TS2345
                     .call(x_axis)
-                    .selectAll("text")
+                    .selectAll("text");
             }
         }
     }
