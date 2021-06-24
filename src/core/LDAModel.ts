@@ -88,53 +88,50 @@ export class LDAModel {
      * @param {Function} forceUpdate callback that updates the webpage
      */
 
-    public _vocabularySize: number;
-    public _correlationMinTokens: number;
-    public _correlationMinProportion: number;
-    public _wordPattern: RegExp;
-    public _completeSweeps: number;
-    public _requestedSweeps: number;
-    public _topicWeights: number[];
+    _vocabularySize: number;
+    _correlationMinTokens: number;
+    _correlationMinProportion: number;
+    _wordPattern: RegExp;
+    _topicWeights: number[];
 
-    public sortVocabByTopic: boolean;
-    public vocabularyCounts: { [key: string]: number }; // reversed from _parseDoc
-    public numTopics: number;
-    public updateWebpage: () => void;
-    public stopwords: { [key: string]: 1 | undefined };
-    public selectedTopic: number;
-    public topicVisibility: LDATopicVisibility;
-    public wordTopicCounts: { [key: string]: { [key: number]: number } };  // reversed from _parseDoc
-    public topicWordCounts: { word: string, count: number }[][]; // reversed from sortTopicWords
-    public tokensPerTopic: number[];
-    public docLengthCounts: number[];
-    public topicDocCounts: number[][];
+    sortVocabByTopic: boolean;
+    vocabularyCounts: { [key: string]: number }; // reversed from _parseDoc
+    numTopics: number;
+    updateWebpage: () => void;
+    stopwords: { [key: string]: 1 | undefined };
+    selectedTopic: number;
+    topicVisibility: LDATopicVisibility;
+    wordTopicCounts: { [key: string]: { [key: number]: number } };  // reversed from _parseDoc
+    topicWordCounts: { word: string, count: number }[][]; // reversed from sortTopicWords
+    tokensPerTopic: number[];
+    docLengthCounts: number[];
+    topicDocCounts: number[][];
 
-    public bigram: boolean;
-    public bigramInitialized: boolean;
-    public bigramCount: LDABigram;
-    public bigramCountRev: LDABigram;
-    public bigramWord1Count: { [key: string]: number }
-    public bigramWord2Count: { [key: string]: number }
-    public totalBigramCount: number
-    public finalBigram: LDABigram
-    public finalBigramRev: LDABigram
-    public bigramThreshold: number
-    public documents: LDADocument []
-    public documentType: string;
-    public modelIsRunning: boolean;
+    bigram: boolean;
+    bigramInitialized: boolean;
+    bigramCount: LDABigram;
+    bigramCountRev: LDABigram;
+    bigramWord1Count: { [key: string]: number }
+    bigramWord2Count: { [key: string]: number }
+    totalBigramCount: number
+    finalBigram: LDABigram
+    finalBigramRev: LDABigram
+    bigramThreshold: number
+    documents: LDADocument []
+    documentType: string;
+    modelIsRunning: boolean;
 
-    public _specificityScale: d3.ScaleLinear<string, string>;
+    _specificityScale: d3.ScaleLinear<string, string>;
 
-    public _timer?: d3.Timer;
-    public _documentTopicSmoothing: number[];
-    public _topicWordSmoothing: number;
-    public _sweeps: number;
-    public _optimizeInterval: number;
-    public _burninPeriod: number;
-    public _changeAlpha: boolean;
-    public _memoMinDocTime?: Date;
-    public _memoMaxDocTime?: Date;
-    public _maxTopicSaliency: number[];
+    scheduler: SweepScheduler;
+    _documentTopicSmoothing: number[];
+    _topicWordSmoothing: number;
+    _optimizeInterval: number;
+    _burninPeriod: number;
+    _changeAlpha: boolean;
+    _memoMinDocTime?: Date;
+    _memoMaxDocTime?: Date;
+    _maxTopicSaliency: number[];
 
 
     constructor(numTopics: number, forceUpdate: () => void) {
@@ -160,9 +157,6 @@ export class LDAModel {
         this.updateWebpage = forceUpdate
 
         this.stopwords = {};
-
-        this._completeSweeps = 0;
-        this._requestedSweeps = 0;
 
         this.selectedTopic = 0;
         this.topicVisibility = {};
@@ -198,7 +192,6 @@ export class LDAModel {
         this._documentTopicSmoothing = zeros(numTopics).fill(0.1); // (used by sweep)
         this._topicWordSmoothing = 0.01; // (used by sweep)
 
-        this._sweeps = 0; // (used by addSweepRequest) for finding whether an additional sweep call should be called
 
         this.documentType = "text/csv";
         this.modelIsRunning = false;
@@ -209,6 +202,8 @@ export class LDAModel {
 
         this._maxTopicSaliency = new Array(this.numTopics)
         // this.selectedTopicChange.bind(this);
+
+        this.scheduler = new SweepScheduler(this)
     }
 
     static DOC_SORT_SMOOTHING = 10.0;
@@ -273,14 +268,12 @@ export class LDAModel {
      * for new documents to be processed
      */
     reset() {
-        this.modelIsRunning = false;
+        this.scheduler.stop();
         this._vocabularySize = 0;
         this.vocabularyCounts = {};
         this.sortVocabByTopic = false;
         this._specificityScale = d3.scaleLinear<string>().domain([0, 1]).range(["#ffffff", "#99d8c9"]);
         this.stopwords = {};
-        this._completeSweeps = 0;
-        this._requestedSweeps = 0;
         this.selectedTopic = -1;
         this.topicVisibility = this.initTopicVisibility(this.numTopics);
         this.wordTopicCounts = {};
@@ -291,7 +284,8 @@ export class LDAModel {
         this._memoMinDocTime = undefined;
         this._memoMaxDocTime = undefined;
         this._maxTopicSaliency = new Array(this.numTopics)
-        d3.select("#iters").text(this._completeSweeps);
+        this.scheduler.reset();
+        displayMessage("Model has been reset", 2500);
     }
 
     /**
@@ -928,12 +922,8 @@ export class LDAModel {
         this.tokensPerTopic = zeros(this.numTopics);
         this._topicWeights = zeros(this.numTopics);
         this.wordTopicCounts = {};
-        this._completeSweeps = 0;
-        this._requestedSweeps = 0;
         this._maxTopicSaliency = new Array(numTopics);
         this._documentTopicSmoothing = zeros(numTopics).fill(0.1);
-
-        d3.select("#iters").text(this._completeSweeps);
 
         Object.keys(this.vocabularyCounts).forEach((word) => {
             this.wordTopicCounts[word] = {}
@@ -984,12 +974,11 @@ export class LDAModel {
      * @summary completes one training iteration
      */
     _sweep() {
-        let startTime = Date.now();
         let topicNormalizers = zeros(this.numTopics);
         let doOptimizeAlpha = false;
         let docLength = 0;
-        if (this._changeAlpha && this._completeSweeps > this._burninPeriod && this._optimizeInterval != 0 &&
-            this._completeSweeps % this._optimizeInterval === 0) {
+        if (this._changeAlpha && this.scheduler.totalCompletedSweeps > this._burninPeriod && this._optimizeInterval !== 0 &&
+            this.scheduler.totalCompletedSweeps % this._optimizeInterval === 0) {
             doOptimizeAlpha = true;
         }
 
@@ -1078,26 +1067,10 @@ export class LDAModel {
             this._learnParameters(this._documentTopicSmoothing, this.topicDocCounts,
                 this.docLengthCounts, 1.001, 1.0, 1);
         }
-
-        console.log("sweep in " + (Date.now() - startTime) + " ms");
-        this._completeSweeps += 1;
-
-        // TODO: Update completed sweeps outside of this function
-        d3.select("#iters").text(this._completeSweeps);
-
-        if (this._completeSweeps >= this._requestedSweeps) {
-            // this.update = true;
-            this.sortTopicWords();
-            this._timer!.stop();
-            this._sweeps = 0;
-            this.modelIsRunning = false;
-            this._maxTopicSaliency = new Array(this.numTopics);
-            this.updateWebpage();
-        }
     }
 
     get iterations() {
-        return this._completeSweeps;
+        return this.scheduler.totalCompletedSweeps;
     }
 
     /**
@@ -1549,35 +1522,14 @@ export class LDAModel {
      * @param {Number} numRequests number of iterations to be requested
      */
     addSweepRequest(numRequests: number) {
-        this.modelIsRunning = true;
-        this.updateWebpage();
-
-        // Protect against stopSweeps messing up _requestedSweeps
-        if (this._requestedSweeps < this._completeSweeps) {
-            this._requestedSweeps = this._completeSweeps;
-        }
-
-        this._requestedSweeps += numRequests
-
-        if (this._sweeps === 0) {
-            this._sweeps = 1;
-            // TODO Remove this timer
-            this._timer = d3.timer(this._sweep.bind(this));
-            //hyperedit
-            this._initializeHistograms();
-            console.log("Requested Sweeps Now: " + this._requestedSweeps);
-        }
-
-        console.log("Has sweeped")
-
-
+        this.scheduler.sweep(numRequests)
     }
 
     /**
      * @summary Stops the model from continuing it's sweeps
      */
     stopSweeps() {
-        this._requestedSweeps = this._completeSweeps;
+        this.scheduler.stop()
     }
 
     /**
@@ -1835,4 +1787,142 @@ export class LDAModel {
     }
 }
 
-export default LDAModel;
+/**
+ * a helper function for formatting ETA
+ * @param s - number of seconds
+ */
+function formatTime(s: number): string {
+    let seconds = s % 60;
+    let minutes = Math.floor(s / 60) % 60;
+    let hours = Math.floor(s / 3600);
+
+    let formatted: string;
+    if (hours === 0)
+        formatted = seconds.toFixed(minutes > 0 ? 0 : 2) + "s"
+    else // for things that will take hours we don't care about seconds
+        formatted = ""
+    if (minutes > 0 || hours > 0)
+        formatted = `${minutes}m${formatted}`
+    if (hours > 0)
+        formatted = `${hours}h${formatted}`
+    return formatted
+}
+
+/**
+ * A utility class for calculating rolling average
+ * @constructor
+ * @param entries - number of entries to keep in the rolling average queue
+ */
+class RollingAvg {
+    private arr: number[]
+    readonly entries: number
+
+    constructor(entries: number) {
+        this.arr = [0]
+        // initialize to a single 0 to avoid some strange errors related to empty arrays
+        this.entries = entries
+    }
+
+    /**
+     * Add a number to the rolling average queue
+     * @param n - the number to add
+     */
+    add(n: number) {
+        this.arr.push(n)
+        if (this.arr.length > this.entries)
+            this.arr.shift()
+    }
+
+    /**
+     * reset the array to initial value
+     */
+    reset() {
+        this.arr = [0]
+    }
+
+    /**
+     * get the current rolling average
+     */
+    avg(): number {
+        return this.arr.reduce((a, b) => a + b) / this.arr.length
+    }
+}
+
+/**
+ * a helper class for scheduling sweeps
+ */
+class SweepScheduler {
+    totalCompletedSweeps: number;
+    completedSweeps: number; // this is only for displaying on top, not checked in code
+    shouldStop: boolean;
+    remainingSweeps: number
+    model: LDAModel
+    timeTaken: RollingAvg
+
+    constructor(model: LDAModel) {
+        this.totalCompletedSweeps = 0;
+        this.shouldStop = false;
+        this.remainingSweeps = 0;
+        this.completedSweeps = 0;
+        this.model = model;
+        this.timeTaken = new RollingAvg(50);
+    }
+
+    sweep(n: number) {
+        this.remainingSweeps += n;
+        this.model.modelIsRunning = true;
+        this.model.updateWebpage();
+        let start = new Date().getTime()
+        this.sweepLoop().then(
+            _ => {
+                displayMessage(`Completed ${this.completedSweeps} iteration${this.completedSweeps > 1 ? "s" : ""
+                } in ${formatTime((new Date().getTime() - start) / 1000)}`, 2500);
+                this.remainingSweeps = 0;
+                this.completedSweeps = 0;
+                this.timeTaken.reset();
+                this.shouldStop = false;
+
+                this.model.modelIsRunning = false
+                this.model.sortTopicWords();
+
+                // copied from previous code, unsure what it does
+                this.model._maxTopicSaliency = new Array(this.model.numTopics);
+            }
+        )
+    }
+
+    private async sweepLoop() {
+        while (!this.shouldStop && this.remainingSweeps > 0) {
+            let timeStarted = new Date().getTime(); // include the messaging time for better accuracy
+            await displayMessage(`Progress: ${
+                (this.completedSweeps / (this.completedSweeps + this.remainingSweeps) * 100).toFixed(2)
+            }% ETA: ${
+                formatTime(this.timeTaken.avg() * this.remainingSweeps / 1000)
+            }`, 0, "promise")
+            this.model._sweep()
+            this.remainingSweeps--;
+            this.completedSweeps++;
+            this.totalCompletedSweeps++;
+            document.getElementById("iters")!.innerText = this.totalCompletedSweeps.toString()
+            this.timeTaken.add(new Date().getTime() - timeStarted);
+        }
+    }
+
+    stop() {
+        if (this.remainingSweeps > 0) {
+            // we want to set this flag only in the case of interruption
+            this.shouldStop = true;
+        }
+    }
+
+    reset() {
+        this.totalCompletedSweeps = 0;
+        this.shouldStop = false;
+        this.remainingSweeps = 0;
+        this.completedSweeps = 0;
+        this.timeTaken.reset();
+        document.getElementById("iters")!.innerText = "0";
+    }
+
+
+}
