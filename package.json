@@ -13,6 +13,7 @@
     "react-bootstrap": "^1.5.2",
     "react-bootstrap-icons": "^1.4.0",
     "react-d3": "^0.4.0",
+    "react-d3-treemap": "^1.0.27",
     "react-dom": "^16.13.1",
     "react-scripts": "^4.0.3",
     "xregexp": "^5.0.1"
