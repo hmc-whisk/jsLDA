@@ -6,10 +6,10 @@ import './App.css';
 import * as d3 from 'd3';
 
 import {getObjectKeys} from 'funcs/utilityFunctions'
-import {LDAModel,LDAModelDataDLer} from 'core'
+import {LDAModel, LDAModelDataDLer} from 'core'
 
-import {TopicDoc,Correlation,HomePage,TopicOverviewPage,DLPage, VocabTable,TimeSeries} from 'Components/Pages'
-import {NavBar,TopBar} from 'Components/Header'
+import {TopicDoc, Correlation, HomePage, TopicOverviewPage, DLPage, VocabTable, TimeSeries} from 'Components/Pages'
+import {NavBar, TopBar} from 'Components/Header'
 import {SideBar} from 'Components/SideBar';
 
 import stateOfUnionDocs from 'defaultDocs/stateOfUnionDocs.txt';
@@ -73,7 +73,7 @@ class App extends Component<AppProps, AppStates> {
         };
 
         window.addEventListener("beforeunload", (e: BeforeUnloadEvent) => {
-            if (this.state.ldaModel._completeSweeps > 0) {
+            if (this.state.ldaModel.scheduler.totalCompletedSweeps > 0) {
                 e.preventDefault()
                 e.returnValue = ''
             }
@@ -263,9 +263,7 @@ class App extends Component<AppProps, AppStates> {
         }).then((result) => {
             result.modelUploaded()
             this.setState({ldaModel: result});
-            // d3 controls itteration display, so this is the only
-            // way to update it.
-            d3.select("#iters").text(result._completeSweeps);
+            document.getElementById("iters")!.innerText = result.scheduler.totalCompletedSweeps.toString();
         }, (reject) => {
             alert(reject)
         })
@@ -403,7 +401,7 @@ class App extends Component<AppProps, AppStates> {
         switch (this.state.selectedTab) {
             case "docs-tab":
                 DisplayPage = <TopicDoc
-                    ldaModel={this.state.ldaModel}                   
+                    ldaModel={this.state.ldaModel}
                 />;
                 break;
             case "corr-tab":
@@ -475,9 +473,7 @@ class App extends Component<AppProps, AppStates> {
 
                 <div id="main" style={{display: "flex", flexDirection: "column", height: "100%"}}>
 
-                    <TopBar completeSweeps={this.state.ldaModel._completeSweeps}
-                            requestedSweeps={this.state.ldaModel._requestedSweeps}
-                            numTopics={this.state.ldaModel.numTopics}
+                    <TopBar numTopics={this.state.ldaModel.numTopics}
                             onClick={this.runIterationsClick.bind(this)}
                             updateNumTopics={this.onTopicsChange.bind(this)}
                             sweepParameter={this.state.sweepParameter}
@@ -485,7 +481,6 @@ class App extends Component<AppProps, AppStates> {
                             bigrams={this.changeBigramStatus.bind(this)}
                             onChange={this.changeSweepAmount.bind(this)}
                             stopButtonClick={this.state.ldaModel.stopSweeps.bind(this.state.ldaModel)}
-                            iter={this.state.ldaModel._completeSweeps}
                             modelIsRunning={this.state.ldaModel.modelIsRunning}
                             onDocumentFileChange={this.onDocumentFileChange.bind(this)}
                             onStopwordFileChange={this.onStopwordFileChange.bind(this)}

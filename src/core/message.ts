@@ -40,7 +40,7 @@ export function displayMessage(message: string, timeout: number = 0, callback?: 
     if (typeof callback === "function") {
         let listener = (e: MessageEvent<Message>) => {
             if (e.origin === window.location.origin && e.data.target === "statusAck") {
-                console.log("Status message update took",new Date().getTime()-time.getTime(),"ms")
+                // console.log("Status message update took",new Date().getTime()-time.getTime(),"ms")
                 callback()
                 window.removeEventListener("message", listener)
             }
@@ -50,7 +50,7 @@ export function displayMessage(message: string, timeout: number = 0, callback?: 
         promise = new Promise<void>((resolve) => {
             let listener = (e: MessageEvent<Message>) => {
                 if (e.origin === window.location.origin && e.data.target === "statusAck") {
-                    console.log("Status message update took",new Date().getTime()-time.getTime(),"ms")
+                    // console.log("Status message update took",new Date().getTime()-time.getTime(),"ms")
                     resolve()
                     window.removeEventListener("message", listener)
                 }

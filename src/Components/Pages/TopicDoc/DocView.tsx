@@ -36,7 +36,7 @@ export class DocView extends React.Component<DocViewProps, DocViewState> {
         if (topic === -1) return <div>{originalText}</div>; // No topic selected
 
         // don't highlight words when no iterations have been trained
-        if (this.props.ldaModel._completeSweeps === 0) return <div>{originalText}</div>;
+        if (this.props.ldaModel.scheduler.totalCompletedSweeps === 0) return <div>{originalText}</div>;
 
         const tokens = this.props.ldaModel.textToTokenSaliences(originalText, topic)
 
