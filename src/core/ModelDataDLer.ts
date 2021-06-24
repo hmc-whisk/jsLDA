@@ -1,7 +1,6 @@
 import {topNWords, saveFile} from '../funcs/utilityFunctions'
 import * as d3 from "d3"
-import LDAModel, {LDADocument} from "./LDAModel";
-import exp from "constants";
+import {LDAModel, LDADocument} from "./LDAModel";
 
 /**
  * A class that allows users to download information about an LDA model
@@ -24,7 +23,7 @@ export class LDAModelDataDLer {
     /**
      * Truncates number to 8 digits
      */
-    _eightDigits: (n:number) => string = d3.format(".8");
+    _eightDigits: (n: number) => string = d3.format(".8");
 
     constructor(model: LDAModel, annotationHolder: { annotations: string[] }) {
         this._model = model;
@@ -67,10 +66,10 @@ export class LDAModelDataDLer {
             let topicMeans = d3
                 // @ts-ignore: TS2339. This function exists
                 .nest()
-                .key(function (d:LDADocument) {
+                .key(function (d: LDADocument) {
                     return d.date;
                 })
-                .rollup(function (d:typeof topicProportions) {
+                .rollup(function (d: typeof topicProportions) {
                     return d3
                         .mean(d, function (x) {
                             return x.p
@@ -283,12 +282,12 @@ export class LDAModelDataDLer {
      *  - For every catagory - catagory label: the average topic proportion for
      *    documents with that label.
      */
-    topicBarDownload = (metaField:string) => {
+    topicBarDownload = (metaField: string) => {
         // get the list of categories without needing to parse entire form again
         let sel = document.getElementById("categorySelect") as HTMLSelectElement;
-        let options=sel.options;
+        let options = sel.options;
 
-        let categories:string[] = []
+        let categories: string[] = []
         for (let i = 0; i < options.length; i++) {
             categories.push(options[i].text);
         }
@@ -301,12 +300,12 @@ export class LDAModelDataDLer {
         barPlotCSV += "\n"
 
         // First gather all the data for current md field.
-        let all_data:{label:string,value:number}[][] = []
+        let all_data: { label: string, value: number }[][] = []
         for (let i = 0; i < categories.length; i++) {
             let averages = this._model.topicAvgsForCatagory(
                 metaField, categories[i]);
 
-            let data:{label:string,value:number}[] = []
+            let data: { label: string, value: number }[] = []
             for (let [topic, value] of Object.entries(averages)) {
                 let topicLabel = "[" + topic + "] " + topNWords(
                     this._model.topicWordCounts[parseInt(topic)], 3);
@@ -338,14 +337,14 @@ export class LDAModelDataDLer {
      *  - for every topic - topic x: the the average proportion of that topic
      *    over every document in that catagory.
      */
-    barPlotValueDownload = (metaField:string) => {
+    barPlotValueDownload = (metaField: string) => {
 
         // First gather all the data for current md field.
-        let all_data:{label:string,value:number}[][] = []
+        let all_data: { label: string, value: number }[][] = []
         for (let i = 0; i < this._model.numTopics; i++) {
             let averages = this._model.metaTopicAverages(
                 metaField, i);
-            let data:{label:string,value:number}[] = []
+            let data: { label: string, value: number }[] = []
             for (let [key, value] of Object.entries(averages)) {
                 data.push({"label": key, "value": value})
             }

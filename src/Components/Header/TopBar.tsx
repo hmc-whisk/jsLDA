@@ -8,8 +8,6 @@ import './header.css';
 import {StatusDisplay} from "./Status";
 
 interface TopBarProps {
-    completeSweeps: number,
-    requestedSweeps: number,
     numTopics: number,
     onClick: () => void,
     updateNumTopics: (val: string) => void,
@@ -18,7 +16,6 @@ interface TopBarProps {
     bigrams: (bigramStatus: boolean) => void,
     onChange: (val: string) => void,
     stopButtonClick: () => void,
-    iter: number,
     modelIsRunning: boolean,
     onDocumentFileChange: (event: ChangeEvent<HTMLInputElement>) => void,
     onStopwordFileChange: (event: ChangeEvent<HTMLInputElement>) => void,
@@ -43,7 +40,7 @@ interface TopBarState {
 
 export class TopBar extends React.Component<TopBarProps, TopBarState> {
 
-    constructor(props:TopBarProps) {
+    constructor(props: TopBarProps) {
         super(props);
 
         this.state = {
@@ -239,21 +236,21 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
         return (
             <div id="form" className="top">
                 <form onSubmit={this.handleSubmit.bind(this)} className="topForm">
-                    <label htmlFor="number">Enter Number of Iterations: &nbsp;</label>
+                    <label htmlFor="number">Number of Iterations &nbsp;</label>
 
                     <input onChange={this.handleChange.bind(this)} id="number" type="number"
                            value={this.state.formValue}
-                           placeholder="# Sweeps" min="1" max="100000" required/>
-
-                    <button type="submit" id="sweep" className="darkButton">Run {this.props.sweepParameter} iterations
+                           placeholder="# Sweeps" min="1" max="100000" required width={3}/>
+                    &nbsp;
+                    <button type="submit" id="sweep" className="darkButton"
+                            disabled={this.props.modelIsRunning}>Run
                     </button>
 
                     <button id="stopSweep" onClick={this.handleClick.bind(this)} className="darkButton"
                             disabled={!this.props.modelIsRunning}>Stop
                     </button>
-
-                    Iterations:<span id="iters"> {this.props.iter} </span>
-
+                    &nbsp;
+                    Current: <span id="iters">0</span>
 
                 </form>
                 <StatusDisplay/>
