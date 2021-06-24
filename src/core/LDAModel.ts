@@ -1849,7 +1849,8 @@ class RollingAvg {
 }
 
 /**
- * a helper class for scheduling sweeps
+ * a helper class for scheduling sweeps based on UI and posting update status messages.
+ * it also updates the display for current number of iterations through raw HTML selectors.
  */
 class SweepScheduler {
     totalCompletedSweeps: number;
@@ -1868,9 +1869,19 @@ class SweepScheduler {
         this.timeTaken = new RollingAvg(50);
     }
 
+    /**
+     * performs number of sweeps as requested, or until the user has hit the stop button
+     * @param n - the number of sweeps to schedule
+     */
+
     sweep(n: number) {
         this.remainingSweeps += n;
         this.model.modelIsRunning = true;
+        // this is necessary because the stop button relies on modelIsRunning, which is not a
+        // react state and a forced render is needed. there is probably no point in
+        // re-rendering the entire page (only TopBar needs to be re-rendered), but
+        // this function call here is very infrequent so it should be fine
+        // (here, not sure about the performance impact in other places)
         this.model.updateWebpage();
         let start = new Date().getTime()
         this.sweepLoop().then(
@@ -1883,7 +1894,7 @@ class SweepScheduler {
                 this.shouldStop = false;
 
                 this.model.modelIsRunning = false
-                this.model.sortTopicWords();
+                this.model.sortTopicWords(); // this function calls updateWebpage()
 
                 // copied from previous code, unsure what it does
                 this.model._maxTopicSaliency = new Array(this.model.numTopics);
@@ -1908,6 +1919,11 @@ class SweepScheduler {
         }
     }
 
+    /**
+     * stop the running loop. note that it's possible for this function to be called in the middle of a sweep
+     * (more precisely, right after the status message update but before the actual sweep computation), in which case the
+     * current sweep will not be interrupted.
+     */
     stop() {
         if (this.remainingSweeps > 0) {
             // we want to set this flag only in the case of interruption
@@ -1915,6 +1931,9 @@ class SweepScheduler {
         }
     }
 
+    /**
+     * reset the scheduler to initial state
+     */
     reset() {
         this.totalCompletedSweeps = 0;
         this.shouldStop = false;
