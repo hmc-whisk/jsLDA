@@ -77,7 +77,6 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
                         levelsToDisplay={1}
                         nodeStyle={{ paddingLeft: 5, paddingRight: 5 }}
                         valueFn={n=>n.toFixed(2) + "%"}
-                        valueUnit={(this.props.ldaModel.selectedTopic).toString()}
                         tooltipOffsetY={160}
                         tooltipOffsetX={330}
                         tooltipPlacement="top"
