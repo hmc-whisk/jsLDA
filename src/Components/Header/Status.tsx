@@ -1,4 +1,4 @@
-import {Component, CSSProperties} from "react";
+import React, {Component, CSSProperties} from "react";
 import {Message, StatusMessage, StatusMessageAck} from "core";
 
 interface StatusDisplayProps {
