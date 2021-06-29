@@ -5,24 +5,27 @@ import React from "react";
 import TreeMap, { ColorModel } from "react-d3-treemap";
 import { topNWords } from "funcs/utilityFunctions";
 import { LDAModel } from 'core'
-import {Tree} from "react-bootstrap-icons";
+
+/**
+ * @summary Component for Visualization page
+ * @requires
+ *  @prop ldaModel
+ *
+ */
 
 interface topicTreemapProps{
     ldaModel:LDAModel
 }
 
 interface topicTreemapState{
-    treeData:any
 }
 
 export class TopicTreemap extends React.Component<topicTreemapProps, topicTreemapState> {
     constructor(props: topicTreemapProps) {
         super(props);
-        this.state={
-            treeData:''
-        }
       }
 
+    // helper function to calculate the probalibity of words per topic
     topWordsProbability(wordsList:Array<string>){
         type wordProbPair = {
             name: string;
@@ -54,19 +57,18 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
         )
     }
 
+    // create treemap when a topic is selected
     createTreeMap(){
+        // get data ready
         let topic = this.props.ldaModel.selectedTopic;
         let topWordsString = topNWords(
           this.props.ldaModel.topicWordCounts[topic], 10);
         let topWordsList = topWordsString.split(" ");
         let treedata = this.topWordsProbability(topWordsList);
-        console.log(treedata)
 
         return <div>
                     treemap[help instruction]
-                    topic
                     <TreeMap<typeof treedata>
-                        // id="topicTreeMap"
                         height={500}
                         width={600}
                         data={treedata}
@@ -82,9 +84,7 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
                         key={Math.random()} // force recreate element when rerender
                     />
             </div>
-
     }
-
 
     render() {
         if (this.props.ldaModel.selectedTopic === -1) {
