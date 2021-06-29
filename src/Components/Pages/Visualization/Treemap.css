@@ -11,3 +11,7 @@ li {
 #rect-0{
   visibility: hidden;
 }
+
+text[clip-path="url(#clip-myTreeMap-0)"] tspan {
+  fill: black;
+}
