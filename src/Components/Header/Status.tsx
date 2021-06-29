@@ -87,7 +87,7 @@ export class StatusDisplay extends Component<StatusDisplayProps, StatusDisplaySt
     render() {
         return <div style={
             {
-                "fontFamily": '"Courier New", Courier,monospace',
+                "fontFamily": '"Roboto Mono","Courier New",Courier,monospace',
                 "overflowX": "hidden",
                 "overflowY": "clip"
             } as CSSProperties}>
