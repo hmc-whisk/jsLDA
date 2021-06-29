@@ -5,6 +5,7 @@ import React from "react";
 import TreeMap, { ColorModel } from "react-d3-treemap";
 import { topNWords } from "funcs/utilityFunctions";
 import { LDAModel } from 'core'
+import {Tree} from "react-bootstrap-icons";
 
 interface topicTreemapProps{
     ldaModel:LDAModel
@@ -14,7 +15,7 @@ interface topicTreemapState{
     treeData:any
 }
 
-export class TopicTreemap extends React.Component<topicTreemapProps, topicTreemapState> {   
+export class TopicTreemap extends React.Component<topicTreemapProps, topicTreemapState> {
     constructor(props: topicTreemapProps) {
         super(props);
         this.state={
@@ -42,7 +43,7 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
             }
         return data;
     }
-    
+
     noTopicSelected() {
         return (
             <div id="pages">
@@ -60,17 +61,15 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
         let topWordsList = topWordsString.split(" ");
         let treedata = this.topWordsProbability(topWordsList);
         console.log(treedata)
-        
 
-        return (
-            <div>
+        return <div>
                     treemap[help instruction]
                     topic
-                    <TreeMap
-                        id="topicTreeMap"
+                    <TreeMap<typeof treedata>
+                        // id="topicTreeMap"
                         height={500}
                         width={600}
-                        data={this.topWordsProbability(topWordsList)}
+                        data={treedata}
                         colorModel={ColorModel.OneEachChildren}
                         paddingInner={3}
                         levelsToDisplay={1}
@@ -80,9 +79,10 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
                         tooltipOffsetY={160}
                         tooltipOffsetX={330}
                         tooltipPlacement="top"
+                        key={Math.random()} // force recreate element when rerender
                     />
             </div>
-        )
+
     }
 
 
@@ -90,7 +90,7 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
         if (this.props.ldaModel.selectedTopic === -1) {
             return this.noTopicSelected()
         }
-        
+
         return (
             <div id="pages">
                 <div id="tM-page" className="page">
