@@ -30,7 +30,7 @@ export class PageController extends React.Component<PageControllerProps,PageCont
     }
 
     /**
-     * @summary Dynamic buttons letting you return to first page
+     * @summary Dynamic buttons letting you return to first page and previous page
      */
     get firstPageButtons() {
         if (this.props.currentPage === 1) {
@@ -44,7 +44,7 @@ export class PageController extends React.Component<PageControllerProps,PageCont
     }
 
     /**
-     * @summary Dynamic buttons letting you skip to last page
+     * @summary Dynamic buttons letting you skip to last page and next page
      */
     get lastPageButtons() {
         if (this.props.currentPage === this.props.lastPage) {
@@ -58,7 +58,7 @@ export class PageController extends React.Component<PageControllerProps,PageCont
     }
 
     /**
-     * @summary Dynamic buttons letting you go to next and previous page
+     * @summary Dynamic buttons letting you go to previous few and next few pages
      */
     get currentPageButtons() {
         var buttons = [];
