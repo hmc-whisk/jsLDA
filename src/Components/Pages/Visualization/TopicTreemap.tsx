@@ -10,9 +10,16 @@ interface topicTreemapProps{
     ldaModel:LDAModel
 }
 
-export class TopicTreemap extends React.Component<topicTreemapProps> {   
+interface topicTreemapState{
+    treeData:any
+}
+
+export class TopicTreemap extends React.Component<topicTreemapProps, topicTreemapState> {   
     constructor(props: topicTreemapProps) {
         super(props);
+        this.state={
+            treeData:''
+        }
       }
 
     topWordsProbability(wordsList:Array<string>){
@@ -45,14 +52,16 @@ export class TopicTreemap extends React.Component<topicTreemapProps> {
             </div>
         )
     }
-    
+
     createTreeMap(){
         let topic = this.props.ldaModel.selectedTopic;
         let topWordsString = topNWords(
           this.props.ldaModel.topicWordCounts[topic], 10);
         let topWordsList = topWordsString.split(" ");
-        let treeData = this.topWordsProbability(topWordsList);
-        console.log(treeData);
+        let treedata = this.topWordsProbability(topWordsList);
+        console.log(treedata)
+        
+
         return (
             <div>
                     treemap[help instruction]
@@ -61,19 +70,21 @@ export class TopicTreemap extends React.Component<topicTreemapProps> {
                         id="topicTreeMap"
                         height={500}
                         width={600}
-                        data={treeData}
+                        data={this.topWordsProbability(topWordsList)}
                         colorModel={ColorModel.OneEachChildren}
                         paddingInner={3}
-                        levelsToDisplay={2}
+                        levelsToDisplay={1}
                         nodeStyle={{ paddingLeft: 5, paddingRight: 5 }}
                         valueFn={n=>n.toFixed(2) + "%"}
-                        tooltipOffsetY={140}
+                        valueUnit={(this.props.ldaModel.selectedTopic).toString()}
+                        tooltipOffsetY={160}
                         tooltipOffsetX={330}
                         tooltipPlacement="top"
                     />
             </div>
         )
     }
+
 
     render() {
         if (this.props.ldaModel.selectedTopic === -1) {
