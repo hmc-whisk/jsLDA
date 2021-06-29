@@ -7,3 +7,7 @@ ul.no-bullets {
 li {
   padding: 0 0 10px;
 }
+
+#rect-0{
+  visibility: hidden;
+}

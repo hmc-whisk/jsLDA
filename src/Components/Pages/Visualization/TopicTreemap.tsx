@@ -62,7 +62,7 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
         // get data ready
         let topic = this.props.ldaModel.selectedTopic;
         let topWordsString = topNWords(
-          this.props.ldaModel.topicWordCounts[topic], 10);
+          this.props.ldaModel.topicWordCounts[topic], 20);
         let topWordsList = topWordsString.split(" ");
         let treedata = this.topWordsProbability(topWordsList);
 
@@ -70,16 +70,19 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
                     treemap[help instruction]
                     <TreeMap<typeof treedata>
                         height={500}
-                        width={600}
+                        width={750}
                         data={treedata}
                         colorModel={ColorModel.OneEachChildren}
                         paddingInner={3}
                         levelsToDisplay={1}
-                        nodeStyle={{ paddingLeft: 5, paddingRight: 5 }}
+                        nodeStyle={{paddingLeft: 10, paddingRight: 5}}
                         valueFn={n=>n.toFixed(2) + "%"}
                         tooltipOffsetY={160}
                         tooltipOffsetX={330}
                         tooltipPlacement="top"
+                        paddingOuter={10}
+                        lightNodeBorderColor="white"
+                        disableBreadcrumb = {true}
                         key={Math.random()} // force recreate element when rerender
                     />
             </div>
