@@ -8,7 +8,7 @@ import * as d3 from 'd3';
 import {getObjectKeys} from 'funcs/utilityFunctions'
 import {LDAModel, LDAModelDataDLer} from 'core'
 
-import {TopicDoc, Correlation, HomePage, TopicOverviewPage, DLPage, VocabTable, TimeSeries} from 'Components/Pages'
+import {TopicDoc, Correlation, HomePage, TopicOverviewPage, DLPage, VocabTable, TimeSeries, TopicTreemap} from 'Components/Pages'
 import {NavBar, TopBar} from 'Components/Header'
 import {SideBar} from 'Components/SideBar';
 
@@ -461,6 +461,10 @@ class App extends Component<AppProps, AppStates> {
                     ldaModel={this.state.ldaModel}
                     annotations={this.annotations}
                     getTopicCorrelations={this.state.ldaModel.getTopicCorrelations.bind(this.state.ldaModel)}/>
+                break;
+            case "visual-tab":
+                DisplayPage = <TopicTreemap
+                    ldaModel={this.state.ldaModel}/>
                 break;
             default:
                 DisplayPage = null;
