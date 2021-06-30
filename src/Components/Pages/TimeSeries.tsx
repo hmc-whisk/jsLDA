@@ -30,10 +30,10 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
         super(props);
         this.state = {
             // Constants for metadata time series views.
-            timeSeriesWidth: 600,
+            timeSeriesWidth: 850,
             timeSeriesHeight: 75,
             timeSeriesHeightTopic: 300,
-            numberOfBins: 30,
+            numberOfBins: 35,
             fillColor: getComputedStyle(document.documentElement).getPropertyValue('--color2'),
             errorBarColor: getComputedStyle(document.documentElement).getPropertyValue('--color2Light'),
             strokeColor: getComputedStyle(document.documentElement).getPropertyValue('--color4'),
@@ -299,8 +299,10 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
             // Topic Label
             this.topicTimeGroups[0]
                 .append("text")
-                .attr("transform", "translate(5,20)")
-                .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3));
+                .attr("transform", "translate(360, 0)")
+                .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3))
+                .style("font-size", 25)
+                .attr("font-weight", "bold");
             // X axis
             this.topicTimeGroups[0]
                 .append("g")
@@ -321,16 +323,16 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
                 .style("text-anchor", "middle")
                 .attr("transform", "translate(-10,-10)")
                 .text("Proportion")
-                .attr("font-weight", 'bold');
-
+                .attr("font-weight", 'bold')
+                .style("font-size", "15");
 
             this.topicTimeGroups[0]
                 .append("text")
                 .style("text-anchor", "middle")
                 .attr("transform", "translate(" + (this.state.timeSeriesWidth / 2 - 20) + "," + (this.state.timeSeriesHeightTopic + 80) + ")")
                 .text("Time")
-                .attr("font-weight", 'bold');
-
+                .attr("font-weight", 'bold')
+                .style("font-size", "15");
 
             let focus = this.topicTimeGroups[0].append("g")
                 .attr("class", "focus")
@@ -437,6 +439,7 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
         event.preventDefault();
 
         if (!event.target.value) event.target.value = "1"; // Protect from empty field
+        else if (parseInt(event.target.value) > 1000) event.target.value = "1000"
 
         this.setState({
             numberOfBins: Math.max(1, parseInt(event.target.value)),
@@ -460,15 +463,17 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
                     of bins that are used below.
                     Data for plots are available in downloads page.
                 </div>
-                <div>
-                    <label htmlFor="numberOfBins">Number of Bins:</label>
+                <div style={{position: "relative", left: 30, paddingBottom:0}}>
+                    <label htmlFor="numberOfBins"  >Number of Bins:</label>
                     <input
                         onChange={this.handleNumAvgChange.bind(this)}
                         type="number" id="numberOfBins"
                         value={this.state.numberOfBins}
+                        placeholder="# bins"
                         max="1000"
                         min="5"
                         step="5"
+                        style={{position:"relative", left:5}}
                     />
                 </div>
                 <div id="ts-page" className="page" ref={this._setRef.bind(this)}>
