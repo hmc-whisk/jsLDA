@@ -40,7 +40,7 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
             value: number;
           };
           let data: { name: string; children: wordProbPair[] } = {
-            name: "Top " + this.state.numberOfTopwords + " Word Probabilities",
+            name: "Top " + (this.state.numberOfTopwords ? this.state.numberOfTopwords: "") + " Word Probabilities",
             children: [],
           };
           for (let word of wordsList) {
