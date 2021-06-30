@@ -5,10 +5,8 @@ import React, { ChangeEvent } from "react";
 import TreeMap, { ColorModel } from "react-d3-treemap";
 import { topNWords } from "funcs/utilityFunctions";
 import { LDAModel } from 'core'
-
 import { scaleSequential } from "d3-scale";
 import * as chromatic from "d3-scale-chromatic";
-import { relative } from 'path/posix';
 
 /**
  * @summary Component for Visualization page
@@ -55,6 +53,7 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
         return data;
     }
 
+    //handle the change of number of top words
     numChange(event: ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
 
@@ -94,8 +93,8 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
                         levelsToDisplay={1}
                         nodeStyle={{paddingLeft: 10, paddingRight: 5, paddingTop:2}}
                         valueFn={n=>n.toFixed(2) + "%"}
-                        tooltipOffsetY={160}
-                        tooltipOffsetX={330}
+                        tooltipOffsetY={140}
+                        tooltipOffsetX={-40}
                         tooltipPlacement="top"
                         paddingOuter={0}
                         lightNodeBorderColor="white"
