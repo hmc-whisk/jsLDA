@@ -6,6 +6,9 @@ import TreeMap, { ColorModel } from "react-d3-treemap";
 import { topNWords } from "funcs/utilityFunctions";
 import { LDAModel } from 'core'
 
+import { scaleSequential } from "d3-scale";
+import * as chromatic from "d3-scale-chromatic";
+
 /**
  * @summary Component for Visualization page
  * @requires
@@ -36,7 +39,7 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
             value: number;
           };
           let data: { name: string; children: wordProbPair[] } = {
-            name: "wordProbs",
+            name: "Top Word Probabilities",
             children: [],
           };
           for (let word of wordsList) {
@@ -97,6 +100,10 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
                         lightNodeBorderColor="white"
                         disableBreadcrumb = {true}
                         key={Math.random()} // force recreate element when rerender
+                        // @ts-ignore
+                        customD3ColorScale={scaleSequential(
+                            chromatic.interpolateGnBu
+                        )}
                     />
             </div>
     }
