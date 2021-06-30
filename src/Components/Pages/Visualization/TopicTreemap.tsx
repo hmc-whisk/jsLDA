@@ -8,6 +8,7 @@ import { LDAModel } from 'core'
 
 import { scaleSequential } from "d3-scale";
 import * as chromatic from "d3-scale-chromatic";
+import { relative } from 'path/posix';
 
 /**
  * @summary Component for Visualization page
@@ -54,10 +55,10 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
         return data;
     }
 
-    handleNumAvgChange(event: ChangeEvent<HTMLInputElement>) {
+    numChange(event: ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
 
-        if (!event.target.value) event.target.value = "1"; // Protect from empty field
+        if (parseInt(event.target.value) > 30) event.target.value = "30";
 
         this.setState({
             numberOfTopwords: Math.max(1, parseInt(event.target.value)),
@@ -91,12 +92,12 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
                         colorModel={ColorModel.OneEachChildren}
                         paddingInner={3}
                         levelsToDisplay={1}
-                        nodeStyle={{paddingLeft: 10, paddingRight: 5}}
+                        nodeStyle={{paddingLeft: 10, paddingRight: 5, paddingTop:2}}
                         valueFn={n=>n.toFixed(2) + "%"}
                         tooltipOffsetY={160}
                         tooltipOffsetX={330}
                         tooltipPlacement="top"
-                        paddingOuter={10}
+                        paddingOuter={0}
                         lightNodeBorderColor="white"
                         disableBreadcrumb = {true}
                         key={Math.random()} // force recreate element when rerender
@@ -114,16 +115,19 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
         }
 
         return (
-            <div id="pages">
+            <div id="pages" style={{position: "relative", left: 30, paddingTop:20}}>
                 treemap[help instruction]
-                <div id="numWords" className="page">
+                <div id="numWords" className="page" style={{position: "relative", left: 0, paddingBottom:0}} >
+                    Number of Top Words:
                     <input
-                        onChange={this.handleNumAvgChange.bind(this)}
+                        onChange={this.numChange.bind(this)}
+                        placeholder="# top Wrods"
                         type="number" id="numberOfBins"
                         value={this.state.numberOfTopwords}
-                        max="30"
+                        max="300"
                         min="5"
-                        step="5"
+                        step="1"
+                        style={{position: "relative", left:5}}
                     />
                 </div>
                 <div id="tM-page" className="page">
