@@ -1,7 +1,7 @@
 // import * as d3 from "d3";
 import './Treemap.css';
 import "react-d3-treemap/dist/react.d3.treemap.css";
-import React from "react";
+import React, { ChangeEvent } from "react";
 import TreeMap, { ColorModel } from "react-d3-treemap";
 import { topNWords } from "funcs/utilityFunctions";
 import { LDAModel } from 'core'
@@ -18,11 +18,15 @@ interface topicTreemapProps{
 }
 
 interface topicTreemapState{
+    numberOfTopwords:number
 }
 
 export class TopicTreemap extends React.Component<topicTreemapProps, topicTreemapState> {
     constructor(props: topicTreemapProps) {
         super(props);
+        this.state={
+            numberOfTopwords:10
+        }
       }
 
     // helper function to calculate the probalibity of words per topic
@@ -47,6 +51,16 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
         return data;
     }
 
+    handleNumAvgChange(event: ChangeEvent<HTMLInputElement>) {
+        event.preventDefault();
+
+        if (!event.target.value) event.target.value = "1"; // Protect from empty field
+
+        this.setState({
+            numberOfTopwords: Math.max(1, parseInt(event.target.value)),
+        })
+    }
+
     noTopicSelected() {
         return (
             <div id="pages">
@@ -58,16 +72,15 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
     }
 
     // create treemap when a topic is selected
-    createTreeMap(){
+    createTreeMap(numTopwords:number){
         // get data ready
         let topic = this.props.ldaModel.selectedTopic;
         let topWordsString = topNWords(
-          this.props.ldaModel.topicWordCounts[topic], 20);
+          this.props.ldaModel.topicWordCounts[topic], numTopwords);
         let topWordsList = topWordsString.split(" ");
         let treedata = this.topWordsProbability(topWordsList);
 
         return <div>
-                    treemap[help instruction]
                     <TreeMap<typeof treedata>
                         height={500}
                         width={750}
@@ -95,8 +108,19 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
 
         return (
             <div id="pages">
+                treemap[help instruction]
+                <div id="numWords" className="page">
+                    <input
+                        onChange={this.handleNumAvgChange.bind(this)}
+                        type="number" id="numberOfBins"
+                        value={this.state.numberOfTopwords}
+                        max="30"
+                        min="5"
+                        step="5"
+                    />
+                </div>
                 <div id="tM-page" className="page">
-                    {this.createTreeMap()}
+                    {this.createTreeMap(this.state.numberOfTopwords)}
                 </div>
             </div>
         )
