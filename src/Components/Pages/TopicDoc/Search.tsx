@@ -44,7 +44,11 @@ export class Search extends React.Component<SearchProps,SearchState> {
      */
     search() {
         var searchResults = [];
+
         for (let i = 0; i < this.props.documents.length; i++) {
+            var currentID = this.props.documents[i].id.toLowerCase();
+            var lowerQuery = this.state.query.toLowerCase();
+
             for (let j = 0; j < this.props.documents[i].id.length - this.state.query.length; j++) {
                 if (this.props.documents[i].id[j,j + this.state.query.length] == this.state.query) {
                     searchResults.push(this.props.documents[i]);
