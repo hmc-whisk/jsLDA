@@ -124,8 +124,8 @@ export class LDAModel {
     _specificityScale: d3.ScaleLinear<string, string>;
 
     scheduler: SweepScheduler;
-    _documentTopicSmoothing: number[];
-    _topicWordSmoothing: number;
+    _documentTopicSmoothing: number[]; // alpha
+    _topicWordSmoothing: number; // beta
     _optimizeInterval: number;
     _burninPeriod: number;
     _changeAlpha: boolean;
@@ -189,15 +189,15 @@ export class LDAModel {
         // {"originalOrder", "id", "date", "originalText", "tokens", "topicCounts", "metadata"}
         this.documents = [];
 
-        this._documentTopicSmoothing = zeros(numTopics).fill(0.1); // (used by sweep)
+        this._documentTopicSmoothing = new Array(numTopics).fill(0.1); // (used by sweep)
         this._topicWordSmoothing = 0.01; // (used by sweep)
 
 
         this.documentType = "text/csv";
         this.modelIsRunning = false;
 
-        this._optimizeInterval = 50;
-        this._burninPeriod = 200;
+        this._optimizeInterval = 25;
+        this._burninPeriod = 100;
         this._changeAlpha = false;
 
         this._maxTopicSaliency = new Array(this.numTopics)
