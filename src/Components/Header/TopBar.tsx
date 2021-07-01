@@ -194,7 +194,7 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                 </div>
                             </div>
 
-                            <div className="configMenu">
+                            {/* <div className="configMenu">
                                 <h3> Vocabulary </h3>
                                 <div>
                                     <h6>
@@ -208,7 +208,7 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                     </h6>
                                     <i>Allows bigrams to be accounted for in the model.</i>
                                 </div>
-                            </div>
+                            </div> */}
 
 
                             <Uploader
@@ -222,10 +222,10 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                 docName={this.props.docName}
                             />
 
-                            <CustomTokenizer
+                            {/* <CustomTokenizer
                                 tokenRegex={this.props.tokenRegex}
                                 changeTokenRegex={this.props.changeTokenRegex}
-                            />
+                            /> */}
                         </div>
                     </div>
                 }/>

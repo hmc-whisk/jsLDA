@@ -53,21 +53,21 @@ export function Uploader(props: UploaderProps) {
                     <form onSubmit={(event) => {
                         confirmReset(event, props.onFileUpload);
                     }}>
-                        <label>Default Documents: </label>
+                        <label>Choose your Documents: </label>
                         <select id="defaultDoc" onChange={(event) => props.onDefaultDocChange(event)}
                                 value={props.docName}>
                             <option value="Movie Plots">Movie Plots</option>
                             <option value="State Of The Union">State Of The Union</option>
                             <option value="Yelp Reviews">Yelp Reviews</option>
                         </select>
-                        <input type="submit" value="Reset" className="darkButton" disabled={props.modelIsRunning}/>
+                        {/* <input type="submit" value="Reset" className="darkButton" disabled={props.modelIsRunning}/> */}
                     </form>
 
                     <br/>
                     <form onSubmit={(event) => {
                         confirmReset(event, props.onFileUpload);
                     }}>
-                        <h5> Or use a custom collection: </h5>
+                        {/* <h5> Or use a custom collection: </h5>
                         <div className="fileInput">
                             <table>
                                 <tbody>
@@ -91,19 +91,19 @@ export function Uploader(props: UploaderProps) {
                                 </tr>
                                 </tbody>
                             </table>
-                        </div>
-                        <input
+                        </div> */}
+                        {/* <input
                             type="submit"
                             id="load-inputs"
                             value="Upload"
                             className="darkButton"
                             disabled={props.modelIsRunning || !isFileAdded("docs-file-input")}
-                        />
+                        /> */}
                     </form>
                 </div>
             </div>
 
-            <div className="configMenu">
+            {/* <div className="configMenu">
                 <h3>Model Upload</h3>
                 <div>
                     <h5> Upload a previously generated model: </h5>
@@ -119,7 +119,7 @@ export function Uploader(props: UploaderProps) {
                                disabled={props.modelIsRunning || !isFileAdded("saved-model-input")}/>
                     </form>
                 </div>
-            </div>
+            </div> */}
         </div>
 
     )
