@@ -34,8 +34,8 @@ export class PageController extends React.Component<PageControllerProps,PageCont
      */
     get firstPageButtons() {
         if (this.props.currentPage === 1) {
-            return ([<Pagination.First />,
-                <Pagination.Prev />]);
+            return ([<Pagination.First disabled />,
+                <Pagination.Prev disabled />]);
         }
         else {
             return ([<Pagination.First onClick={() => this.props.changePage(1)} />,
@@ -48,8 +48,8 @@ export class PageController extends React.Component<PageControllerProps,PageCont
      */
     get lastPageButtons() {
         if (this.props.currentPage === this.props.lastPage) {
-            return ([<Pagination.Next />,
-                <Pagination.Last />]);
+            return ([<Pagination.Next disabled />,
+                <Pagination.Last disabled />]);
         }
         else {
             return ([<Pagination.Next onClick={() => this.props.changePage(this.props.currentPage + 1)} />,
