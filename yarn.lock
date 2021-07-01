@@ -5823,6 +5823,11 @@ file-uri-to-path@1.0.0:
   resolved "https://registry.yarnpkg.com/file-uri-to-path/-/file-uri-to-path-1.0.0.tgz#553a7b8446ff6f684359c445f1e37a05dacc33dd"
   integrity sha512-0Zt+s3L7Vf1biwWZ29aARiVYLx7iMGnEUl9x33fbB/j3jR81u/O2LbqK+Bm1CDSNDKVtJ/YjwY7TUd5SkeLQLw==
 
+filesaver.js-npm@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/filesaver.js-npm/-/filesaver.js-npm-1.0.1.tgz#ae6d1d113194dce4fb50ac0d904a40eb451597c7"
+  integrity sha1-rm0dETGU3OT7UKwNkEpA60UVl8c=
+
 filesize@6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/filesize/-/filesize-6.1.0.tgz#e81bdaa780e2451d714d71c0d7a4f3238d37ad00"

@@ -16,10 +16,12 @@ store some binary (deflated text) data.
 
 import Dexie from 'dexie'
 import {compress, decompress} from './compression'
+import {displayMessage} from "./message";
 
 interface LDAModelData {
     key: string,
-    content: Uint8Array
+    content: Uint8Array,
+    contentType: string
 }
 
 // This is necessary for typescript type inferences
@@ -50,11 +52,12 @@ is an object, it will be passed into JSON.stringify() first, which implies that
 not all objects can be perfectly reconstructed from the storage, so some caution
 is required before passing arbitrary objects into this function.
  */
-export async function saveToStorage(key: string, data: string | object): Promise<void> {
+export async function saveToStorage(key: string, data: string | object, contentType: string = "text/plain"): Promise<void> {
     let compressed = await compress(data);
     await db.data.put({
         key,
-        content:compressed
+        contentType,
+        content: compressed
     })
 }
 
@@ -62,11 +65,14 @@ export async function saveToStorage(key: string, data: string | object): Promise
 Retrieve the data associated with the given key from the browser storage. If
 no data is associated with the given key, null is returned.
  */
-export async function getFromStorage(key:string):Promise<string|object|null>{
-    let compressed=await db.data.get(key)
-    if (compressed===undefined){
+export async function getFromStorage(key: string): Promise<{ data: string, contentType: string } | null> {
+    let compressed = await db.data.get(key)
+    if (compressed === undefined) {
         return null
     }
-    return await decompress(compressed.content)
+    return {
+        data: await decompress(compressed.content),
+        contentType: compressed.contentType
+    }
 
 }
