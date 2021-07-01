@@ -1,7 +1,8 @@
 import {zeros, getObjectKeys, truncate} from '../funcs/utilityFunctions'
 import * as d3 from 'd3';
 import XRegExp from "xregexp";
-import {displayMessage} from "./message";
+import {clearMessage, displayMessage} from "./message";
+import {saveToStorage} from "./storage";
 
 // This adds the Object.keys() function to some old browsers that don't support it
 if (!Object.keys) {
@@ -133,6 +134,7 @@ export class LDAModel {
     _memoMaxDocTime?: Date;
     _maxTopicSaliency: number[];
 
+    tokenTypes: { [key: string]: number, _current_type_index_: number };
 
     constructor(numTopics: number, forceUpdate: () => void) {
 
@@ -202,6 +204,10 @@ export class LDAModel {
 
         this._maxTopicSaliency = new Array(this.numTopics)
         // this.selectedTopicChange.bind(this);
+
+        this.tokenTypes = {
+            _current_type_index_: 0 // this is just a name that hopefully doesn't conflict with any of the actual tokens
+        }
 
         this.scheduler = new SweepScheduler(this)
     }
@@ -334,6 +340,19 @@ export class LDAModel {
             this._parseDoc(doc);
 
             this.sortTopicWords();
+
+            new Promise<void>(async (resolve, reject) => {
+                try {
+                    await displayMessage("Saving document", 0, "promise")
+                    await saveToStorage("document", doc,this.documentType)
+                    clearMessage()
+                    resolve()
+                } catch (e) {
+                    reject(e)
+                }
+            }).catch()
+
+
         }
     }
 
@@ -424,6 +443,10 @@ export class LDAModel {
                         topicCounts[topic] += 1;
                     }
                     tokens.push({word, topic, "isStopword": Boolean(isStopword)});
+
+                    if (!this.tokenTypes.hasOwnProperty(word)) {
+                        this.tokenTypes[word] = this.tokenTypes._current_type_index_++
+                    }
                 }
             });
 
@@ -980,6 +1003,7 @@ export class LDAModel {
         if (this._changeAlpha && this.scheduler.totalCompletedSweeps > this._burninPeriod && this._optimizeInterval !== 0 &&
             this.scheduler.totalCompletedSweeps % this._optimizeInterval === 0) {
             doOptimizeAlpha = true;
+            this._initializeHistograms()
         }
 
         for (let topic = 0; topic < this.numTopics; topic++) {
@@ -1078,7 +1102,7 @@ export class LDAModel {
      *  and create histograms for use in Dirichlet hyperparameter
      *  optimization.
      */
-    _initializeHistograms = () => {
+    _initializeHistograms() {
         let maxTokens = 0;
         // let totalTokens = 0;
         let seqLen;
