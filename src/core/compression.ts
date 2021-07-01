@@ -11,7 +11,7 @@ export async function compress(data: string | object): Promise<Uint8Array> {
     let zip = new jsZip();
 
     zip.file('data', toCompress, {
-        comment: typeof data === "object" ? "object" : "string"
+        comment: typeof data
     })
 
     return await zip.generateAsync({
@@ -26,7 +26,7 @@ export async function compress(data: string | object): Promise<Uint8Array> {
 /*
 The reverse operation of compress
  */
-export async function decompress(data: Uint8Array): Promise<string | object> {
+export async function decompress(data: Uint8Array): Promise<string> {
     let zip = new jsZip();
     await zip.loadAsync(data)
     let file = zip.file('data')
