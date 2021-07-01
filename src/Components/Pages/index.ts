@@ -5,6 +5,7 @@ import {TimeSeries} from './TimeSeries'
 import {VocabTable} from './VocabTable'
 import {DLPage} from './DLPage'
 import {TopicOverviewPage} from './TopicOverview/TopicOverviewPage'
+import {TopicTreemap} from './Visualization/TopicTreemap'
 
 
 export {
@@ -18,5 +19,6 @@ export {
     TimeSeries,
     VocabTable,
     DLPage,
-    TopicOverviewPage
+    TopicOverviewPage,
+    TopicTreemap
 }
