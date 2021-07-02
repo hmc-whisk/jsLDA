@@ -1,11 +1,12 @@
-import React from 'react';
-import Form from 'react-bootstrap/Form';
+import React, {KeyboardEvent} from 'react';
+import FormControl from 'react-bootstrap/FormControl';
+import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
 import './topicDoc.css';
-import type {LDAModel, SortedLDADocument} from "core";
+import type {LDAModel, LDADocument} from "core";
 
 interface SearchProps{
-    documents:SortedLDADocument[]
+    model:LDAModel
 }
 interface SearchState{
     query:string
@@ -18,24 +19,37 @@ interface SearchState{
  *  @state query
  */
 export class Search extends React.Component<SearchProps,SearchState> {
-    render() {
-        return (
-            <div>
-                <Form>
-                    <Form.Control type="text" placeholder="Search" value={this.state.query} onChange={this.handleChange} />
-                    <Button variant="outline-primary"
-                            onClick={() => this.search()}>Search</Button>
-                </Form>
-            </div>
-        )
+
+    constructor(props:SearchProps){
+        super(props);
+
+        this.state = {query: ''};
     }
 
-    /**
-     * @summary Changes the state as the search field is updated
-     * @param event 
-     */
-    handleChange(event) {
-        this.setState({query: event.target.value});
+    render() {
+        return (
+            <div style={{width:'50%', display:'inline-block'}}>
+
+                <InputGroup style={{display:'inline-flex', width:'100%'}}>
+                    <FormControl
+                        type="search"
+                        placeholder="Search for a document ID..."
+                        aria-label="Search-Query"
+                        aria-describedby="basic-addon2"
+                        onChange={e => this.setState({query: e.target.value})}
+                        onKeyPress={(e:KeyboardEvent<HTMLInputElement>) => {if (e.key === 'Enter') {
+                            // @ts-ignore
+                            this.setState({query: e.target.value});
+                            this.search();
+                        }}}
+                    />
+                    <Button variant="outline-secondary" id="button-addon2" onClick={this.search.bind(this)}>
+                        Search
+                    </Button>
+                </InputGroup>
+
+            </div>
+        )
     }
 
     /**
@@ -43,21 +57,20 @@ export class Search extends React.Component<SearchProps,SearchState> {
      * @returns Array of LDADocuments that fit the search query
      */
     search() {
-        var searchResults = [];
+        let searchResults: LDADocument[] = [];
+        let docs = this.props.model.documents;
 
-        for (let i = 0; i < this.props.documents.length; i++) {
-            var currentID = this.props.documents[i].id.toLowerCase();
-            var lowerQuery = this.state.query.toLowerCase();
+        for (let i = 0; i < docs.length; i++) {
+            let currentID = docs[i].id.toString().toLowerCase();
+            let lowerQuery = this.state.query.toLowerCase();
 
-            for (let j = 0; j < this.props.documents[i].id.length - this.state.query.length; j++) {
-                if (this.props.documents[i].id[j,j + this.state.query.length] == this.state.query) {
-                    searchResults.push(this.props.documents[i]);
-                    break;
-                }
+            if (currentID.indexOf(lowerQuery) >= 0) {
+                searchResults.push(docs[i]);
             }
         }
 
-        return (searchResults);
+        // return (searchResults);
+        console.log(searchResults);
     }
 }
 

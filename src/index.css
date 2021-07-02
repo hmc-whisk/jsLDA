@@ -82,6 +82,8 @@ text { font-size: small; vertical-align: baseline; } */
   display: flex;
   flex-direction: column;
   height: 100%;
+  padding-left: 1em;
+  padding-right: 1em;
 }
 
 #tooltip { 
