@@ -38,9 +38,9 @@ export class PageController extends React.Component<PageControllerProps,PageCont
                 <Pagination.Item disabled>{'<'}</Pagination.Item>]);
         }
         else {
-            return ([<Pagination.Item key={1}
+            return ([<Pagination.Item
                         onClick={() => this.props.changePage(1)}>{'<<'}</Pagination.Item>,
-                    <Pagination.Item key={this.props.currentPage - 1}
+                    <Pagination.Item
                         onClick={() => this.props.changePage(this.props.currentPage - 1)}>{'<'}</Pagination.Item>]);
         }
     }
@@ -54,9 +54,9 @@ export class PageController extends React.Component<PageControllerProps,PageCont
                 <Pagination.Item disabled>{'>>'}</Pagination.Item>]);
         }
         else {
-            return ([<Pagination.Item key={this.props.currentPage + 1}
+            return ([<Pagination.Item
                         onClick={() => this.props.changePage(this.props.currentPage + 1)}>{'>'}</Pagination.Item>,
-                    <Pagination.Item key={this.props.lastPage}
+                    <Pagination.Item
                         onClick={() => this.props.changePage(this.props.lastPage)}>{'>>'}</Pagination.Item>]);
         }
     }
