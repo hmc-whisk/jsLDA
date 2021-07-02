@@ -34,12 +34,14 @@ export class PageController extends React.Component<PageControllerProps,PageCont
      */
     get firstPageButtons() {
         if (this.props.currentPage === 1) {
-            return ([<Pagination.First disabled />,
-                <Pagination.Prev disabled />]);
+            return ([<Pagination.Item disabled>{'<<'}</Pagination.Item>,
+                <Pagination.Item disabled>{'<'}</Pagination.Item>]);
         }
         else {
-            return ([<Pagination.First onClick={() => this.props.changePage(1)} />,
-                <Pagination.Prev onClick={() => this.props.changePage(this.props.currentPage - 1)} />]);
+            return ([<Pagination.Item key={1}
+                        onClick={() => this.props.changePage(1)}>{'<<'}</Pagination.Item>,
+                    <Pagination.Item key={this.props.currentPage - 1}
+                        onClick={() => this.props.changePage(this.props.currentPage - 1)}>{'<'}</Pagination.Item>]);
         }
     }
 
@@ -48,12 +50,14 @@ export class PageController extends React.Component<PageControllerProps,PageCont
      */
     get lastPageButtons() {
         if (this.props.currentPage === this.props.lastPage) {
-            return ([<Pagination.Next disabled />,
-                <Pagination.Last disabled />]);
+            return ([<Pagination.Item disabled>{'>'}</Pagination.Item>,
+                <Pagination.Item disabled>{'>>'}</Pagination.Item>]);
         }
         else {
-            return ([<Pagination.Next onClick={() => this.props.changePage(this.props.currentPage + 1)} />,
-                <Pagination.Last onClick={() => this.props.changePage(this.props.lastPage)}/>]);
+            return ([<Pagination.Item key={this.props.currentPage + 1}
+                        onClick={() => this.props.changePage(this.props.currentPage + 1)}>{'>'}</Pagination.Item>,
+                    <Pagination.Item key={this.props.lastPage}
+                        onClick={() => this.props.changePage(this.props.lastPage)}>{'>>'}</Pagination.Item>]);
         }
     }
 
