@@ -17,10 +17,20 @@
 .docNav {
     float: left;
     height: 42px;
+    position: relative;
+    width: 100%;
+    margin-top: 2em;
+    margin-bottom: 2em;
+}
+
+.page-selector {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 #docPage {
-    margin: 50px 15px 0px 0px
+    margin: 50px 0px 0px 0px
 }
 
 #metaDataButton {
@@ -103,12 +113,12 @@ div.accordion {
 
 .pagination li:first-child {
     border-top-left-radius: 5px;
-    border-bottom-left-radius: 0px;
+    border-bottom-left-radius: 5px;
 }
 
 .pagination li:last-child {
     border-top-right-radius: 5px;
-    border-bottom-right-radius: 0px;
+    border-bottom-right-radius: 5px;
 }
 
 .pagination li {
@@ -116,9 +126,19 @@ div.accordion {
     justify-content: center;
     border: 2px solid var(--color1);
     height: 110%;
+    padding-bottom: 0;
+    margin-right: -1px;
+    margin-left: -1px;
 }
 
-.pagination li:not(.active) a {
+.page-item.disabled .page-link {
+    color: lightgray;
+    background-color: var(--color3);
+    border: 2px;
+    margin-left: 0px;
+}
+
+.pagination li:not(.active) a, .pagination li:not(.active) span {
     display: inline-block;
     padding: 8px 16px;
 }
@@ -128,16 +148,16 @@ div.accordion {
 }
 
 .pagination li.page-item.active {
-    background-color: var(--color2);
+    background-color: var(--color1);
     color: white;
     text-decoration: none;
-    border: 3px solid var(--color1);
+    border: 2px solid var(--color1);
     padding: 8px 16px;
 }
 
 .pagination li.page-item.active span.page-link {
     padding: 0px;
-    background-color: var(--color2);
+    background-color: var(--color1);
     border: none;
     z-index: 1;
 }
@@ -150,7 +170,7 @@ div.accordion {
 .pagination li.page-item:not(.active) .page-link:hover {
     background-color: var(--color1);
     color: black;
-    border: 1px solid var(--color1);
+    border: 0px solid var(--color1);
 }
 
 .pagination span.sr-only {
