@@ -19,7 +19,7 @@ interface PageControllerState{}
 export class PageController extends React.Component<PageControllerProps,PageControllerState> {
     render() {
         return (
-            <div>
+            <div className="page-selector">
                 <Pagination>
                     {this.firstPageButtons}
                     {this.currentPageButtons}
