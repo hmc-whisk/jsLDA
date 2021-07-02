@@ -1,6 +1,7 @@
 import React, {Component, CSSProperties} from 'react';
 import PageController from './PageController';
 import DocAccordion from './DocAccordion';
+import Search from './Search';
 import LabeledToggleButton from 'Components/LabeledToggleButton';
 import './topicDoc.css';
 import type {LDAModel, SortedLDADocument} from "core";
@@ -98,18 +99,15 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
         return (
             <div id="docPage">
                 <div>
+                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'0.5em'}}>
+                        <Search model={this.props.ldaModel} />
 
-                    {this.toggleMetaDataButton()}
-                    {this.toggleSalienceDataButton()}
-
-                    <div className="docNav">
-                        <PageController
-                            currentPage={this.state.currentPage}
-                            changePage={this.changePage.bind(this)}
-                            lastPage={this.lastPage}/>
+                        <div style={{display:'flex'}}>
+                            {this.toggleMetaDataButton()}
+                            {this.toggleSalienceDataButton()}
+                        </div>
                     </div>
-
-
+                    
                     <DocAccordion
                         documents={this.state.useSalience ?
                             this.sortedDocumentsSalient :
@@ -120,6 +118,13 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                         showMetaData={this.state.showMetaData}
                         useSalience={this.state.useSalience}
                     />
+
+                    <div className="docNav">
+                        <PageController
+                            currentPage={this.state.currentPage}
+                            changePage={this.changePage.bind(this)}
+                            lastPage={this.lastPage}/>
+                    </div>
                 </div>
             </div>
         )
@@ -131,8 +136,9 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                 id="toggleMetaData"
                 label="Show Metadata"
                 style={{
-                    float: "right",
-                    borderTopRightRadius: "4px",
+                    borderTopLeftRadius: "4px",
+                    borderBottomLeftRadius: "4px",
+                    borderRight: "none"
                 } as CSSProperties}
                 checked={this.state.showMetaData}
                 onChange={this.toggleMetaData.bind(this)}/>
@@ -145,7 +151,8 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                 id="toggleSalience"
                 label={"Sort by Saliency"}
                 style={{
-                    float: "right",
+                    borderTopRightRadius: "4px",
+                    borderBottomRightRadius: "4px"
                 }}
                 checked={this.state.useSalience}
                 onChange={this.toggleSalience.bind(this)}/>
