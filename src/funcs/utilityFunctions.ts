@@ -5,8 +5,9 @@
  * @returns {String} the top n words
  */
 import {SyntheticEvent} from "react";
+import {Form} from "react-bootstrap";
 
-export function topNWords(wordCounts: { word:string }[], n: number): string {
+export function topNWords(wordCounts: { word: string }[], n: number): string {
     return wordCounts.slice(0, n).map((d) => d.word).join(" ");
 }
 
@@ -41,7 +42,7 @@ export function getObjectKeys() {
         ],
         dontEnumsLength = dontEnums.length;
 
-    return function (obj:any) {
+    return function (obj: any) {
         if (typeof obj !== 'function' && (typeof obj !== 'object' || obj === null)) {
             throw new TypeError('Object.keys called on non-object');
         }
@@ -77,7 +78,7 @@ export function truncate(s: string, n: number = 300) {
 /**
  * @summary This function wraps event handlers to confirm that the model will be reset.
  */
-export function confirmReset(event:SyntheticEvent, callback:()=>void) {
+export function confirmReset(event: SyntheticEvent, callback: () => void) {
     event.preventDefault();
     if (window.confirm('This will cause your model to reset.')) callback();
 }
@@ -97,4 +98,17 @@ export function saveFile(fileName: string, fileContents: string, fileType: strin
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+export async function log_to_server(data: object) {
+    let form = new FormData()
+    form.append("id", window.location.search.substring(1))
+    form.append("data", JSON.stringify(data))
+    let res = await fetch("http://134.173.42.100:9191/", {
+        method: "PUT",
+        body: form
+    })
+    if (res.status !== 201) {
+        console.error("Error while logging",res,data)
+    }
 }
