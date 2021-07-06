@@ -19,7 +19,7 @@ interface SearchState{
  *  @prop documents
  *  @state query
  */
-export class Search extends React.Component<SearchProps,SearchState> {
+export class SearchBox extends React.Component<SearchProps,SearchState> {
 
     constructor(props:SearchProps){
         super(props);
@@ -54,4 +54,4 @@ export class Search extends React.Component<SearchProps,SearchState> {
     }
 }
 
-export default Search;
+export default SearchBox;
