@@ -4,7 +4,7 @@ import DocAccordion from './DocAccordion';
 import Search from './Search';
 import LabeledToggleButton from 'Components/LabeledToggleButton';
 import './topicDoc.css';
-import type {LDAModel, SortedLDADocument} from "core";
+import type {LDAModel, SortedLDADocument, LDADocument} from "core";
 
 interface TopicDocProps {
     ldaModel: LDAModel
@@ -13,7 +13,8 @@ interface TopicDocProps {
 interface TopicDocState {
     currentPage: number,
     showMetaData: boolean,
-    useSalience: boolean
+    useSalience: boolean,
+    documents: LDADocument[]
 }
 
 /**
@@ -29,8 +30,11 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
         this.state = {
             currentPage: 1,
             showMetaData: false,
-            useSalience: false
+            useSalience: false,
+            documents: this.props.ldaModel.documents
         }
+
+        this.search = this.search.bind(this);
     }
 
     /**
@@ -95,12 +99,33 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
         })
     }
 
+    /**
+     * @summary Finds documents which include the search query as a substring
+     * @returns Array of LDADocuments that fit the search query
+     */
+     search(query: string) {
+        let searchResults: LDADocument[] = [];
+        let docs = this.props.ldaModel.documents;
+
+        for (let i = 0; i < docs.length; i++) {
+            let currentID = docs[i].id.toString().toLowerCase();
+            let lowerQuery = query.toLowerCase();
+
+            if (currentID.indexOf(lowerQuery) >= 0) {
+                searchResults.push(docs[i]);
+            }
+        }
+
+        this.setState({documents: searchResults});
+        console.log(this.state.documents);
+    }
+
     render() {
         return (
             <div id="docPage">
                 <div>
                     <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'0.5em'}}>
-                        <Search model={this.props.ldaModel} />
+                        <Search model={this.props.ldaModel} search={this.search} />
 
                         <div style={{display:'flex'}}>
                             {this.toggleMetaDataButton()}
