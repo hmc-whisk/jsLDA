@@ -1,10 +1,11 @@
 import React, {Component, CSSProperties} from 'react';
 import PageController from './PageController';
 import DocAccordion from './DocAccordion';
-import Search from './Search';
+import SearchBox from './SearchBox';
 import LabeledToggleButton from 'Components/LabeledToggleButton';
 import './topicDoc.css';
 import type {LDAModel, SortedLDADocument, LDADocument} from "core";
+import { utcThursdays } from 'd3';
 
 interface TopicDocProps {
     ldaModel: LDAModel
@@ -14,7 +15,7 @@ interface TopicDocState {
     currentPage: number,
     showMetaData: boolean,
     useSalience: boolean,
-    documents: LDADocument[]
+    documents: SortedLDADocument[]
 }
 
 /**
@@ -31,7 +32,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
             currentPage: 1,
             showMetaData: false,
             useSalience: false,
-            documents: this.props.ldaModel.documents
+            documents: this.props.ldaModel.sortedDocuments
         }
 
         this.search = this.search.bind(this);
@@ -49,7 +50,19 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
      * @summary documents sorted in order of the saliency score of documents
      */
     get sortedDocumentsSalient(): SortedLDADocument[] {
-        return this.props.ldaModel.sortedDocumentsSalient
+        if (this.state.documents.length === this.props.ldaModel.sortedDocumentsSalient.length) {
+            return this.props.ldaModel.sortedDocumentsSalient
+        }
+        // else sort this.state.documents by salience and return it
+        else {
+            let sortedDocuments: SortedLDADocument[] = this.state.documents;
+            sortedDocuments.sort(function (a, b) {
+                return b.score - a.score;
+            });
+            return sortedDocuments;
+        }
+
+        
     }
 
     get lastPage(): number {
@@ -101,11 +114,11 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
 
     /**
      * @summary Finds documents which include the search query as a substring
-     * @returns Array of LDADocuments that fit the search query
+     * @returns Array of SortedLDADocuments that fit the search query
      */
      search(query: string) {
-        let searchResults: LDADocument[] = [];
-        let docs = this.props.ldaModel.documents;
+        let searchResults: SortedLDADocument[] = [];
+        let docs = this.props.ldaModel.sortedDocuments;
 
         for (let i = 0; i < docs.length; i++) {
             let currentID = docs[i].id.toString().toLowerCase();
@@ -117,7 +130,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
         }
 
         this.setState({documents: searchResults});
-        console.log(this.state.documents);
+        // console.log(searchResults);
     }
 
     render() {
@@ -125,7 +138,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
             <div id="docPage">
                 <div>
                     <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'0.5em'}}>
-                        <Search model={this.props.ldaModel} search={this.search} />
+                        <SearchBox model={this.props.ldaModel} search={this.search} />
 
                         <div style={{display:'flex'}}>
                             {this.toggleMetaDataButton()}
@@ -136,7 +149,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                     <DocAccordion
                         documents={this.state.useSalience ?
                             this.sortedDocumentsSalient :
-                            this.sortedDocuments}
+                            this.state.documents}
                         ldaModel={this.props.ldaModel}
                         startDoc={this.startDoc}
                         endDoc={this.endDoc}
