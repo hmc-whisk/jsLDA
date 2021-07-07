@@ -1,4 +1,4 @@
-import {zeros, getObjectKeys, truncate} from '../funcs/utilityFunctions'
+import {zeros, getObjectKeys, truncate, logToServer} from '../funcs/utilityFunctions'
 import * as d3 from 'd3';
 import XRegExp from "xregexp";
 import {displayMessage} from "./message";
@@ -310,6 +310,7 @@ export class LDAModel {
      */
     setTopicVisibility(topicNum: number, visibility: "default" | "pinned" | "hidden") {
         this.topicVisibility[topicNum] = visibility;
+        logToServer({event: "topic-visibility", topic: topicNum, visibility})
     }
 
     /**
@@ -1211,6 +1212,7 @@ export class LDAModel {
      * @param {Boolean} refresh whether or not to run sortTopicWords
      */
     addStop(word: string, refresh = false) {
+        logToServer({event: "add-stopword", word})
         displayMessage(`adding "${word}" to stoplist`, 0, () => {
             this.addStopHelper(word);
             if (this.bigram) {
@@ -1259,6 +1261,7 @@ export class LDAModel {
      * @param {String} word the word to remove
      */
     removeStop(word: string) {
+        logToServer({event: "remove-stopword", word})
         displayMessage(`removing "${word}" from stoplist`, 0, () => {
             this.removeStopHelper(word);
             if (this.bigram) {
@@ -1875,6 +1878,7 @@ class SweepScheduler {
      */
 
     sweep(n: number) {
+        logToServer({event: "start-train", iterations: n, completed: this.totalCompletedSweeps})
         this.remainingSweeps += n;
         this.model.modelIsRunning = true;
         // this is necessary because the stop button relies on modelIsRunning, which is not a
@@ -1886,6 +1890,7 @@ class SweepScheduler {
         let start = new Date().getTime()
         this.sweepLoop().then(
             _ => {
+                logToServer({event: "stop-train", completed: this.completedSweeps})
                 displayMessage(`Completed ${this.completedSweeps} iteration${this.completedSweeps > 1 ? "s" : ""
                 } in ${formatTime((new Date().getTime() - start) / 1000)}`, 2500);
                 this.remainingSweeps = 0;

@@ -3,7 +3,7 @@ import './Treemap.css';
 import "react-d3-treemap/dist/react.d3.treemap.css";
 import React, { ChangeEvent } from "react";
 import TreeMap, { ColorModel } from "react-d3-treemap";
-import { topNWords } from "funcs/utilityFunctions";
+import {logToServer, topNWords} from "funcs/utilityFunctions";
 import { LDAModel } from 'core'
 import { scaleSequential } from "d3-scale";
 import * as chromatic from "d3-scale-chromatic";
@@ -56,7 +56,7 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
     //handle the change of number of top words
     numChange(event: ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
-
+        logToServer({event:"change-treemap","num-words":event.target.value})
         if (parseInt(event.target.value) > 30) event.target.value = "30";
 
         this.setState({
@@ -118,7 +118,7 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
                 <div className="help" style={{position: "relative", left: -15, paddingBottom:0}}>
                 The following treemap allows one to visualize the probabilities of the top words for a selected topic.
                 Words with a higher probability of appearing in a given topic will represent a larger portion of the treemap's area.
-                The maximum number of words displayed by this treemap is 30. 
+                The maximum number of words displayed by this treemap is 30.
                 </div>
                 <div id="numWords" className="page" style={{position: "relative", left: 5, paddingBottom:0}} >
                     Number of Top Words:

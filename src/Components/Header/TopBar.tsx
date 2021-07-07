@@ -6,6 +6,8 @@ import Uploader from './Uploader';
 import CustomTokenizer from './CustomTokenizer';
 import './header.css';
 import {StatusDisplay} from "./Status";
+import {logToServer} from "../../funcs/utilityFunctions";
+import {displayMessage} from "../../core";
 
 interface TopBarProps {
     numTopics: number,
@@ -149,6 +151,12 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
         this.confirmBigramUpdate(event.target.checked);
     };
 
+    endStudy(){
+        logToServer({event:"end-study"})
+        // TODO: upload data
+        displayMessage("The study has ended. Thank you")
+    }
+
     helpTextStyle: CSSProperties = {
         backgroundColor: "var(--color3)",
         position: "fixed",
@@ -254,7 +262,11 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
 
                 </form>
                 <StatusDisplay/>
+                <div>
+                <button id="endStudy" onClick={this.endStudy.bind(this)}
+                        className="configButton">End Study</button>
                 {this.configuration}
+                </div>
             </div>
 
 
