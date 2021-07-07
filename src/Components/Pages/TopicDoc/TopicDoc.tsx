@@ -4,8 +4,8 @@ import DocAccordion from './DocAccordion';
 import SearchBox from './SearchBox';
 import LabeledToggleButton from 'Components/LabeledToggleButton';
 import './topicDoc.css';
-import type {LDAModel, SortedLDADocument, LDADocument} from "core";
-import { utcThursdays } from 'd3';
+import type {LDAModel, SortedLDADocument} from "core";
+import {logToServer} from "../../../funcs/utilityFunctions";
 
 interface TopicDocProps {
     ldaModel: LDAModel
@@ -62,7 +62,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
             return sortedDocuments;
         }
 
-        
+
     }
 
     get lastPage(): number {
@@ -94,12 +94,14 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
         this.setState({
             currentPage: n
         })
+        logToServer({event:"switch-doc-page",page:n})
     }
 
     /**
      * @summary Toggles option to show meta data of documents
      */
     toggleMetaData() {
+        logToServer({event:"change-doc-view",metadata:!this.state.showMetaData, saliency:this.state.useSalience})
         this.setState({showMetaData: !this.state.showMetaData})
     }
 
@@ -107,6 +109,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
      * @summary Toggles option to sort by salinence score
      */
     toggleSalience() {
+        logToServer({event:"change-doc-view",metadata:this.state.showMetaData, saliency:!this.state.useSalience})
         this.setState({
             useSalience: !this.state.useSalience
         })
@@ -116,7 +119,8 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
      * @summary Finds documents which include the search query as a substring
      * @returns Array of SortedLDADocuments that fit the search query
      */
-     search(query: string) {
+    search(query: string) {
+        logToServer({event: "search", query})
         let searchResults: SortedLDADocument[] = [];
         let docs = this.props.ldaModel.sortedDocuments;
 
@@ -137,15 +141,20 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
         return (
             <div id="docPage">
                 <div>
-                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'0.5em'}}>
-                        <SearchBox model={this.props.ldaModel} search={this.search} />
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '0.5em'
+                    }}>
+                        <SearchBox model={this.props.ldaModel} search={this.search}/>
 
-                        <div style={{display:'flex'}}>
+                        <div style={{display: 'flex'}}>
                             {this.toggleMetaDataButton()}
                             {this.toggleSalienceDataButton()}
                         </div>
                     </div>
-                    
+
                     <DocAccordion
                         documents={this.state.useSalience ?
                             this.sortedDocumentsSalient :
