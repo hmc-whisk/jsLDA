@@ -169,7 +169,8 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
 
                         <div style={{display: 'flex'}}>
                             {this.toggleMetaDataButton()}
-                            {this.toggleSalienceDataButton()}
+                            {/* Removing this because it's too slow. [Issue #197] */}
+                            {/* {this.toggleSalienceDataButton()} */}
                         </div>
                     </div>
 
@@ -201,9 +202,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                 id="toggleMetaData"
                 label="Show Metadata"
                 style={{
-                    borderTopLeftRadius: "4px",
-                    borderBottomLeftRadius: "4px",
-                    borderRight: "none"
+                    borderRadius:"4px"
                 } as CSSProperties}
                 checked={this.state.showMetaData}
                 onChange={this.toggleMetaData.bind(this)}/>
