@@ -6,7 +6,8 @@ import './topicDoc.css';
 import type {LDAModel, LDADocument} from "core";
 
 interface SearchProps{
-    model:LDAModel
+    model:LDAModel,
+    search: (query: string) => void
 }
 interface SearchState{
     query:string
@@ -18,7 +19,7 @@ interface SearchState{
  *  @prop documents
  *  @state query
  */
-export class Search extends React.Component<SearchProps,SearchState> {
+export class SearchBox extends React.Component<SearchProps,SearchState> {
 
     constructor(props:SearchProps){
         super(props);
@@ -40,38 +41,22 @@ export class Search extends React.Component<SearchProps,SearchState> {
                         onKeyPress={(e:KeyboardEvent<HTMLInputElement>) => {if (e.key === 'Enter') {
                             // @ts-ignore
                             this.setState({query: e.target.value});
-                            this.search();
+                            this.props.search(this.state.query);
                         }}}
                     />
-                    <Button variant="outline-secondary" id="button-addon2" onClick={this.search.bind(this)}>
+                    <Button variant="outline-secondary" id="button-addon2" style={{borderBottomLeftRadius:'0', borderTopLeftRadius:'0'}} onClick={() => this.props.search(this.state.query)}>
                         Search
+                    </Button>
+                    <Button variant="outline-secondary" id="reset-button-search" style={{marginLeft:'5px'}}
+                        onClick={() => {
+                            this.props.search('');}}>
+                        Reset
                     </Button>
                 </InputGroup>
 
             </div>
         )
     }
-
-    /**
-     * @summary Finds documents which include the search query as a substring
-     * @returns Array of LDADocuments that fit the search query
-     */
-    search() {
-        let searchResults: LDADocument[] = [];
-        let docs = this.props.model.documents;
-
-        for (let i = 0; i < docs.length; i++) {
-            let currentID = docs[i].id.toString().toLowerCase();
-            let lowerQuery = this.state.query.toLowerCase();
-
-            if (currentID.indexOf(lowerQuery) >= 0) {
-                searchResults.push(docs[i]);
-            }
-        }
-
-        // return (searchResults);
-        console.log(searchResults);
-    }
 }
 
-export default Search;
+export default SearchBox;

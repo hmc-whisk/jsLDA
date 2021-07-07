@@ -5,8 +5,9 @@
  * @returns {String} the top n words
  */
 import {SyntheticEvent} from "react";
+import {displayMessage} from "../core";
 
-export function topNWords(wordCounts: { word:string }[], n: number): string {
+export function topNWords(wordCounts: { word: string }[], n: number): string {
     return wordCounts.slice(0, n).map((d) => d.word).join(" ");
 }
 
@@ -41,7 +42,7 @@ export function getObjectKeys() {
         ],
         dontEnumsLength = dontEnums.length;
 
-    return function (obj:any) {
+    return function (obj: any) {
         if (typeof obj !== 'function' && (typeof obj !== 'object' || obj === null)) {
             throw new TypeError('Object.keys called on non-object');
         }
@@ -77,7 +78,7 @@ export function truncate(s: string, n: number = 300) {
 /**
  * @summary This function wraps event handlers to confirm that the model will be reset.
  */
-export function confirmReset(event:SyntheticEvent, callback:()=>void) {
+export function confirmReset(event: SyntheticEvent, callback: () => void) {
     event.preventDefault();
     if (window.confirm('This will cause your model to reset.')) callback();
 }
@@ -97,4 +98,51 @@ export function saveFile(fileName: string, fileContents: string, fileType: strin
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+
+// https://stackoverflow.com/questions/2090551/parse-query-string-in-javascript
+function getQueryVariable(variable: string): string | undefined {
+    let query = window.location.search.substring(1);
+    let vars = query.split('&');
+    for (let i = 0; i < vars.length; i++) {
+        let pair = vars[i].split('=');
+        if (decodeURIComponent(pair[0]) === variable) {
+            return decodeURIComponent(pair[1]);
+        }
+    }
+}
+
+export interface LogMessage {
+    event: string
+}
+
+async function _logToServer<T extends LogMessage>(id: string, data: T) {
+    let form = new FormData()
+    form.append("id", id)
+    form.append("data", JSON.stringify(data))
+    let res= await fetch("http://134.173.42.100:9191/", {
+        method: "PUT",
+        body: form
+    })
+    if (res.status!==201){
+        console.error("Server response bad status code")
+        console.error(res)
+        throw new Error("Bad status")
+    }
+}
+
+export function logToServer<T extends LogMessage>(data: T) {
+    let id = getQueryVariable("id")
+    if (id === undefined) {
+        displayMessage("Logging failed: missing ID", 1500)
+        return
+    }
+    _logToServer(id, data)
+        .then(_=> console.log("server log emitted",data))
+        .catch(e => {
+            displayMessage("Logging failed. Unexpected error.");
+            console.error(e)
+        }
+    )
 }
