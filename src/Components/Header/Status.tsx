@@ -80,8 +80,8 @@ export class StatusDisplay extends Component<StatusDisplayProps, StatusDisplaySt
     onTimeout(count: number) {
         if (this.messageCount === count) {
             this.setState({message: ""})
+            this.messageCount++;
         }
-        this.messageCount++;
     }
 
     render() {
