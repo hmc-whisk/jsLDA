@@ -26,6 +26,7 @@ import moviePlotsDocs from 'defaultDocs/wikiMoviePlots.csv';
 import yelpReviews from 'defaultDocs/yelpReviews.csv';
 import defaultStops from 'defaultDocs/stoplist.txt';
 import corrTooltip from 'Components/Tooltip/corrTooltip.png';
+import movieReviews from 'defaultDocs/movieReviews.csv';
 
 
 // This adds the Object.keys() function to some old browsers that don't support it
@@ -63,8 +64,8 @@ class App extends Component<AppProps, AppStates> {
             modelDataDLer: new LDAModelDataDLer(ldaModel, this),
 
             // The file location of default files
-            docName: "Movie Plots",
-            documentsURL: moviePlotsDocs,
+            docName: "movieReviews",
+            documentsURL: movieReviews,
             stopwordsURL: defaultStops,
             defaultExt: "text/csv",
 

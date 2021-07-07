@@ -14,6 +14,12 @@ interface NumTopicSliderState{
 }
 
 export class NumTopicSlider extends React.Component<NumTopicSliderProps,NumTopicSliderState> {
+    constructor(props:NumTopicSliderProps) {
+        super(props);
+        this.state = {
+          numTop: "25"
+        };
+      }
 
     handleChange(e:SyntheticEvent<HTMLInputElement>){
         this.setState({
@@ -41,8 +47,10 @@ export class NumTopicSlider extends React.Component<NumTopicSliderProps,NumTopic
                     <button
                         type="submit"
                         id="submitTopNum"
+                        className="configButton"
                         onClick={this.handleSubmit.bind(this)}
-                        style={{marginLeft: "5px", borderColor:"black", borderWidth:"1px"}}
+                        // style= {{paddingLeft:"px"}}
+                        
                     > update
                     </button>
                     <span id="num_topics_display"> </span>
