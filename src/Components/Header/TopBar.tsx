@@ -177,15 +177,15 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                         <div style={{margin: "15px"}}>
                             <div className="configMenu">
                                 <h3> Topics </h3>
-                                <div>
-                                    <h5> Set number of topics: </h5>
+                                {/* <div> */}
+                                    {/* <h5> Set number of topics: </h5>
                                     <NumTopicSlider
                                         onChange={this.updateNumDisplay.bind(this)}
                                         sliderValue={this.state.sliderValue}
                                         updateNumTopics={this.confirmUpdate.bind(this)}
                                         onInput={this.updateNumDisplay.bind(this)}
                                         modelIsRunning={this.props.modelIsRunning}
-                                    />
+                                    /> */}
 
                                     {/* <h6>
                                         <Checkbox
@@ -197,9 +197,9 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                         Optimize topic concentrations
                                     </h6> */}
 
-                                    <i> Optimized topic correlation allow the model to account for </i>
-                                    <i> different proportions of topics in each documents </i>
-                                </div>
+                                    {/* <i> Optimized topic correlation allow the model to account for </i>
+                                    <i> different proportions of topics in each documents </i> */}
+                                {/* </div> */}
                             </div>
 
                             {/* <div className="configMenu">
@@ -267,19 +267,18 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                         className="configButton">End Study</button> */}
                 {/* {this.configuration} */}
                 </div>
-                <div style={{float: "right"}}>
-                    <h5> Set number of topics: </h5>
+                <div>
+                    <h5 ></h5>
                         <NumTopicSlider
                             onChange={this.updateNumDisplay.bind(this)}
                             sliderValue={this.state.sliderValue}
                             updateNumTopics={this.confirmUpdate.bind(this)}
                             onInput={this.updateNumDisplay.bind(this)}
                             modelIsRunning={this.props.modelIsRunning}
-                    ></NumTopicSlider>
-                    &nbsp;
+                    ></NumTopicSlider>  
+                </div>
                     <button id="endStudy" onClick={this.endStudy.bind(this)}
                         className="configButton">End Study</button>
-                </div>
             </div>
 
 
