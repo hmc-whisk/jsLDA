@@ -267,7 +267,8 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                         className="configButton">End Study</button> */}
                 {/* {this.configuration} */}
                 </div>
-                <div>
+                
+                <div className="topRight" style={{display:"flex"}}>
                     <h5 ></h5>
                         <NumTopicSlider
                             onChange={this.updateNumDisplay.bind(this)}
@@ -275,10 +276,10 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                             updateNumTopics={this.confirmUpdate.bind(this)}
                             onInput={this.updateNumDisplay.bind(this)}
                             modelIsRunning={this.props.modelIsRunning}
-                    ></NumTopicSlider>  
-                </div>
+                        ></NumTopicSlider>  
                     <button id="endStudy" onClick={this.endStudy.bind(this)}
                         className="configButton">End Study</button>
+                </div>
             </div>
 
 
@@ -287,9 +288,4 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
 
 }
 
-//
-
-
 export default TopBar;
-
-
