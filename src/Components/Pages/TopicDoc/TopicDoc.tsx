@@ -1,10 +1,12 @@
 import React, {Component, CSSProperties} from 'react';
 import PageController from './PageController';
 import DocAccordion from './DocAccordion';
-import Search from './Search';
+import SearchBox from './SearchBox';
 import LabeledToggleButton from 'Components/LabeledToggleButton';
+import {LDAModel} from "../../../core/LDAModel";
 import './topicDoc.css';
-import type {LDAModel, SortedLDADocument} from "core";
+import type {SortedLDADocument} from "core";
+import {logToServer} from "../../../funcs/utilityFunctions";
 
 interface TopicDocProps {
     ldaModel: LDAModel
@@ -13,7 +15,8 @@ interface TopicDocProps {
 interface TopicDocState {
     currentPage: number,
     showMetaData: boolean,
-    useSalience: boolean
+    useSalience: boolean,
+    documents: SortedLDADocument[]
 }
 
 /**
@@ -29,8 +32,11 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
         this.state = {
             currentPage: 1,
             showMetaData: false,
-            useSalience: false
+            useSalience: false,
+            documents: this.props.ldaModel.sortedDocuments
         }
+
+        this.search = this.search.bind(this);
     }
 
     /**
@@ -38,18 +44,47 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
      * of the selected topic
      */
     get sortedDocuments(): SortedLDADocument[] {
-        return this.props.ldaModel.sortedDocuments
+        if (this.state.documents.length === this.props.ldaModel.sortedDocuments.length) {
+            return this.props.ldaModel.sortedDocuments
+        }
+        else {
+            const selectedTopic = this.props.ldaModel.selectedTopic;
+            const sumDocSortSmoothing = LDAModel.DOC_SORT_SMOOTHING * this.props.ldaModel.numTopics;
+            
+            let sortedDocuments: SortedLDADocument[] = this.state.documents.map(function (doc, i) {
+                (doc as SortedLDADocument)["score"] = (doc.topicCounts[selectedTopic] + LDAModel.DOC_SORT_SMOOTHING) /
+                    (doc.tokens.length + sumDocSortSmoothing)
+                return doc as SortedLDADocument
+            });
+            sortedDocuments.sort(function (a, b) {
+                return b.score - a.score;
+            });
+            return sortedDocuments;
+        }
+        
     }
 
     /**
      * @summary documents sorted in order of the saliency score of documents
      */
     get sortedDocumentsSalient(): SortedLDADocument[] {
-        return this.props.ldaModel.sortedDocumentsSalient
+        // If you're returning all documents (i.e. there is no search query)
+        if (this.state.documents.length === this.props.ldaModel.sortedDocumentsSalient.length) {
+            return this.props.ldaModel.sortedDocumentsSalient
+        }
+        else {
+            let sortedDocuments: SortedLDADocument[] = this.state.documents;
+            sortedDocuments.sort(function (a, b) {
+                return b.score - a.score;
+            });
+            return sortedDocuments;
+        }
+
+
     }
 
     get lastPage(): number {
-        return Math.ceil(this.props.ldaModel.documents.length / TopicDoc.DOCS_PER_PAGE);
+        return Math.ceil(this.state.documents.length / TopicDoc.DOCS_PER_PAGE);
     }
 
     get startDoc(): number {
@@ -77,12 +112,14 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
         this.setState({
             currentPage: n
         })
+        logToServer({event:"switch-doc-page",page:n})
     }
 
     /**
      * @summary Toggles option to show meta data of documents
      */
     toggleMetaData() {
+        logToServer({event:"change-doc-view",metadata:!this.state.showMetaData, saliency:this.state.useSalience})
         this.setState({showMetaData: !this.state.showMetaData})
     }
 
@@ -90,24 +127,52 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
      * @summary Toggles option to sort by salinence score
      */
     toggleSalience() {
+        logToServer({event:"change-doc-view",metadata:this.state.showMetaData, saliency:!this.state.useSalience})
         this.setState({
             useSalience: !this.state.useSalience
         })
+    }
+
+    /**
+     * @summary Finds documents which include the search query as a substring
+     * @returns Array of SortedLDADocuments that fit the search query
+     */
+    search(query: string) {
+        logToServer({event: "search", query})
+        let searchResults: SortedLDADocument[] = [];
+        let docs = this.props.ldaModel.sortedDocuments;
+
+        for (let i = 0; i < docs.length; i++) {
+            let currentID = docs[i].id.toString().toLowerCase();
+            let lowerQuery = query.toLowerCase();
+
+            if (currentID.indexOf(lowerQuery) >= 0) {
+                searchResults.push(docs[i]);
+            }
+        }
+
+        this.setState({documents: searchResults});
+        // console.log(searchResults);
     }
 
     render() {
         return (
             <div id="docPage">
                 <div>
-                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'0.5em'}}>
-                        <Search model={this.props.ldaModel} />
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '0.5em'
+                    }}>
+                        <SearchBox model={this.props.ldaModel} search={this.search}/>
 
-                        <div style={{display:'flex'}}>
+                        <div style={{display: 'flex'}}>
                             {this.toggleMetaDataButton()}
                             {this.toggleSalienceDataButton()}
                         </div>
                     </div>
-                    
+
                     <DocAccordion
                         documents={this.state.useSalience ?
                             this.sortedDocumentsSalient :
