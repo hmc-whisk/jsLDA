@@ -34,7 +34,7 @@ export class NavBar extends React.Component<NavBarProps, NavBarState> {
         ['docs-tab', 'Topic Documents'],
         ['corr-tab', 'Topic Correlations'],
         ['ts-tab', 'Time Series'],
-        ['meta-tab', 'Metadata'],
+        // ['meta-tab', 'Metadata'],
         ['to-tab', 'Topic Overview'],
         ['dl-tab', 'Downloads'],
         ['vocab-tab', 'Vocabulary'],

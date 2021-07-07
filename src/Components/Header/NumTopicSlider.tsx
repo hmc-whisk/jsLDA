@@ -9,12 +9,20 @@ interface NumTopicSliderProps{
     modelIsRunning:boolean
 }
 
-interface NumTopicSliderState{}
+interface NumTopicSliderState{
+    numTop:string
+}
 
 export class NumTopicSlider extends React.Component<NumTopicSliderProps,NumTopicSliderState> {
 
     handleChange(e:SyntheticEvent<HTMLInputElement>){
-        this.props.updateNumTopics((e.target as HTMLInputElement).value);
+        this.setState({
+            numTop:(e.target as HTMLInputElement).value
+        })
+    }
+
+    handleSubmit(e: SyntheticEvent) {
+        this.props.updateNumTopics(this.state.numTop);
     }
 
     render() {
@@ -30,6 +38,13 @@ export class NumTopicSlider extends React.Component<NumTopicSliderProps,NumTopic
                            onMouseUp={this.handleChange.bind(this)}
                            onInput={this.props.onInput}
                     />
+                    <button
+                        type="submit"
+                        id="submitTopNum"
+                        onClick={this.handleSubmit.bind(this)}
+                        style={{marginLeft: "5px", borderColor:"black", borderWidth:"1px"}}
+                    > update
+                    </button>
                     <span id="num_topics_display"> </span>
                     {this.props.sliderValue} Topics
                 </span>
