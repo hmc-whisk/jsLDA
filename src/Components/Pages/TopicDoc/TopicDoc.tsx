@@ -3,8 +3,9 @@ import PageController from './PageController';
 import DocAccordion from './DocAccordion';
 import SearchBox from './SearchBox';
 import LabeledToggleButton from 'Components/LabeledToggleButton';
+import {LDAModel} from "../../../core/LDAModel";
 import './topicDoc.css';
-import type {LDAModel, SortedLDADocument} from "core";
+import type {SortedLDADocument} from "core";
 import {logToServer} from "../../../funcs/utilityFunctions";
 
 interface TopicDocProps {
@@ -43,17 +44,34 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
      * of the selected topic
      */
     get sortedDocuments(): SortedLDADocument[] {
-        return this.props.ldaModel.sortedDocuments
+        if (this.state.documents.length === this.props.ldaModel.sortedDocuments.length) {
+            return this.props.ldaModel.sortedDocuments
+        }
+        else {
+            const selectedTopic = this.props.ldaModel.selectedTopic;
+            const sumDocSortSmoothing = LDAModel.DOC_SORT_SMOOTHING * this.props.ldaModel.numTopics;
+            
+            let sortedDocuments: SortedLDADocument[] = this.state.documents.map(function (doc, i) {
+                (doc as SortedLDADocument)["score"] = (doc.topicCounts[selectedTopic] + LDAModel.DOC_SORT_SMOOTHING) /
+                    (doc.tokens.length + sumDocSortSmoothing)
+                return doc as SortedLDADocument
+            });
+            sortedDocuments.sort(function (a, b) {
+                return b.score - a.score;
+            });
+            return sortedDocuments;
+        }
+        
     }
 
     /**
      * @summary documents sorted in order of the saliency score of documents
      */
     get sortedDocumentsSalient(): SortedLDADocument[] {
+        // If you're returning all documents (i.e. there is no search query)
         if (this.state.documents.length === this.props.ldaModel.sortedDocumentsSalient.length) {
             return this.props.ldaModel.sortedDocumentsSalient
         }
-        // else sort this.state.documents by salience and return it
         else {
             let sortedDocuments: SortedLDADocument[] = this.state.documents;
             sortedDocuments.sort(function (a, b) {
@@ -66,7 +84,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
     }
 
     get lastPage(): number {
-        return Math.ceil(this.props.ldaModel.documents.length / TopicDoc.DOCS_PER_PAGE);
+        return Math.ceil(this.state.documents.length / TopicDoc.DOCS_PER_PAGE);
     }
 
     get startDoc(): number {
@@ -158,7 +176,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                     <DocAccordion
                         documents={this.state.useSalience ?
                             this.sortedDocumentsSalient :
-                            this.state.documents}
+                            this.sortedDocuments}
                         ldaModel={this.props.ldaModel}
                         startDoc={this.startDoc}
                         endDoc={this.endDoc}

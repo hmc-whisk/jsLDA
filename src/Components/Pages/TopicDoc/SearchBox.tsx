@@ -44,8 +44,13 @@ export class SearchBox extends React.Component<SearchProps,SearchState> {
                             this.props.search(this.state.query);
                         }}}
                     />
-                    <Button variant="outline-secondary" id="button-addon2" onClick={() => this.props.search(this.state.query)}>
+                    <Button variant="outline-secondary" id="button-addon2" style={{borderBottomLeftRadius:'0', borderTopLeftRadius:'0'}} onClick={() => this.props.search(this.state.query)}>
                         Search
+                    </Button>
+                    <Button variant="outline-secondary" id="reset-button-search" style={{marginLeft:'5px'}}
+                        onClick={() => {
+                            this.props.search('');}}>
+                        Reset
                     </Button>
                 </InputGroup>
 
