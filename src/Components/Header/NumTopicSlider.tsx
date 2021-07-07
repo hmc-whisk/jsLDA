@@ -35,7 +35,7 @@ export class NumTopicSlider extends React.Component<NumTopicSliderProps,NumTopic
         return (
             <div style={{display: "flex", justifyContent: "center", margin: "10px"}}>
                 <span id="num_topics_control">
-                    Train with
+                Set number of topics: 
                     <input id="num-topics-input" type="range" name="topics"
                            onChange={this.handleChange.bind(this)}
                            value={this.props.sliderValue}
@@ -44,17 +44,14 @@ export class NumTopicSlider extends React.Component<NumTopicSliderProps,NumTopic
                            onMouseUp={this.handleChange.bind(this)}
                            onInput={this.props.onInput}
                     />
+                    <span id="num_topics_display"> </span>
+                    {this.props.sliderValue} Topics
                     <button
                         type="submit"
                         id="submitTopNum"
-                        className="configButton"
-                        onClick={this.handleSubmit.bind(this)}
-                        // style= {{paddingLeft:"px"}}
-                        
-                    > update
+                        className="darkButton"
+                        onClick={this.handleSubmit.bind(this)}> update
                     </button>
-                    <span id="num_topics_display"> </span>
-                    {this.props.sliderValue} Topics
                 </span>
             </div>
         );
