@@ -5,10 +5,19 @@ import './App.css';
 
 import * as d3 from 'd3';
 
-import {getObjectKeys} from 'funcs/utilityFunctions'
+import {getObjectKeys, logToServer} from 'funcs/utilityFunctions'
 import {LDAModel, LDAModelDataDLer} from 'core'
 
-import {TopicDoc, Correlation, HomePage, TopicOverviewPage, DLPage, VocabTable, TimeSeries, TopicTreemap} from 'Components/Pages'
+import {
+    TopicDoc,
+    Correlation,
+    HomePage,
+    TopicOverviewPage,
+    DLPage,
+    VocabTable,
+    TimeSeries,
+    TopicTreemap
+} from 'Components/Pages'
 import {NavBar, TopBar} from 'Components/Header'
 import {SideBar} from 'Components/SideBar';
 
@@ -120,6 +129,7 @@ class App extends Component<AppProps, AppStates> {
 
     changeAnnotation(text: string, i: number) {
         this.annotations[i] = text;
+        logToServer({event: "annotate-topic", topic: i, annotation: text})
         this.modelForceUpdate();
     }
 
@@ -360,7 +370,7 @@ class App extends Component<AppProps, AppStates> {
      */
     onTopicsChange(val: string) {
         console.log("Changing # of topics: " + val);
-
+        logToServer({event:"change-num-topics","num-topics":val})
         let newNumTopics = Number(val);
         if (!isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.state.ldaModel.numTopics) {
             this.state.ldaModel.changeNumTopics(Number(val));
@@ -373,6 +383,7 @@ class App extends Component<AppProps, AppStates> {
         // Set upon initialisation, changed to new numTopics in reset
         document.getElementById("num-topics-input")!.setAttribute("value", this.state.ldaModel.numTopics.toString());
         this.queueLoad();
+        logToServer({"event": "page-load"})
     }
 
     /**
