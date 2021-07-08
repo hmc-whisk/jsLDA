@@ -134,7 +134,6 @@ export class LDAModel {
     _memoMaxDocTime?: Date;
     _maxTopicSaliency: number[];
 
-    tokenTypes: { [key: string]: number, _current_type_index_: number };
 
     constructor(numTopics: number, forceUpdate: () => void) {
 
@@ -205,9 +204,6 @@ export class LDAModel {
         this._maxTopicSaliency = new Array(this.numTopics)
         // this.selectedTopicChange.bind(this);
 
-        this.tokenTypes = {
-            _current_type_index_: 0 // this is just a name that hopefully doesn't conflict with any of the actual tokens
-        }
 
         this.scheduler = new SweepScheduler(this)
     }
@@ -444,9 +440,6 @@ export class LDAModel {
                     }
                     tokens.push({word, topic, "isStopword": Boolean(isStopword)});
 
-                    if (!this.tokenTypes.hasOwnProperty(word)) {
-                        this.tokenTypes[word] = this.tokenTypes._current_type_index_++
-                    }
                 }
             });
 
