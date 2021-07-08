@@ -51,12 +51,18 @@ function exportToMallet(model: LDAModel): string {
     }
     console.log(model._documentTopicSmoothing)
     serialized += `\n#beta : ${model._topicWordSmoothing}\n`
+    let typeIndicies: { [key: string]: number } = {}
+    let nextType: number = 0;
     for (let documentIndex in model.documents) {
         let doc = model.documents[documentIndex]
+        let docPos = 0;
         for (let tokenIndex in doc.tokens) {
             let token = doc.tokens[tokenIndex]
             if (token.isStopword) continue
-            serialized += `${documentIndex} NA ${tokenIndex} ${model.tokenTypes[token.word]} ${token.word} ${token.topic}\n`
+            if (!typeIndicies.hasOwnProperty(token.word)){
+                typeIndicies[token.word]=nextType++;
+            }
+            serialized += `${documentIndex} NA ${docPos++} ${typeIndicies[token.word]} ${token.word} ${token.topic}\n`
         }
     }
 
