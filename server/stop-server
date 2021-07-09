@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [ ! -e "logging-server.pid" ]; then
+    echo ERROR: PID not found
+fi
+kill -2 "$(cat logging-server.pid)"
+rm logging-server.pid
