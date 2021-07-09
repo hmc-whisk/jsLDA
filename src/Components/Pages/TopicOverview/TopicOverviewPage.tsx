@@ -3,6 +3,8 @@ import {topNWords} from 'funcs/utilityFunctions';
 import TopicDoc from '../TopicDoc/TopicDoc';
 import {LDAModel} from 'core';
 import './TopicOverview.css';
+// import Treemap from ''
+import TopicTreemap from "../Visualization/TopicTreemap";
 
 /**
  * @summary Component for Topic Overview page
@@ -160,10 +162,12 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
         return (
             <div id="documents">
                 <h3 style={{float: "left", margin: "10 0 0 0"}}>
-                    Documents:
+                    {/* Documents: */}
                 </h3>
-                <TopicDoc
-                    ldaModel={this.props.ldaModel}/>
+                {/* <TopicDoc
+                    ldaModel={this.props.ldaModel}/> */}
+                    <TopicTreemap
+                    ldaModel={this.props.ldaModel}></TopicTreemap>
             </div>
         )
     }

@@ -114,13 +114,13 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
         }
 
         return (
-            <div id="pages" style={{position: "relative", left: 30, paddingTop:20}}>
-                <div className="help" style={{position: "relative", left: -15, paddingBottom:0}}>
-                The following treemap allows one to visualize the probabilities of the top words for a selected topic.
+            <div id="pages" style={{position: "relative", left: -10, paddingTop:0, top:-20}}>
+                <div className="help" style={{position: "relative", left: -20, paddingBottom:0, fontSize:"18"}}>
+                The following figure allows one to visualize the probabilities of the top words for a selected topic.
                 Words with a higher probability of appearing in a given topic will represent a larger portion of the treemap's area.
                 The maximum number of words displayed by this treemap is 30.
                 </div>
-                <div id="numWords" className="page" style={{position: "relative", left: 5, paddingBottom:0}} >
+                <div id="numWords" className="page" style={{position: "relative", left: 0, paddingBottom:0}} >
                     Number of Top Words:
                     <input
                         onChange={this.numChange.bind(this)}
@@ -133,7 +133,7 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
                         style={{position: "relative", left:5}}
                     />
                 </div>
-                <div id="tM-page" className="page">
+                <div id="tM-page" className="page" style={{position: "relative", left: 120}}>
                     {this.createTreeMap(this.state.numberOfTopwords)}
                 </div>
             </div>

@@ -162,7 +162,14 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
                 this.topicTimeGroups[topic]
                     .append("text")
                     .attr("transform", "translate(0,45)")
-                    .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3));
+                    .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3))
+                    .style("font-size", 15);
+                this.topicTimeGroups[topic]
+                    .append("text")
+                    .attr("transform", "translate(0, 30)")
+                    .text("Topic "+topic)
+                    .style("font-size", 15)
+                    .attr("font-weight", "bold");
                 this.topicTimeGroups[topic]
                     .select("g")
                     .attr("transform", "translate(95,75)")
@@ -299,9 +306,15 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
             // Topic Label
             this.topicTimeGroups[0]
                 .append("text")
-                .attr("transform", "translate(360, 0)")
+                .attr("transform", "translate(350, -10)")
                 .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3))
-                .style("font-size", 25)
+                .style("font-size", 20)
+                .attr("font-weight", "bold");
+            this.topicTimeGroups[0]
+                .append("text")
+                .attr("transform", "translate(260, -10)")
+                .text("Topic "+this.props.ldaModel.selectedTopic)
+                .style("font-size", 20)
                 .attr("font-weight", "bold");
             // X axis
             this.topicTimeGroups[0]
@@ -465,6 +478,7 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
                 </div>
                 <div style={{position: "relative", left: 30, paddingBottom:0}}>
                     <label htmlFor="numberOfBins"  >Number of Bins:</label>
+                    
                     <input
                         onChange={this.handleNumAvgChange.bind(this)}
                         type="number" id="numberOfBins"
