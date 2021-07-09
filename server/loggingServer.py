@@ -12,7 +12,7 @@ def get_db():
         pk INTEGER PRIMARY KEY AUTOINCREMENT,
         id CHAR(4),
         data TEXT,
-        time DATETIME DEFAULT CURRENT_TIMESTAMP
+        time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """)
     c.close()
