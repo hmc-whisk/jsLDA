@@ -160,15 +160,20 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
      */
     documents() {
         return (
-            <div id="documents">
-                <h3 style={{float: "left", margin: "10 0 0 0"}}>
-                    {/* Documents: */}
-                </h3>
-                {/* <TopicDoc
-                    ldaModel={this.props.ldaModel}/> */}
-                    <TopicTreemap
-                    ldaModel={this.props.ldaModel}></TopicTreemap>
-            </div>
+            <>
+                <div>
+                    
+                </div>
+                <div id="documents">
+                    <h3 style={{float: "left", margin: "10 0 0 0"}}>
+                        {/* Documents: */}
+                    </h3>
+                    {/* <TopicDoc
+                        ldaModel={this.props.ldaModel}/> */}
+                        <TopicTreemap
+                        ldaModel={this.props.ldaModel}></TopicTreemap>
+                </div>
+            </>
         )
     }
 }
