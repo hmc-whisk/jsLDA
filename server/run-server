@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+if [ -e "logging-server.pid" ]; then
+    kill -2 "$(cat logging-server.pid)"
+fi
+
+nohup /research/xanda/userstudy-logging/env/bin/gunicorn loggingServer:app --workers 1 --bind 0.0.0.0:9191 --access-logfile access.log --error-logfile error.log > /dev/null &
+echo $! > logging-server.pid
+
