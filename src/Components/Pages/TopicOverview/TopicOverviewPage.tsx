@@ -3,6 +3,8 @@ import {topNWords} from 'funcs/utilityFunctions';
 import TopicDoc from '../TopicDoc/TopicDoc';
 import {LDAModel} from 'core';
 import './TopicOverview.css';
+// import Treemap from ''
+import TopicTreemap from "../Visualization/TopicTreemap";
 
 /**
  * @summary Component for Topic Overview page
@@ -81,11 +83,18 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
      */
     noTopicSelected() {
         return (
-            <div id="pages">
-                <div id="to-page" className="page">
-                    <h2 id="label">Please Select a Topic</h2>
+            <>
+                <div id="pages">
+                    <div id="to-page" className="page" style={{paddingBottom:"0px"}}>
+                        <h2 id="label">Please Select a Topic</h2>
+                    </div>
+                    <div>
+                        More detailed information about the selected topic will show up here, including 
+                        a list of the top words, the top three most correlated topics, and a treemap visualization 
+                        of the top word probabilities.
+                    </div>
                 </div>
-            </div>
+            </>
         )
     }
 
@@ -99,6 +108,11 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
         return (
             <div id="label">
                 <h2>Topic {topicNum}</h2>
+                <div style={{paddingBottom:"20px", margin:"0px", textAlign:"left"}}>
+                    More detailed information about the selected topic will show up here, including 
+                    a list of the top words, the top three most correlated topics, and a treemap visualization 
+                    of the top word probabilities.
+                </div>
                 <pre style={{
                     fontSize: TopicOverviewPage.annotationFontSize,
                     whiteSpace: "pre-wrap"
@@ -160,10 +174,12 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
         return (
             <div id="documents">
                 <h3 style={{float: "left", margin: "10 0 0 0"}}>
-                    Documents:
+                    {/* Documents: */}
                 </h3>
-                <TopicDoc
-                    ldaModel={this.props.ldaModel}/>
+                {/* <TopicDoc
+                    ldaModel={this.props.ldaModel}/> */}
+                    <TopicTreemap
+                    ldaModel={this.props.ldaModel}></TopicTreemap>
             </div>
         )
     }
