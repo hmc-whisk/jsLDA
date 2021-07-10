@@ -141,7 +141,7 @@ export function logToServer<T extends LogMessage>(data: T) {
     _logToServer(id, data)
         .then(_=> console.log("server log emitted",data))
         .catch(e => {
-            displayMessage("Logging failed. Unexpected error.");
+            displayMessage("Logging failed. Unexpected error.", 1500);
             console.error(e)
         }
     )
