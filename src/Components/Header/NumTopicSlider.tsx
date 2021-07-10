@@ -36,17 +36,27 @@ export class NumTopicSlider extends React.Component<NumTopicSliderProps,NumTopic
             <div style={{display: "flex", margin: "5px"}}>
                 <span id="num_topics_control">
                 Set number of topics: 
-                    &nbsp;
-                    <input id="num-topics-input" type="range" name="topics"
+                    {/* <input id="num-topics-input" type="range" name="topics"
                         onChange={this.handleChange.bind(this)}
                         value={this.props.sliderValue}
                         min="3" max="100"
                         disabled={this.props.modelIsRunning}
                         onMouseUp={this.handleChange.bind(this)}
                         onInput={this.props.onInput}
+                    /> */}
+                    <input
+                        onChange={this.handleChange.bind(this)}
+                        type="number" id="numberOfTopics"
+                        defaultValue="10"
+                        placeholder="# bins"
+                        max="100"
+                        min="5"
+                        step="5"
+                        style={{position:"relative", left:0}}
                     />
                     &nbsp;
-                    {this.props.sliderValue} Topics
+                    {/* {this.props.sliderValue}  */}
+                    Topics
                     &nbsp;
                     <button
                         type="submit"
