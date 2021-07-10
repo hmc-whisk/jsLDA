@@ -8,7 +8,7 @@
   --color5: #777; */
   --color1: #a9bcd0;
   --color1Dark: #9dafc2;
-  
+
   --color2: #58a4b0;
   --color2Light: #9de2ec;
 
@@ -19,17 +19,17 @@
   --color5: #1b1b1e;
 
   --color6: #d4dee0;
-  
-  --negativeCorrelationColor: #df6060;
-  --positiveCorrelationColor: var(--color2);
+
+  --negativeCorrelationColor: hsl(5, 70%, 70%);
+  --positiveCorrelationColor: hsl(175, 40%, 40%);
 }
 
 
 
 
-/* body { 
-  font-family: Calibri, Verdana; 
-  background-color: var(--color3); 
+/* body {
+  font-family: Calibri, Verdana;
+  background-color: var(--color3);
   margin: 0;
 }
 
@@ -40,29 +40,29 @@ code {
 text { font-size: small; vertical-align: baseline; } */
 
 
-.lightButton { 
+.lightButton {
   border: solid var(--color1) 2px;
   font-family: Calibri, Verdana, sans-serif;
   /* margin:0 2px 0 0;  */
-  padding:7px 10px; 
-  -webkit-user-select: none; -moz-user-select: none; user-select: none; -moz-border-radius: 4px; 
+  padding:7px 10px;
+  -webkit-user-select: none; -moz-user-select: none; user-select: none; -moz-border-radius: 4px;
   border-radius: 4px;
   background: var(--color3); }
 
 .lightButton:hover:enabled{
-  background: var(--color1); 
+  background: var(--color1);
 }
 
-.darkButton { 
-  border: solid var(--color1Dark) 2px; 
+.darkButton {
+  border: solid var(--color1Dark) 2px;
   /* margin:0 2px 0 0;  */
   /* padding:7px 10px;  */
-  -webkit-user-select: none; 
-  -moz-user-select: none; 
-  user-select: none; 
-  -moz-border-radius: 4px; 
-  border-radius: 4px; 
-  background: var(--color3); 
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  background: var(--color3);
 }
 
 .labeledToggleButton {
@@ -73,12 +73,12 @@ text { font-size: small; vertical-align: baseline; } */
 }
 
 .darkButton:hover:enabled{
-  background: var(--color3Dark); 
+  background: var(--color3Dark);
 }
 
-#tabwrapper { 
-  flex: 3; 
-  overflow-y: auto; 
+#tabwrapper {
+  flex: 3;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -86,15 +86,15 @@ text { font-size: small; vertical-align: baseline; } */
   padding-right: 1em;
 }
 
-#tooltip { 
-  border: solid var(--color1) 2px; 
-  margin: 0 2px 0 0; 
-  padding: 7px 10px; 
-  border-radius: 4px; 
-  background: var(--color3); 
-  position: absolute; 
-  z-index: 10; 
-  visibility: hidden; 
+#tooltip {
+  border: solid var(--color1) 2px;
+  margin: 0 2px 0 0;
+  padding: 7px 10px;
+  border-radius: 4px;
+  background: var(--color3);
+  position: absolute;
+  z-index: 10;
+  visibility: hidden;
 }
 
 
@@ -113,7 +113,7 @@ div:empty:before {
 
 /* css for topic overview page */
 .grid-item {
-  border: solid var(--color1) 3px; 
+  border: solid var(--color1) 3px;
   width: 100%;
   border-radius: 20px;
 }
@@ -128,7 +128,7 @@ div#to-page {
   gap: 15px 15px;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto auto;
-  grid-template-areas: 
+  grid-template-areas:
     "label label"
     "timegraph correlations"
     "documents documents";
@@ -150,4 +150,4 @@ div#to-page #correlations {
 
 div#to-page #documents {
   grid-area: documents;
-} 
+}
