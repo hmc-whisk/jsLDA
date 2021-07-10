@@ -5,6 +5,8 @@ import Tooltip from '../Tooltip';
 import './pages.css';
 import type {LDADocument} from "core";
 
+const backColor = getComputedStyle(document.documentElement).getPropertyValue('--color3');
+
 /* This function will compute pairwise correlations between topics.
  * Unlike the correlated topic model (CTM) LDA doesn't have parameters
  * that represent topic correlations. But that doesn't mean that topics are
@@ -213,21 +215,21 @@ export class Correlation extends Component<CorrelationProps, CorrelationState> {
         this.notes = this.props.provideNotes();
         let notes = this.notes;
         let changeNotes = this.props.changeNotes
-        d3.select("#corr-page").append("foreignObject")
-            .append('xhtml:div')
-            .append('div')
-            .attr("style", "white-space: pre-line; background: #ECECEC; border-collapse: separate; border-radius: 3px; ")
-            .attr("dataText", "Write your notes here")
-            .attr("contentEditable", true)
-            .on("blur", function () {
-                let innerText = this.innerText
-                if (innerText[innerText.length - 1] === '\n') {
-                    innerText = innerText.slice(0, -1)
-                }
-                notes = innerText;
-                changeNotes(innerText);
-            })
-            .text(notes)
+        // d3.select("#corr-page").append("foreignObject")
+        //     .append('xhtml:div')
+        //     .append('div')
+        //     .attr("style", "white-space: pre-line; background: #ECECEC; border-collapse: separate; border-radius: 3px; ")
+        //     .attr("dataText", "Write your notes here")
+        //     .attr("contentEditable", true)
+        //     .on("blur", function () {
+        //         let innerText = this.innerText
+        //         if (innerText[innerText.length - 1] === '\n') {
+        //             innerText = innerText.slice(0, -1)
+        //         }
+        //         notes = innerText;
+        //         changeNotes(innerText);
+        //     })
+        //     .text(notes)
 
         this.plotMatrix();
     }
@@ -285,17 +287,56 @@ export class Correlation extends Component<CorrelationProps, CorrelationState> {
         return (
             <div>
                 <div id="corr-page" className="page">
-                    <div className="help">Topic correlations are pointwise mutual information scores.
+                    <div className="help" style={{padding:"20px", margin:"0px"}}>Topic correlations are pointwise mutual information scores.
                         This score measures whether two topics occur in the same document more often than we would
                         expect by chance.
                         Previous versions of this script calculated correlations on log ratios. Data for the plot is
                         available from the Downloads page. <a
                             href="https://en.wikipedia.org/wiki/Pointwise_mutual_information" style={{color: 'blue'}}>More
                             about this metric on Wikipedia.</a>
-                        <Tooltip tooltip={this.props.tooltip}
-                                 altText={"The two axes represent each of the generated topics. Negative pointwise information\
-		              is represented by a dark circle, positive is lighter. \
-                              On hover over a circle, the two topics that the circle represents are shown."}/>
+                        <div style={{marginTop:'15px'}}>
+                            <Tooltip
+                                floatRight={false}
+                                displayElement={
+                                    <div style={{backgroundColor: backColor,
+                                        position: "fixed",
+                                        top: "10%",
+                                        left: "10%",
+                                        right: "10%",
+                                        borderRadius: "20px 0px 0px 20px",
+                                        margin: "10px",
+                                        height: "70%",
+                                        overflowY: "scroll"}}>
+                                            <div style={{margin:"15px"}}>
+                                                <h4 style={{textAlign: "center"}}>Understanding the Graph</h4>
+                                                <ul>
+                                                    <li>
+                                                        The two axes represent each of the generated topics, and are labeled by topic number and the 
+                                                        top three most common words found in that topic.                                                
+                                                    </li>
+                                                    <li>
+                                                        Negative pointwise information is represented by a blue circle, while positive pointwise information 
+                                                        is represented by a red one.
+                                                    </li>
+                                                    <li>
+                                                        The size of the circle represents the magnitudes of the positive or negative correlation.
+                                                    </li>
+                                                    <li>
+                                                        When you hover over a circle, the two topics that are represented by that circle should be shown.
+                                                    </li>
+                                                </ul>
+                                                {/* We need to update the image. */}
+                                                {/* <img src={this.props.tooltip} className="media-object"
+                                                    height={'auto'} width={'80%'} style={{marginLeft:'10%', marginTop:'15px'}}
+                                                    draggable='false'/> */}
+                                            </div>
+                                    </div>
+                                }/>
+                                {/* tooltip={this.props.tooltip}
+                                    altText={"The two axes represent each of the generated topics. Negative pointwise information\
+                                    is represented by a dark circle, positive is lighter. \
+                                    On hover over a circle, the two topics that the circle represents are shown."}/> */}
+                        </div>
                     </div>
 
                 </div>
