@@ -287,7 +287,7 @@ export class Correlation extends Component<CorrelationProps, CorrelationState> {
         return (
             <div>
                 <div id="corr-page" className="page">
-                    <div className="help" style={{padding:"20px", margin:"0px"}}>Topic correlations are pointwise mutual information scores.
+                    <div className="help" style={{padding:"20px", paddingTop:'0px', margin:"0px"}}>Topic correlations are pointwise mutual information scores.
                         This score measures whether two topics occur in the same document more often than we would
                         expect by chance.
                         Previous versions of this script calculated correlations on log ratios. Data for the plot is
