@@ -1,27 +1,14 @@
 import {LDAModel} from "./LDAModel";
-import {getFromStorage} from "./storage";
 import {createZip} from "./compression";
 import {displayMessage} from "./message";
+import {getQueryVariable} from "../funcs/utilityFunctions";
 
-const FileSaver = require("filesaver.js-npm")
-
-function readMallet(serializedModel: string) {
-    let s = serializedModel.slice(serializedModel.indexOf("\n") + 1)
-    s.split('\n').forEach((s, i) => {
-        if (i == 0) {
-            for (let n of s.slice(s.indexOf(": ") + 1).split(" ")) {
-                console.log(parseFloat(n))
-            }
-        }
-    })
-}
 
 function exportToMallet(model: LDAModel): string {
     let serialized = "#doc source pos typeindex type topic\n#alpha : "
     for (let n of model._documentTopicSmoothing) {
         serialized += `${n} `
     }
-    console.log(model._documentTopicSmoothing)
     serialized += `\n#beta : ${model._topicWordSmoothing}\n`
     let typeIndicies: { [key: string]: number } = {}
     let nextType: number = 0;
@@ -43,25 +30,12 @@ function exportToMallet(model: LDAModel): string {
 
 
 export async function saveModel(model: LDAModel) {
-
-
     let files: { [key: string]: string } = {}
-
-    await displayMessage("Loading original document", 0, "promise")
-    let document = (await getFromStorage("document"))!
-    let filename: string;
-    switch (document.contentType) {
-        case "text/csv":
-            filename = "document.csv"
-            break
-        case "text/tsv":
-            filename = "document.tsv"
-            break
-        default:
-            throw Error("incorrect content-type encountered during decompression")
+    let id = getQueryVariable("id");
+    if (id===undefined){
+        await displayMessage("Logging failed: missing ID", 1500, "promise")
+        throw Error("No ID")
     }
-
-    files[filename] = document.data
 
     await displayMessage("Generating stoplist", 0, "promise")
 
@@ -74,9 +48,20 @@ export async function saveModel(model: LDAModel) {
     await displayMessage("Serializing model", 0, "promise")
     files["model.txt"] = exportToMallet(model)
 
-    await displayMessage("Compressing", 0, "promise")
+    await displayMessage("Compressing model", 0, "promise")
     let zip = await createZip(files)
 
-    await displayMessage("Initiating browser download", 1500, "promise")
-    FileSaver.saveAs(zip, "LDAModel.zip")
+    await displayMessage("Uploading model", 0, "promise")
+
+    let form=new FormData()
+
+    form.append("id",id)
+    form.append("model.zip",zip)
+
+    await fetch("http://134.173.42.100:9191/upload",{
+        method:"PUT",
+        body:form
+    })
 }
+
+

@@ -1,8 +1,7 @@
 import {zeros, getObjectKeys, truncate, logToServer} from '../funcs/utilityFunctions'
 import * as d3 from 'd3';
 import XRegExp from "xregexp";
-import {clearMessage, displayMessage} from "./message";
-import {saveToStorage} from "./storage";
+import {displayMessage} from "./message";
 
 // This adds the Object.keys() function to some old browsers that don't support it
 if (!Object.keys) {
@@ -337,17 +336,6 @@ export class LDAModel {
             this._parseDoc(doc);
 
             this.sortTopicWords();
-
-            new Promise<void>(async (resolve, reject) => {
-                try {
-                    await displayMessage("Saving document", 0, "promise")
-                    await saveToStorage("document", doc,this.documentType)
-                    clearMessage()
-                    resolve()
-                } catch (e) {
-                    reject(e)
-                }
-            }).catch()
 
 
         }

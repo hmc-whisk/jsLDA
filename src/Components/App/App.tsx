@@ -6,7 +6,7 @@ import './App.css';
 import * as d3 from 'd3';
 
 import {getObjectKeys, logToServer} from 'funcs/utilityFunctions'
-import {LDAModel, LDAModelDataDLer} from 'core'
+import {displayMessage, LDAModel, LDAModelDataDLer, Message} from 'core'
 
 import {
     TopicDoc,
@@ -27,6 +27,7 @@ import yelpReviews from 'defaultDocs/yelpReviews.csv';
 import defaultStops from 'defaultDocs/stoplist.txt';
 import corrTooltip from 'Components/Tooltip/corrTooltip.png';
 import movieReviews from 'defaultDocs/movieReviews.csv';
+import {saveModel} from "../../core/serialization";
 
 
 // This adds the Object.keys() function to some old browsers that don't support it
@@ -88,6 +89,23 @@ class App extends Component<AppProps, AppStates> {
                 e.returnValue = ''
             }
         })
+        console.log("constructor")
+        window.addEventListener("message",async (e:MessageEvent<Message>) => {
+            if (e.data.target!=='end-study'){
+                return
+            }
+            if (this.state.ldaModel.documents.length===0){
+                return // there's some weird issue with double initialization
+            }
+            try {
+                await saveModel(this.state.ldaModel)
+            } catch (e){
+                await displayMessage("Error uploading model", 0, "promise")
+                return
+            }
+            await displayMessage("Uploading successful. Thank you!", 0, "promise")
+        })
+
     };
 
     startingNumTopics = 25;
