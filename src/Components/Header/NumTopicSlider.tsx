@@ -44,9 +44,10 @@ export class NumTopicSlider extends React.Component<NumTopicSliderProps,NumTopic
                         onMouseUp={this.handleChange.bind(this)}
                         onInput={this.props.onInput}
                     /> */}
-                    <input
+                    &nbsp;
+                    <input id="num-topics-input"
                         onChange={this.handleChange.bind(this)}
-                        type="number" id="numberOfTopics"
+                        type="number"
                         defaultValue="10"
                         placeholder="# bins"
                         max="100"
