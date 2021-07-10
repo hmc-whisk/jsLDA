@@ -8,6 +8,7 @@ import './header.css';
 import {StatusDisplay} from "./Status";
 import {logToServer} from "../../funcs/utilityFunctions";
 import {displayMessage} from "../../core";
+import {saveModel} from "../../core/serialization";
 
 interface TopBarProps {
     numTopics: number,
@@ -153,8 +154,8 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
 
     endStudy(){
         logToServer({event:"end-study"})
-        // TODO: upload data
-        displayMessage("The study has ended. Thank you")
+        window.postMessage({target:"end-study"},window.location.origin)
+        // this will go into app.ts
     }
 
     helpTextStyle: CSSProperties = {
@@ -267,7 +268,7 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                         className="configButton">End Study</button> */}
                 {/* {this.configuration} */}
                 </div>
-                
+
                 <div className="topRight" style={{display:"flex"}}>
                     <h5 ></h5>
                         <NumTopicSlider
@@ -276,7 +277,7 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                             updateNumTopics={this.confirmUpdate.bind(this)}
                             onInput={this.updateNumDisplay.bind(this)}
                             modelIsRunning={this.props.modelIsRunning}
-                        ></NumTopicSlider>  
+                        ></NumTopicSlider>
                     <button id="endStudy" onClick={this.endStudy.bind(this)}
                         className="configButton">End Study</button>
                 </div>
