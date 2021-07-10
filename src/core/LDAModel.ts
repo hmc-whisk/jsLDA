@@ -203,6 +203,7 @@ export class LDAModel {
         this._maxTopicSaliency = new Array(this.numTopics)
         // this.selectedTopicChange.bind(this);
 
+
         this.scheduler = new SweepScheduler(this)
     }
 
@@ -335,6 +336,8 @@ export class LDAModel {
             this._parseDoc(doc);
 
             this.sortTopicWords();
+
+
         }
     }
 
@@ -425,6 +428,7 @@ export class LDAModel {
                         topicCounts[topic] += 1;
                     }
                     tokens.push({word, topic, "isStopword": Boolean(isStopword)});
+
                 }
             });
 
@@ -981,6 +985,7 @@ export class LDAModel {
         if (this._changeAlpha && this.scheduler.totalCompletedSweeps > this._burninPeriod && this._optimizeInterval !== 0 &&
             this.scheduler.totalCompletedSweeps % this._optimizeInterval === 0) {
             doOptimizeAlpha = true;
+            this._initializeHistograms()
         }
 
         for (let topic = 0; topic < this.numTopics; topic++) {
@@ -1079,7 +1084,7 @@ export class LDAModel {
      *  and create histograms for use in Dirichlet hyperparameter
      *  optimization.
      */
-    _initializeHistograms = () => {
+    _initializeHistograms() {
         let maxTokens = 0;
         // let totalTokens = 0;
         let seqLen;

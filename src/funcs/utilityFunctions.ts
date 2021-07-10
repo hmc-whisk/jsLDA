@@ -102,7 +102,7 @@ export function saveFile(fileName: string, fileContents: string, fileType: strin
 
 
 // https://stackoverflow.com/questions/2090551/parse-query-string-in-javascript
-function getQueryVariable(variable: string): string | undefined {
+export function getQueryVariable(variable: string): string | undefined {
     let query = window.location.search.substring(1);
     let vars = query.split('&');
     for (let i = 0; i < vars.length; i++) {
