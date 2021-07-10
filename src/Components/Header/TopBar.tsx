@@ -263,11 +263,6 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
 
                 </form>
                 <StatusDisplay/>
-                <div>
-                {/* <button id="endStudy" onClick={this.endStudy.bind(this)}
-                        className="configButton">End Study</button> */}
-                {/* {this.configuration} */}
-                </div>
 
                 <div className="topRight" style={{display:"flex"}}>
                     <h5 ></h5>
