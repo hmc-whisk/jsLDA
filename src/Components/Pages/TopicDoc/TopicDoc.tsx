@@ -157,41 +157,49 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
 
     render() {
         return (
-            <div id="docPage">
-                <div>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: '0.5em'
-                    }}>
-                        <SearchBox model={this.props.ldaModel} search={this.search}/>
+            <>
+                <div style={{padding:"20px", margin:"0px"}}>
+                    All documents within the loaded dataset can be viewed here along with a topic score. 
+                    You can use the search box to find specific documents by document ID. 
+                    To reveal more information about each document, you can use the "Show Metadata" toggle. 
+                </div>
+                <div id="docPage">
+                    <div>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '0.5em'
+                        }}>
+                            <SearchBox model={this.props.ldaModel} search={this.search}/>
 
-                        <div style={{display: 'flex'}}>
-                            {this.toggleMetaDataButton()}
-                            {this.toggleSalienceDataButton()}
+                            <div style={{display: 'flex'}}>
+                                {this.toggleMetaDataButton()}
+                                {/* Removing this because it's too slow. [Issue #197] */}
+                                {/* {this.toggleSalienceDataButton()} */}
+                            </div>
+                        </div>
+
+                        <DocAccordion
+                            documents={this.state.useSalience ?
+                                this.sortedDocumentsSalient :
+                                this.sortedDocuments}
+                            ldaModel={this.props.ldaModel}
+                            startDoc={this.startDoc}
+                            endDoc={this.endDoc}
+                            showMetaData={this.state.showMetaData}
+                            useSalience={this.state.useSalience}
+                        />
+
+                        <div className="docNav">
+                            <PageController
+                                currentPage={this.state.currentPage}
+                                changePage={this.changePage.bind(this)}
+                                lastPage={this.lastPage}/>
                         </div>
                     </div>
-
-                    <DocAccordion
-                        documents={this.state.useSalience ?
-                            this.sortedDocumentsSalient :
-                            this.sortedDocuments}
-                        ldaModel={this.props.ldaModel}
-                        startDoc={this.startDoc}
-                        endDoc={this.endDoc}
-                        showMetaData={this.state.showMetaData}
-                        useSalience={this.state.useSalience}
-                    />
-
-                    <div className="docNav">
-                        <PageController
-                            currentPage={this.state.currentPage}
-                            changePage={this.changePage.bind(this)}
-                            lastPage={this.lastPage}/>
-                    </div>
                 </div>
-            </div>
+            </>
         )
     }
 
@@ -201,9 +209,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                 id="toggleMetaData"
                 label="Show Metadata"
                 style={{
-                    borderTopLeftRadius: "4px",
-                    borderBottomLeftRadius: "4px",
-                    borderRight: "none"
+                    borderRadius:"4px"
                 } as CSSProperties}
                 checked={this.state.showMetaData}
                 onChange={this.toggleMetaData.bind(this)}/>

@@ -53,6 +53,7 @@ export class NumTopicSlider extends React.Component<NumTopicSliderProps,NumTopic
                         id="submitTopNum"
                         className="darkButton"
                         onClick={this.handleSubmit.bind(this)}
+                        disabled={this.props.modelIsRunning}
                         > Update
                     </button>
                     &nbsp;
