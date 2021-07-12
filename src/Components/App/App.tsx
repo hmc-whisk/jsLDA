@@ -449,7 +449,8 @@ class App extends Component<AppProps, AppStates> {
                 break;
             case "meta-tab":
                 DisplayPage = <MetaDataPage
-                ldaModel={this.state.ldaModel}/>
+                ldaModel={this.state.ldaModel}
+                metaFields={this.state.ldaModel.metaFields}/>
                 break;
             case "to-tab":
                 DisplayPage = <TopicOverviewPage
