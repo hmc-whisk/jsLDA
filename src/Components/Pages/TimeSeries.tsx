@@ -306,7 +306,7 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
             // Topic Label
             this.topicTimeGroups[0]
                 .append("text")
-                .attr("transform", "translate(350, -10)")
+                .attr("transform", "translate(360, -10)")
                 .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3))
                 .style("font-size", 20)
                 .attr("font-weight", "bold");
