@@ -171,7 +171,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                             alignItems: 'center',
                             marginBottom: '0.5em'
                         }}>
-                            <SearchBox model={this.props.ldaModel} search={this.search}/>
+                            <SearchBox model={this.props.ldaModel} search={this.search} changePage={this.changePage.bind(this)}/>
 
                             <div style={{display: 'flex'}}>
                                 {this.toggleMetaDataButton()}
