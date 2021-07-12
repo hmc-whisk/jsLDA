@@ -47,6 +47,10 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
     );
   }
 
+  /*
+  * gets the data to display in the bar graph.
+  * displays the average topic value for every metadata value.
+  */
   calculateDataToDisplay() {
     // from MetaData.js
     let averages = this.props.ldaModel.metaTopicAverages(
@@ -57,22 +61,23 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
     for (let [key, value] of Object.entries(averages)) {
       data.push({ label: key, value: value });
     }
-    // console.log(data);
+
     let result = data.map(({label, value}) => ([label, value]));
+    // console.log(data);
     // console.log(result);
     return result;
   }
 
   createBarChart() {
-    // hard coded test data
-    let inputData = this.calculateDataToDisplay();
-    // console.log(this.props.ldaModel.metaFields);
+    // 2D array, contains [label, value] for each metadata value
+    let inputData = this.calculateDataToDisplay(); 
+
     const data = {
-      labels: inputData.map((x) => x[0]),
+      labels: inputData.map((x) => x[0]), // extract the labels from the 2D array
       datasets: [
         {
           label: this.state.metaField,
-          data: inputData.map((x) => x[1]),
+          data: inputData.map((x) => x[1]), // extract the values from the 2D array
           fill: true,
           backgroundColor: "rgba(75,192,192,0.2)",
           borderColor: "rgba(75,192,192,1)",
