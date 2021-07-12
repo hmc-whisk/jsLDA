@@ -19,6 +19,9 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
     };
   }
 
+  /*
+  * handles a change of the metafield via the selector
+  */
   metaFieldChange(event: ChangeEvent<HTMLSelectElement>) {
     // event.preventDefault();
 
@@ -27,6 +30,9 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
 
   }
 
+  /*
+  * creates a dropdown menu to select the metafield that will be used to render the graph
+  */
   createMetaFieldSelector() {
     return (
       <select onChange={this.metaFieldChange.bind(this)}>
@@ -41,25 +47,42 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
     );
   }
 
+  calculateDataToDisplay() {
+    // from MetaData.js
+    let averages = this.props.ldaModel.metaTopicAverages(
+      this.state.metaField,
+      this.props.ldaModel.selectedTopic
+    );
+    let data = [];
+    for (let [key, value] of Object.entries(averages)) {
+      data.push({ label: key, value: value });
+    }
+    // console.log(data);
+    let result = data.map(({label, value}) => ([label, value]));
+    // console.log(result);
+    return result;
+  }
+
   createBarChart() {
     // hard coded test data
+    let inputData = this.calculateDataToDisplay();
     // console.log(this.props.ldaModel.metaFields);
     const data = {
-      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      labels: inputData.map((x) => x[0]),
       datasets: [
         {
           label: this.state.metaField,
-          data: [33, 53, 85, 41, 44, 65],
+          data: inputData.map((x) => x[1]),
           fill: true,
           backgroundColor: "rgba(75,192,192,0.2)",
           borderColor: "rgba(75,192,192,1)",
         },
-        {
-          label: "Second dataset",
-          data: [33, 25, 35, 51, 54, 76],
-          fill: false,
-          borderColor: "#742774",
-        },
+        // {
+        //   label: "Second dataset",
+        //   data: [33, 25, 35, 51, 54, 76],
+        //   fill: false,
+        //   borderColor: "#742774",
+        // },
       ],
     };
 
