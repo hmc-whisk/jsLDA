@@ -179,24 +179,15 @@ export class HomePage extends React.Component {
                                 assigned to that topic at that time. While a topic is selected, only the graph for that
                                 topic will appear. Hovering over this plot will give you more information.
                             </p>
-                            <h4 style={{textAlign: "center"}}>Metadata Tab</h4>
+                            <h4 style={{textAlign: "center"}}>Topic Overview Tab</h4>
+			    <p>This tab will help you see key information about a particular topic.</p>
                             <p>
-                                This tab will help you see how topics relate to document metadata.
+				This display is meant to expand upon the information you would see in the left topic display bar.
+				an extended list of the top words, the top three most correlated topics with that topic,
+				and a visualization of how much probability each of the top words has in the topic.
                             </p>
                             <p>
-                                If you have included metadata in your documents file, you can use this tab to explore
-                                the relationships between your topics and the metadata. There are several different
-                                graphs available for use. For discrete data, you may use each of the bar plots. The
-                                normal bar plots are best for getting information about a particular topic, while the
-                                topic bar plot is best at getting information about which topics are related to a
-                                specific metadata value. For continuous data, the scatter plot is available. If you
-                                would prefer to make your own graphs, you have the option of exporting data related to
-                                any of these graphs on this page.
-                            </p>
-                            <h4 style={{textAlign: "center"}}>Downloads Tab</h4>
-                            <p>
-                                If you would like to continue your analysis with other tools, you have the option of
-                                downloading much of the information created by this website via this tab.
+                                
                             </p>
                         </div>
                     </div>
@@ -220,13 +211,6 @@ export class HomePage extends React.Component {
                         href="https://www.pnas.org/content/pnas/101/suppl_1/5228.full.pdf">here</a>.
                     </p>
 
-                    <h3>Uploading your own files</h3>
-                        <p>
-                            If you choose to upload your own dataset, your files must
-                            be formatted so that jsLDA 2.0 can interpret them.
-                        </p>
-                    {this.uploadHelp}
-
                     <h3>Training a Model</h3>
                         <p>
                             Your topics will start out totally random. To get meaningful topics,
@@ -234,6 +218,7 @@ export class HomePage extends React.Component {
                             Most of the controls for this can be found at the very top of the page.
                         </p>
                     {this.trainingHelp}
+                    
                     <h3>Analyzing a Model</h3>
                         <p>Once you've trained a model, you'll need to figure out what your model has found. jsLDA 2.0 has a few different tools to help you do this.</p>
                     {this.analyzingHelp}
