@@ -3,9 +3,9 @@ import PageController from './PageController';
 import DocAccordion from './DocAccordion';
 import SearchBox from './SearchBox';
 import LabeledToggleButton from 'Components/LabeledToggleButton';
+import {LDAModel} from "../../../core/LDAModel";
 import './topicDoc.css';
-import type {LDAModel, SortedLDADocument, LDADocument} from "core";
-import { utcThursdays } from 'd3';
+import type {SortedLDADocument} from "core";
 
 interface TopicDocProps {
     ldaModel: LDAModel
@@ -43,17 +43,34 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
      * of the selected topic
      */
     get sortedDocuments(): SortedLDADocument[] {
-        return this.props.ldaModel.sortedDocuments
+        if (this.state.documents.length === this.props.ldaModel.sortedDocuments.length) {
+            return this.props.ldaModel.sortedDocuments
+        }
+        else {
+            const selectedTopic = this.props.ldaModel.selectedTopic;
+            const sumDocSortSmoothing = LDAModel.DOC_SORT_SMOOTHING * this.props.ldaModel.numTopics;
+            
+            let sortedDocuments: SortedLDADocument[] = this.state.documents.map(function (doc, i) {
+                (doc as SortedLDADocument)["score"] = (doc.topicCounts[selectedTopic] + LDAModel.DOC_SORT_SMOOTHING) /
+                    (doc.tokens.length + sumDocSortSmoothing)
+                return doc as SortedLDADocument
+            });
+            sortedDocuments.sort(function (a, b) {
+                return b.score - a.score;
+            });
+            return sortedDocuments;
+        }
+        
     }
 
     /**
      * @summary documents sorted in order of the saliency score of documents
      */
     get sortedDocumentsSalient(): SortedLDADocument[] {
+        // If you're returning all documents (i.e. there is no search query)
         if (this.state.documents.length === this.props.ldaModel.sortedDocumentsSalient.length) {
             return this.props.ldaModel.sortedDocumentsSalient
         }
-        // else sort this.state.documents by salience and return it
         else {
             let sortedDocuments: SortedLDADocument[] = this.state.documents;
             sortedDocuments.sort(function (a, b) {
@@ -62,11 +79,11 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
             return sortedDocuments;
         }
 
-        
+
     }
 
     get lastPage(): number {
-        return Math.ceil(this.props.ldaModel.documents.length / TopicDoc.DOCS_PER_PAGE);
+        return Math.ceil(this.state.documents.length / TopicDoc.DOCS_PER_PAGE);
     }
 
     get startDoc(): number {
@@ -116,7 +133,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
      * @summary Finds documents which include the search query as a substring
      * @returns Array of SortedLDADocuments that fit the search query
      */
-     search(query: string) {
+    search(query: string) {
         let searchResults: SortedLDADocument[] = [];
         let docs = this.props.ldaModel.sortedDocuments;
 
@@ -135,36 +152,49 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
 
     render() {
         return (
-            <div id="docPage">
-                <div>
-                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'0.5em'}}>
-                        <SearchBox model={this.props.ldaModel} search={this.search} changePage={this.changePage.bind(this)} />
+            <>
+                <div style={{padding:"20px", margin:"0px"}}>
+                    All documents within the loaded dataset can be viewed here along with a topic score. 
+                    You can use the search box to find specific documents by document ID. 
+                    To reveal more information about each document, you can use the "Show Metadata" toggle. 
+                </div>
+                <div id="docPage">
+                    <div>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '0.5em'
+                        }}>
+                            <SearchBox model={this.props.ldaModel} search={this.search} changePage={this.changePage.bind(this)}/>
 
-                        <div style={{display:'flex'}}>
-                            {this.toggleMetaDataButton()}
-                            {this.toggleSalienceDataButton()}
+                            <div style={{display: 'flex'}}>
+                                {this.toggleMetaDataButton()}
+                                {/* Removing this because it's too slow. [Issue #197] */}
+                                {/* {this.toggleSalienceDataButton()} */}
+                            </div>
+                        </div>
+
+                        <DocAccordion
+                            documents={this.state.useSalience ?
+                                this.sortedDocumentsSalient :
+                                this.sortedDocuments}
+                            ldaModel={this.props.ldaModel}
+                            startDoc={this.startDoc}
+                            endDoc={this.endDoc}
+                            showMetaData={this.state.showMetaData}
+                            useSalience={this.state.useSalience}
+                        />
+
+                        <div className="docNav">
+                            <PageController
+                                currentPage={this.state.currentPage}
+                                changePage={this.changePage.bind(this)}
+                                lastPage={this.lastPage}/>
                         </div>
                     </div>
-                    
-                    <DocAccordion
-                        documents={this.state.useSalience ?
-                            this.sortedDocumentsSalient :
-                            this.state.documents}
-                        ldaModel={this.props.ldaModel}
-                        startDoc={this.startDoc}
-                        endDoc={this.endDoc}
-                        showMetaData={this.state.showMetaData}
-                        useSalience={this.state.useSalience}
-                    />
-
-                    <div className="docNav">
-                        <PageController
-                            currentPage={this.state.currentPage}
-                            changePage={this.changePage.bind(this)}
-                            lastPage={this.lastPage}/>
-                    </div>
                 </div>
-            </div>
+            </>
         )
     }
 
@@ -174,9 +204,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                 id="toggleMetaData"
                 label="Show Metadata"
                 style={{
-                    borderTopLeftRadius: "4px",
-                    borderBottomLeftRadius: "4px",
-                    borderRight: "none"
+                    borderRadius:"4px"
                 } as CSSProperties}
                 checked={this.state.showMetaData}
                 onChange={this.toggleMetaData.bind(this)}/>
