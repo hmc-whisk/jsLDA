@@ -929,6 +929,7 @@ export class LDAModel {
         this.wordTopicCounts = {};
         this._maxTopicSaliency = new Array(numTopics);
         this._documentTopicSmoothing = zeros(numTopics).fill(0.1);
+        this.scheduler.reset()
 
         Object.keys(this.vocabularyCounts).forEach((word) => {
             this.wordTopicCounts[word] = {}
@@ -952,6 +953,7 @@ export class LDAModel {
             }
         });
         this.sortTopicWords();
+        displayMessage("Topic count has been updated", 2500);
         this.updateWebpage();
     }
 
@@ -1874,7 +1876,7 @@ class SweepScheduler {
         this.remainingSweeps = 0;
         this.completedSweeps = 0;
         this.model = model;
-        this.timeTaken = new RollingAvg(50);
+        this.timeTaken = new RollingAvg(25);
     }
 
     /**
