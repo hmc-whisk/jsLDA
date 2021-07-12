@@ -7,7 +7,6 @@ import {logToServer, topNWords} from "funcs/utilityFunctions";
 import { LDAModel } from 'core'
 import { scaleSequential } from "d3-scale";
 import * as chromatic from "d3-scale-chromatic";
-import { ZoomOut } from 'react-bootstrap-icons';
 
 /**
  * @summary Component for Visualization page
