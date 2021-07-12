@@ -22,6 +22,11 @@ export class NumTopicSlider extends React.Component<NumTopicSliderProps,NumTopic
       }
 
     handleChange(e:SyntheticEvent<HTMLInputElement>){
+        if (!(e.target as HTMLInputElement).value || parseInt((e.target as HTMLInputElement).value) <=0)
+            this.setState({
+                numTop:"1"
+            })
+        else 
         this.setState({
             numTop:(e.target as HTMLInputElement).value
         })
@@ -48,7 +53,7 @@ export class NumTopicSlider extends React.Component<NumTopicSliderProps,NumTopic
                     <input id="num-topics-input"
                         onChange={this.handleChange.bind(this)}
                         type="number"
-                        defaultValue="10"
+                        defaultValue={this.state.numTop}
                         placeholder="# bins"
                         max="100"
                         min="5"
