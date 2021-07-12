@@ -122,6 +122,9 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
      */
     confirmUpdate(val: string) {
         // does not use confrimReset bc of the slider needs to reset to original positions
+        if (parseInt(val)===this.state.sliderValue){
+            return
+        }
         if (window.confirm('This will cause your model to reset.')) {
             this.props.updateNumTopics(val);
         } else {

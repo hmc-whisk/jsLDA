@@ -388,7 +388,7 @@ class App extends Component<AppProps, AppStates> {
      * @summary This function is the callback for "change"
      */
     onTopicsChange(val: string) {
-        console.log("Changing # of topics: " + val);
+        // console.log("Changing # of topics: " + val);
         logToServer({event:"change-num-topics","num-topics":val})
         let newNumTopics = Number(val);
         if (!isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.state.ldaModel.numTopics) {
