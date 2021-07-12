@@ -85,7 +85,7 @@ export class PageController extends React.Component<PageControllerProps,PageCont
             }
             return (buttons);
         }
-        else if (this.props.currentPage > this.props.lastPage - 2) {
+        else if ((this.props.currentPage > this.props.lastPage - 2) && (this.props.lastPage > 5)) {
             for (let i = this.props.lastPage - 4; i < this.props.currentPage; i++) {
                 buttons.push(this.pageButton(i));
             }
