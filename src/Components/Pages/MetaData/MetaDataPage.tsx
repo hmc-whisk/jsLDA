@@ -1,26 +1,54 @@
-import React from "react";
+import React, { ChangeEvent } from "react";
 import { LDAModel } from "core";
 import { Bar } from "react-chartjs-2";
 
 interface metaDataProps {
-  ldaModel: LDAModel;
+  ldaModel: LDAModel,
+  metaFields: string[]
 }
 
-interface metaDataState {}
+interface metaDataState {
+  metaField: string
+}
 
 export class MetaDataPage extends React.Component<metaDataProps, metaDataState> {
   constructor(props: metaDataProps) {
     super(props);
-    this.state = {};
+    this.state = {
+      metaField: this.props.ldaModel.metaFields[0]
+    };
+  }
+
+  metaFieldChange(event: ChangeEvent<HTMLSelectElement>) {
+    // event.preventDefault();
+
+    console.log(event.target.value);
+    this.setState({metaField: event.target.value})
+
+  }
+
+  createMetaFieldSelector() {
+    return (
+      <select onChange={this.metaFieldChange.bind(this)}>
+        {this.props.metaFields.map((metaField) => {
+          return (
+            <option key={metaField} value={metaField}>
+              {metaField}
+            </option>
+          );
+        })}
+      </select>
+    );
   }
 
   createBarChart() {
     // hard coded test data
+    // console.log(this.props.ldaModel.metaFields);
     const data = {
       labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
       datasets: [
         {
-          label: "First dataset",
+          label: this.state.metaField,
           data: [33, 53, 85, 41, 44, 65],
           fill: true,
           backgroundColor: "rgba(75,192,192,0.2)",
@@ -65,7 +93,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
   }
 
   render() {
-    return <div className="page">{this.createBarChart()}</div>;
+    return <div className="page">{this.createBarChart()} {this.createMetaFieldSelector()}</div>;
   }
 }
 
