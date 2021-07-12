@@ -7,7 +7,8 @@ import type {LDAModel, LDADocument} from "core";
 
 interface SearchProps{
     model:LDAModel,
-    search: (query: string) => void
+    search: (query: string) => void,
+    changePage: (n:number)=>void
 }
 interface SearchState{
     query:string
@@ -39,13 +40,26 @@ export class SearchBox extends React.Component<SearchProps,SearchState> {
                         aria-describedby="basic-addon2"
                         onChange={e => this.setState({query: e.target.value})}
                         onKeyPress={(e:KeyboardEvent<HTMLInputElement>) => {if (e.key === 'Enter') {
+                            this.props.changePage(1);
                             // @ts-ignore
                             this.setState({query: e.target.value});
                             this.props.search(this.state.query);
                         }}}
                     />
-                    <Button variant="outline-secondary" id="button-addon2" onClick={() => this.props.search(this.state.query)}>
+                    <Button variant="outline-secondary" id="button-addon2"
+                        style={{
+                            borderBottomLeftRadius:'0',
+                            borderTopLeftRadius:'0'}}
+                        onClick={() => {
+                            this.props.changePage(1);
+                            this.props.search(this.state.query);}}>
                         Search
+                    </Button>
+                    <Button variant="outline-secondary" id="reset-button-search" style={{marginLeft:'5px'}}
+                        onClick={() => {
+                            this.props.changePage(1);
+                            this.props.search('');}}>
+                        Reset
                     </Button>
                 </InputGroup>
 
