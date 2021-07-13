@@ -5,7 +5,6 @@ import SearchBox from './SearchBox';
 import LabeledToggleButton from 'Components/LabeledToggleButton';
 import './topicDoc.css';
 import type {LDAModel, SortedLDADocument, LDADocument} from "core";
-import { utcThursdays } from 'd3';
 
 interface TopicDocProps {
     ldaModel: LDAModel
