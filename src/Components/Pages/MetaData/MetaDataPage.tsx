@@ -8,14 +8,16 @@ interface metaDataProps {
 }
 
 interface metaDataState {
-  metaField: string
+  metaField: string,
+  numberOfFields: number
 }
 
 export class MetaDataPage extends React.Component<metaDataProps, metaDataState> {
   constructor(props: metaDataProps) {
     super(props);
     this.state = {
-      metaField: this.props.ldaModel.metaFields[0]
+      metaField: this.props.ldaModel.metaFields[0],
+      numberOfFields: 10
     };
   }
 
@@ -24,6 +26,17 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
   */
   metaFieldChange(e: ChangeEvent<HTMLSelectElement>) {
     this.setState({metaField: e.target.value})
+  }
+
+  //handle the change of number of top words
+  numChange(event: ChangeEvent<HTMLInputElement>) {
+    event.preventDefault();
+
+    if (parseInt(event.target.value) > 30) event.target.value = "30";
+
+    this.setState({
+        numberOfFields: Math.max(1, parseInt(event.target.value)),
+    })
   }
 
   /*
@@ -58,10 +71,10 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
       data.push({ label: key, value: value });
     }
 
-    let result = data.map(({label, value}) => ([label, value]));
-    // console.log(data);
-    console.log(result);
-    return result;
+    type metadataPair = [string, number];
+    let result: metadataPair[] = data.map(({label, value}) => ([label, value]));
+    result = result.sort((a,b) => (b[1] - a[1]));
+    return result.slice(0,this.state.numberOfFields).sort();
   }
 
   createBarChart() {
@@ -127,7 +140,18 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
       return this.noTopicSelected()
     }
 
-    return <div className="page">{this.createBarChart()} {this.createMetaFieldSelector()}</div>;
+    return <div className="page">{this.createBarChart()} {this.createMetaFieldSelector()}
+                        <input
+                        onChange={this.numChange.bind(this)}
+                        placeholder="# top Wrods"
+                        type="number" id="numberOfBins"
+                        value={this.state.numberOfFields}
+                        max="300"
+                        min="5"
+                        step="1"
+                        style={{position: "relative", left:5}}
+                    />
+                    </div>;
   }
 }
 
