@@ -12,7 +12,8 @@ interface metaDataProps {
 interface metaDataState {
   metaField: string,
   numberOfFields: number,
-  sortByTop: boolean
+  sortByTop: boolean,
+  sortByName: boolean
 }
 
 export class MetaDataPage extends React.Component<metaDataProps, metaDataState> {
@@ -21,7 +22,8 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
     this.state = {
       metaField: this.props.ldaModel.metaFields[0],
       numberOfFields: 10,
-      sortByTop: true
+      sortByTop: true,
+      sortByName: false
     };
   }
 
@@ -79,10 +81,18 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
     let result: metadataPair[] = data.map(({label, value}) => ([label, value]));
     result = result.sort((a,b) => (b[1] - a[1]));
     console.log(this.state.sortByTop)
-    if (!this.state.sortByTop)
-      return result.slice(-this.state.numberOfFields).sort();
-    else 
-      return result.slice(0,this.state.numberOfFields).sort();
+    if (!this.state.sortByTop) {
+      if (this.state.sortByName)
+        return result.slice(-this.state.numberOfFields).sort();
+      else
+        return result.slice(-this.state.numberOfFields);
+    }
+    else {
+      if (this.state.sortByName)
+        return result.slice(0,this.state.numberOfFields).sort();
+      else
+        return result.slice(0,this.state.numberOfFields);
+    }
   }
 
   createBarChart() {
@@ -119,7 +129,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
         },
         title: {
           display: true,
-          text: "Average topic score by " + this.state.metaField,
+          text: this.state.sortByTop ? "Highest " + "average topic scores by " + this.state.metaField : "Lowest " + "average topic scores by " + this.state.metaField,
         },
       },
     };
@@ -143,11 +153,18 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
     )
   }
 
-  toggleSort() {
+  toggleSortNumber() {
     this.setState({
         sortByTop: !this.state.sortByTop
     })
     console.log(this.state.sortByTop)
+}
+
+toggleSortName() {
+  this.setState({
+      sortByName: !this.state.sortByName
+  })
+  console.log(this.state.sortByName)
 }
 
   configChart(){
@@ -164,8 +181,8 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
             style={{position: "relative", left:0}}
           ></input>
           <LabeledToggleButton
-            id="toggleSort"
-            label={"show from lowest top scores"}
+            id="toggleSortNumber"
+            label={"show lowest scores"}
             style={{
               borderTopRightRadius: "10px",
               borderBottomRightRadius: "10px",
@@ -173,7 +190,19 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
               borderBottomLeftRadius:"10px"
               }}
             checked={!this.state.sortByTop}
-            onChange={this.toggleSort.bind(this)}
+            onChange={this.toggleSortNumber.bind(this)}
+          />
+            <LabeledToggleButton
+            id="toggleSortName"
+            label={"sort results lexicographically"}
+            style={{
+              borderTopRightRadius: "10px",
+              borderBottomRightRadius: "10px",
+              borderTopLeftRadius:"10px",
+              borderBottomLeftRadius:"10px"
+              }}
+            checked={this.state.sortByName}
+            onChange={this.toggleSortName.bind(this)}
           />
       </div>
     )
