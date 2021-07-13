@@ -76,7 +76,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
       labels: inputData.map((x) => x[0]), // extract the labels from the 2D array
       datasets: [
         {
-          label: this.state.metaField,
+          label: "Average topic score " + "(Topic " + this.props.ldaModel.selectedTopic + ")",
           data: inputData.map((x) => x[1]), // extract the values from the 2D array
           fill: true,
           backgroundColor: "rgba(75,192,192,0.2)",
@@ -101,27 +101,29 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
         },
       },
       responsive: true,
+      maintainAspectRatio: true,
       plugins: {
         legend: {
           position: "right",
         },
         title: {
           display: true,
-          text: "Chart.js Horizontal Bar Chart",
+          text: "Average topic score by " + this.state.metaField,
         },
       },
     };
 
     return (
       <div>
+        {/* calculate height based on the amount of data to display somehow? */}
         {/* @ts-ignore */}
-        <Bar data={data} options={options} />
+        <Bar data={data} options={options} height={150}/>
       </div>
     );
   }
 
   render() {
-    return <div className="page">{this.createBarChart()} {this.createMetaFieldSelector()}</div>;
+    return <div className="page">{this.createMetaFieldSelector()} {this.createBarChart()}</div>;
   }
 }
 
