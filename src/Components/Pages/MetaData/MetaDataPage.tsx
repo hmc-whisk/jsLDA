@@ -1,6 +1,8 @@
 import React, { ChangeEvent } from "react";
 import { LDAModel } from "core";
 import { Bar } from "react-chartjs-2";
+import LabeledToggleButton from 'Components/LabeledToggleButton';
+import { BorderBottom } from "react-bootstrap-icons";
 
 interface metaDataProps {
   ldaModel: LDAModel,
@@ -9,7 +11,8 @@ interface metaDataProps {
 
 interface metaDataState {
   metaField: string,
-  numberOfFields: number
+  numberOfFields: number,
+  sortByTop: boolean
 }
 
 export class MetaDataPage extends React.Component<metaDataProps, metaDataState> {
@@ -17,7 +20,8 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
     super(props);
     this.state = {
       metaField: this.props.ldaModel.metaFields[0],
-      numberOfFields: 10
+      numberOfFields: 10,
+      sortByTop: true
     };
   }
 
@@ -74,7 +78,11 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
     type metadataPair = [string, number];
     let result: metadataPair[] = data.map(({label, value}) => ([label, value]));
     result = result.sort((a,b) => (b[1] - a[1]));
-    return result.slice(0,this.state.numberOfFields).sort();
+    console.log(this.state.sortByTop)
+    if (!this.state.sortByTop)
+      return result.slice(-this.state.numberOfFields).sort();
+    else 
+      return result.slice(0,this.state.numberOfFields).sort();
   }
 
   createBarChart() {
@@ -107,7 +115,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
       maintainAspectRatio: true,
       plugins: {
         legend: {
-          position: "right",
+          position: "bottom",
         },
         title: {
           display: true,
@@ -133,25 +141,54 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
             </div>
         </div>
     )
+  }
+
+  toggleSort() {
+    this.setState({
+        sortByTop: !this.state.sortByTop
+    })
+    console.log(this.state.sortByTop)
 }
+
+  configChart(){
+    return(
+      <div style={{display:"flex", justifyContent:'space-between', alignItems:'center', marginBottom:'0.5em'}} id="configChart">
+          <input
+            onChange={this.numChange.bind(this)}
+            placeholder="# top Wrods"
+            type="number" id="numberOfBins"
+            value={this.state.numberOfFields}
+            max="300"
+            min="5"
+            step="1"
+            style={{position: "relative", left:0}}
+          ></input>
+          <LabeledToggleButton
+            id="toggleSort"
+            label={"show from lowest top scores"}
+            style={{
+              borderTopRightRadius: "10px",
+              borderBottomRightRadius: "10px",
+              borderTopLeftRadius:"10px",
+              borderBottomLeftRadius:"10px"
+              }}
+            checked={!this.state.sortByTop}
+            onChange={this.toggleSort.bind(this)}
+          />
+      </div>
+    )
+  }
 
   render() {
     if (this.props.ldaModel.selectedTopic === -1) {
       return this.noTopicSelected()
     }
 
-    return <div className="page">{this.createBarChart()} {this.createMetaFieldSelector()}
-                        <input
-                        onChange={this.numChange.bind(this)}
-                        placeholder="# top Wrods"
-                        type="number" id="numberOfBins"
-                        value={this.state.numberOfFields}
-                        max="300"
-                        min="5"
-                        step="1"
-                        style={{position: "relative", left:5}}
-                    />
-                    </div>;
+    return <div className="page">
+      {this.createBarChart()} 
+      {this.createMetaFieldSelector()}
+      {this.configChart()}
+    </div>;
   }
 }
 
