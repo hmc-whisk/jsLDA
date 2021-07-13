@@ -22,12 +22,8 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
   /*
   * handles a change of the metafield via the selector
   */
-  metaFieldChange(event: ChangeEvent<HTMLSelectElement>) {
-    // event.preventDefault();
-
-    console.log(event.target.value);
-    this.setState({metaField: event.target.value})
-
+  metaFieldChange(e: ChangeEvent<HTMLSelectElement>) {
+    this.setState({metaField: e.target.value})
   }
 
   /*
@@ -64,7 +60,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
 
     let result = data.map(({label, value}) => ([label, value]));
     // console.log(data);
-    // console.log(result);
+    console.log(result);
     return result;
   }
 
@@ -82,12 +78,6 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
           backgroundColor: "rgba(75,192,192,0.2)",
           borderColor: "rgba(75,192,192,1)",
         },
-        // {
-        //   label: "Second dataset",
-        //   data: [33, 25, 35, 51, 54, 76],
-        //   fill: false,
-        //   borderColor: "#742774",
-        // },
       ],
     };
 
@@ -122,8 +112,22 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
     );
   }
 
+  noTopicSelected() {
+    return (
+        <div id="pages">
+            <div id="meta-page" className="page">
+                <h2 id="label" style={{textAlign: "center"}}> Please Select a Topic</h2>
+            </div>
+        </div>
+    )
+}
+
   render() {
-    return <div className="page">{this.createMetaFieldSelector()} {this.createBarChart()}</div>;
+    if (this.props.ldaModel.selectedTopic === -1) {
+      return this.noTopicSelected()
+    }
+
+    return <div className="page">{this.createBarChart()} {this.createMetaFieldSelector()}</div>;
   }
 }
 
