@@ -24,7 +24,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
       numberOfFields: 10,
       sortByTop: true,
       sortByName: false,
-      displayConfigPanel: false
+      displayConfigPanel: true
     };
   }
 
@@ -234,10 +234,11 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
       return this.noTopicSelected()
     }
 
-    return <div className="page">
-      {this.createBarChart()}
-      <button onClick={this.toggleConfigPanel.bind(this)}>Edit</button>
+    return <div >
+           {this.createBarChart()}
+      <button className="configMenu" style={{float:"left"}} onClick={this.toggleConfigPanel.bind(this)}>Configure the chart</button>
       {this.state.displayConfigPanel && <div>{this.configChart()}</div>}
+ 
     </div>;
   }
 }
