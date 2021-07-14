@@ -234,11 +234,16 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
       return this.noTopicSelected()
     }
 
-    return <div className="page">
-      {this.createBarChart()}
-      <button onClick={this.toggleConfigPanel.bind(this)}>Edit</button>
-      {this.state.displayConfigPanel && <div>{this.configChart()}</div>}
-    </div>;
+    return (
+      <div className="page">
+        {this.createBarChart()}
+        {this.state.displayConfigPanel ? 
+        (<button onClick={this.toggleConfigPanel.bind(this)}>Hide</button>)
+           : 
+        (<button onClick={this.toggleConfigPanel.bind(this)}>Edit</button>)}
+        {this.state.displayConfigPanel && <div>{this.configChart()}</div>}
+      </div>
+    );
   }
 }
 
