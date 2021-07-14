@@ -24,7 +24,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
       numberOfFields: 10,
       sortByTop: true,
       sortByName: false,
-      displayConfigPanel: true
+      displayConfigPanel: false
     };
   }
 
@@ -234,9 +234,14 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
       return this.noTopicSelected()
     }
 
-    return <div >
+    return <div>
+      <div className="help" style={{position: "relative", left: 10, paddingBottom:0}}>
+      This plot displays the average topic scores for metadata values present in the collection of documents. Since there is often
+      a very high number of distinct metadata values, this plot will show up to 30 of the metadata values with either the highest or
+      lowest average topic scores. Nagivate to the button below the chart to configure the plot.
+      </div>
            {this.createBarChart()}
-      <button className="configMenu" style={{float:"left"}} onClick={this.toggleConfigPanel.bind(this)}>Configure the chart</button>
+      <button className="configMenu" style={{float:"left"}} onClick={this.toggleConfigPanel.bind(this)}>Configure plot</button>
       {this.state.displayConfigPanel && <div>{this.configChart()}</div>}
  
     </div>;
