@@ -12,7 +12,8 @@ interface metaDataState {
   metaField: string,
   numberOfFields: number,
   sortByTop: boolean,
-  sortByName: boolean
+  sortByName: boolean,
+  displayConfigPanel: boolean
 }
 
 export class MetaDataPage extends React.Component<metaDataProps, metaDataState> {
@@ -22,7 +23,8 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
       metaField: this.props.ldaModel.metaFields[0],
       numberOfFields: 10,
       sortByTop: true,
-      sortByName: false
+      sortByName: false,
+      displayConfigPanel: false
     };
   }
 
@@ -160,59 +162,69 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
     this.setState({
         sortByTop: !this.state.sortByTop
     })
-    console.log(this.state.sortByTop)
+    // console.log(this.state.sortByTop)
   }
 
-toggleSortName() {
-  this.setState({
-      sortByName: !this.state.sortByName
-  })
-  console.log(this.state.sortByName)
-}
+  toggleSortName() {
+    this.setState({
+        sortByName: !this.state.sortByName
+    })
+    // console.log(this.state.sortByName)
+  }
+
+  toggleConfigPanel() {
+    this.setState({
+        displayConfigPanel: !this.state.displayConfigPanel
+    })
+    console.log("Edit " + this.state.displayConfigPanel)
+  }
 
   configChart(){
     return(
-      <div 
-        style={{
-          marginBottom:'0.5em',
-          marginTop:"5"}} 
-        id="configChart">
-          Number of bars: &nbsp;  
-          <input
-            onChange={this.numChange.bind(this)}
-            placeholder="# bars"
-            type="number" id="numberOfBins"
-            value={this.state.numberOfFields}
-            max="300"
-            min="5"
-            step="1"
-            style={{marginTop:"5"}}
-          ></input>
-          <div id="buttons" style={{display:"flex",float:"right"}}>
-          <LabeledToggleButton
-            id="toggleSortNumber"
-            label={"show lowest scores"}
-            style={{
-              borderTopRightRadius: "10px",
-              borderBottomRightRadius: "10px",
-              borderTopLeftRadius:"10px",
-              borderBottomLeftRadius:"10px"}}
-            checked={!this.state.sortByTop}
-            onChange={this.toggleSortNumber.bind(this)}
-          /> 
+      <div>
+        {this.createMetaFieldSelector()}
+        <div 
+          style={{
+            marginBottom:'0.5em',
+            marginTop:"5"}} 
+          id="configChart">
+            Number of bars: &nbsp;  
+            <input
+              onChange={this.numChange.bind(this)}
+              placeholder="# bars"
+              type="number" id="numberOfBins"
+              value={this.state.numberOfFields}
+              max="300"
+              min="5"
+              step="1"
+              style={{marginTop:"5"}}
+            ></input>
+            <div id="buttons" style={{display:"flex",float:"right"}}>
             <LabeledToggleButton
-            id="toggleSortName"
-            label={"sort results lexicographically"}
-            style={{
-              borderTopRightRadius: "10px",
-              borderBottomRightRadius: "10px",
-              borderTopLeftRadius:"10px",
-              borderBottomLeftRadius:"10px",
-              marginLeft:"5"}}
-            checked={this.state.sortByName}
-            onChange={this.toggleSortName.bind(this)}
-          />
-          </div>
+              id="toggleSortNumber"
+              label={"show lowest scores"}
+              style={{
+                borderTopRightRadius: "10px",
+                borderBottomRightRadius: "10px",
+                borderTopLeftRadius:"10px",
+                borderBottomLeftRadius:"10px"}}
+              checked={!this.state.sortByTop}
+              onChange={this.toggleSortNumber.bind(this)}
+            /> 
+              <LabeledToggleButton
+              id="toggleSortName"
+              label={"sort results lexicographically"}
+              style={{
+                borderTopRightRadius: "10px",
+                borderBottomRightRadius: "10px",
+                borderTopLeftRadius:"10px",
+                borderBottomLeftRadius:"10px",
+                marginLeft:"5"}}
+              checked={this.state.sortByName}
+              onChange={this.toggleSortName.bind(this)}
+            />
+            </div>
+        </div>
       </div>
     )
   }
@@ -223,9 +235,9 @@ toggleSortName() {
     }
 
     return <div className="page">
-      {this.createBarChart()} 
-      {this.createMetaFieldSelector()}
-      {this.configChart()}
+      {this.createBarChart()}
+      <button onClick={this.toggleConfigPanel.bind(this)}>Edit</button>
+      {this.state.displayConfigPanel && <div>{this.configChart()}</div>}
     </div>;
   }
 }
