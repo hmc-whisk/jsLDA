@@ -2,7 +2,6 @@ import React, { ChangeEvent } from "react";
 import { LDAModel } from "core";
 import { Bar } from "react-chartjs-2";
 import LabeledToggleButton from 'Components/LabeledToggleButton';
-import { BorderBottom } from "react-bootstrap-icons";
 
 interface metaDataProps {
   ldaModel: LDAModel,
@@ -50,6 +49,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
   */
   createMetaFieldSelector() {
     return (
+      <div id="metafileds selector"> Choose metadata field: &nbsp;
       <select onChange={this.metaFieldChange.bind(this)}>
         {this.props.metaFields.map((metaField) => {
           return (
@@ -59,6 +59,8 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
           );
         })}
       </select>
+      </div>
+
     );
   }
 
@@ -125,11 +127,12 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
       maintainAspectRatio: true,
       plugins: {
         legend: {
-          position: "bottom",
+          display: false
         },
         title: {
           display: true,
-          text: this.state.sortByTop ? "Highest " + "average topic scores by " + this.state.metaField : "Lowest " + "average topic scores by " + this.state.metaField,
+          text: this.state.sortByTop ? "Highest " +this.state.numberOfFields+ " average topic scores by " + this.state.metaField 
+                                     : "Lowest " + this.state.numberOfFields + " average topic scores by " + this.state.metaField,
         },
       },
     };
@@ -158,7 +161,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
         sortByTop: !this.state.sortByTop
     })
     console.log(this.state.sortByTop)
-}
+  }
 
 toggleSortName() {
   this.setState({
@@ -169,17 +172,23 @@ toggleSortName() {
 
   configChart(){
     return(
-      <div style={{display:"flex", justifyContent:'space-between', alignItems:'center', marginBottom:'0.5em'}} id="configChart">
+      <div 
+        style={{
+          marginBottom:'0.5em',
+          marginTop:"5"}} 
+        id="configChart">
+          Number of bars: &nbsp;  
           <input
             onChange={this.numChange.bind(this)}
-            placeholder="# top Wrods"
+            placeholder="# bars"
             type="number" id="numberOfBins"
             value={this.state.numberOfFields}
             max="300"
             min="5"
             step="1"
-            style={{position: "relative", left:0}}
+            style={{marginTop:"5"}}
           ></input>
+          <div id="buttons" style={{display:"flex",float:"right"}}>
           <LabeledToggleButton
             id="toggleSortNumber"
             label={"show lowest scores"}
@@ -187,11 +196,10 @@ toggleSortName() {
               borderTopRightRadius: "10px",
               borderBottomRightRadius: "10px",
               borderTopLeftRadius:"10px",
-              borderBottomLeftRadius:"10px"
-              }}
+              borderBottomLeftRadius:"10px"}}
             checked={!this.state.sortByTop}
             onChange={this.toggleSortNumber.bind(this)}
-          />
+          /> 
             <LabeledToggleButton
             id="toggleSortName"
             label={"sort results lexicographically"}
@@ -199,11 +207,12 @@ toggleSortName() {
               borderTopRightRadius: "10px",
               borderBottomRightRadius: "10px",
               borderTopLeftRadius:"10px",
-              borderBottomLeftRadius:"10px"
-              }}
+              borderBottomLeftRadius:"10px",
+              marginLeft:"5"}}
             checked={this.state.sortByName}
             onChange={this.toggleSortName.bind(this)}
           />
+          </div>
       </div>
     )
   }
