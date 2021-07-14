@@ -133,8 +133,8 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
         },
         title: {
           display: true,
-          text: this.state.sortByTop ? "Highest " +this.state.numberOfFields+ " average topic scores by " + this.state.metaField 
-                                     : "Lowest " + this.state.numberOfFields + " average topic scores by " + this.state.metaField,
+          text: this.state.sortByTop ? "Highest " +this.state.numberOfFields+ " average topic scores by " + this.state.metaField +" in topic "+this.props.ldaModel.selectedTopic
+                                     : "Lowest " + this.state.numberOfFields + " average topic scores by " + this.state.metaField+" in topic "+this.props.ldaModel.selectedTopic,
         },
       },
     };
@@ -202,7 +202,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
             <div id="buttons" style={{display:"flex",float:"right"}}>
             <LabeledToggleButton
               id="toggleSortNumber"
-              label={"show lowest scores"}
+              label={"See " +this.state.numberOfFields+" lowest topic scores"}
               style={{
                 borderTopRightRadius: "10px",
                 borderBottomRightRadius: "10px",
