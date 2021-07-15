@@ -2,6 +2,8 @@ import React, { ChangeEvent } from "react";
 import { LDAModel } from "core";
 import { Bar } from "react-chartjs-2";
 import LabeledToggleButton from 'Components/LabeledToggleButton';
+import 'Components/Header/header.css';
+import './MetaDataPage.css';
 
 interface metaDataProps {
   ldaModel: LDAModel,
@@ -133,8 +135,8 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
         },
         title: {
           display: true,
-          text: this.state.sortByTop ? "Highest " +this.state.numberOfFields+ " average topic scores by " + this.state.metaField +" in topic "+this.props.ldaModel.selectedTopic
-                                     : "Lowest " + this.state.numberOfFields + " average topic scores by " + this.state.metaField+" in topic "+this.props.ldaModel.selectedTopic,
+          text: this.state.sortByTop ? "Highest " + (this.state.numberOfFields || "")+ " average topic scores by " + this.state.metaField +" in topic "+this.props.ldaModel.selectedTopic
+                                     : "Lowest " + (this.state.numberOfFields || "") + " average topic scores by " + this.state.metaField+" in topic "+this.props.ldaModel.selectedTopic,
         },
       },
     };
@@ -182,44 +184,45 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
   configChart(){
     return(
       <div>
-        {this.createMetaFieldSelector()}
-        <div 
+        <div
           style={{
             marginBottom:'0.5em',
-            marginTop:"5"}} 
+            marginTop:"5",
+            display:"table-row"}} 
           id="configChart">
+            {this.createMetaFieldSelector()}
             Number of bars: &nbsp;  
             <input
               onChange={this.numChange.bind(this)}
               placeholder="# bars"
               type="number" id="numberOfBins"
               value={this.state.numberOfFields}
-              max="300"
+              max="30"
               min="5"
               step="1"
-              style={{marginTop:"5"}}
+              style={{marginTop:"5", marginBottom:"5"}}
             ></input>
-            <div id="buttons" style={{display:"flex",float:"right"}}>
+            <div id="buttons">
             <LabeledToggleButton
               id="toggleSortNumber"
-              label={"See " +this.state.numberOfFields+" lowest topic scores"}
-              style={{
-                borderTopRightRadius: "10px",
-                borderBottomRightRadius: "10px",
-                borderTopLeftRadius:"10px",
-                borderBottomLeftRadius:"10px"}}
-              checked={!this.state.sortByTop}
-              onChange={this.toggleSortNumber.bind(this)}
-            /> 
-              <LabeledToggleButton
-              id="toggleSortName"
-              label={"sort results lexicographically"}
+              label={"See " + (this.state.numberOfFields || "") + " lowest topic scores"}
               style={{
                 borderTopRightRadius: "10px",
                 borderBottomRightRadius: "10px",
                 borderTopLeftRadius:"10px",
                 borderBottomLeftRadius:"10px",
-                marginLeft:"5"}}
+                marginBottom:"5"}}
+              checked={!this.state.sortByTop}
+              onChange={this.toggleSortNumber.bind(this)}
+            /> 
+              <LabeledToggleButton
+              id="toggleSortName"
+              label={"Sort results lexicographically"}
+              style={{
+                borderTopRightRadius: "10px",
+                borderBottomRightRadius: "10px",
+                borderTopLeftRadius:"10px",
+                borderBottomLeftRadius:"10px"}}
               checked={this.state.sortByName}
               onChange={this.toggleSortName.bind(this)}
             />
@@ -234,17 +237,41 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
       return this.noTopicSelected()
     }
 
-    return <div>
-      <div className="help" style={{position: "relative", left: 10, paddingBottom:0}}>
-      This plot displays the average topic scores for metadata values present in the collection of documents. Since there is often
-      a very high number of distinct metadata values, this plot will show up to 30 of the metadata values with either the highest or
-      lowest average topic scores. Nagivate to the button below the chart to configure the plot.
+    return (
+      <div>
+        <div
+          className="help"
+          style={{ position: "relative", left: 10, paddingBottom: 0 }}
+        >
+          This plot displays the average topic scores for metadata values
+          present in the collection of documents. Since there is often a very
+          high number of distinct metadata values, this plot will show up to 30
+          of the metadata values with either the highest or lowest average topic
+          scores. Nagivate to the button below the chart to configure the plot.
+        </div>
+        {this.createBarChart()}
+        <div
+          className="configPanel"
+          style={{
+            padding: "5 10px",
+            display: "inline-grid",
+            backgroundColor: "var(--color1)",
+            borderRadius: "10px",
+            margin: "5px",
+          }}
+        >
+          {/*inline flex, grid */}
+          <button
+            className="configMenu"
+            style={{ float: "left" }}
+            onClick={this.toggleConfigPanel.bind(this)}
+          >
+            Configure plot
+          </button>
+          {this.state.displayConfigPanel && <div>{this.configChart()}</div>}
+        </div>
       </div>
-           {this.createBarChart()}
-      <button className="configMenu" style={{float:"left"}} onClick={this.toggleConfigPanel.bind(this)}>Configure plot</button>
-      {this.state.displayConfigPanel && <div>{this.configChart()}</div>}
- 
-    </div>;
+    );
   }
 }
 
