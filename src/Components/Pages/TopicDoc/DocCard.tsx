@@ -4,6 +4,7 @@ import Accordion from 'react-bootstrap/Accordion';
 import {format as d3Format} from 'd3';
 import {truncate} from '../../../funcs/utilityFunctions';
 import DocView from './DocView';
+import DocTreeMap from './DocTreeMap';
 import './topicDoc.css';
 import type {LDAModel, SortedLDADocument} from "core";
 
@@ -43,6 +44,12 @@ export class DocCard extends React.Component<DocCardProps,DocCardState> {
                             ldaModel={this.props.ldaModel}
                             maxTopicValue={this.props.maxTopicValue}
                         />
+                        <div style ={{margin:'10 0 5 0'}}>
+                            <DocTreeMap
+                                ldaModel={this.props.ldaModel}
+                                document={this.props.document}
+                            />
+                        </div>
                     </span>
                 </Accordion.Collapse>
             </Card>

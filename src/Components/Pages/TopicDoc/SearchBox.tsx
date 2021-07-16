@@ -3,7 +3,7 @@ import FormControl from 'react-bootstrap/FormControl';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
 import './topicDoc.css';
-import type {LDAModel, LDADocument} from "core";
+import type {LDAModel} from "core";
 
 interface SearchProps{
     model:LDAModel,
