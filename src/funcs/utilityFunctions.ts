@@ -134,6 +134,7 @@ async function _logToServer<T extends LogMessage>(id: string, data: T) {
 
 export function logToServer<T extends LogMessage>(data: T) {
     let id = getQueryVariable("id")
+    if (id==="test") return; // special testing id to disable logging altogether
     if (id === undefined) {
         displayMessage("Logging failed: missing ID", 1500)
         return
