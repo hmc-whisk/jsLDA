@@ -7,6 +7,7 @@
 import {SyntheticEvent} from "react";
 import {displayMessage} from "../core";
 
+
 export function topNWords(wordCounts: { word: string }[], n: number): string {
     return wordCounts.slice(0, n).map((d) => d.word).join(" ");
 }
@@ -117,15 +118,12 @@ export interface LogMessage {
     event: string
 }
 
-async function _logToServer<T extends LogMessage>(id: string, data: T) {
-    let form = new FormData()
-    form.append("id", id)
-    form.append("data", JSON.stringify(data))
-    let res= await fetch("http://134.173.42.100:9191/", {
-        method: "PUT",
-        body: form
-    })
-    if (res.status!==201){
+async function _logToServer<T extends LogMessage>(id: string, data: T) {    
+    let res= await fetch(`https://cs.hmc.edu/~xanda/logstudy.cgi?id=${id}&data=${JSON.stringify(data)}&time=${Date()}`, {
+      method: 'POST',
+      mode: 'no-cors'}
+    ) 
+    if (res.status!==201 && res.type !== 'opaque'){
         console.error("Server response bad status code")
         console.error(res)
         throw new Error("Bad status")
