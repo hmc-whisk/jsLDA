@@ -36,6 +36,10 @@ export async function saveModel(model: LDAModel) {
         await displayMessage("Logging failed: missing ID", 1500, "promise")
         throw Error("No ID")
     }
+    if (id.match(/^[A-Za-z0-9]{1,12}$/)===null){
+        displayMessage("Logging failed: invalid ID", 1500)
+        return
+    }
 
     await displayMessage("Generating stoplist", 0, "promise")
 
@@ -58,10 +62,15 @@ export async function saveModel(model: LDAModel) {
     form.append("id",id)
     form.append("model.zip",zip)
 
-    await fetch("http://134.173.42.100:9191/upload",{
-        method:"PUT",
+    let res=await fetch("https://www.cs.hmc.edu/~xanda/savestudy.cgi",{
+        method:"POST",
         body:form
     })
+    if (res.type !=="basic" || !res.ok){
+        console.error(res)
+        throw Error("Error while uploading")
+    }
+    return res
 }
 
 
