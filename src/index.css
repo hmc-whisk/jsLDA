@@ -20,8 +20,8 @@
 
   --color6: #d4dee0;
 
-  --negativeCorrelationColor: hsl(5, 70%, 70%);
-  --positiveCorrelationColor: hsl(175, 40%, 40%);
+  --negativeCorrelationColor: hsl(175, 40%, 40%);
+  --positiveCorrelationColor: hsl(5, 70%, 70%);
 }
 
 
