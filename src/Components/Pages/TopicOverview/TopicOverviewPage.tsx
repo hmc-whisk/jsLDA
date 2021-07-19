@@ -48,7 +48,7 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
         if (ar.length < 3) return [0,1,2];
         let max = [{value: ar[0], index: 0}, {value: ar[1], index: 1}, {value: ar[2], index: 2}];
         max.sort((a,b) => b.value - a.value);
-    
+
         for (let i = 3; i < ar.length; i++) {
             if (ar[i] > max[2].value) {
                 max[2].value = ar[i];
@@ -89,8 +89,8 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
                         <h2 id="label">Please Select a Topic</h2>
                     </div>
                     <div>
-                        More detailed information about the selected topic will show up here, including 
-                        a list of the top words, the top three most correlated topics, and a treemap visualization 
+                        More detailed information about the selected topic will show up here, including
+                        a list of the top words, the top three most correlated topics, and a treemap visualization
                         of the top word probabilities.
                     </div>
                 </div>
@@ -109,13 +109,14 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
             <div id="label">
                 <h2>Topic {topicNum}</h2>
                 <div style={{paddingBottom:"20px", margin:"0px", textAlign:"left"}}>
-                    More detailed information about the selected topic will show up here, including 
-                    a list of the top words, the top three most correlated topics, and a treemap visualization 
+                    More detailed information about the selected topic will show up here, including
+                    a list of the top words, the top three most correlated topics, and a treemap visualization
                     of the top word probabilities.
                 </div>
                 <pre style={{
                     fontSize: TopicOverviewPage.annotationFontSize,
-                    whiteSpace: "pre-wrap"
+                    whiteSpace: "pre-wrap",
+                    overflow: "visible"
                 }}>
                     <i>{this.props.annotations[topicNum]}</i>
                 </pre>
