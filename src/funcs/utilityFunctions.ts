@@ -118,23 +118,28 @@ export interface LogMessage {
     event: string
 }
 
-async function _logToServer<T extends LogMessage>(id: string, data: T) {    
-    let res= await fetch(`https://cs.hmc.edu/~xanda/logstudy.cgi?id=${id}&data=${JSON.stringify(data)}&time=${Date()}`, {
+async function _logToServer<T extends LogMessage>(id: string, data: T) {
+    let res=await fetch(`https://www.cs.hmc.edu/~xanda/logstudy.cgi?id=${id}&data=${btoa(JSON.stringify(data))}&time=${Date()}`, {
       method: 'POST',
-      mode: 'no-cors'}
-    ) 
-    if (res.status!==201 && res.type !== 'opaque'){
-        console.error("Server response bad status code")
+        }
+    )
+    if (res.type!=="basic" || !res.ok){
         console.error(res)
-        throw new Error("Bad status")
+        throw Error("logging failed")
     }
+    return res
 }
 
 export function logToServer<T extends LogMessage>(data: T) {
     let id = getQueryVariable("id")
     if (id==="test") return; // special testing id to disable logging altogether
+
     if (id === undefined) {
         displayMessage("Logging failed: missing ID", 1500)
+        return
+    }
+    if (id.match(/^[A-Za-z0-9]{1,12}$/)===null){
+        displayMessage("Logging failed: invalid ID", 1500)
         return
     }
     _logToServer(id, data)
