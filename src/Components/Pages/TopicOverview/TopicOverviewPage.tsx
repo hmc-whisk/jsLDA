@@ -49,7 +49,6 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps, T
 
         let b = arr.slice().filter(n => n > 0)
         b.sort((a, b) => b - a) // descending
-        console.log("in", arr, "sorted", b)
         let t0 = arr.indexOf(b[0])
         let t1 = arr.indexOf(b[1])
         let t2 = arr.indexOf(b[2])
@@ -59,7 +58,6 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps, T
         if (t >= 0) {
             res[t] = arr.indexOf(b[3])
         }
-        console.log(res, "out", res.filter(n => n >= 0 && n !== undefined))
         return res.filter(n => n >= 0 && n !== undefined)
     }
 
