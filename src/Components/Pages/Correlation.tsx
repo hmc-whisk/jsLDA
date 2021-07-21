@@ -311,12 +311,12 @@ export class Correlation extends Component<CorrelationProps, CorrelationState> {
                                                 <h4 style={{textAlign: "center"}}>Understanding the Graph</h4>
                                                 <ul>
                                                     <li>
-                                                        The two axes represent each of the generated topics, and are labeled by topic number and the 
-                                                        top three most common words found in that topic.                                                
+                                                        The two axes represent each of the generated topics, and are labeled by topic number and the
+                                                        top three most common words found in that topic.
                                                     </li>
                                                     <li>
-                                                        Negative pointwise information is represented by a blue circle, while positive pointwise information 
-                                                        is represented by a red one.
+                                                        Negative pointwise information is represented by a red circle, while positive pointwise information
+                                                        is represented by a blue one.
                                                     </li>
                                                     <li>
                                                         The size of the circle represents the magnitudes of the positive or negative correlation.
