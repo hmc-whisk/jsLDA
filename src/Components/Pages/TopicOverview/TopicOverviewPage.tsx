@@ -14,16 +14,16 @@ import TopicTreemap from "../Visualization/TopicTreemap";
  * @author Theo Bayard de Volo
  */
 
-interface TopicOverviewPageProps{
-    ldaModel:LDAModel,
-    annotations:string[],
+interface TopicOverviewPageProps {
+    ldaModel: LDAModel,
+    annotations: string[],
     getTopicCorrelations: () => number[][]
 }
 
-interface TopicOverviewPageState{}
+interface TopicOverviewPageState {}
 
 
-export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,TopicOverviewPageState> {
+export class TopicOverviewPage extends React.Component<TopicOverviewPageProps, TopicOverviewPageState> {
     // Some settings
     static numWordsToShow = 50 // Number of topic words in label
     static numDocuments = 20 // Number of documents to display
@@ -44,20 +44,23 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
      * @returns the indices of the 3 largest values in an array of numbers
      * adapted from https://stackoverflow.com/a/11792417
      */
-    getMax(ar: number[]): number[] {
-        if (ar.length < 3) return [0,1,2];
-        let max = [{value: ar[0], index: 0}, {value: ar[1], index: 1}, {value: ar[2], index: 2}];
-        max.sort((a,b) => b.value - a.value);
+    getMax(arr: number[]): number[] {
 
-        for (let i = 3; i < ar.length; i++) {
-            if (ar[i] > max[2].value) {
-                max[2].value = ar[i];
-                max[2].index = i;
-            }
-            max.sort((a,b) => b.value - a.value);
+
+        let b = arr.slice().filter(n => n > 0)
+        b.sort((a, b) => b - a) // descending
+        console.log("in", arr, "sorted", b)
+        let t0 = arr.indexOf(b[0])
+        let t1 = arr.indexOf(b[1])
+        let t2 = arr.indexOf(b[2])
+        let res: number[] = [t0, t1, t2]
+        // if the selected topic is included, exclude and pick the next one
+        let t = res.indexOf(this.props.ldaModel.selectedTopic)
+        if (t >= 0) {
+            res[t] = arr.indexOf(b[3])
         }
-        let maxIndices: number[] = max.map(x => x.index);
-        return maxIndices;
+        console.log(res, "out", res.filter(n => n >= 0 && n !== undefined))
+        return res.filter(n => n >= 0 && n !== undefined)
     }
 
     render() {
@@ -85,7 +88,7 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
         return (
             <>
                 <div id="pages">
-                    <div id="to-page" className="page" style={{paddingBottom:"0px"}}>
+                    <div id="to-page" className="page" style={{paddingBottom: "0px"}}>
                         <h2 id="label">Please Select a Topic</h2>
                     </div>
                     <div>
@@ -105,10 +108,11 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
      */
     label() {
         const topicNum = this.props.ldaModel.selectedTopic
+        const nPosCorrelated = this.selectedTopicCorrelations.filter(n => n > 0).length
         return (
             <div id="label">
                 <h2>Topic {topicNum}</h2>
-                <div style={{paddingBottom:"20px", margin:"0px", textAlign:"left"}}>
+                <div style={{paddingBottom: "20px", margin: "0px", textAlign: "left"}}>
                     More detailed information about the selected topic will show up here, including
                     a list of the top words, the top three most correlated topics, and a treemap visualization
                     of the top word probabilities.
@@ -127,17 +131,19 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
 
                 </p>
                 <p className="subtitle" style={{textAlign: "left"}}>
-                <b> Most Correlated Topics: </b>
+                    <b> {nPosCorrelated > 3 ? "Top 3" : "All"}
+                        &nbsp;positively correlated topics ({nPosCorrelated} total)
+                    </b>
                 </p>
                 <ul className="no-bullets">
                     {this.getMax(this.selectedTopicCorrelations).map(value => {
                         return <li key={value.toString()} style={{textAlign: "left"}}>
                             <b>Topic {value}: </b>
                             {topNWords(this.props.ldaModel.topicWordCounts[value],
-                            TopicOverviewPage.numWordsToShow)}
-                            </li>
+                                TopicOverviewPage.numWordsToShow)}
+                        </li>
                     })
-                }
+                    }
                 </ul>
 
             </div>
@@ -179,7 +185,7 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
                 </h3>
                 {/* <TopicDoc
                     ldaModel={this.props.ldaModel}/> */}
-                    <TopicTreemap
+                <TopicTreemap
                     ldaModel={this.props.ldaModel}></TopicTreemap>
             </div>
         )
