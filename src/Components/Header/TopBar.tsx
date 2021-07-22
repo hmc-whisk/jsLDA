@@ -255,7 +255,7 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                            placeholder="# Sweeps" min="1" max="100000" required width={3}/>
                     &nbsp;
                     <button type="submit" id="sweep" className="darkButton"
-                            disabled={this.props.modelIsRunning}>Run
+                            disabled={this.props.modelIsRunning}>Train
                     </button>
 
                     <button id="stopSweep" onClick={this.handleClick.bind(this)} className="darkButton"
