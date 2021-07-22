@@ -159,7 +159,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
         return (
             <>
                 <div style={{padding:"20px", margin:"0px"}}>
-                    All documents within the loaded dataset can be viewed here along with a topic score. 
+                    All documents within the dataset can be viewed here along with a topic score. 
                     You can use the search box to find specific documents by document ID. 
                     To reveal more information about each document, you can use the "Show Metadata" toggle. 
                 </div>

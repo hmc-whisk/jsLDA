@@ -462,10 +462,8 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
     render() {
         return (
             <>
-                <div className="help">Documents are grouped by their "date_tag"
-                    field. These plots
+                <div className="help">Documents are grouped by their listed date. These plots
                     show the average document proportion of each topic in each time bin.
-                    Date values are parsed as ISO date time strings.
                     When a topic is selected a more detailed graph of just that topic
                     is shown.
                     Hover only shows the time fields that are filled. The light blue
@@ -474,7 +472,6 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
                     The graphs bin documents into time periods to smooth
                     out the data and make it more interpretable. You can change the number
                     of bins that are used below.
-                    Data for plots are available in downloads page.
                 </div>
                 <div style={{position: "relative", left: 30, paddingBottom:0}}>
                     <label htmlFor="numberOfBins"  >Number of Bins:</label>
