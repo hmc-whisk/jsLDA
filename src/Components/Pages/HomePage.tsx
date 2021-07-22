@@ -81,10 +81,10 @@ export class HomePage extends React.Component {
                             <h4 style={{textAlign: "center"}}>Running Iterations</h4>
                             <p>
                                 When you first load the app, your topics will be more or less useless. You can fix
-                                this by having the model run iterations over your documents. Everything you need to do
-                                this can be found at the top left of the page. 100 to 200 iterations is good for initial
-                                investigation. For a final model and more reliable topics, you may want to do thousands
-                                of iterations.
+                                this by having the model run iterations over your documents. Everything you need to
+                                start training can be found at the top left of the page. Training for 100 to 200 iterations
+                                is good for initial investigation. For a final model and more reliable topics, you may
+                                want to run thousands of iterations.
                             </p>
                             <hr />
                             <h4 style={{textAlign: "center"}}>Number of Topics</h4>
