@@ -379,11 +379,11 @@ export class LDAModel {
             let fields = parsedDoc[i];
             // Set fields based on whether they exist
             let docID = columnInfo.id === -1 ?
-                this.documents.length :
-                fields[columnInfo.id];
+                        this.documents.length :
+                        fields[columnInfo.id];
             let docDate = columnInfo.date_tag === -1 ?
-                "" :
-                fields[columnInfo.date_tag];
+                          "" :
+                          fields[columnInfo.date_tag];
             let text = fields[columnInfo.text];
             let tokens: LDAToken[] = [];
             let rawTokens = this.getRawTokens(text)
@@ -976,10 +976,11 @@ export class LDAModel {
     _sweep() {
         let topicNormalizers = zeros(this.numTopics);
         let doOptimizeAlpha = false;
-        let docLength = 0;
+
         if (this._changeAlpha && this.scheduler.totalCompletedSweeps > this._burninPeriod && this._optimizeInterval !== 0 &&
             this.scheduler.totalCompletedSweeps % this._optimizeInterval === 0) {
             doOptimizeAlpha = true;
+            this._initializeHistograms()
         }
 
         for (let topic = 0; topic < this.numTopics; topic++) {
@@ -991,7 +992,7 @@ export class LDAModel {
         for (let doc = 0; doc < this.documents.length; doc++) {
             let currentDoc = this.documents[doc];
             let docTopicCounts = currentDoc.topicCounts;
-
+            let docLength = 0;
             for (let position = 0; position < currentDoc.tokens.length; position++) {
                 let token = currentDoc.tokens[position];
                 if (token.isStopword) {
