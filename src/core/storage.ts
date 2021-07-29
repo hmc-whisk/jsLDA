@@ -1,5 +1,5 @@
 /*
-Jerie Wang, June 2021
+Mia Wang, June 2021
 
 This module handles storing arbitrarily large data into the browser's storage.
 Per Origin Eviction policy

@@ -1,7 +1,7 @@
 import {zeros, getObjectKeys, truncate} from '../funcs/utilityFunctions'
 import * as d3 from 'd3';
 import XRegExp from "xregexp";
-import {clearMessage, displayMessage} from "./message";
+import {clearMessage, displayMessage, ForceUpdateApp} from "./message";
 import {saveToStorage} from "./storage";
 
 // This adds the Object.keys() function to some old browsers that don't support it
@@ -98,7 +98,6 @@ export class LDAModel {
     sortVocabByTopic: boolean;
     vocabularyCounts: { [key: string]: number }; // reversed from _parseDoc
     numTopics: number;
-    updateWebpage: () => void;
     stopwords: { [key: string]: 1 | undefined };
     selectedTopic: number;
     topicVisibility: LDATopicVisibility;
@@ -135,7 +134,7 @@ export class LDAModel {
     _maxTopicSaliency: number[];
 
 
-    constructor(numTopics: number, forceUpdate: () => void) {
+    constructor(numTopics: number) {
 
         this._vocabularySize = 0;
 
@@ -154,8 +153,6 @@ export class LDAModel {
         // Topic model parameters
 
         this.numTopics = numTopics;
-
-        this.updateWebpage = forceUpdate
 
         this.stopwords = {};
 
@@ -242,6 +239,13 @@ export class LDAModel {
         }
     }
 
+    updateWebpage() {
+        console.log('force app update')
+        window.postMessage({
+            target: "forceUpdateApp"
+        } as ForceUpdateApp, window.location.origin)
+    }
+
     // Used by sidebar to change selectedTopic and sortVocabByTopic
     selectedTopicChange(topic: number) {
         this.selectedTopic = topic;
@@ -250,6 +254,7 @@ export class LDAModel {
         }
         this.updateWebpage();
     }
+
 
     sortByTopicChange(sort: boolean) {
         this.sortVocabByTopic = sort
@@ -336,11 +341,12 @@ export class LDAModel {
             this._parseDoc(doc);
 
             this.sortTopicWords();
+            this.updateWebpage()
 
             new Promise<void>(async (resolve, reject) => {
                 try {
-                    await displayMessage("Saving document", 0, "promise")
-                    await saveToStorage("document", doc,this.documentType)
+                    await displayMessage("Saving documents", 0, "promise")
+                    await saveToStorage("documents", doc, this.documentType)
                     clearMessage()
                     resolve()
                 } catch (e) {
@@ -394,11 +400,11 @@ export class LDAModel {
             let fields = parsedDoc[i];
             // Set fields based on whether they exist
             let docID = columnInfo.id === -1 ?
-                this.documents.length :
-                fields[columnInfo.id];
+                        this.documents.length :
+                        fields[columnInfo.id];
             let docDate = columnInfo.date_tag === -1 ?
-                "" :
-                fields[columnInfo.date_tag];
+                          "" :
+                          fields[columnInfo.date_tag];
             let text = fields[columnInfo.text];
             let tokens: LDAToken[] = [];
             let rawTokens = this.getRawTokens(text)
@@ -575,7 +581,6 @@ export class LDAModel {
         for (let topic = 0; topic < this.numTopics; topic++) {
             this.topicWordCounts[topic].sort(this.byCountDescending);
         }
-        this.updateWebpage();
     }
 
     /**
@@ -992,7 +997,7 @@ export class LDAModel {
     _sweep() {
         let topicNormalizers = zeros(this.numTopics);
         let doOptimizeAlpha = false;
-        let docLength = 0;
+
         if (this._changeAlpha && this.scheduler.totalCompletedSweeps > this._burninPeriod && this._optimizeInterval !== 0 &&
             this.scheduler.totalCompletedSweeps % this._optimizeInterval === 0) {
             doOptimizeAlpha = true;
@@ -1008,7 +1013,7 @@ export class LDAModel {
         for (let doc = 0; doc < this.documents.length; doc++) {
             let currentDoc = this.documents[doc];
             let docTopicCounts = currentDoc.topicCounts;
-
+            let docLength = 0;
             for (let position = 0; position < currentDoc.tokens.length; position++) {
                 let token = currentDoc.tokens[position];
                 if (token.isStopword) {
@@ -1133,12 +1138,12 @@ export class LDAModel {
      * @param {Number} numIterations 200 to 1000 generally insures convergence, but 1-5 is often enough to step in the right direction
      * @returns The sum of the learned parameters.
      */
-    _learnParameters = (parameters: number[],
-                        observations: number[][],
-                        observationLengths: number[],
-                        shape: number,
-                        scale: number,
-                        numIterations: number) => {
+    _learnParameters(parameters: number[],
+                     observations: number[][],
+                     observationLengths: number[],
+                     shape: number,
+                     scale: number,
+                     numIterations: number) {
 
         let i;
         let k;
@@ -1911,10 +1916,12 @@ class SweepScheduler {
                 this.shouldStop = false;
 
                 this.model.modelIsRunning = false
-                this.model.sortTopicWords(); // this function calls updateWebpage()
+                this.model.sortTopicWords();
 
                 // copied from previous code, unsure what it does
                 this.model._maxTopicSaliency = new Array(this.model.numTopics);
+
+                this.model.updateWebpage()
             }
         )
     }

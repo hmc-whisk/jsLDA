@@ -16,6 +16,10 @@ export interface StatusMessageAck extends Message {
     target: "statusAck"
 }
 
+export interface ForceUpdateApp extends Message{
+    target: "forceUpdateApp"
+}
+
 /**
  this function displays a status message at the top of the page. it is safe
  to be called anywhere in the app, although there is no way for the function
