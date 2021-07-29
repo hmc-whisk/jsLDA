@@ -1,6 +1,6 @@
 import {LDAModel} from "./LDAModel";
 import {getFromStorage} from "./storage";
-import {createZip} from "./compression";
+import {createZip, readZip} from "./compression";
 import {displayMessage} from "./message";
 
 const FileSaver = require("filesaver.js-npm")
@@ -33,15 +33,70 @@ const testString = `#doc source pos typeindex type topic
 
 // doc index, throw, index into token, recompute, token, recompute topicwordcount ++
 
-function readMallet(serializedModel: string) {
-    let s = serializedModel.slice(serializedModel.indexOf("\n") + 1)
-    s.split('\n').forEach((s, i) => {
-        if (i == 0) {
-            for (let n of s.slice(s.indexOf(": ") + 1).split(" ")) {
-                console.log(parseFloat(n))
+function readMallet(serializedModel: string, model: LDAModel) {
+    let alpha: number[] = []
+    let beta: number | undefined;
+
+    model.wordTopicCounts = {}
+    model.topicDocCounts = []
+    model.tokensPerTopic = new Array(model.numTopics).fill(0)
+    for (let doc of model.documents) {
+        doc.topicCounts = new Array(model.numTopics).fill(0)
+    }
+
+    serializedModel.split('\n').forEach((line, i) => {
+        if (line.startsWith("#alpha")) {
+            if (alpha.length > 0) {
+                console.warn(`Encountered alpha in model even when already initialized (line ${i + 1})`)
             }
+            for (let s of line.slice(line.indexOf(": ") + 1).trim().split(" ")) {
+                let n = parseFloat(s)
+                // thanks js, we all love that NaN === NaN always returns false
+                if (Number.isNaN(n)) throw Error(`Cannot parse alpha (line ${i + 1})`)
+                alpha.push(n)
+            }
+        } else if (line.startsWith("#beta")) {
+            if (beta !== undefined) {
+                console.warn(`Encountered beta in model even when already initialized (line ${i + 1})`)
+            }
+            beta = parseFloat(line.slice(line.indexOf(":") + 1))
+        } else if (line.trim().startsWith('#') || line.trim()==='') {
+            // do nothing
+        } else {
+            let [sDocIndex, _, sTokenIndex, sTypeIndex, token, sTopic] = line.split(' ')
+            for (let v of [sDocIndex, _, sTokenIndex, sTypeIndex, token, sTopic])
+                if (v === undefined) throw Error("Cannot parse line " + i)
+            let docIndex = parseFloat(sDocIndex)
+            let tokenIndex = parseFloat(sTokenIndex)
+            let typeIndex = parseFloat(sTypeIndex)
+            let topic = parseFloat(sTopic)
+
+            for (let v of [docIndex, tokenIndex, typeIndex, topic])
+                // this weird comparison includes an NaN check because NaN compared with anything is always false
+                // and should be slightly less computation than Number.isNaN(v) || v <0
+                if (!(v >= 0)) throw Error("Cannot parse line " + i)
+            model.documents[docIndex].tokens[tokenIndex] = {
+                isStopword: false, // stopwords are not serialized into the model
+                topic: topic,
+                word: token
+            }
+            model.tokensPerTopic[topic]++;
+            if (!model.wordTopicCounts[token]) {
+                model.wordTopicCounts[token] = {};
+            }
+            if (!model.wordTopicCounts[token][topic]) {
+                model.wordTopicCounts[token][topic] = 0;
+            }
+            model.wordTopicCounts[token][topic] += 1;
+            model.documents[docIndex].topicCounts[topic] += 1;
         }
     })
+    if (alpha.length !== model.numTopics) throw Error(`Length of alpha vector does not match number of topics in model (${model.numTopics}, inferred from length of annotations)`)
+    if (beta === undefined || Number.isNaN(beta)) throw Error("Cannot find beta")
+    model._documentTopicSmoothing = alpha
+    model._topicWordSmoothing = beta
+
+    model.sortTopicWords()
 }
 
 function exportToMallet(model: LDAModel): string {
@@ -59,8 +114,8 @@ function exportToMallet(model: LDAModel): string {
         for (let tokenIndex in doc.tokens) {
             let token = doc.tokens[tokenIndex]
             if (token.isStopword) continue
-            if (!typeIndicies.hasOwnProperty(token.word)){
-                typeIndicies[token.word]=nextType++;
+            if (!typeIndicies.hasOwnProperty(token.word)) {
+                typeIndicies[token.word] = nextType++;
             }
             serialized += `${documentIndex} NA ${docPos++} ${typeIndicies[token.word]} ${token.word} ${token.topic}\n`
         }
@@ -69,27 +124,29 @@ function exportToMallet(model: LDAModel): string {
     return serialized
 }
 
+function exportAnnotations(annotations: string[]) {
+    return JSON.stringify(annotations, null, 4)
+}
 
-export async function saveModel(model: LDAModel) {
-
+export async function serializeModel(model: LDAModel, annotations: string[]) {
 
     let files: { [key: string]: string } = {}
 
     await displayMessage("Loading original document", 0, "promise")
-    let document = (await getFromStorage("document"))!
+    let documents = (await getFromStorage("documents"))!
     let filename: string;
-    switch (document.contentType) {
+    switch (documents.contentType) {
         case "text/csv":
-            filename = "document.csv"
+            filename = "documents.csv"
             break
         case "text/tsv":
-            filename = "document.tsv"
+            filename = "documents.tsv"
             break
         default:
             throw Error("incorrect content-type encountered during decompression")
     }
 
-    files[filename] = document.data
+    files[filename] = documents.data
 
     await displayMessage("Generating stoplist", 0, "promise")
 
@@ -102,9 +159,75 @@ export async function saveModel(model: LDAModel) {
     await displayMessage("Serializing model", 0, "promise")
     files["model.txt"] = exportToMallet(model)
 
-    await displayMessage("Compressing", 0, "promise")
-    let zip = await createZip(files)
+    await displayMessage("Serializing annotations", 0, "promise")
+    files["annotations.json"] = exportAnnotations(annotations)
 
-    await displayMessage("Initiating browser download", 1500, "promise")
+    await displayMessage("Compressing", 0, "promise")
+
+    return await createZip(files)
+}
+
+export async function saveModel(model:LDAModel, annotations: string[]){
+    let zip = await serializeModel(model,annotations)
     FileSaver.saveAs(zip, "LDAModel.zip")
 }
+
+export async function deserializeModel(serializedModel: Blob): Promise<{
+    model: LDAModel
+    annotations: string[]
+}> {
+    await displayMessage("Decompressing model", 0, "promise")
+    let files = await readZip(serializedModel)
+    let annotations = files["annotations.json"]
+    let stopwords = files["stopwords.txt"]
+    let model = files["model.txt"]
+
+    if (!annotations) throw Error("Annotations (annotations.json) not found in serialized model")
+    if (!stopwords) throw Error("Stopwords (stopwords.txt) not found in serialized model")
+    if (!model) throw Error("Model (model.txt) not found in serialized model")
+    console.log(files)
+    let docTsv: string | undefined = files["documents.tsv"]
+    let docCsv: string | undefined = files["documents.csv"]
+    let documents: string;
+    let documentsType: string;
+    if (docTsv) {
+        documents = docTsv
+        documentsType = "text/tsv"
+    } else if (docCsv) {
+        documents = docCsv
+        documentsType = "text/csv"
+    } else {
+        throw Error("Documents (documents.tsv or documents.csv) not found in serializedModel")
+    }
+    await displayMessage("Reading annotations", 0, "promise")
+    let deserializedAnnotations = JSON.parse(annotations);
+
+    await displayMessage("Reading stopwords", 0, "promise")
+    let deserializedStopwords: { [key: string]: 1 | undefined } = {}
+    for (let w of stopwords.split(/\n/)) {
+        deserializedStopwords[w] = 1
+    }
+
+    await displayMessage("Parsing original documents", 0, "promise")
+    let deserializedModel = new LDAModel(deserializedAnnotations.length);
+    deserializedModel.documentType = documentsType
+    deserializedModel.stopwords = deserializedStopwords
+    deserializedModel._parseDoc(documents)
+
+    await displayMessage("Recomputing stopwords", 0, "promise")
+    for (let doc of deserializedModel.documents) {
+        for (let token of doc.tokens) {
+            token.isStopword = Boolean(deserializedStopwords[token.word])
+        }
+    }
+
+    await displayMessage("Reconstructing model", 0, "promise")
+    readMallet(model, deserializedModel)
+
+    await displayMessage("Model deserialized", 0, "promise")
+    return {
+        model: deserializedModel,
+        annotations: deserializedAnnotations
+    }
+}
+
