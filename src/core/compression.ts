@@ -47,18 +47,32 @@ export async function decompress(data: Uint8Array): Promise<string> {
 export async function createZip(files: { [key: string]: string }): Promise<Blob> {
     let zip = new jsZip();
     let dir = zip.folder("LDAModel")
-    if (dir===null){
+    if (dir === null) {
         throw Error("Error creating zip")
     }
-    for (let name in files){
-        dir.file(name,files[name])
+    for (let name in files) {
+        dir.file(name, files[name])
     }
     return await zip.generateAsync({
         compression: "DEFLATE",
         type: "blob",
-        compressionOptions:{
-            level:6
+        compressionOptions: {
+            level: 6
         }
     })
 }
 
+export async function readZip(file: Blob) {
+    let zip = await jsZip.loadAsync(file, {createFolders: true});
+    let dir = zip.folder("LDAModel")
+    if (!dir) {
+        throw Error("Cannot find LDAModel folder in the zip file")
+    }
+    let files: { [key: string]: string | undefined } = {}
+    for (let path in dir.files) {
+        path = path.substring(9)
+        if (path === "") continue
+        files[path] = await dir.file(path)!.async("string")
+    }
+    return files
+}

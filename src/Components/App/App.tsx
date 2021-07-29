@@ -7,6 +7,7 @@ import * as d3 from 'd3';
 
 import {getObjectKeys} from 'funcs/utilityFunctions'
 import {LDAModel, LDAModelDataDLer} from 'core'
+import type {ForceUpdateApp} from "core/message";
 
 import {TopicDoc, Correlation, HomePage, TopicOverviewPage, DLPage, VocabTable, TimeSeries} from 'Components/Pages'
 import {NavBar, TopBar} from 'Components/Header'
@@ -17,6 +18,7 @@ import moviePlotsDocs from 'defaultDocs/wikiMoviePlots.csv';
 import yelpReviews from 'defaultDocs/yelpReviews.csv';
 import defaultStops from 'defaultDocs/stoplist.txt';
 import corrTooltip from 'Components/Tooltip/corrTooltip.png';
+import {deserializeModel, saveModel, serializeModel} from "../../core/serialization";
 
 
 // This adds the Object.keys() function to some old browsers that don't support it
@@ -47,7 +49,7 @@ class App extends Component<AppProps, AppStates> {
     constructor(props: AppProps) {
         super(props)
 
-        let ldaModel = new LDAModel(this.startingNumTopics, this.modelForceUpdate.bind(this));
+        let ldaModel = new LDAModel(this.startingNumTopics);
 
         this.state = {
             ldaModel: ldaModel,
@@ -78,17 +80,14 @@ class App extends Component<AppProps, AppStates> {
                 e.returnValue = ''
             }
         })
+        window.addEventListener("message", (e: MessageEvent) => {
+            if (e.origin === window.location.origin && e.data.target === 'forceUpdateApp') {
+                this.forceUpdate()
+            }
+        })
     };
 
     startingNumTopics = 25;
-
-    /**
-     * @summary function used by model to force update of webpage
-     */
-    modelForceUpdate() {
-        this.forceUpdate();
-        console.log("Forced Update");
-    }
 
     downloadModel() {
         const fileName = "jsLDA_Model";
@@ -120,7 +119,7 @@ class App extends Component<AppProps, AppStates> {
 
     changeAnnotation(text: string, i: number) {
         this.annotations[i] = text;
-        this.modelForceUpdate();
+        this.forceUpdate();
     }
 
     resetNotes(i: number) {
@@ -251,7 +250,7 @@ class App extends Component<AppProps, AppStates> {
                 // Create a new LDAModel to put uploaded info into
                 try {
                     resolve(Object.assign(
-                        new LDAModel(this.startingNumTopics, this.modelForceUpdate.bind(this)),
+                        new LDAModel(this.startingNumTopics),
                         JSON.parse(reader.result as string)));
 
                 } catch {
@@ -471,6 +470,26 @@ class App extends Component<AppProps, AppStates> {
             <div id="app">
                 <div id="tooltip"></div>
 
+                    <button onClick={() => saveModel(this.state.ldaModel, this.annotations) }>Download</button>
+                    <input id="testFile" type="file" name="upload"/>
+
+                    <button
+                        onClick={() => {
+                            // @ts-ignore
+                            deserializeModel(document.getElementById("testFile").files.item(0)).then((m)=>{
+                                console.log(m)
+                            })
+                        }}> Upload</button>
+                    <button onClick={async ()=>{
+                        let model = this.state.ldaModel
+                        console.log("model",model)
+                        let reconstructed=(await deserializeModel(await serializeModel(this.state.ldaModel,this.annotations))).model
+                        console.log("reconstructed", reconstructed)
+                        // @ts-ignore
+                        debugger
+                    }
+                    }>Compare</button>
+
                 <div id="main" style={{display: "flex", flexDirection: "column", height: "100%"}}>
 
                     <TopBar numTopics={this.state.ldaModel.numTopics}
@@ -521,7 +540,8 @@ class App extends Component<AppProps, AppStates> {
                 </div>
             </div>
         );
-    };
+    }
+    ;
 }
 
 export default App;
