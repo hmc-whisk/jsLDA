@@ -33,7 +33,7 @@ const testString = `#doc source pos typeindex type topic
 
 // doc index, throw, index into token, recompute, token, recompute topicwordcount ++
 
-function readMallet(serializedModel: string, model: LDAModel, stoplist: { [key: string]: 1 | undefined }) {
+function readMallet(serializedModel: string, model: LDAModel) {
     let alpha: number[] = []
     let beta: number | undefined;
 
@@ -145,7 +145,7 @@ function exportAnnotations(annotations: string[]) {
     return JSON.stringify(annotations, null, 4)
 }
 
-export async function serializeModel(model: LDAModel, annotations: string[]) {
+export async function serializeModel(model: LDAModel) {
 
     let files: { [key: string]: string } = {}
 
@@ -177,22 +177,20 @@ export async function serializeModel(model: LDAModel, annotations: string[]) {
     files["model.txt"] = exportToMallet(model)
 
     await displayMessage("Serializing annotations", 0, "promise")
-    files["annotations.json"] = exportAnnotations(annotations)
+    files["annotations.json"] = exportAnnotations(model.annotations)
 
     await displayMessage("Compressing", 0, "promise")
-
     return await createZip(files)
 }
 
-export async function saveModel(model: LDAModel, annotations: string[]) {
-    let zip = await serializeModel(model, annotations)
+export async function saveModel(model: LDAModel) {
+    let zip = await serializeModel(model)
+
+    await displayMessage("Initiating browser download", 1000, "promise")
     FileSaver.saveAs(zip, "LDAModel.zip")
 }
 
-export async function deserializeModel(serializedModel: Blob): Promise<{
-    model: LDAModel
-    annotations: string[]
-}> {
+export async function deserializeModel(serializedModel: Blob): Promise<LDAModel> {
     await displayMessage("Decompressing model", 0, "promise")
     let files = await readZip(serializedModel)
     let annotations = files["annotations.json"]
@@ -217,7 +215,8 @@ export async function deserializeModel(serializedModel: Blob): Promise<{
         throw Error("Documents (documents.tsv or documents.csv) not found in serializedModel")
     }
     await displayMessage("Reading annotations", 0, "promise")
-    let deserializedAnnotations = JSON.parse(annotations);
+    let deserializedAnnotations:string[] = (JSON.parse(annotations) as (string|null)[]).map(v=>v===null?"":v);
+
 
     await displayMessage("Reading stopwords", 0, "promise")
     let deserializedStopwords: { [key: string]: 1 | undefined } = {}
@@ -227,6 +226,7 @@ export async function deserializeModel(serializedModel: Blob): Promise<{
 
     await displayMessage("Parsing original documents", 0, "promise")
     let deserializedModel = new LDAModel(deserializedAnnotations.length);
+    deserializedModel.annotations=deserializedAnnotations
     deserializedModel.documentType = documentsType
     deserializedModel.stopwords = deserializedStopwords
     deserializedModel._parseDoc(documents)
@@ -239,12 +239,9 @@ export async function deserializeModel(serializedModel: Blob): Promise<{
     }
 
     await displayMessage("Reconstructing model", 0, "promise")
-    readMallet(model, deserializedModel, deserializedStopwords)
+    readMallet(model, deserializedModel)
 
     await displayMessage("Model deserialized", 0, "promise")
-    return {
-        model: deserializedModel,
-        annotations: deserializedAnnotations
-    }
+    return deserializedModel
 }
 

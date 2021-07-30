@@ -16,7 +16,6 @@ import TreeMap from '../TreeMap';
 
 interface TopicOverviewPageProps{
     ldaModel:LDAModel,
-    annotations:string[],
     getTopicCorrelations: () => number[][]
 }
 
@@ -48,7 +47,7 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
         if (ar.length < 3) return [0,1,2];
         let max = [{value: ar[0], index: 0}, {value: ar[1], index: 1}, {value: ar[2], index: 2}];
         max.sort((a,b) => b.value - a.value);
-    
+
         for (let i = 3; i < ar.length; i++) {
             if (ar[i] > max[2].value) {
                 max[2].value = ar[i];
@@ -105,7 +104,7 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
                     fontSize: TopicOverviewPage.annotationFontSize,
                     whiteSpace: "pre-wrap"
                 }}>
-                    <i>{this.props.annotations[topicNum]}</i>
+                    <i>{this.props.ldaModel.annotations[topicNum]}</i>
                 </pre>
                 <p className="subtitle" style={{textAlign: "left"}}>
                     <b>Top Words: </b>

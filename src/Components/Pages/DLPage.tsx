@@ -16,11 +16,10 @@ export class DLPage extends React.Component<{
             <div id="pages">
 
                 <div id="dl-page" className="page">
-                    <div className="help">All of the following downloads, except for the model download, are in CSV
+                    <div className="help">All of the following downloads are in CSV
                         format. Quotation marks are stripped from words upon download to avoid CSV errors.
                     </div>
                     <ul>
-                        <li>{this.modelSaver}</li>
                         <li>{this.docTopics}</li>
                         <li>{this.topicWords}</li>
                         <li>{this.topicSummary}</li>
@@ -35,19 +34,6 @@ export class DLPage extends React.Component<{
             </div>
 
         );
-    }
-
-    get modelSaver() {
-        let description = "A copy of your current model which you can upload to this website and continue working on."
-        return (
-            <span>
-                <button id="model-dl" className="darkButton"
-                        onClick={() => this.props.modelDataDLer.downloadModel()}>
-                    LDA Model
-                </button>
-                : {description}
-            </span>
-        )
     }
 
     get docTopics() {

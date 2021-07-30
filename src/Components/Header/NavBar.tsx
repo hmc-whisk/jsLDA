@@ -11,13 +11,13 @@ interface NavBarState {
 
 export class NavBar extends React.Component<NavBarProps, NavBarState> {
 
-    constructor(props:NavBarProps) {
+    constructor(props: NavBarProps) {
         super(props);
 
         this.state = {selected: "home-tab"};
     }
 
-    handleClick(e:SyntheticEvent<HTMLLIElement>) {
+    handleClick(e: SyntheticEvent<HTMLLIElement>) {
         let val = (e.target as HTMLLIElement).id;
         this.setState({selected: val})
         this.props.onClick(val);
@@ -35,7 +35,8 @@ export class NavBar extends React.Component<NavBarProps, NavBarState> {
         ['meta-tab', 'Metadata'],
         ['to-tab', 'Topic Overview'],
         ['dl-tab', 'Downloads'],
-        ['vocab-tab', 'Vocabulary']
+        ['import-export-tab', 'Import&Export'],
+        ['vocab-tab', 'Vocabulary'],
     ]
 
     render() {
