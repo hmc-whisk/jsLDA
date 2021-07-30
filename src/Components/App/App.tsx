@@ -7,8 +7,6 @@ import * as d3 from 'd3';
 
 import {getObjectKeys} from 'funcs/utilityFunctions'
 import {LDAModel, LDAModelDataDLer} from 'core'
-import type {ForceUpdateApp} from "core/message";
-
 import {TopicDoc, Correlation, HomePage, TopicOverviewPage, DLPage, VocabTable, TimeSeries} from 'Components/Pages'
 import {NavBar, TopBar} from 'Components/Header'
 import {SideBar} from 'Components/SideBar';
@@ -18,7 +16,7 @@ import moviePlotsDocs from 'defaultDocs/wikiMoviePlots.csv';
 import yelpReviews from 'defaultDocs/yelpReviews.csv';
 import defaultStops from 'defaultDocs/stoplist.txt';
 import corrTooltip from 'Components/Tooltip/corrTooltip.png';
-import {deserializeModel, saveModel, serializeModel} from "../../core/serialization";
+import {ImportExportPage} from "../Pages/importExportPage";
 
 
 // This adds the Object.keys() function to some old browsers that don't support it
@@ -53,7 +51,7 @@ class App extends Component<AppProps, AppStates> {
 
         this.state = {
             ldaModel: ldaModel,
-            modelDataDLer: new LDAModelDataDLer(ldaModel, this),
+            modelDataDLer: new LDAModelDataDLer(ldaModel),
 
             // The file location of default files
             docName: "Movie Plots",
@@ -89,19 +87,6 @@ class App extends Component<AppProps, AppStates> {
 
     startingNumTopics = 25;
 
-    downloadModel() {
-        const fileName = "jsLDA_Model";
-        const json = JSON.stringify(this.state.ldaModel);
-        const blob = new Blob([json], {type: 'application/json'});
-        const href = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = href;
-        link.download = fileName + ".json";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
     // Default notes for correlation (placed here to avoid rerendering)
     corNotes = ``;
 
@@ -114,16 +99,13 @@ class App extends Component<AppProps, AppStates> {
         return this.corNotes;
     }
 
-    // Data and functions for annotations in sidebar (placed here instead of as a state to avoid re-rendering)
-    annotations: string[] = [];
-
     changeAnnotation(text: string, i: number) {
-        this.annotations[i] = text;
-        this.forceUpdate();
+        this.state.ldaModel.setAnnotation(i,text)
+        // this.forceUpdate()
     }
 
-    resetNotes(i: number) {
-        this.annotations = new Array(i);
+    resetNotes() {
+        this.state.ldaModel.resetAnnoation()
     }
 
     /**
@@ -131,7 +113,7 @@ class App extends Component<AppProps, AppStates> {
      * @param {Number} topic Number of topic to get annotations for
      */
     getAnnotation(topic: number) {
-        return this.annotations[topic];
+        return this.state.ldaModel.annotations[topic];
     }
 
 
@@ -184,6 +166,12 @@ class App extends Component<AppProps, AppStates> {
         }
     }
 
+    overwriteModel(model:LDAModel){
+        this.state.ldaModel.reset()
+        this.setState({
+            ldaModel:model
+        })
+    }
 
     /**
      * @summary Retrieve doc files from upload component and set documentType
@@ -319,7 +307,7 @@ class App extends Component<AppProps, AppStates> {
      * @summary Runs the document processing pipeline
      */
     queueLoad() {
-        this.resetNotes(this.state.ldaModel.numTopics)
+        this.resetNotes()
         this.state.ldaModel.reset();
         Promise.all<string, string>([this.getStoplistUpload(), this.getDocsUpload()])
             .then(([stops, lines]) => {
@@ -365,7 +353,7 @@ class App extends Component<AppProps, AppStates> {
             this.state.ldaModel.changeNumTopics(Number(val));
         }
 
-        this.resetNotes(this.state.ldaModel.numTopics);
+        this.resetNotes();
     }
 
     componentDidMount() {
@@ -458,8 +446,10 @@ class App extends Component<AppProps, AppStates> {
             case "to-tab":
                 DisplayPage = <TopicOverviewPage
                     ldaModel={this.state.ldaModel}
-                    annotations={this.annotations}
                     getTopicCorrelations={this.state.ldaModel.getTopicCorrelations.bind(this.state.ldaModel)}/>
+                break;
+            case "import-export-tab":
+                DisplayPage = <ImportExportPage model={this.state.ldaModel} overwriteModel={this.overwriteModel.bind(this)}/>
                 break;
             default:
                 DisplayPage = null;
@@ -469,26 +459,6 @@ class App extends Component<AppProps, AppStates> {
         return (
             <div id="app">
                 <div id="tooltip"></div>
-
-                    <button onClick={() => saveModel(this.state.ldaModel, this.annotations) }>Download</button>
-                    <input id="testFile" type="file" name="upload"/>
-
-                    <button
-                        onClick={() => {
-                            // @ts-ignore
-                            deserializeModel(document.getElementById("testFile").files.item(0)).then((m)=>{
-                                console.log(m)
-                            })
-                        }}> Upload</button>
-                    <button onClick={async ()=>{
-                        let model = this.state.ldaModel
-                        console.log("model",model)
-                        let reconstructed=(await deserializeModel(await serializeModel(this.state.ldaModel,this.annotations))).model
-                        console.log("reconstructed", reconstructed)
-                        // @ts-ignore
-                        debugger
-                    }
-                    }>Compare</button>
 
                 <div id="main" style={{display: "flex", flexDirection: "column", height: "100%"}}>
 
@@ -531,9 +501,9 @@ class App extends Component<AppProps, AppStates> {
                             <NavBar onClick={this.changeTab.bind(this)}/>
                             <div id="pages">
                             </div>
-
-
+                            <div style={{"height":"100%","width":"100%","paddingLeft":"20px","paddingRight":"20px"}}>
                             {!this.state.ldaModel ? null : DisplayPage}
+                            </div>
 
                         </div>
                     </div>

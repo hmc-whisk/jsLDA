@@ -133,6 +133,7 @@ export class LDAModel {
     _memoMaxDocTime?: Date;
     _maxTopicSaliency: number[];
 
+    annotations:string[]
 
     constructor(numTopics: number) {
 
@@ -203,6 +204,7 @@ export class LDAModel {
 
 
         this.scheduler = new SweepScheduler(this)
+        this.annotations=new Array(numTopics).fill("")
     }
 
     static DOC_SORT_SMOOTHING = 10.0;
@@ -270,6 +272,14 @@ export class LDAModel {
         return b.count - a.count;
     };
 
+    setAnnotation(i:number,text:string){
+        this.annotations[i]=text
+    }
+
+    resetAnnoation(){
+        this.annotations=new Array(this.numTopics).fill("")
+    }
+
     /**
      * @summary Resets data members in preparation
      * for new documents to be processed
@@ -291,6 +301,7 @@ export class LDAModel {
         this._memoMinDocTime = undefined;
         this._memoMaxDocTime = undefined;
         this._maxTopicSaliency = new Array(this.numTopics)
+        this.resetAnnoation()
         this.scheduler.reset();
         displayMessage("Model has been reset", 2500);
     }
@@ -945,6 +956,7 @@ export class LDAModel {
         this.wordTopicCounts = {};
         this._maxTopicSaliency = new Array(numTopics);
         this._documentTopicSmoothing = zeros(numTopics).fill(0.1);
+        this.resetAnnoation()
 
         Object.keys(this.vocabularyCounts).forEach((word) => {
             this.wordTopicCounts[word] = {}

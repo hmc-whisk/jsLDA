@@ -19,19 +19,17 @@ export class LDAModelDataDLer {
      */
 
     readonly _model: LDAModel
-    private _annotationHolder: { annotations: string[] }
     /**
      * Truncates number to 8 digits
      */
     _eightDigits: (n: number) => string = d3.format(".8");
 
-    constructor(model: LDAModel, annotationHolder: { annotations: string[] }) {
+    constructor(model: LDAModel) {
         this._model = model;
-        this._annotationHolder = annotationHolder;
     }
 
     get _annotations() {
-        return this._annotationHolder.annotations;
+        return this._model.annotations;
     }
 
     /**

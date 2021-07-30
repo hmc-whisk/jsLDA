@@ -1,4 +1,4 @@
-import React, {Component, SyntheticEvent} from 'react';
+import React, {ChangeEvent, Component, SyntheticEvent} from 'react';
 import * as d3 from 'd3';
 import {topNWords} from 'funcs/utilityFunctions';
 
@@ -9,7 +9,6 @@ import {LDATopicVisibility} from "core";
 
 
 interface TopicBoxProps {
-    key: number
     topNum: number
     selectedTopic: number
     topicsDict: { [key: number]: string }
@@ -17,102 +16,121 @@ interface TopicBoxProps {
     toggleVisibility: (event: SyntheticEvent, topNum: number, toggledButton: string) => void
     toggleTopicDocuments: (topic: number) => void
     changeAnnotation: (text: string, i: number) => void
+    annotation: string
 }
 
-function TopicBox(props: TopicBoxProps) {
-    let {
-        topNum,
-        selectedTopic,
-        topicsDict,
-        topicVisibility,
-        toggleVisibility,
-        toggleTopicDocuments,
-        changeAnnotation,
-    } = props
-    return (
-        <div id="topics" className="sidebox">
-            {/* Pin and Hide buttons */}
-            <div
-                className={ // topicbar color change if selected or hidden
-                    (topNum === selectedTopic) ?
+interface TopicBoxState {
+    annotation: string
+}
+
+class TopicBox extends Component<TopicBoxProps, TopicBoxState> {
+
+    constructor(props: TopicBoxProps) {
+        super(props)
+        this.state = {
+            annotation: this.props.annotation
+        }
+    }
+
+    componentDidUpdate(prevProps: Readonly<TopicBoxProps>, prevState: Readonly<TopicBoxState>, snapshot?: any) {
+        if (this.props.annotation !== prevProps.annotation)
+            this.setState({
+                annotation: this.props.annotation
+            })
+    }
+
+    handleChange(e: ChangeEvent<HTMLTextAreaElement>) {
+        this.setState({annotation: e.target.value})
+    }
+
+    render() {
+        return (
+            <div id="topics" className="sidebox">
+                {/* Pin and Hide buttons */}
+                <div
+                    className={ // topicbar color change if selected or hidden
+                        (this.props.topNum === this.props.selectedTopic) ?
                         "topicbar topicbar-selected"
-                        :
-                        (topicVisibility[topNum] === "hidden" ?
-                                "topicbar topicbar-hidden"
-                                :
-                                "topicbar"
+                                                                         :
+                        (this.props.topicVisibility[this.props.topNum] === "hidden" ?
+                         "topicbar topicbar-hidden"
+                                                                                    :
+                         "topicbar"
                         )
-                }
-                onClick={() => toggleTopicDocuments(topNum)}
-            >
-                {/* Topic label */}
-                <div style={{color: (topNum === selectedTopic) ? "white" : "black"}}>
-                    {`Topic ${topNum}`}
-                </div>
-
-                {/* Pin/Unpin buttons */}
-                <div>
-                    <button
-                        type="button"
-                        onClick={(e) => toggleVisibility(e, topNum, "pin")}
-                        className="topic-button"
-                    >
-                        {topicVisibility[topNum] === "pinned" ?
-                            <PinAngleFill className="topic-button-icon"/>
-                            :
-                            <PinAngle className="topic-button-icon"/>
-                        }
-                    </button>
-
-                    {/* Hide/Unhide button */}
-                    <button
-                        type="button"
-                        onClick={(e) => toggleVisibility(e, topNum, "hide")}
-                        className="topic-button"
-                    >
-                        {topicVisibility[topNum] === "hidden" ?
-                            <EyeSlashFill className="topic-button-icon"/>
-                            :
-                            <EyeSlash className="topic-button-icon"/>
-                        }
-                    </button>
-                </div>
-            </div>
-
-            {/* Annotation text field */}
-            <textarea
-                className="textField"
-                style={{
-                    whiteSpace: "pre-line",
-                    backgroundColor: "var(--color3Dark)",
-                    borderCollapse: "separate",
-                    color: "black",
-                    borderRadius: "3px",
-                    border: "none",
-                    height: "30px",
-                    width: "100%",
-                    resize: "vertical"
-                }}
-                wrap="soft"
-                placeholder="Enter annotation"
-                onBlur={(e) => {
-                    if (e.target.value && e.target.value[e.target.value.length - 1] === '\n') {
-                        e.target.value = e.target.value.slice(0, -1);
                     }
-                    changeAnnotation(e.target.value, topNum);
-                }}
-            />
+                    onClick={() => this.props.toggleTopicDocuments(this.props.topNum)}
+                >
+                    {/* Topic label */}
+                    <div style={{color: (this.props.topNum === this.props.selectedTopic) ? "white" : "black"}}>
+                        {`Topic ${this.props.topNum}`}
+                    </div>
 
-            {/* List of top words */}
-            <div
-                className={(topNum === selectedTopic) ? "topicwords selected" : "topicwords"}
-                onClick={() => toggleTopicDocuments(topNum)}
-                style={{color: "inherit"}}
-            >
-                {topicsDict[topNum]}
+                    {/* Pin/Unpin buttons */}
+                    <div>
+                        <button
+                            type="button"
+                            onClick={(e) => this.props.toggleVisibility(e, this.props.topNum, "pin")}
+                            className="topic-button"
+                        >
+                            {this.props.topicVisibility[this.props.topNum] === "pinned" ?
+                             <PinAngleFill className="topic-button-icon"/>
+                                                                                        :
+                             <PinAngle className="topic-button-icon"/>
+                            }
+                        </button>
+
+                        {/* Hide/Unhide button */}
+                        <button
+                            type="button"
+                            onClick={(e) => this.props.toggleVisibility(e, this.props.topNum, "hide")}
+                            className="topic-button"
+                        >
+                            {this.props.topicVisibility[this.props.topNum] === "hidden" ?
+                             <EyeSlashFill className="topic-button-icon"/>
+                                                                                        :
+                             <EyeSlash className="topic-button-icon"/>
+                            }
+                        </button>
+                    </div>
+                </div>
+
+                {/* Annotation text field */}
+                <textarea
+                    className="textField"
+                    style={{
+                        whiteSpace: "pre-line",
+                        backgroundColor: "var(--color3Dark)",
+                        borderCollapse: "separate",
+                        color: "black",
+                        borderRadius: "3px",
+                        border: "none",
+                        height: "30px",
+                        width: "100%",
+                        resize: "vertical"
+                    }}
+                    wrap="soft"
+                    placeholder="Enter annotation"
+                    onBlur={(e) => {
+                        if (e.target.value && e.target.value[e.target.value.length - 1] === '\n') {
+                            e.target.value = e.target.value.slice(0, -1);
+                        }
+                        this.props.changeAnnotation(this.state.annotation, this.props.topNum);
+                    }}
+                    value={this.state.annotation}
+                    onChange={this.handleChange.bind(this)}
+                />
+
+                {/* List of top words */}
+                <div
+                    className={(this.props.topNum === this.props.selectedTopic) ? "topicwords selected" : "topicwords"}
+                    onClick={() => this.props.toggleTopicDocuments(this.props.topNum)}
+                    style={{color: "inherit"}}
+                >
+                    {this.props.topicsDict[this.props.topNum]}
+                </div>
             </div>
-        </div>
-    )
+        )
+    }
 }
 
 interface SideBarProps {
@@ -134,6 +152,7 @@ interface SideBarState {
 }
 
 export class SideBar extends Component<SideBarProps, SideBarState> {
+    counter: number
 
     constructor(props: SideBarProps) {
         super(props);
@@ -142,7 +161,9 @@ export class SideBar extends Component<SideBarProps, SideBarState> {
             displayOrder: [],
             topicsLoaded: false
         };
+        this.counter = 0
     }
+
 
     // NOTE: kept the d3 implementation of this function because
     // it affects an external element (sortVocabByTopic)
@@ -239,6 +260,7 @@ export class SideBar extends Component<SideBarProps, SideBarState> {
     // should be cleared
     clearAnnotations() {
         (document.getElementById("topic-annotations") as HTMLFormElement).reset();
+        this.counter++
     }
 
     componentDidMount() {
@@ -275,33 +297,35 @@ export class SideBar extends Component<SideBarProps, SideBarState> {
         const {changeAnnotation, topicVisibility, selectedTopic} = this.props;
         return (
             this.state.topicsLoaded ?
-                <div className="sidebar">
-                    <form id="topic-annotations">
-                        {
-                            this.state.displayOrder.map((topNum) => (
-                                    <TopicBox
-                                        key={topNum}
-                                        topNum={topNum}
-                                        selectedTopic={selectedTopic}
-                                        topicsDict={this.state.topicWords}
-                                        topicVisibility={topicVisibility}
-                                        toggleVisibility={this.toggleTopicVisibility.bind(this)}
-                                        toggleTopicDocuments={this.toggleTopicDocuments.bind(this)}
-                                        changeAnnotation={changeAnnotation}
-                                    />
-                                )
+            <div className="sidebar">
+                <form id="topic-annotations">
+                    {
+                        this.state.displayOrder.map((topNum) => (
+                                <TopicBox
+                                    key={topNum + "_" + this.counter}
+                                    // the counter is used to force all topic boxes to re-render
+                                    topNum={topNum}
+                                    selectedTopic={selectedTopic}
+                                    topicsDict={this.state.topicWords}
+                                    topicVisibility={topicVisibility}
+                                    toggleVisibility={this.toggleTopicVisibility.bind(this)}
+                                    toggleTopicDocuments={this.toggleTopicDocuments.bind(this)}
+                                    changeAnnotation={changeAnnotation}
+                                    annotation={this.props.getAnnotation(topNum)}
+                                />
                             )
-                        }
-                    </form>
-                </div>
-                :
-                <div className="sidebar">
-                    <Spinner
-                        animation="grow"
-                        style={{width: "50px", height: "50px", marginLeft: "45%"}}
-                        variant="secondary"
-                    />
-                </div>
+                        )
+                    }
+                </form>
+            </div>
+                                    :
+            <div className="sidebar">
+                <Spinner
+                    animation="grow"
+                    style={{width: "50px", height: "50px", marginLeft: "45%"}}
+                    variant="secondary"
+                />
+            </div>
         )
     }
 }

@@ -2,11 +2,14 @@
 .tabs {
     height: auto;
     margin-top: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 .tabs > ul {
     font-size: 1em;
     list-style: none;
+    padding:0
 }
 
 .tabs > ul > li {
@@ -39,11 +42,7 @@
     color: #000;
 }
 
-#vocab-tab {
-    float: right;
-}
-
-#dl-tab {
+#vocab-tab, #dl-tab, #import-export-tab {
     float: right;
 }
 
