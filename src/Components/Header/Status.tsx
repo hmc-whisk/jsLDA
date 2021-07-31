@@ -80,16 +80,14 @@ export class StatusDisplay extends Component<StatusDisplayProps, StatusDisplaySt
     onTimeout(count: number) {
         if (this.messageCount === count) {
             this.setState({message: ""})
+            this.messageCount++;
         }
-        this.messageCount++;
     }
 
     render() {
         return <div style={
             {
                 "fontFamily": '"Roboto Mono","Courier New",Courier,monospace',
-                "overflowX": "hidden",
-                "overflowY": "clip"
             } as CSSProperties}>
             {this.state.message}
         </div>
