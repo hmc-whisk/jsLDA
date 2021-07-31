@@ -69,10 +69,6 @@ export async function readZip(file: Blob) {
         throw Error("Cannot find LDAModel folder in the zip file")
     }
     let files: { [key: string]: string | undefined } = {}
-    for (let path in dir.files) {
-        path = path.substring(9)
-        if (path === "") continue
-        files[path] = await dir.file(path)!.async("string")
-    }
+    dir.forEach((p,f)=>f.async("string"))
     return files
 }
