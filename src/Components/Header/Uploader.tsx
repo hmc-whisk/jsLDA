@@ -27,11 +27,6 @@ import {confirmReset} from '../../funcs/utilityFunctions'
  *        the model upload button is pressed
  */
 
-// returns true if the input has a file selected, false otherwise
-function isFileAdded(inputId: string) {
-    let inp = document.getElementById(inputId) as HTMLInputElement;
-    return inp && inp.files && inp.files.length;
-}
 
 interface UploaderProps {
     onDocumentFileChange: (event: ChangeEvent<HTMLInputElement>) => void,
@@ -61,62 +56,6 @@ export function Uploader(props: UploaderProps) {
                             <option value="Yelp Reviews">Yelp Reviews</option>
                         </select>
                         <input type="submit" value="Reset" className="darkButton" disabled={props.modelIsRunning}/>
-                    </form>
-
-                    <br/>
-                    <form onSubmit={(event) => {
-                        confirmReset(event, props.onFileUpload);
-                    }}>
-                        <h5> Or use a custom collection: </h5>
-                        <div className="fileInput">
-                            <table>
-                                <tbody>
-                                <tr>
-                                    <td>
-                                        <label htmlFor="docs-file-input">Documents: </label>
-                                    </td>
-                                    <td>
-                                        <input id="docs-file-input" type="file"
-                                               onChange={(event) => props.onDocumentFileChange(event)}/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <label htmlFor="stops-file-input"> Stoplist: </label>
-                                    </td>
-                                    <td>
-                                        <input id="stops-file-input" type="file"
-                                               onChange={(event) => props.onStopwordFileChange(event)}/>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <input
-                            type="submit"
-                            id="load-inputs"
-                            value="Upload"
-                            className="darkButton"
-                            disabled={props.modelIsRunning || !isFileAdded("docs-file-input")}
-                        />
-                    </form>
-                </div>
-            </div>
-
-            <div className="configMenu">
-                <h3>Model Upload</h3>
-                <div>
-                    <h5> Upload a previously generated model: </h5>
-                    <form onSubmit={(event) => {
-                        confirmReset(event, props.onModelUpload);
-                    }}>
-                        <div className="fileInput">
-                            <label htmlFor="saved-model-input">Model: </label>
-                            <input id="saved-model-input" type="file"
-                                   onChange={(event) => props.onModelFileChange(event)} size={10}/>
-                        </div>
-                        <input type="submit" id="load-inputs" value="Upload" className="darkButton"
-                               disabled={props.modelIsRunning || !isFileAdded("saved-model-input")}/>
                     </form>
                 </div>
             </div>
