@@ -18,6 +18,8 @@ import yelpReviews from 'defaultDocs/yelpReviews.csv';
 import defaultStops from 'defaultDocs/stoplist.txt';
 import corrTooltip from 'Components/Tooltip/corrTooltip.png';
 import {ImportExportPage} from "../Pages/importExportPage";
+import MetaDataPage from 'Components/Pages/MetaData/MetaDataPage';
+
 
 
 // This adds the Object.keys() function to some old browsers that don't support it
@@ -434,14 +436,9 @@ class App extends Component<AppProps, AppStates> {
                 DisplayPage = <HomePage/>
                 break;
             case "meta-tab":
-                DisplayPage = <div id="meta-page" style={
-                    {
-                        marginTop: "2em",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                        fontSize: "150%"
-                    } as CSSProperties
-                }> Page under construction</div>
+                DisplayPage = <MetaDataPage
+                ldaModel={this.state.ldaModel}
+                metaFields={this.state.ldaModel.metaFields}/>
                 break;
             case "to-tab":
                 DisplayPage = <TopicOverviewPage
