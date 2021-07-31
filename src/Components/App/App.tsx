@@ -167,7 +167,6 @@ class App extends Component<AppProps, AppStates> {
     }
 
     overwriteModel(model:LDAModel){
-        this.state.ldaModel.reset()
         this.setState({
             ldaModel:model
         })
