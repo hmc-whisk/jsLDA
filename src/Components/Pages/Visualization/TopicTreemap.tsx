@@ -124,7 +124,7 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
                     Number of Top Words:
                     <input
                         onChange={this.numChange.bind(this)}
-                        placeholder="# top Wrods"
+                        placeholder="# top Words"
                         type="number" id="numberOfBins"
                         value={this.state.numberOfTopwords}
                         max="300"
