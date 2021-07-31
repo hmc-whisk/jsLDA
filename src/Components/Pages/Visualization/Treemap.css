@@ -1,0 +1,17 @@
+ul.no-bullets {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+li {
+  padding: 0 0 10px;
+}
+
+#rect-0{
+  visibility: hidden;
+}
+
+text[clip-path="url(#clip-myTreeMap-0)"] tspan {
+  fill: black;
+}

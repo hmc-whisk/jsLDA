@@ -19,7 +19,7 @@ interface PageControllerState{}
 export class PageController extends React.Component<PageControllerProps,PageControllerState> {
     render() {
         return (
-            <div>
+            <div className="page-selector">
                 <Pagination>
                     {this.firstPageButtons}
                     {this.currentPageButtons}
@@ -30,65 +30,99 @@ export class PageController extends React.Component<PageControllerProps,PageCont
     }
 
     /**
-     * @summary Dynamic buttons letting you return to first page
+     * @summary Dynamic buttons letting you return to first page and previous page
      */
     get firstPageButtons() {
-        if (this.props.currentPage > 3) {
-            return (
-                [this.pageButton(1),
-                    <Pagination.Ellipsis key="firstEllipsis"/>]
-            );
-        } else if (this.props.currentPage > 2) {
-            return (
-                this.pageButton(1)
-            );
+        if (this.props.currentPage === 1) {
+            return ([<Pagination.Item disabled>{'<<'}</Pagination.Item>,
+                <Pagination.Item disabled>{'<'}</Pagination.Item>]);
         }
-        return null;
+        else {
+            return ([<Pagination.Item
+                        onClick={() => this.props.changePage(1)}>{'<<'}</Pagination.Item>,
+                    <Pagination.Item
+                        onClick={() => this.props.changePage(this.props.currentPage - 1)}>{'<'}</Pagination.Item>]);
+        }
     }
 
     /**
-     * @summary Dynamic buttons letting you skip to last page
+     * @summary Dynamic buttons letting you skip to last page and next page
      */
     get lastPageButtons() {
-        if (this.props.currentPage < this.props.lastPage - 2) {
-            return (
-                [<Pagination.Ellipsis key="lastEllipsis"/>,
-                    this.pageButton(this.props.lastPage)]
-            );
-        } else if (this.props.currentPage < this.props.lastPage - 1) {
-            return (
-                this.pageButton(this.props.lastPage)
-            );
+        if (this.props.currentPage === this.props.lastPage) {
+            return ([<Pagination.Item disabled>{'>'}</Pagination.Item>,
+                <Pagination.Item disabled>{'>>'}</Pagination.Item>]);
         }
-        return null;
+        else {
+            return ([<Pagination.Item
+                        onClick={() => this.props.changePage(this.props.currentPage + 1)}>{'>'}</Pagination.Item>,
+                    <Pagination.Item
+                        onClick={() => this.props.changePage(this.props.lastPage)}>{'>>'}</Pagination.Item>]);
+        }
     }
 
     /**
-     * @summary Dynamic buttons letting you go to next and previous page
+     * @summary Dynamic buttons letting you go to previous few and next few pages
      */
     get currentPageButtons() {
-        if (this.props.currentPage === 1) {
-            return (
-                [<Pagination.Item active key={this.props.currentPage}>
-                    {this.props.currentPage}
-                </Pagination.Item>,
-                    this.pageButton(this.props.currentPage + 1)]
-            );
-        } else if (this.props.currentPage === this.props.lastPage) {
-            return (
-                [this.pageButton(this.props.currentPage - 1),
-                    <Pagination.Item active key={this.props.currentPage}>
-                        {this.props.currentPage}
-                    </Pagination.Item>]
-            );
+        var buttons = [];
+        if (this.props.currentPage < 3) {
+            for (let i = 1; i < this.props.currentPage; i++) {
+                buttons.push(this.pageButton(i));
+            }
+            buttons.push(<Pagination.Item active key={this.props.currentPage}>
+                {this.props.currentPage}
+            </Pagination.Item>);
+            for (let i = this.props.currentPage + 1; i < 6; i++) {
+                if (i <= this.props.lastPage) {
+                    buttons.push(this.pageButton(i));
+                }
+                else {
+                    buttons.push(<Pagination.Item disabled>
+                        {i}
+                    </Pagination.Item>);
+                }
+            }
+            return (buttons);
         }
-        return (
-            [this.pageButton(this.props.currentPage - 1),
-                <Pagination.Item active key={this.props.currentPage}>
-                    {this.props.currentPage}
-                </Pagination.Item>,
-                this.pageButton(this.props.currentPage + 1)]
-        );
+        else if ((this.props.currentPage > this.props.lastPage - 2) && (this.props.lastPage > 5)) {
+            for (let i = this.props.lastPage - 4; i < this.props.currentPage; i++) {
+                buttons.push(this.pageButton(i));
+            }
+            buttons.push(<Pagination.Item active key={this.props.currentPage}>
+                {this.props.currentPage}
+            </Pagination.Item>);
+            for (let i = this.props.currentPage + 1; i < this.props.lastPage + 1; i++) {
+                if (i <= this.props.lastPage) {
+                    buttons.push(this.pageButton(i));
+                }
+                else {
+                    buttons.push(<Pagination.Item disabled>
+                        {i}
+                    </Pagination.Item>);
+                }
+            }
+            return (buttons);
+        }
+        else {
+            for (let i = this.props.currentPage - 2; i < this.props.currentPage; i++) {
+                buttons.push(this.pageButton(i));
+            }
+            buttons.push(<Pagination.Item active key={this.props.currentPage}>
+                {this.props.currentPage}
+            </Pagination.Item>);
+            for (let i = this.props.currentPage + 1; i < this.props.currentPage + 3; i++) {
+                if (i <= this.props.lastPage) {
+                    buttons.push(this.pageButton(i));
+                }
+                else {
+                    buttons.push(<Pagination.Item disabled>
+                        {i}
+                    </Pagination.Item>);
+                }
+            }
+            return (buttons);
+        }
     }
 
     /**
