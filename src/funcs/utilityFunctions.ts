@@ -7,7 +7,7 @@
 import {SyntheticEvent} from "react";
 
 export function topNWords(wordCounts: { word:string }[], n: number): string {
-    return wordCounts.slice(0, n).map((d) => d.word).join(" ");
+    return wordCounts.slice(0, n).map((d) => d.word).join(", ");
 }
 
 /**
