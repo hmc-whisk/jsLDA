@@ -2,6 +2,9 @@ import React, {ChangeEvent, Component} from 'react';
 import * as d3 from 'd3';
 import './pages.css';
 import type {LDAModelDataDLer} from "core";
+import '../../index.css';
+
+import { Html5Table, WindowTable } from "window-table";
 
 interface VocabTableProps {
     sortVocabByTopic: boolean,
@@ -40,6 +43,8 @@ export class VocabTable extends Component<VocabTableProps, VocabTableState> {
 
 
     // used by toggleTopicDocuments in topicdocuments, ready, changeNumTopics in processing, sweep in sweep
+    // NOTE: This function is currently not used, since it was replaced by a window table component.
+    // However, it contains d3 highlighting for topic specificity, which hopefully will be added to the window table implementation.
     createVocabTable() {
         let format = d3.format(".2g");
         let wordFrequencies = this.mostFrequentWords(this.state.displayingStopwords, this.props.sortVocabByTopic).slice(0, 499);
@@ -86,7 +91,11 @@ export class VocabTable extends Component<VocabTableProps, VocabTableState> {
         //  we can then sort.
         let wordCounts: { word: string, count: number }[] = [];
 
-        if (sortByTopic) {
+        // adding this.props.selectedTopic != -1 prevents wordTopicCounts
+        // from being an empty list when the number of topics is updated while sorting by topic,
+        // which would cause wordCounts to be empty and 
+        // would mean the stopwords table would just render as blank.
+        if (sortByTopic && this.props.selectedTopic != -1) {
             for (let word in this.props.vocabularyCounts) {
                 if (this.props.wordTopicCounts[word] &&
                     this.props.wordTopicCounts[word][this.props.selectedTopic]) {
@@ -173,12 +182,12 @@ export class VocabTable extends Component<VocabTableProps, VocabTableState> {
     }
 
     componentDidMount() {
-        this.createVocabTable();
+        // this.createVocabTable();
         this.setUp();
     }
 
     componentDidUpdate() {
-        this.createVocabTable();
+        // this.createVocabTable();
         this.setUp();
     }
 
@@ -186,7 +195,61 @@ export class VocabTable extends Component<VocabTableProps, VocabTableState> {
         return nextProps.update;
     }
 
+    /*
+     * This function creates the rows of the stopwords table.
+     * Each row contains a word, its frequency, its topic specificity, and a stop button for it.
+     */
+    createWindowTableData() {
+        // wordFrequencies is a list of the Record type
+        // this allows us to add the additional fields of score and stop later
+        let wordFrequencies: Record<string, any>[] = this.mostFrequentWords(
+          this.state.displayingStopwords,
+          this.props.sortVocabByTopic
+        ).slice();
+
+        // this allows for searching
+        // filter wordFrequency based on the search input and display the filtered list
+        if (this.state.searchText !== "") {
+            wordFrequencies = wordFrequencies.filter(d => d.word.includes(this.state.searchText));
+        }
+        let format = d3.format(".2g"); // format used to display truncated frequency values
+
+        // loop through wordFrequencies and add a score/stop button component for each word
+        wordFrequencies.forEach((d: Record<string,any>) => {
+            let score = this.specificity(d.word);
+            d.score = this.props.stopwords[d.word] ? (<span>"NA"</span>) : (<span style={{backgroundColor: this.specificityScale(score), overflow:"auto",height: "100%", width: "100%"}}> {format(score)} </span>);
+            d.stop = this.createStopButton(d.word);
+        });
+
+        return wordFrequencies;
+    }
+
+    /*
+     * Creates the stop button component that stops or unstops a word (adds to or unadds from the stoplist).
+     * WindowTable can have JSX as data, so this returns a JSX button element to be displayed in the table.
+     */
+    createStopButton(word: string) {
+        return (
+          <button
+            className="lightButton"
+            style={{ padding: "4px" }}
+            onClick={() =>
+              !this.props.stopwords[word] ? this.props.addStop(word, true) : this.props.removeStop(word)
+            }
+          >
+            {this.props.stopwords[word] ? "unstop" : "stop"}
+          </button>
+        );
+    }
+
     render() {
+        // data header names
+        const columns = [
+            {key: 'word', width: 30, title: 'Word'},
+            {key: 'count', width: 30, title: 'Frequency'},
+            {key: 'score', width: 30, title: 'Topic Specificity'},
+            {key: 'stop', width: 50, title: 'Stop'},
+            ];
         return (
             <div
                 id="vocab-page"
@@ -221,17 +284,13 @@ export class VocabTable extends Component<VocabTableProps, VocabTableState> {
                         }}
                     />
                     <div style={{flex: "1", overflow: "auto"}}>
-                        <table id="vocab-table">
-                            <thead>
-                            <tr>
-                                <th>Word</th>
-                                <th>Frequency</th>
-                                <th>Topic Specificity</th>
-                                <th>Stoplist</th>
-                            </tr>
-                            </thead>
-                            <tbody/>
-                        </table>
+                <div style={{paddingTop: "10px"}}>
+                    <Html5Table
+                        data={this.createWindowTableData()}
+                        columns={columns}
+                        style={{height: '500px', width: '500px'}}
+                    />
+                </div>
                     </div>
                 </div>
 
