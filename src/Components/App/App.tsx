@@ -5,10 +5,19 @@ import './App.css';
 
 import * as d3 from 'd3';
 
-import {getObjectKeys} from 'funcs/utilityFunctions'
-import {LDAModel, LDAModelDataDLer} from 'core'
+import {getObjectKeys, logToServer} from 'funcs/utilityFunctions'
+import {displayMessage, LDAModel, LDAModelDataDLer, Message} from 'core'
 
-import {TopicDoc, Correlation, HomePage, TopicOverviewPage, DLPage, VocabTable, TimeSeries, TopicTreemap} from 'Components/Pages'
+import {
+    TopicDoc,
+    Correlation,
+    HomePage,
+    TopicOverviewPage,
+    DLPage,
+    VocabTable,
+    TimeSeries,
+    TopicTreemap
+} from 'Components/Pages'
 import {NavBar, TopBar} from 'Components/Header'
 import {SideBar} from 'Components/SideBar';
 
@@ -20,6 +29,8 @@ import corrTooltip from 'Components/Tooltip/corrTooltip.png';
 import {ImportExportPage} from "../Pages/importExportPage";
 import MetaDataPage from 'Components/Pages/MetaData/MetaDataPage';
 
+import movieReviews from 'defaultDocs/movieReviews.csv';
+import {saveModel} from "../../core/serialization";
 
 
 // This adds the Object.keys() function to some old browsers that don't support it
@@ -57,8 +68,8 @@ class App extends Component<AppProps, AppStates> {
             modelDataDLer: new LDAModelDataDLer(ldaModel),
 
             // The file location of default files
-            docName: "Movie Plots",
-            documentsURL: moviePlotsDocs,
+            docName: "movieReviews",
+            documentsURL: movieReviews,
             stopwordsURL: defaultStops,
             defaultExt: "text/csv",
 
@@ -81,11 +92,23 @@ class App extends Component<AppProps, AppStates> {
                 e.returnValue = ''
             }
         })
-        window.addEventListener("message", (e: MessageEvent) => {
-            if (e.origin === window.location.origin && e.data.target === 'forceUpdateApp') {
-                this.forceUpdate()
+        console.log("constructor")
+        window.addEventListener("message",async (e:MessageEvent<Message>) => {
+            if (e.data.target!=='end-study'){
+                return
             }
+            if (this.state.ldaModel.documents.length===0){
+                return // there's some weird issue with double initialization
+            }
+            try {
+                await saveModel(this.state.ldaModel)
+            } catch (e){
+                await displayMessage("Error uploading model", 0, "promise")
+                return
+            }
+            await displayMessage("Uploading successful. Thank you!", 0, "promise")
         })
+
     };
 
     startingNumTopics = 25;
@@ -348,8 +371,8 @@ class App extends Component<AppProps, AppStates> {
      * @summary This function is the callback for "change"
      */
     onTopicsChange(val: string) {
-        console.log("Changing # of topics: " + val);
-
+        // console.log("Changing # of topics: " + val);
+        logToServer({event:"change-num-topics","num-topics":val})
         let newNumTopics = Number(val);
         if (!isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.state.ldaModel.numTopics) {
             this.state.ldaModel.changeNumTopics(Number(val));
@@ -362,6 +385,7 @@ class App extends Component<AppProps, AppStates> {
         // Set upon initialisation, changed to new numTopics in reset
         document.getElementById("num-topics-input")!.setAttribute("value", this.state.ldaModel.numTopics.toString());
         this.queueLoad();
+        logToServer({"event": "page-load"})
     }
 
     /**
@@ -428,10 +452,10 @@ class App extends Component<AppProps, AppStates> {
                     update={this.state.update}
                 />;
                 break;
-            case "dl-tab":
-                DisplayPage = <DLPage
-                    modelDataDLer={this.state.modelDataDLer}/>;
-                break;
+            // case "dl-tab":
+            //     DisplayPage = <DLPage
+            //         modelDataDLer={this.state.modelDataDLer}/>;
+            //     break;
             case "home-tab":
                 DisplayPage = <HomePage/>
                 break;

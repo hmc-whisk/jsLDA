@@ -1,5 +1,6 @@
 import React, {SyntheticEvent} from "react";
 import './header.css';
+import {logToServer} from "../../funcs/utilityFunctions";
 
 interface NavBarProps {
     onClick: (tabID: string) => void
@@ -21,6 +22,7 @@ export class NavBar extends React.Component<NavBarProps, NavBarState> {
         let val = (e.target as HTMLLIElement).id;
         this.setState({selected: val})
         this.props.onClick(val);
+        logToServer({event:"navigation",destination:val});
     }
 
     checkIdSelected(id: string) {
@@ -32,7 +34,7 @@ export class NavBar extends React.Component<NavBarProps, NavBarState> {
         ['docs-tab', 'Topic Documents'],
         ['corr-tab', 'Topic Correlations'],
         ['ts-tab', 'Time Series'],
-        ['meta-tab', 'Metadata'],
+        // ['meta-tab', 'Metadata'],
         ['to-tab', 'Topic Overview'],
         ['visual-tab', 'Visualization'],
         ['dl-tab', 'Downloads'],

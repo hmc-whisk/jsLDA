@@ -1,6 +1,6 @@
 import React, {ChangeEvent, Component, SyntheticEvent} from 'react';
 import * as d3 from 'd3';
-import {topNWords} from 'funcs/utilityFunctions';
+import {logToServer, topNWords} from 'funcs/utilityFunctions';
 
 import {PinAngle, PinAngleFill, EyeSlash, EyeSlashFill} from 'react-bootstrap-icons';
 import Spinner from 'react-bootstrap/Spinner';
@@ -174,8 +174,10 @@ export class SideBar extends Component<SideBarProps, SideBarState> {
             //sortVocabByTopic = false;
             d3.select("#sortVocabByTopic").text("Sort by topic")
             this.props.selectedTopicChange(-1);
+            logToServer({event: "topic-deselect", topic})
         } else {
             this.props.selectedTopicChange(topic);
+            logToServer({event: "topic-select", topic})
         }
     }
 

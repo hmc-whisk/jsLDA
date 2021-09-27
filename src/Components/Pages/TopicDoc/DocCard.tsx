@@ -2,7 +2,7 @@ import React, {ReactElement} from 'react';
 import Card from 'react-bootstrap/Card';
 import Accordion from 'react-bootstrap/Accordion';
 import {format as d3Format} from 'd3';
-import {truncate} from '../../../funcs/utilityFunctions';
+import {truncate,logToServer} from 'funcs/utilityFunctions';
 import DocView from './DocView';
 import DocTreeMap from './DocTreeMap';
 import './topicDoc.css';
@@ -24,7 +24,7 @@ export class DocCard extends React.Component<DocCardProps,DocCardState> {
         const document = this.props.document;
         return (
             <Card>
-                <Accordion.Toggle as={Card.Header} eventKey={document.id.toString()}>
+                <Accordion.Toggle as={Card.Header} eventKey={document.id.toString()} onClick={_=>logToServer({event:"toggle-document","document-id":document.id})}>
                     <b>ID: </b>{document.id}
                     <span style={{float: "right"}}>
                         {this.props.useSalience ?

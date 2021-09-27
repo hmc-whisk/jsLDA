@@ -6,6 +6,7 @@ import LabeledToggleButton from 'Components/LabeledToggleButton';
 import {LDAModel} from "../../../core/LDAModel";
 import './topicDoc.css';
 import type {SortedLDADocument} from "core";
+import {logToServer} from "../../../funcs/utilityFunctions";
 
 interface TopicDocProps {
     ldaModel: LDAModel
@@ -111,12 +112,14 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
         this.setState({
             currentPage: n
         })
+        logToServer({event:"switch-doc-page",page:n})
     }
 
     /**
      * @summary Toggles option to show meta data of documents
      */
     toggleMetaData() {
+        logToServer({event:"change-doc-view",metadata:!this.state.showMetaData, saliency:this.state.useSalience})
         this.setState({showMetaData: !this.state.showMetaData})
     }
 
@@ -124,6 +127,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
      * @summary Toggles option to sort by salinence score
      */
     toggleSalience() {
+        logToServer({event:"change-doc-view",metadata:this.state.showMetaData, saliency:!this.state.useSalience})
         this.setState({
             useSalience: !this.state.useSalience
         })
@@ -134,6 +138,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
      * @returns Array of SortedLDADocuments that fit the search query
      */
     search(query: string) {
+        logToServer({event: "search", query})
         let searchResults: SortedLDADocument[] = [];
         let docs = this.props.ldaModel.sortedDocuments;
 

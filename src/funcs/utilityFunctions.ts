@@ -5,6 +5,7 @@
  * @returns {String} the top n words
  */
 import {SyntheticEvent} from "react";
+import {displayMessage} from "../core";
 
 export function topNWords(wordCounts: { word:string }[], n: number): string {
     return wordCounts.slice(0, n).map((d) => d.word).join(", ");
@@ -41,7 +42,7 @@ export function getObjectKeys() {
         ],
         dontEnumsLength = dontEnums.length;
 
-    return function (obj:any) {
+    return function (obj: any) {
         if (typeof obj !== 'function' && (typeof obj !== 'object' || obj === null)) {
             throw new TypeError('Object.keys called on non-object');
         }
@@ -77,7 +78,7 @@ export function truncate(s: string, n: number = 300) {
 /**
  * @summary This function wraps event handlers to confirm that the model will be reset.
  */
-export function confirmReset(event:SyntheticEvent, callback:()=>void) {
+export function confirmReset(event: SyntheticEvent, callback: () => void) {
     event.preventDefault();
     if (window.confirm('This will cause your model to reset.')) callback();
 }
@@ -97,4 +98,54 @@ export function saveFile(fileName: string, fileContents: string, fileType: strin
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+
+// https://stackoverflow.com/questions/2090551/parse-query-string-in-javascript
+export function getQueryVariable(variable: string): string | undefined {
+    let query = window.location.search.substring(1);
+    let vars = query.split('&');
+    for (let i = 0; i < vars.length; i++) {
+        let pair = vars[i].split('=');
+        if (decodeURIComponent(pair[0]) === variable) {
+            return decodeURIComponent(pair[1]);
+        }
+    }
+}
+
+export interface LogMessage {
+    event: string
+}
+
+async function _logToServer<T extends LogMessage>(id: string, data: T) {
+    let res=await fetch(`https://www.cs.hmc.edu/~xanda/logstudy.cgi?id=${id}&data=${btoa(JSON.stringify(data))}&time=${Date()}`, {
+      method: 'POST',
+        }
+    )
+    if (res.type!=="basic" || !res.ok){
+        console.error(res)
+        throw Error("logging failed")
+    }
+    return res
+}
+
+export function logToServer<T extends LogMessage>(data: T) {
+    let id = getQueryVariable("id")
+    if (id==="test") return; // special testing id to disable logging altogether
+
+    if (id === undefined) {
+        displayMessage("Logging failed: missing ID", 1500)
+        return
+    }
+    if (id.match(/^[A-Za-z0-9]{1,12}$/)===null){
+        displayMessage("Logging failed: invalid ID", 1500)
+        return
+    }
+    _logToServer(id, data)
+        .then(_=> console.log("server log emitted",data))
+        .catch(e => {
+            displayMessage("Logging failed. Unexpected error.", 1500);
+            console.error(e)
+        }
+    )
 }
