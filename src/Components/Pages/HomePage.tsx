@@ -109,7 +109,8 @@ export class HomePage extends React.Component {
                                 default, some basic words like "the" are already included in your stoplist. Stopwords
                                 should be added sparingly, as adding too many can remove valuable information from your
                                 model.
-                            </p><p>
+                            </p>
+                            <p>
                                 One good indicator of how much information you might lose from adding a stopword
                                 is that word's topic specificity. Words with a high specificity (closer to 1) are more
                                 specific to a small number of topics and tend to tell you more about the contents of
@@ -157,7 +158,8 @@ export class HomePage extends React.Component {
                                 like to investigate in the topic bar. Now the documents will be sorted by their topic
                                 score. This score mostly indicates how much of the topic appears in this document, but
                                 it is also weighted to favor longer documents.
-                            </p><p>
+                            </p>
+                            <p>
                                 Once you’ve done this, you can click on
                                 documents to reveal their full text. When the document is extended, you will notice that
                                 some words are highlighted. This highlighting is based on a metric called saliency.
@@ -170,7 +172,9 @@ export class HomePage extends React.Component {
                             </p>
                             <hr />
                             <h4 style={{textAlign: "center"}}>Topic Correlations Tab</h4>
-                            <p>This tab will help you see which topics show up together.</p>
+                            <p>
+                                This tab will help you see which topics show up together.
+                            </p>
                             <p>
                                 Here you can investigate how topics relate to each other. Displayed on this page is a
                                 large grid of blue and red circles. Each circle represents whether two topics occur in
@@ -182,7 +186,9 @@ export class HomePage extends React.Component {
                             </p>
                             <hr />
                             <h4 style={{textAlign: "center"}}>Time Series Tab</h4>
-                            <p>This tab will help you see how prevalent topics are over time.</p>
+                            <p>
+                                This tab will help you see how prevalent topics are over time.
+                            </p>
                             <p>
                                 If you have included a working date_tag column in your documents file, this page will
                                 display topic trends over time. Each point represents the average proportion of words
@@ -191,11 +197,13 @@ export class HomePage extends React.Component {
                             </p>
                             <hr />
                             <h4 style={{textAlign: "center"}}>Topic Overview Tab</h4>
-			    <p>This tab will help you see key information about a particular topic.</p>
+			                <p>
+                                This tab will help you see key information about a particular topic.
+                            </p>
                             <p>
-				This display is meant to expand upon the information you would see in the left topic display bar:
-				an extended list of the top words, the top three most correlated topics with that topic,
-				and a visualization of how much probability each of the top words has in the topic.
+                                This display is meant to expand upon the information you would see in the left topic display bar:
+                                an extended list of the top words, the top three most correlated topics with that topic,
+                                and a visualization of how much probability each of the top words has in the topic.
                             </p>
                             <p>
                                 
@@ -213,7 +221,8 @@ export class HomePage extends React.Component {
                 <span>
                     <p>
                         This is a tool designed to train and investigate LDA (latent Dirichlet allocation) topic
-                        models. If you are
+                        models. You can begin by choosing a default dataset to
+                        work with [where to find that], or by uploading your own dataset. If you are
                         unfamiliar with topic models, reading <a
                         href="http://www.scottbot.net/HIAL/index.html@p=19113.html">this</a> is
                         a good place to start. For a more technical explanation
@@ -224,7 +233,7 @@ export class HomePage extends React.Component {
                     <h3>Training a Model</h3>
                         <p>
                             Your topics will start out totally random. To get meaningful topics,
-			    you can have the model run iterations of inference.
+			                you can have the model run iterations of inference.
                             Most of the controls for this can be found at the very top of the page.
                         </p>
                     {this.trainingHelp}
@@ -232,12 +241,19 @@ export class HomePage extends React.Component {
                     <hr /><br />
                     
                     <h3>Analyzing a Model</h3>
-                        <p>Once you've trained a model, you'll need to figure out what your model has found. jsLDA 2.0 has a few different tools to help you do this.</p>
+                        <p>
+                            Once you've trained a model, you'll need to figure out what your model has found. 
+                            jsLDA 2.0 has a few different tools to help you do this.
+                        </p>
                     {this.analyzingHelp}
 
                     <hr /><br />
                     <h3>About</h3>
-			<p>jsLDA was originally created by David Mimno at Cornell University. Further development was conducted at Harvey Mudd College by Alfredo Gomez, Dana Harris, Ingrid Wu, Mia Wang, Simon Babb, Taeyun Lee, Tatsuki Kuze, Theo Bayard de Volo, and Xanda Schofield.</p>
+                    <p> 
+                        jsLDA was originally created by David Mimno at Cornell University.Further development was 
+                        conducted at Harvey Mudd College by Alfredo Gomez, Dana Harris, Ingrid Wu, Mia Wang, Simon Babb, 
+                        Taeyun Lee, Tatsuki Kuze, Theo Bayard de Volo, and Xanda Schofield.
+                    </p>
                 </span>
 
             </div>
