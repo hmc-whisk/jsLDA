@@ -105,7 +105,10 @@ export class HomePage extends React.Component {
                                 analysis your model will skip over stopwords, pretending like they do not exist. By
                                 default, some basic words like "the" are already included in your stoplist. Stopwords
                                 should be added sparingly, as adding too many can remove valuable information from your
-                                model. One good indicator of how much information you might lose from adding a stopword
+                                model.
+                            </p>
+                            <p>
+                                One good indicator of how much information you might lose from adding a stopword
                                 is that word's topic specificity. Words with a high specificity (closer to 1) are more
                                 specific to a small number of topics and tend to tell you more about the contents of
                                 those topics. Words with a low specificity are found more commonly in many topics, and
@@ -150,9 +153,10 @@ export class HomePage extends React.Component {
                                 how jsLDA 2.0 enables you to do this. To start, you’ll want to click on the topic you’d
                                 like to investigate in the topic bar. Now the documents will be sorted by their topic
                                 score. This score mostly indicates how much of the topic appears in this document, but
-                                it is also weighted to favor longer documents. Once you’ve done this, you can click on
-                                documents to reveal their full text. When the document is extended, you will notice that
-                                some words are highlighted. This highlighting is based on a metric called saliency.
+                                it is also weighted to favor longer documents.
+                            </p>
+                            <p> Once you’ve done this, you can click on documents to reveal their full text.
+                                When the document is extended, you will notice that some words are highlighted. This highlighting is based on a metric called saliency.
                                 First theorized by Chuang et al and later adapted for looking at words in the context of
                                 topics by Alexander et al, this metric represents both how much of the topic that word
                                 accounts for and how distinct the word is to that topic. Words with a high saliency
@@ -193,6 +197,18 @@ export class HomePage extends React.Component {
                                 would prefer to make your own graphs, you have the option of exporting data related to
                                 any of these graphs on this page.
                             </p>
+                            <h4 style={{textAlign: "center"}}>Topic Overview Tab</h4>
+                            <p>
+                                This tab will help you see key information about a particular topic.
+                            </p>
+                            <p>
+                                This display is meant to expand upon the information you would see in the left topic display bar:
+                                an extended list of the top words, the top three most correlated topics with that topic,
+                                and a visualization of how much probability each of the top words has in the topic.
+                            </p>
+                            <p>
+                                
+                            </p>
                             <h4 style={{textAlign: "center"}}>Downloads Tab</h4>
                             <p>
                                 If you would like to continue your analysis with other tools, you have the option of
@@ -230,7 +246,7 @@ export class HomePage extends React.Component {
                     <h3>Training a Model</h3>
                         <p>
                             Your topics will start out totally random. To get meaningful topics,
-			    you can have the model run iterations of inference.
+			                 you can have the model run iterations of inference.
                             Most of the controls for this can be found at the very top of the page.
                         </p>
                     {this.trainingHelp}
@@ -238,7 +254,9 @@ export class HomePage extends React.Component {
                         <p>Once you've trained a model, you'll need to figure out what your model has found. jsLDA 2.0 has a few different tools to help you do this.</p>
                     {this.analyzingHelp}
                     <h3>About</h3>
-			<p>jsLDA was originally created by David Mimno at Cornell University. Further development was conducted at Harvey Mudd College by Alfredo Gomez, Dana Harris, Ingrid Wu, Mia Wang, Simon Babb, Taeyun Lee, Tatsuki Kuze, Theo Bayard de Volo, and Xanda Schofield.</p>
+			        <p>
+                        jsLDA was originally created by David Mimno at Cornell University. Further development was conducted at Harvey Mudd College by Alfredo Gomez, Dana Harris, Ingrid Wu, Mia Wang, Simon Babb, Taeyun Lee, Tatsuki Kuze, Theo Bayard de Volo, and Xanda Schofield.
+                    </p>
                 </span>
 
             </div>
