@@ -236,12 +236,16 @@ export class HomePage extends React.Component {
                         href="https://www.pnas.org/content/pnas/101/suppl_1/5228.full.pdf">here</a>.
                     </p>
 
+                    <hr /><br />
+
                     <h3>Uploading your own files</h3>
                         <p>
                             If you choose to upload your own dataset, your files must
                             be formatted so that jsLDA 2.0 can interpret them.
                         </p>
                     {this.uploadHelp}
+                    
+                    <hr /><br />
 
                     <h3>Training a Model</h3>
                         <p>
@@ -250,9 +254,15 @@ export class HomePage extends React.Component {
                             Most of the controls for this can be found at the very top of the page.
                         </p>
                     {this.trainingHelp}
+
+                    <hr /><br /> 
+
                     <h3>Analyzing a Model</h3>
                         <p>Once you've trained a model, you'll need to figure out what your model has found. jsLDA 2.0 has a few different tools to help you do this.</p>
                     {this.analyzingHelp}
+
+                    <hr /><br />
+                    
                     <h3>About</h3>
 			        <p>
                         jsLDA was originally created by David Mimno at Cornell University. Further development was conducted at Harvey Mudd College by Alfredo Gomez, Dana Harris, Ingrid Wu, Mia Wang, Simon Babb, Taeyun Lee, Tatsuki Kuze, Theo Bayard de Volo, and Xanda Schofield.
