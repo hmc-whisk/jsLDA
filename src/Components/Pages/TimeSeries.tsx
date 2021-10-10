@@ -1,6 +1,6 @@
 import React, {ChangeEvent, Component} from 'react';
 import * as d3 from 'd3';
-import {topNWords} from '../../funcs/utilityFunctions';
+import {logToServer, topNWords} from '../../funcs/utilityFunctions';
 import './pages.css';
 import type {LDAModel, LDATopicTimeBinAveraged, LDATopicTimeBinAveragedWithStd} from "core";
 
@@ -162,7 +162,14 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
                 this.topicTimeGroups[topic]
                     .append("text")
                     .attr("transform", "translate(0,45)")
-                    .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3));
+                    .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3))
+                    .style("font-size", 15);
+                this.topicTimeGroups[topic]
+                    .append("text")
+                    .attr("transform", "translate(0, 30)")
+                    .text("Topic "+topic)
+                    .style("font-size", 15)
+                    .attr("font-weight", "bold");
                 this.topicTimeGroups[topic]
                     .select("g")
                     .attr("transform", "translate(95,75)")
@@ -299,9 +306,15 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
             // Topic Label
             this.topicTimeGroups[0]
                 .append("text")
-                .attr("transform", "translate(360, 0)")
+                .attr("transform", "translate(360, -10)")
                 .text(topNWords(this.props.ldaModel.topicWordCounts[topic], 3))
-                .style("font-size", 25)
+                .style("font-size", 20)
+                .attr("font-weight", "bold");
+            this.topicTimeGroups[0]
+                .append("text")
+                .attr("transform", "translate(260, -10)")
+                .text("Topic "+this.props.ldaModel.selectedTopic)
+                .style("font-size", 20)
                 .attr("font-weight", "bold");
             // X axis
             this.topicTimeGroups[0]
@@ -437,7 +450,7 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
 
     handleNumAvgChange(event: ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
-
+        logToServer({event:"change-time-series",buckets:event.target.value})
         if (!event.target.value) event.target.value = "1"; // Protect from empty field
         else if (parseInt(event.target.value) > 1000) event.target.value = "1000"
 
@@ -449,10 +462,8 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
     render() {
         return (
             <>
-                <div className="help">Documents are grouped by their "date_tag"
-                    field. These plots
+                <div className="help">Documents are grouped by their listed date. These plots
                     show the average document proportion of each topic in each time bin.
-                    Date values are parsed as ISO date time strings.
                     When a topic is selected a more detailed graph of just that topic
                     is shown.
                     Hover only shows the time fields that are filled. The light blue
@@ -461,10 +472,10 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
                     The graphs bin documents into time periods to smooth
                     out the data and make it more interpretable. You can change the number
                     of bins that are used below.
-                    Data for plots are available in downloads page.
                 </div>
                 <div style={{position: "relative", left: 30, paddingBottom:0}}>
                     <label htmlFor="numberOfBins"  >Number of Bins:</label>
+                    
                     <input
                         onChange={this.handleNumAvgChange.bind(this)}
                         type="number" id="numberOfBins"

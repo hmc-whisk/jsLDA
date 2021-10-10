@@ -6,9 +6,18 @@ import './App.css';
 import * as d3 from 'd3';
 
 import {getObjectKeys} from 'funcs/utilityFunctions'
-import {LDAModel, LDAModelDataDLer} from 'core'
+import {displayMessage, LDAModel, LDAModelDataDLer, Message} from 'core'
 
-import {TopicDoc, Correlation, HomePage, TopicOverviewPage, DLPage, VocabTable, TimeSeries, TopicTreemap} from 'Components/Pages'
+import {
+    TopicDoc,
+    Correlation,
+    HomePage,
+    TopicOverviewPage,
+    DLPage,
+    VocabTable,
+    TimeSeries,
+    TopicTreemap
+} from 'Components/Pages'
 import {NavBar, TopBar} from 'Components/Header'
 import {SideBar} from 'Components/SideBar';
 
@@ -19,8 +28,7 @@ import defaultStops from 'defaultDocs/stoplist.txt';
 import corrTooltip from 'Components/Tooltip/corrTooltip.png';
 import {ImportExportPage} from "../Pages/importExportPage";
 import MetaDataPage from 'Components/Pages/MetaData/MetaDataPage';
-
-
+import movieReviews from 'defaultDocs/movieReviews.csv';   // got this one from the userstudy branch
 
 // This adds the Object.keys() function to some old browsers that don't support it
 if (!Object.keys) {
@@ -57,8 +65,8 @@ class App extends Component<AppProps, AppStates> {
             modelDataDLer: new LDAModelDataDLer(ldaModel),
 
             // The file location of default files
-            docName: "Movie Plots",
-            documentsURL: moviePlotsDocs,
+            docName: "movieReviews",
+            documentsURL: movieReviews,
             stopwordsURL: defaultStops,
             defaultExt: "text/csv",
 
@@ -81,11 +89,22 @@ class App extends Component<AppProps, AppStates> {
                 e.returnValue = ''
             }
         })
-        window.addEventListener("message", (e: MessageEvent) => {
-            if (e.origin === window.location.origin && e.data.target === 'forceUpdateApp') {
-                this.forceUpdate()
+        console.log("constructor")
+        window.addEventListener("message",async (e:MessageEvent<Message>) => {
+            if (e.data.target!=='end-study'){
+                return
             }
+            if (this.state.ldaModel.documents.length===0){
+                return // there's some weird issue with double initialization
+            }
+            try {
+            } catch (e){
+                await displayMessage("Error uploading model", 0, "promise")
+                return
+            }
+            await displayMessage("Uploading successful. Thank you!", 0, "promise")
         })
+
     };
 
     startingNumTopics = 25;
@@ -102,13 +121,17 @@ class App extends Component<AppProps, AppStates> {
         return this.corNotes;
     }
 
-    changeAnnotation(text: string, i: number) {
-        this.state.ldaModel.setAnnotation(i,text)
-        // this.forceUpdate()
-    }
+    // Data and functions for annotations in sidebar (placed here instead of as a state to avoid re-rendering)
+    annotations: string[] = [];
 
-    resetNotes() {
-        this.state.ldaModel.resetAnnoation()
+    changeAnnotation(text: string, i: number) {
+        this.annotations[i] = text;
+        // this.modelForceUpdate();
+    }
+    
+    resetNotes(i: number) {
+        // I changed this to act like the resetAnnotations in LDAModel.
+        this.annotations = new Array(i);
     }
 
     /**
@@ -309,7 +332,7 @@ class App extends Component<AppProps, AppStates> {
      * @summary Runs the document processing pipeline
      */
     queueLoad() {
-        this.resetNotes()
+        this.resetNotes(this.state.ldaModel.numTopics)
         this.state.ldaModel.reset();
         Promise.all<string, string>([this.getStoplistUpload(), this.getDocsUpload()])
             .then(([stops, lines]) => {
@@ -348,14 +371,13 @@ class App extends Component<AppProps, AppStates> {
      * @summary This function is the callback for "change"
      */
     onTopicsChange(val: string) {
-        console.log("Changing # of topics: " + val);
-
+        // console.log("Changing # of topics: " + val);
         let newNumTopics = Number(val);
         if (!isNaN(newNumTopics) && newNumTopics > 0 && newNumTopics !== this.state.ldaModel.numTopics) {
             this.state.ldaModel.changeNumTopics(Number(val));
         }
 
-        this.resetNotes();
+        this.resetNotes(this.state.ldaModel.numTopics);
     }
 
     componentDidMount() {
@@ -428,10 +450,10 @@ class App extends Component<AppProps, AppStates> {
                     update={this.state.update}
                 />;
                 break;
-            case "dl-tab":
-                DisplayPage = <DLPage
-                    modelDataDLer={this.state.modelDataDLer}/>;
-                break;
+            // case "dl-tab":
+            //     DisplayPage = <DLPage
+            //         modelDataDLer={this.state.modelDataDLer}/>;
+            //     break;
             case "home-tab":
                 DisplayPage = <HomePage/>
                 break;
@@ -443,6 +465,7 @@ class App extends Component<AppProps, AppStates> {
             case "to-tab":
                 DisplayPage = <TopicOverviewPage
                     ldaModel={this.state.ldaModel}
+                    annotations={this.annotations}
                     getTopicCorrelations={this.state.ldaModel.getTopicCorrelations.bind(this.state.ldaModel)}/>
                 break;
             case "import-export-tab":
