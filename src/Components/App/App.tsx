@@ -450,10 +450,10 @@ class App extends Component<AppProps, AppStates> {
                     update={this.state.update}
                 />;
                 break;
-            // case "dl-tab":
-            //     DisplayPage = <DLPage
-            //         modelDataDLer={this.state.modelDataDLer}/>;
-            //     break;
+            case "dl-tab":
+                DisplayPage = <DLPage
+                    modelDataDLer={this.state.modelDataDLer}/>;
+                break;
             case "home-tab":
                 DisplayPage = <HomePage/>
                 break;
