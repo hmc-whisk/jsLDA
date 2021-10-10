@@ -3,7 +3,7 @@ import './Treemap.css';
 import "react-d3-treemap/dist/react.d3.treemap.css";
 import React, { ChangeEvent } from "react";
 import TreeMap, { ColorModel } from "react-d3-treemap";
-import {logToServer, topNWords} from "funcs/utilityFunctions";
+import {topNWords} from "funcs/utilityFunctions";
 import { LDAModel } from 'core'
 import { scaleSequential } from "d3-scale";
 import * as chromatic from "d3-scale-chromatic";
@@ -68,7 +68,6 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
     //handle the change of number of top words
     numChange(event: ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
-        logToServer({event:"change-treemap","num-words":event.target.value})
         if (parseInt(event.target.value) > 30) event.target.value = "30";
 
         this.setState({

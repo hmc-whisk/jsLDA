@@ -1,6 +1,6 @@
 import React, {ChangeEvent, Component} from 'react';
 import * as d3 from 'd3';
-import {logToServer, topNWords} from '../../funcs/utilityFunctions';
+import {topNWords} from '../../funcs/utilityFunctions';
 import './pages.css';
 import type {LDAModel, LDATopicTimeBinAveraged, LDATopicTimeBinAveragedWithStd} from "core";
 
@@ -450,7 +450,6 @@ export class TimeSeries extends Component<TimeSeriesProps, TimeSeriesState> {
 
     handleNumAvgChange(event: ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
-        logToServer({event:"change-time-series",buckets:event.target.value})
         if (!event.target.value) event.target.value = "1"; // Protect from empty field
         else if (parseInt(event.target.value) > 1000) event.target.value = "1000"
 

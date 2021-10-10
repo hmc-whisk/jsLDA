@@ -1,6 +1,6 @@
 import React from "react";
 import {topNWords} from 'funcs/utilityFunctions';
-import TopicDoc from '../TopicDoc/TopicDoc';
+// import TopicDoc from '../TopicDoc/TopicDoc';
 import {LDAModel} from 'core';
 import './TopicOverview.css';
 // import Treemap from ''
