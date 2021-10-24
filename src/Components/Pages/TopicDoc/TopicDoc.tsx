@@ -141,6 +141,19 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
             let currentID = docs[i].id.toString().toLowerCase();
             let lowerQuery = query.toLowerCase();
 
+            let currentMetaData = docs[i].metadata;
+            var values = Object.keys(currentMetaData).map(function(key){
+                if (currentMetaData[key].indexOf(lowerQuery) >= 0) {
+                    searchResults.push(docs[i]);
+                    console.log("pushed value:")
+                    console.log(currentMetaData[key])
+                }
+                // console.log("currentMetaData[key]")
+                // console.log(currentMetaData[key])
+            });
+            // console.log("currentMetaData: ")
+            // console.log(currentMetaData)
+
             if (currentID.indexOf(lowerQuery) >= 0) {
                 searchResults.push(docs[i]);
             }
