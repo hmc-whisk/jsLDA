@@ -1,5 +1,5 @@
 import {LDAModel} from "./LDAModel";
-//import {getFromStorage, saveToStorage} from "./storage";
+import {getFromStorage, saveToStorage} from "./storage";
 import {createZip, readZip} from "./compression";
 import {displayMessage} from "./message";
 import {getQueryVariable} from "../funcs/utilityFunctions";
@@ -146,50 +146,50 @@ function exportAnnotations(annotations: string[]) {
     return JSON.stringify(annotations, null, 4)
 }
 
-// export async function serializeModel(model: LDAModel) {
+export async function serializeModel(model: LDAModel) {
 
-//     let files: { [key: string]: string } = {}
+    let files: { [key: string]: string } = {}
 
-//     await displayMessage("Loading original document", 0, "promise")
-//     let documents = (await getFromStorage("documents"))!
-//     let filename: string;
-//     switch (documents.contentType) {
-//         case "text/csv":
-//             filename = "documents.csv"
-//             break
-//         case "text/tsv":
-//             filename = "documents.tsv"
-//             break
-//         default:
-//             throw Error("incorrect content-type encountered during decompression")
-//     }
+    await displayMessage("Loading original document", 0, "promise")
+    let documents = (await getFromStorage("documents"))!
+    let filename: string;
+    switch (documents.contentType) {
+        case "text/csv":
+            filename = "documents.csv"
+            break
+        case "text/tsv":
+            filename = "documents.tsv"
+            break
+        default:
+            throw Error("incorrect content-type encountered during decompression")
+    }
 
-//     files[filename] = documents.data
+    files[filename] = documents.data
 
-//     await displayMessage("Generating stoplist", 0, "promise")
+    await displayMessage("Generating stoplist", 0, "promise")
 
-//     let stops: string = "";
-//     for (let key in model.stopwords) {
-//         stops += key + "\n"
-//     }
-//     files["stopwords.txt"] = stops
+    let stops: string = "";
+    for (let key in model.stopwords) {
+        stops += key + "\n"
+    }
+    files["stopwords.txt"] = stops
 
-//     await displayMessage("Serializing model", 0, "promise")
-//     files["model.txt"] = exportToMallet(model)
+    await displayMessage("Serializing model", 0, "promise")
+    files["model.txt"] = exportToMallet(model)
 
-//     await displayMessage("Serializing annotations", 0, "promise")
-//     files["annotations.json"] = exportAnnotations(model.annotations)
+    await displayMessage("Serializing annotations", 0, "promise")
+    files["annotations.json"] = exportAnnotations(model.annotations)
 
-//     await displayMessage("Compressing", 0, "promise")
-//     return await createZip(files)
-// }
+    await displayMessage("Compressing", 0, "promise")
+    return await createZip(files)
+}
 
-// export async function saveModel(model: LDAModel) {
-//     let zip = await serializeModel(model)
+export async function saveModel(model: LDAModel) {
+    let zip = await serializeModel(model)
 
-//     await displayMessage("Initiating browser download", 1000, "promise")
-//     FileSaver.saveAs(zip, "LDAModel.zip")
-// }
+    await displayMessage("Initiating browser download", 1000, "promise")
+    FileSaver.saveAs(zip, "LDAModel.zip")
+}
 
 /**
  * @param annotations: a list of annotations with length matching number of documents

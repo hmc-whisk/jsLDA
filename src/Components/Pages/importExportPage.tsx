@@ -1,7 +1,8 @@
 import React, {Component} from "react";
 import {displayMessage, LDAModel} from "core";
-import {deserializeMalletUpload, deserializeModel, readDocumentsUpload} from "core/serialization";
+import {deserializeMalletUpload, deserializeModel, readDocumentsUpload,saveModel} from "core/serialization";
 import {Tab, Row, Col, Nav} from "react-bootstrap";
+import {saveToStorage} from "../../core/storage";
 
 interface ImportExportPageProps {
     model: LDAModel,
@@ -75,7 +76,7 @@ export class ImportExportPage extends Component<ImportExportPageProps, ImportExp
         await displayMessage("Initializing model", 0, "promise")
         let model = await readDocumentsUpload(this.props.model.numTopics, docs, contentType)
         await displayMessage("Saving documents", 0, "promise")
-        //await saveToStorage("documents", docs, contentType)
+        await saveToStorage("documents", docs, contentType)
         await displayMessage("Loading model", 0, "promise")
         this.props.overwriteModel(model)
         this.clearError()
@@ -172,10 +173,10 @@ export class ImportExportPage extends Component<ImportExportPageProps, ImportExp
                                         Export the model to a zip archive. This will initiate a browser download with
                                         a <code>LDAModel.zip</code> file.
                                     </p>
-                                    {/* <button onClick={_ => saveModel(this.props.model)}
+                                    <button onClick={_ => saveModel(this.props.model)}
                                             className="btn btn-light btn-outline-primary">
                                         Export Model
-                                    </button> */}
+                                    </button>
                                 </div>
                             </Tab.Pane>
                             <Tab.Pane eventKey="import-model">
