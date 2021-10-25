@@ -130,6 +130,23 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
     }
 
     /**
+     * @summary Gets all keys of the metadata
+     * @returns Array of all keys of the metadata
+     */
+     getMetadataKeys() {
+        let metadataKeys: String[] = [];
+        let docs = this.props.ldaModel.sortedDocuments;
+
+        for (let i = 0; i < docs.length; i++) {
+            let currentMetaData = docs[i].metadata;
+            for (var key in currentMetaData){
+                metadataKeys.push(key);
+            }
+        }
+        return metadataKeys;
+    }
+
+    /**
      * @summary Finds documents which include the search query as a substring
      * @returns Array of SortedLDADocuments that fit the search query
      */
@@ -142,17 +159,12 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
             let lowerQuery = query.toLowerCase();
 
             let currentMetaData = docs[i].metadata;
-            var values = Object.keys(currentMetaData).map(function(key){
+            // eslint-disable-next-line array-callback-return
+            Object.keys(currentMetaData).map(function(key){
                 if (currentMetaData[key].indexOf(lowerQuery) >= 0) {
                     searchResults.push(docs[i]);
-                    console.log("pushed value:")
-                    console.log(currentMetaData[key])
                 }
-                // console.log("currentMetaData[key]")
-                // console.log(currentMetaData[key])
             });
-            // console.log("currentMetaData: ")
-            // console.log(currentMetaData)
 
             if (currentID.indexOf(lowerQuery) >= 0) {
                 searchResults.push(docs[i]);
@@ -179,7 +191,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                             alignItems: 'center',
                             marginBottom: '0.5em'
                         }}>
-                            <SearchBox model={this.props.ldaModel} search={this.search} changePage={this.changePage.bind(this)}/>
+                            <SearchBox model={this.props.ldaModel} search={this.search} getMetadataKeys={this.getMetadataKeys} changePage={this.changePage.bind(this)}/>
 
                             <div style={{display: 'flex'}}>
                                 {this.toggleMetaDataButton()}

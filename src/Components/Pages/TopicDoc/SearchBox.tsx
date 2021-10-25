@@ -1,6 +1,8 @@
 import React, {KeyboardEvent} from 'react';
 import FormControl from 'react-bootstrap/FormControl';
 import InputGroup from 'react-bootstrap/InputGroup';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 import Button from 'react-bootstrap/Button';
 import './topicDoc.css';
 import type {LDAModel} from "core";
@@ -8,7 +10,8 @@ import type {LDAModel} from "core";
 interface SearchProps{
     model:LDAModel,
     search: (query: string) => void,
-    changePage: (n:number)=>void
+    getMetadataKeys: string[],
+    changePage: (n:number)=>void,
 }
 interface SearchState{
     query:string
@@ -25,7 +28,10 @@ export class SearchBox extends React.Component<SearchProps,SearchState> {
     constructor(props:SearchProps){
         super(props);
 
-        this.state = {query: ''};
+        this.state = {
+            query: '',
+            metadataKey: '',
+        };
     }
 
     render() {
@@ -61,6 +67,17 @@ export class SearchBox extends React.Component<SearchProps,SearchState> {
                             this.props.search('');}}>
                         Reset
                     </Button>
+                    <Select
+                        fullWidth
+                        displayEmpty
+                        value={metadataKey}
+                        onChange={e => this.setState({metadataKey: e.target.value})}
+                        variant="outlined"
+                        >
+                        {this.props.getMetadataKeys().map(key => (
+                            <MenuItem value={key}>{key}</MenuItem>
+                        ))}
+                    </Select>
                 </InputGroup>
 
             </div>
