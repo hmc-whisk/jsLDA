@@ -134,7 +134,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
      * @returns Array of all keys of the metadata
      */
      getMetadataKeys() {
-        let metadataKeys: String[] = [];
+        let metadataKeys: string[] = [];
         let docs = this.props.ldaModel.sortedDocuments;
 
         for (let i = 0; i < docs.length; i++) {
@@ -191,7 +191,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                             alignItems: 'center',
                             marginBottom: '0.5em'
                         }}>
-                            <SearchBox model={this.props.ldaModel} search={this.search} getMetadataKeys={this.getMetadataKeys} changePage={this.changePage.bind(this)}/>
+                            <SearchBox model={this.props.ldaModel} search={this.search} metadataKeys={this.getMetadataKeys()} changePage={this.changePage.bind(this)}/>
 
                             <div style={{display: 'flex'}}>
                                 {this.toggleMetaDataButton()}

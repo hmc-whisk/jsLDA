@@ -10,11 +10,12 @@ import type {LDAModel} from "core";
 interface SearchProps{
     model:LDAModel,
     search: (query: string) => void,
-    getMetadataKeys: string[],
+    metadataKeys: string[],
     changePage: (n:number)=>void,
 }
 interface SearchState{
     query:string
+    metadataKey: string
 }
 
 /**
@@ -30,7 +31,7 @@ export class SearchBox extends React.Component<SearchProps,SearchState> {
 
         this.state = {
             query: '',
-            metadataKey: '',
+            metadataKey: 'ID',
         };
     }
 
@@ -70,11 +71,12 @@ export class SearchBox extends React.Component<SearchProps,SearchState> {
                     <Select
                         fullWidth
                         displayEmpty
-                        value={metadataKey}
+                        value={this.state.metadataKey}
                         onChange={e => this.setState({metadataKey: e.target.value})}
                         variant="outlined"
                         >
-                        {this.props.getMetadataKeys().map(key => (
+                        <MenuItem value={'ID'}>{'ID'}</MenuItem>
+                        {this.props.metadataKeys.map((key: string) => (
                             <MenuItem value={key}>{key}</MenuItem>
                         ))}
                     </Select>
