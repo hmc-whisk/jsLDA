@@ -2,7 +2,7 @@ import {zeros, getObjectKeys, truncate} from '../funcs/utilityFunctions'
 import * as d3 from 'd3';
 import XRegExp from "xregexp";
 import {clearMessage, displayMessage, ForceUpdateApp} from "./message";
-// import {saveToStorage} from "./storage";   TODO bring back the storage.ts
+import {saveToStorage} from "./storage";   //TODO bring back the storage.ts
 
 // This adds the Object.keys() function to some old browsers that don't support it
 if (!Object.keys) {
@@ -354,17 +354,16 @@ export class LDAModel {
             this.sortTopicWords();
             this.updateWebpage()
 
-            //TODO: Save the document. should work after bringing back storage.ts
-            // new Promise<void>(async (resolve, reject) => {
-            //     try {
-            //         await displayMessage("Saving documents", 0, "promise")
-            //         await saveToStorage("documents", doc, this.documentType)
-            //         clearMessage()
-            //         resolve()
-            //     } catch (e) {
-            //         reject(e)
-            //     }
-            // }).catch()
+            new Promise<void>(async (resolve, reject) => {
+                try {
+                    await displayMessage("Saving documents", 0, "promise")
+                    await saveToStorage("documents", doc, this.documentType)
+                    clearMessage()
+                    resolve()
+                } catch (e) {
+                    reject(e)
+                }
+            }).catch()
 
 
         }
