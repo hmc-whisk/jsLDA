@@ -2,7 +2,7 @@ import {zeros, getObjectKeys, truncate} from '../funcs/utilityFunctions'
 import * as d3 from 'd3';
 import XRegExp from "xregexp";
 import {clearMessage, displayMessage, ForceUpdateApp} from "./message";
-import {saveToStorage} from "./storage";
+import {saveToStorage} from "./storage";   //TODO bring back the storage.ts
 
 // This adds the Object.keys() function to some old browsers that don't support it
 if (!Object.keys) {
@@ -276,7 +276,7 @@ export class LDAModel {
         this.annotations[i]=text
     }
 
-    resetAnnoation(){
+    resetAnnotation(){
         this.annotations=new Array(this.numTopics).fill("")
     }
 
@@ -301,7 +301,7 @@ export class LDAModel {
         this._memoMinDocTime = undefined;
         this._memoMaxDocTime = undefined;
         this._maxTopicSaliency = new Array(this.numTopics)
-        this.resetAnnoation()
+        this.resetAnnotation()
         this.scheduler.reset();
         displayMessage("Model has been reset", 2500);
     }
@@ -956,7 +956,7 @@ export class LDAModel {
         this.wordTopicCounts = {};
         this._maxTopicSaliency = new Array(numTopics);
         this._documentTopicSmoothing = zeros(numTopics).fill(0.1);
-        this.resetAnnoation()
+        this.resetAnnotation()
 
         Object.keys(this.vocabularyCounts).forEach((word) => {
             this.wordTopicCounts[word] = {}
@@ -980,6 +980,7 @@ export class LDAModel {
             }
         });
         this.sortTopicWords();
+        displayMessage("Topic count has been updated", 2500);
         this.updateWebpage();
     }
 
@@ -1900,7 +1901,7 @@ class SweepScheduler {
         this.remainingSweeps = 0;
         this.completedSweeps = 0;
         this.model = model;
-        this.timeTaken = new RollingAvg(50);
+        this.timeTaken = new RollingAvg(25);
     }
 
     /**

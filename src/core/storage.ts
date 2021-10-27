@@ -1,12 +1,10 @@
 /*
 Mia Wang, June 2021
-
 This module handles storing arbitrarily large data into the browser's storage.
 Per Origin Eviction policy
 (https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Browser_storage_limits_and_eviction_criteria),
 the maximum amount of data the browser can store for this project is 10% of the
 free-disk space, up to 2GB, which should be more than enough in most cases.
-
 While all data interfaces referred to within this project are called storage,
 the data actually go into IndexedDB. This is because LocalStorage cannot handle
 binary data, but calling the object database would be too confusing for anyone

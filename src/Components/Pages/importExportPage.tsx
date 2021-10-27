@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import {displayMessage, LDAModel} from "core";
-import {deserializeMalletUpload, deserializeModel, readDocumentsUpload, saveModel} from "core/serialization";
-import {Tab, Row, Col, Nav} from "react-bootstrap"
+import {deserializeMalletUpload, deserializeModel, readDocumentsUpload,saveModel} from "core/serialization";
+import {Tab, Row, Col, Nav} from "react-bootstrap";
 import {saveToStorage} from "../../core/storage";
 
 interface ImportExportPageProps {

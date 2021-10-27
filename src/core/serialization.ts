@@ -2,6 +2,7 @@ import {LDAModel} from "./LDAModel";
 import {getFromStorage, saveToStorage} from "./storage";
 import {createZip, readZip} from "./compression";
 import {displayMessage} from "./message";
+import {getQueryVariable} from "../funcs/utilityFunctions";
 
 const FileSaver = require("filesaver.js-npm")
 
@@ -122,7 +123,6 @@ function exportToMallet(model: LDAModel): string {
     for (let n of model._documentTopicSmoothing) {
         serialized += `${n} `
     }
-    console.log(model._documentTopicSmoothing)
     serialized += `\n#beta : ${model._topicWordSmoothing}\n`
     let typeIndicies: { [key: string]: number } = {}
     let nextType: number = 0;
