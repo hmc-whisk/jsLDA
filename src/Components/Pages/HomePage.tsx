@@ -77,7 +77,7 @@ export class HomePage extends React.Component {
                 displayElement={
                     <div style={this.helpTextStyle}>
                         <div style={{margin: "15px"}}>
-                            <h4 style={{textAlign: "center"}}>Running Iterations</h4>
+                            <h4 style={{textAlign: "center"}}>Running Iterations </h4>
                             <p>
                                 When you first load a dataset, your topics will be more or less useless. You can fix
                                 this by having the model run iterations over your documents. Everything you need to do
