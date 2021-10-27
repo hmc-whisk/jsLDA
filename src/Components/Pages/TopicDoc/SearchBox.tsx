@@ -72,13 +72,14 @@ export class SearchBox extends React.Component<SearchProps,SearchState> {
                         fullWidth
                         displayEmpty
                         value={this.state.metadataKey}
-                        onChange={e => this.setState({metadataKey: e.target.value})}
+                        onChange={e => this.setState({metadataKey: String(e.target.value)})}
                         variant="outlined"
                         >
-                        <MenuItem value={'ID'}>{'ID'}</MenuItem>
+                        <MenuItem key={'ID'} value={'ID'}>{'ID'}</MenuItem>
                         {this.props.metadataKeys.map((key: string) => (
-                            <MenuItem value={key}>{key}</MenuItem>
+                            <MenuItem key={key} value={key}>{key}</MenuItem>
                         ))}
+                        <MenuItem key={'Text'} value={'Text'}>{'Text'}</MenuItem>
                     </Select>
                 </InputGroup>
 

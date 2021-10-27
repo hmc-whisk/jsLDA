@@ -137,12 +137,11 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
         let metadataKeys: string[] = [];
         let docs = this.props.ldaModel.sortedDocuments;
 
-        for (let i = 0; i < docs.length; i++) {
-            let currentMetaData = docs[i].metadata;
-            for (var key in currentMetaData){
-                metadataKeys.push(key);
-            }
+        let currentMetaData = docs[0].metadata;
+        for (var key in currentMetaData){
+            metadataKeys.push(key);
         }
+        
         return metadataKeys;
     }
 
