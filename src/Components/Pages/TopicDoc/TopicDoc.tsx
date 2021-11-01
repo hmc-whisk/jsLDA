@@ -149,24 +149,38 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
      * @summary Finds documents which include the search query as a substring
      * @returns Array of SortedLDADocuments that fit the search query
      */
-    search(query: string) {
+    search(query: string, searchKey: string) {
         let searchResults: SortedLDADocument[] = [];
         let docs = this.props.ldaModel.sortedDocuments;
+        let lowerQuery = query.toLowerCase();
 
-        for (let i = 0; i < docs.length; i++) {
-            let currentID = docs[i].id.toString().toLowerCase();
-            let lowerQuery = query.toLowerCase();
-
-            let currentMetaData = docs[i].metadata;
-            // eslint-disable-next-line array-callback-return
-            Object.keys(currentMetaData).map(function(key){
-                if (currentMetaData[key].indexOf(lowerQuery) >= 0) {
+        if (searchKey === 'id') {
+            for (let i = 0; i < docs.length; i++) {
+                let currentID = docs[i].id.toString().toLowerCase();
+                if (currentID.indexOf(lowerQuery) >= 0) {
                     searchResults.push(docs[i]);
                 }
-            });
-
-            if (currentID.indexOf(lowerQuery) >= 0) {
-                searchResults.push(docs[i]);
+            }
+        } else if (searchKey === 'date') {
+            for (let i = 0; i < docs.length; i++) {
+                let currentDate = docs[i].date;
+                if (currentDate.indexOf(lowerQuery) >= 0) {
+                    searchResults.push(docs[i]);
+                }
+            }
+        } else if (searchKey === 'text') {
+            for (let i = 0; i < docs.length; i++) {
+                let lowerCurrentText = docs[i].originalText.toLowerCase();
+                if (lowerCurrentText.indexOf(lowerQuery) >= 0) {
+                    searchResults.push(docs[i]);
+                }
+            }
+        } else {
+            for (let i = 0; i < docs.length; i++) {
+                let currentMetaData = docs[i].metadata;
+                if (currentMetaData[searchKey].toLowerCase().indexOf(lowerQuery) >= 0) {
+                    searchResults.push(docs[i]);
+                }
             }
         }
 
