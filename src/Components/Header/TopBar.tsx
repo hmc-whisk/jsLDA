@@ -177,9 +177,9 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                 displayElement={
                     <div style={this.helpTextStyle}>
                         <div style={{margin: "15px"}}>
-                            <div className="configMenu">
+                            {/* <div className="configMenu">
                                 <h3> Topics </h3>
-                                {/* <div> */}
+                                {/* <div>
                                     {/* <h5> Set number of topics: </h5>
                                     <NumTopicSlider
                                         onChange={this.updateNumDisplay.bind(this)}
@@ -202,7 +202,7 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                     {/* <i> Optimized topic correlation allow the model to account for </i>
                                     <i> different proportions of topics in each documents </i> */}
                                 {/* </div> */}
-                            </div>
+                            {/* </div> */}
 
                             {/* <div className="configMenu">
                                 <h3> Vocabulary </h3>
@@ -257,7 +257,7 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                     </button>
 
                     <button id="stopSweep" onClick={this.handleClick.bind(this)} className="darkButton"
-                            disabled={!this.props.modelIsRunning}>Stop
+                            disabled={this.props.modelIsRunning}>Stop
                     </button>
                     &nbsp;
                     Current: <span id="iters">0</span>
