@@ -2,6 +2,8 @@ import React, {Component, CSSProperties} from 'react';
 import PageController from './PageController';
 import DocAccordion from './DocAccordion';
 import SearchBox from './SearchBox';
+import Grid from '@material-ui/core/Grid';
+import Box from '@material-ui/core/Box';
 import LabeledToggleButton from 'Components/LabeledToggleButton';
 import {LDAModel} from "../../../core/LDAModel";
 import './topicDoc.css';
@@ -198,20 +200,22 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                 </div>
                 <div id="docPage">
                     <div>
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginBottom: '0.5em'
-                        }}>
+                        <Grid
+                        container
+                        direction="row"
+                        alignItems="center"
+                        spacing={2}
+                        style={{marginBottom: '0.5em'}}
+                        >
+                            <Grid item xs={9}>
                             <SearchBox model={this.props.ldaModel} search={this.search} metadataKeys={this.getMetadataKeys()} changePage={this.changePage.bind(this)}/>
-
-                            <div style={{display: 'flex'}}>
-                                {this.toggleMetaDataButton()}
-                                {/* Removing this because it's too slow. [Issue #197] */}
-                                {/* {this.toggleSalienceDataButton()} */}
-                            </div>
-                        </div>
+                            </Grid>
+                            <Grid item xs={3}>
+                            {this.toggleMetaDataButton()}
+                            {/* Removing this because it's too slow. [Issue #197] */}
+                            {/* {this.toggleSalienceDataButton()} */}
+                            </Grid>
+                        </Grid>
 
                         <DocAccordion
                             documents={this.state.useSalience ?
