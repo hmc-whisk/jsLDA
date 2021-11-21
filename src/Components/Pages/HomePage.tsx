@@ -164,7 +164,7 @@ export class HomePage extends React.Component {
                                 than other topics. The 'Use Saliency' option allows you to sort the documents by their
                                 average saliency score.
                             </p>
-                            <h4 style={{textAlign: "center"}}>Topic Correlations Tab</h4>
+                            {/* <h4 style={{textAlign: "center"}}>Topic Correlations Tab</h4>
                             <p>This tab will help you see which topics show up together.</p>
                             <p>
                                 Here you can investigate how topics relate to each other. Displayed on this page is a
@@ -174,7 +174,7 @@ export class HomePage extends React.Component {
                                 more than we would expect, and red means they occur together less than we would expect.
                                 The size of the circle indicates the magnitude of their correlation. Hovering over a
                                 circle will provide additional information.
-                            </p>
+                            </p> */}
                             <h4 style={{textAlign: "center"}}>Time Series Tab</h4>
                             <p>This tab will help you see how prevalent topics are over time.</p>
                             <p>

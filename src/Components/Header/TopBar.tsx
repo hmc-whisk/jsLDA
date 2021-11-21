@@ -6,8 +6,6 @@ import Uploader from './Uploader';
 import CustomTokenizer from './CustomTokenizer';
 import './header.css';
 import {StatusDisplay} from "./Status";
-import {displayMessage} from "../../core";
-//import {saveModel} from "../../core/serialization";
 
 interface TopBarProps {
     numTopics: number,
@@ -121,9 +119,6 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
      */
     confirmUpdate(val: string) {
         // does not use confrimReset bc of the slider needs to reset to original positions
-        if (parseInt(val)===this.state.sliderValue){
-            return
-        }
         if (window.confirm('This will cause your model to reset.')) {
             this.props.updateNumTopics(val);
         } else {
@@ -154,11 +149,6 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
         this.confirmBigramUpdate(event.target.checked);
     };
 
-    endStudy(){
-        window.postMessage({target:"end-study"},window.location.origin)
-        // this will go into app.ts
-    }
-
     helpTextStyle: CSSProperties = {
         backgroundColor: "var(--color3)",
         position: "fixed",
@@ -177,19 +167,19 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                 displayElement={
                     <div style={this.helpTextStyle}>
                         <div style={{margin: "15px"}}>
-                            {/* <div className="configMenu">
+                            <div className="configMenu">
                                 <h3> Topics </h3>
-                                {/* <div>
-                                    {/* <h5> Set number of topics: </h5>
+                                <div>
+                                    <h5> Set number of topics: </h5>
                                     <NumTopicSlider
                                         onChange={this.updateNumDisplay.bind(this)}
                                         sliderValue={this.state.sliderValue}
                                         updateNumTopics={this.confirmUpdate.bind(this)}
                                         onInput={this.updateNumDisplay.bind(this)}
                                         modelIsRunning={this.props.modelIsRunning}
-                                    /> */}
+                                    />
 
-                                    {/* <h6>
+                                    <h6>
                                         <Checkbox
                                             onChange={this.handleCheckOptimize.bind(this)}
                                             inputProps={{'aria-label': 'primary checkbox'}}
@@ -197,14 +187,14 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                             style={{paddingLeft: "0"}}
                                         />
                                         Optimize topic concentrations
-                                    </h6> */}
+                                    </h6>
 
-                                    {/* <i> Optimized topic correlation allow the model to account for </i>
-                                    <i> different proportions of topics in each documents </i> */}
-                                {/* </div> */}
-                            {/* </div> */}
+                                    <i> Optimized topic correlation allow the model to account for </i>
+                                    <i> different proportions of topics in each documents </i>
+                                </div>
+                            </div>
 
-                            {/* <div className="configMenu">
+                            <div className="configMenu">
                                 <h3> Vocabulary </h3>
                                 <div>
                                     <h6>
@@ -218,10 +208,10 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                     </h6>
                                     <i>Allows bigrams to be accounted for in the model.</i>
                                 </div>
-                            </div> */}
+                            </div>
 
 
-                            {/* <Uploader
+                            <Uploader
                                 onDocumentFileChange={this.props.onDocumentFileChange}
                                 onStopwordFileChange={this.props.onStopwordFileChange}
                                 onModelFileChange={this.props.onModelFileChange}
@@ -230,12 +220,12 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                 modelIsRunning={this.props.modelIsRunning}
                                 onDefaultDocChange={this.props.onDefaultDocChange}
                                 docName={this.props.docName}
-                            /> */}
+                            />
 
-                            {/* <CustomTokenizer
+                            <CustomTokenizer
                                 tokenRegex={this.props.tokenRegex}
                                 changeTokenRegex={this.props.changeTokenRegex}
-                            /> */}
+                            />
                         </div>
                     </div>
                 }/>
@@ -253,30 +243,18 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                            placeholder="# Sweeps" min="1" max="100000" required width={3}/>
                     &nbsp;
                     <button type="submit" id="sweep" className="darkButton"
-                            disabled={this.props.modelIsRunning}>Train
+                            disabled={this.props.modelIsRunning}>Run
                     </button>
 
                     <button id="stopSweep" onClick={this.handleClick.bind(this)} className="darkButton"
-                            disabled={this.props.modelIsRunning}>Stop
+                            disabled={!this.props.modelIsRunning}>Stop
                     </button>
                     &nbsp;
                     Current: <span id="iters">0</span>
 
                 </form>
                 <StatusDisplay/>
-
-                <div className="topRight" style={{display:"flex"}}>
-                    <h5 ></h5>
-                        <NumTopicSlider
-                            onChange={this.updateNumDisplay.bind(this)}
-                            sliderValue={this.state.sliderValue}
-                            updateNumTopics={this.confirmUpdate.bind(this)}
-                            onInput={this.updateNumDisplay.bind(this)}
-                            modelIsRunning={this.props.modelIsRunning}
-                        ></NumTopicSlider>
-                    <button id="endStudy" onClick={this.endStudy.bind(this)}
-                        className="configButton">End Study</button>
-                </div>
+                {this.configuration}
             </div>
 
 
@@ -285,4 +263,9 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
 
 }
 
+//
+
+
 export default TopBar;
+
+
