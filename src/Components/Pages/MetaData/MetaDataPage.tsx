@@ -83,6 +83,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
   }
 
   numChange(e:SyntheticEvent<HTMLInputElement>){
+    console.log("numchange")
     if (!(e.target as HTMLInputElement).value || parseInt((e.target as HTMLInputElement).value) <=0) {
       this.setState(state => {
         const topicSets = state.topicSets.concat(parseInt((e.target as HTMLInputElement).value));
@@ -96,14 +97,15 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
   }
 
   handleSubmit(e: SyntheticEvent) {
-    if (this.state.add) {
-      this.setState(state => {
-        const topicSets = state.topicSets.concat(this.state.choosedTopic);
-        return {
-          topicSets
-        };
-      });
-    } else {
+    if (this.state.choosedTopic>=0 && this.state.choosedTopic<this.props.ldaModel.numTopics && Number.isInteger(this.state.choosedTopic)){ 
+      if (this.state.add && !this.state.topicSets.includes(this.state.choosedTopic)) {
+        this.setState(state => {
+          const topicSets = state.topicSets.concat(this.state.choosedTopic).sort();
+          return {
+            topicSets
+          };
+        });
+      } else if (!this.state.add) {
       this.setState(prevState => (
         {     	
           topicSets: prevState.topicSets.filter(topic => topic !== this.state.choosedTopic)
@@ -111,6 +113,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
       ));
     }
   }
+}
 
   /*
   * creates a dropdown menu to select the metafield that will be used to render the graph
@@ -407,7 +410,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
                   defaultValue={0}
                   placeholder="# bins"
                   max={this.props.ldaModel.numTopics}
-                  min="1"
+                  min="0"
                   step="1"
                   style={{position:"relative", left:0}}
               />
