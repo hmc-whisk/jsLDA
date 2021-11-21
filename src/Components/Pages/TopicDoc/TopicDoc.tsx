@@ -2,6 +2,8 @@ import React, {Component, CSSProperties} from 'react';
 import PageController from './PageController';
 import DocAccordion from './DocAccordion';
 import SearchBox from './SearchBox';
+import Grid from '@material-ui/core/Grid';
+import Box from '@material-ui/core/Box';
 import LabeledToggleButton from 'Components/LabeledToggleButton';
 import {LDAModel} from "../../../core/LDAModel";
 import './topicDoc.css';
@@ -130,19 +132,57 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
     }
 
     /**
+     * @summary Gets all keys of the metadata
+     * @returns Array of all keys of the metadata
+     */
+     getMetadataKeys() {
+        let metadataKeys: string[] = [];
+        let docs = this.props.ldaModel.sortedDocuments;
+
+        let currentMetaData = docs[0].metadata;
+        for (var key in currentMetaData){
+            metadataKeys.push(key);
+        }
+        
+        return metadataKeys;
+    }
+
+    /**
      * @summary Finds documents which include the search query as a substring
      * @returns Array of SortedLDADocuments that fit the search query
      */
-    search(query: string) {
+    search(query: string, searchKey: string) {
         let searchResults: SortedLDADocument[] = [];
         let docs = this.props.ldaModel.sortedDocuments;
+        let lowerQuery = query.toLowerCase();
 
-        for (let i = 0; i < docs.length; i++) {
-            let currentID = docs[i].id.toString().toLowerCase();
-            let lowerQuery = query.toLowerCase();
-
-            if (currentID.indexOf(lowerQuery) >= 0) {
-                searchResults.push(docs[i]);
+        if (searchKey === 'id') {
+            for (let i = 0; i < docs.length; i++) {
+                let currentID = docs[i].id.toString().toLowerCase();
+                if (currentID.indexOf(lowerQuery) >= 0) {
+                    searchResults.push(docs[i]);
+                }
+            }
+        } else if (searchKey === 'date') {
+            for (let i = 0; i < docs.length; i++) {
+                let currentDate = docs[i].date;
+                if (currentDate.indexOf(lowerQuery) >= 0) {
+                    searchResults.push(docs[i]);
+                }
+            }
+        } else if (searchKey === 'text') {
+            for (let i = 0; i < docs.length; i++) {
+                let lowerCurrentText = docs[i].originalText.toLowerCase();
+                if (lowerCurrentText.indexOf(lowerQuery) >= 0) {
+                    searchResults.push(docs[i]);
+                }
+            }
+        } else {
+            for (let i = 0; i < docs.length; i++) {
+                let currentMetaData = docs[i].metadata;
+                if (currentMetaData[searchKey].toLowerCase().indexOf(lowerQuery) >= 0) {
+                    searchResults.push(docs[i]);
+                }
             }
         }
 
@@ -160,20 +200,22 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                 </div>
                 <div id="docPage">
                     <div>
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginBottom: '0.5em'
-                        }}>
-                            <SearchBox model={this.props.ldaModel} search={this.search} changePage={this.changePage.bind(this)}/>
-
-                            <div style={{display: 'flex'}}>
-                                {this.toggleMetaDataButton()}
-                                {/* Removing this because it's too slow. [Issue #197] */}
-                                {/* {this.toggleSalienceDataButton()} */}
-                            </div>
-                        </div>
+                        <Grid
+                        container
+                        direction="row"
+                        alignItems="center"
+                        spacing={2}
+                        style={{marginBottom: '0.5em'}}
+                        >
+                            <Grid item xs={9}>
+                            <SearchBox model={this.props.ldaModel} search={this.search} metadataKeys={this.getMetadataKeys()} changePage={this.changePage.bind(this)}/>
+                            </Grid>
+                            <Grid item xs={3}>
+                            {this.toggleMetaDataButton()}
+                            {/* Removing this because it's too slow. [Issue #197] */}
+                            {/* {this.toggleSalienceDataButton()} */}
+                            </Grid>
+                        </Grid>
 
                         <DocAccordion
                             documents={this.state.useSalience ?
