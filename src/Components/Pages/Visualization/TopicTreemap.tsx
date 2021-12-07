@@ -2,7 +2,8 @@
 import './Treemap.css';
 import "react-d3-treemap/dist/react.d3.treemap.css";
 import React, { ChangeEvent } from "react";
-import {Line} from 'react-chartjs-2';
+import TreeMap, { ColorModel } from "react-d3-treemap";
+import { Bar} from 'react-chartjs-2';
 import {topNWords} from "funcs/utilityFunctions";
 import { LDAModel } from 'core'
 import { scaleSequential } from "d3-scale";
@@ -84,8 +85,9 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
             </div>
         )
     }
+
     // create a plot when a topic is selected
-    createPlot(numTopwords:number){
+    createBarPlot(numTopwords:number){
          // get data ready
         let topic = this.props.ldaModel.selectedTopic;
         let topWordsString = topNWords(
@@ -94,15 +96,13 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
         let treedata = this.topWordsProbability(topWordsList);
         const x = []
         const y = []
-        console.log(treedata)
+        
         let data = treedata.children
-        console.log(data)
+        // fills up x and y values
         for ( var i = 0; i < numTopwords; i++ ){
          x.push(data[i].name)
          y.push(data[i].value)
         }
-        console.log(x)
-        console.log(y)
 
         const plotData = {
             labels:x,
@@ -111,15 +111,16 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
                 label:"top "+numTopwords+" of the topic vs their probabilities",
                 data:y,
                 fill: true,
-                backgroundColor: "rgba(75,192,192,0.2)",
-               borderColor: "rgba(75,192,192,1)"
+                backgroundColor: "rgba(121, 148, 163)",
+                borderColor: "rgba(121, 148, 163,5)",
+                display: true,
               }
             ]
         };
         return<div>
-            <Line
-                data = {plotData}
-            />
+                <Bar
+                    data = {plotData}
+                />
             </div> 
     }
     // create treemap when a topic is selected
@@ -185,7 +186,7 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
                 <div id="tM-page" className="page" style={{position: "relative", left: 120}}>
                     {/* The next line creates the  grid visualization of words*/}
                     {/* {this.createTreeMap(this.state.numberOfTopwords)} */}
-                    {this.createPlot(this.state.numberOfTopwords)}
+                    {this.createBarPlot(this.state.numberOfTopwords)}
 
                 </div>
             </div>
