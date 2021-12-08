@@ -3,7 +3,7 @@ import './Treemap.css';
 import "react-d3-treemap/dist/react.d3.treemap.css";
 import React, { ChangeEvent } from "react";
 import TreeMap, { ColorModel } from "react-d3-treemap";
-import { Bar} from 'react-chartjs-2';
+import {Bar} from 'react-chartjs-2';
 import {topNWords} from "funcs/utilityFunctions";
 import { LDAModel } from 'core'
 import { scaleSequential } from "d3-scale";
@@ -108,7 +108,7 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
             labels:x,
             datasets:[
               {
-                label:"top "+numTopwords+" of the topic vs their probabilities",
+                label:"top "+numTopwords+" of the topic and their probabilities",
                 data:y,
                 fill: true,
                 backgroundColor: "rgba(121, 148, 163)",
