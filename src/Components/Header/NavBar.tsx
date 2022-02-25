@@ -11,7 +11,7 @@ interface NavBarState {
 
 export class NavBar extends React.Component<NavBarProps, NavBarState> {
 
-    constructor(props: NavBarProps) {
+    constructor(props:NavBarProps) {
         super(props);
 
         this.state = {selected: "home-tab"};

@@ -27,6 +27,11 @@ import {confirmReset} from '../../funcs/utilityFunctions'
  *        the model upload button is pressed
  */
 
+// returns true if the input has a file selected, false otherwise
+function isFileAdded(inputId: string) {
+    let inp = document.getElementById(inputId) as HTMLInputElement;
+    return inp && inp.files && inp.files.length;
+}
 
 interface UploaderProps {
     onDocumentFileChange: (event: ChangeEvent<HTMLInputElement>) => void,
@@ -48,7 +53,7 @@ export function Uploader(props: UploaderProps) {
                     <form onSubmit={(event) => {
                         confirmReset(event, props.onFileUpload);
                     }}>
-                        <label>Default Documents: </label>
+                        <label>Choose your Documents: </label>
                         <select id="defaultDoc" onChange={(event) => props.onDefaultDocChange(event)}
                                 value={props.docName}>
                             <option value="Movie Plots">Movie Plots</option>

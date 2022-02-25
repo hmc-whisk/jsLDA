@@ -45,11 +45,10 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
     get sortedDocuments(): SortedLDADocument[] {
         if (this.state.documents.length === this.props.ldaModel.sortedDocuments.length) {
             return this.props.ldaModel.sortedDocuments
-        }
-        else {
+        } else {
             const selectedTopic = this.props.ldaModel.selectedTopic;
             const sumDocSortSmoothing = LDAModel.DOC_SORT_SMOOTHING * this.props.ldaModel.numTopics;
-            
+
             let sortedDocuments: SortedLDADocument[] = this.state.documents.map(function (doc, i) {
                 (doc as SortedLDADocument)["score"] = (doc.topicCounts[selectedTopic] + LDAModel.DOC_SORT_SMOOTHING) /
                     (doc.tokens.length + sumDocSortSmoothing)
@@ -60,7 +59,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
             });
             return sortedDocuments;
         }
-        
+
     }
 
     /**
@@ -71,6 +70,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
         if (this.state.documents.length === this.props.ldaModel.sortedDocumentsSalient.length) {
             return this.props.ldaModel.sortedDocumentsSalient
         }
+        // else sort this.state.documents by salience and return it
         else {
             let sortedDocuments: SortedLDADocument[] = this.state.documents;
             sortedDocuments.sort(function (a, b) {
@@ -153,10 +153,10 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
     render() {
         return (
             <>
-                <div style={{padding:"20px", margin:"0px"}}>
-                    All documents within the loaded dataset can be viewed here along with a topic score. 
-                    You can use the search box to find specific documents by document ID. 
-                    To reveal more information about each document, you can use the "Show Metadata" toggle. 
+                <div style={{padding: "20px", margin: "0px"}}>
+                    All documents within the dataset can be viewed here along with a topic score.
+                    You can use the search box to find specific documents by document ID.
+                    To reveal more information about each document, you can use the "Show Metadata" toggle.
                 </div>
                 <div id="docPage">
                     <div>
@@ -166,7 +166,26 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                             alignItems: 'center',
                             marginBottom: '0.5em'
                         }}>
-                            <SearchBox model={this.props.ldaModel} search={this.search} changePage={this.changePage.bind(this)}/>
+                            <SearchBox model={this.props.ldaModel} search={this.search}
+                                       changePage={this.changePage.bind(this)}/>
+                        </div>
+                    </div>
+                </div>
+                <div style={{padding: "20px", margin: "0px"}}>
+                    All documents within the loaded dataset can be viewed here along with a topic score.
+                    You can use the search box to find specific documents by document ID.
+                    To reveal more information about each document, you can use the "Show Metadata" toggle.
+                </div>
+                <div id="docPage">
+                    <div>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '0.5em'
+                        }}>
+                            <SearchBox model={this.props.ldaModel} search={this.search}
+                                       changePage={this.changePage.bind(this)}/>
 
                             <div style={{display: 'flex'}}>
                                 {this.toggleMetaDataButton()}
@@ -177,8 +196,8 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
 
                         <DocAccordion
                             documents={this.state.useSalience ?
-                                this.sortedDocumentsSalient :
-                                this.sortedDocuments}
+                                       this.sortedDocumentsSalient :
+                                       this.sortedDocuments}
                             ldaModel={this.props.ldaModel}
                             startDoc={this.startDoc}
                             endDoc={this.endDoc}
@@ -204,7 +223,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                 id="toggleMetaData"
                 label="Show Metadata"
                 style={{
-                    borderRadius:"4px"
+                    borderRadius: "4px"
                 } as CSSProperties}
                 checked={this.state.showMetaData}
                 onChange={this.toggleMetaData.bind(this)}/>

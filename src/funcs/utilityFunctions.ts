@@ -6,8 +6,8 @@
  */
 import {SyntheticEvent} from "react";
 
-export function topNWords(wordCounts: { word:string }[], n: number): string {
-    return wordCounts.slice(0, n).map((d) => d.word).join(", ");
+export function topNWords(wordCounts: { word: string }[], n: number): string {
+    return wordCounts.slice(0, n).map((d) => d.word).join(" ");
 }
 
 /**
@@ -41,7 +41,7 @@ export function getObjectKeys() {
         ],
         dontEnumsLength = dontEnums.length;
 
-    return function (obj:any) {
+    return function (obj: any) {
         if (typeof obj !== 'function' && (typeof obj !== 'object' || obj === null)) {
             throw new TypeError('Object.keys called on non-object');
         }
@@ -77,7 +77,7 @@ export function truncate(s: string, n: number = 300) {
 /**
  * @summary This function wraps event handlers to confirm that the model will be reset.
  */
-export function confirmReset(event:SyntheticEvent, callback:()=>void) {
+export function confirmReset(event: SyntheticEvent, callback: () => void) {
     event.preventDefault();
     if (window.confirm('This will cause your model to reset.')) callback();
 }

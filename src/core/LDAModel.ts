@@ -411,11 +411,11 @@ export class LDAModel {
             let fields = parsedDoc[i];
             // Set fields based on whether they exist
             let docID = columnInfo.id === -1 ?
-                        this.documents.length :
-                        fields[columnInfo.id];
+                this.documents.length :
+                fields[columnInfo.id];
             let docDate = columnInfo.date_tag === -1 ?
-                          "" :
-                          fields[columnInfo.date_tag];
+                "" :
+                fields[columnInfo.date_tag];
             let text = fields[columnInfo.text];
             let tokens: LDAToken[] = [];
             let rawTokens = this.getRawTokens(text)
@@ -592,6 +592,7 @@ export class LDAModel {
         for (let topic = 0; topic < this.numTopics; topic++) {
             this.topicWordCounts[topic].sort(this.byCountDescending);
         }
+        this.updateWebpage();
     }
 
     /**
@@ -956,6 +957,7 @@ export class LDAModel {
         this.wordTopicCounts = {};
         this._maxTopicSaliency = new Array(numTopics);
         this._documentTopicSmoothing = zeros(numTopics).fill(0.1);
+        this.scheduler.reset()
         this.resetAnnoation()
 
         Object.keys(this.vocabularyCounts).forEach((word) => {
@@ -980,6 +982,7 @@ export class LDAModel {
             }
         });
         this.sortTopicWords();
+        displayMessage("Topic count has been updated", 2500);
         this.updateWebpage();
     }
 
@@ -1900,7 +1903,7 @@ class SweepScheduler {
         this.remainingSweeps = 0;
         this.completedSweeps = 0;
         this.model = model;
-        this.timeTaken = new RollingAvg(50);
+        this.timeTaken = new RollingAvg(25);
     }
 
     /**
