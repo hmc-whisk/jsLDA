@@ -126,7 +126,7 @@ export class TopicTreemap extends React.Component<topicTreemapProps, topicTreema
         }
 
         return (
-            <div id="pages" style={{position: "relative", left: -10, paddingTop:0, top:-20}}>
+            <div id="pages" style={{position: "relative", left: -10, paddingTop:0, top:20}}>
                 <div className="help" style={{position: "relative", left: -20, paddingBottom:0, fontSize:"18"}}>
                 The following figure allows one to visualize the probabilities of the top words for a selected topic.
                 Words with a higher probability of appearing in a given topic will represent a larger portion of the treemap's area.

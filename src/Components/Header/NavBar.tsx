@@ -30,7 +30,7 @@ export class NavBar extends React.Component<NavBarProps, NavBarState> {
     static tabs = [
         ['home-tab', 'Home Page'],
         ['docs-tab', 'Topic Documents'],
-        ['corr-tab', 'Topic Correlations'],
+        // ['corr-tab', 'Topic Correlations'],
         ['ts-tab', 'Time Series'],
         ['meta-tab', 'Metadata'],
         ['to-tab', 'Topic Overview'],
@@ -38,7 +38,6 @@ export class NavBar extends React.Component<NavBarProps, NavBarState> {
         ['dl-tab', 'Downloads'],
         ['import-export-tab', 'Import&Export'],
         ['vocab-tab', 'Vocabulary'],
-
     ]
 
     render() {
@@ -55,7 +54,6 @@ export class NavBar extends React.Component<NavBarProps, NavBarState> {
             </div>
         );
     }
-
 }
 
 export default NavBar;

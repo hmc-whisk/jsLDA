@@ -28,7 +28,6 @@ import defaultStops from 'defaultDocs/stoplist.txt';
 import corrTooltip from 'Components/Tooltip/corrTooltip.png';
 import {ImportExportPage} from "../Pages/importExportPage";
 import MetaDataPage from 'Components/Pages/MetaData/MetaDataPage';
-
 import movieReviews from 'defaultDocs/movieReviews.csv'
 
 
@@ -67,8 +66,8 @@ class App extends Component<AppProps, AppStates> {
             modelDataDLer: new LDAModelDataDLer(ldaModel),
 
             // The file location of default files
-            docName: "movieReviews",
-            documentsURL: movieReviews,
+            docName: "moviePlotsDocs",
+            documentsURL: moviePlotsDocs,
             stopwordsURL: defaultStops,
             defaultExt: "text/csv",
 

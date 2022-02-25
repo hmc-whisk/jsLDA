@@ -85,16 +85,6 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps, T
         return (
             <>
                 <div id="pages">
-                    <div id="to-page" className="page" style={{paddingBottom: "0px"}}>
-                        <h2 id="label">Please Select a Topic</h2>
-                    </div>
-                    <div>
-                        More detailed information about the selected topic will show up here, including
-                        a list of the top words, the top three most correlated topics, and a treemap visualization
-                        of the top word probabilities.
-                    </div>
-                </div>
-                <div id="pages">
                     <div id="to-page" className="page" style={{paddingBottom:"0px"}}>
                         <h2 id="label">Please Select a Topic</h2>
                     </div>
