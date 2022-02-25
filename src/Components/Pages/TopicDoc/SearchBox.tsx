@@ -30,7 +30,6 @@ export class SearchBox extends React.Component<SearchProps,SearchState> {
 
     constructor(props:SearchProps){
         super(props);
-
         this.state = {
             query: '',
             searchKey: 'id',
@@ -61,7 +60,6 @@ export class SearchBox extends React.Component<SearchProps,SearchState> {
                         }}}
                     />
                 </Grid>
-
                 <Grid item xs={3}>
                     <InputLabel id="select-label">Search by</InputLabel>
                     <Select
@@ -81,7 +79,6 @@ export class SearchBox extends React.Component<SearchProps,SearchState> {
                         <MenuItem key={'text'} value={'text'}>{'text'}</MenuItem>
                     </Select>
                 </Grid>
-
                 <Grid item xs={2}>
                     <Button
                         variant="outline-secondary"
@@ -92,8 +89,7 @@ export class SearchBox extends React.Component<SearchProps,SearchState> {
                             this.props.search(this.state.query, this.state.searchKey);}}>
                         Search
                     </Button>
-                </Grid>
-                            
+                </Grid>                            
                 <Grid item xs={2}>
                     <Button
                         variant="outline-secondary"

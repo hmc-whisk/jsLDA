@@ -83,7 +83,6 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
   }
 
   numChange(e:SyntheticEvent<HTMLInputElement>){
-    console.log("numchange")
     if (!(e.target as HTMLInputElement).value || parseInt((e.target as HTMLInputElement).value) <=0) {
       this.setState(state => {
         const topicSets = state.topicSets.concat(parseInt((e.target as HTMLInputElement).value));
@@ -200,7 +199,6 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
       responsive: true,
       maintainAspectRatio: true,
       redraw:true,
-      
       plugins: {
         legend: {
           display: false
@@ -225,7 +223,6 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
   // create svg when no topic is selected
   createBarChartGeneral(topicSets:number[]) {
     let inputDataSample = this.calculateDataToDisplay(topicSets[0], this.state.numberOfFieldsGeneral); 
-
     let data : {
       labels: any[];
       datasets: {
@@ -236,7 +233,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
           borderColor: string;
       }[];
     }
-    
+
     data = {
       labels: inputDataSample.map((x) => x[0]), // extract the labels from the 2D array
       datasets: [
@@ -268,7 +265,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
         }
       )
     }
-      
+
     const options = {
       indexAxis: 'y',
       elements: {
@@ -344,7 +341,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
               min="1"
               step="1"
             ></input></div>
-            <div id="buttons" style={{display:"flex", marginLeft:"5" }}>
+            <div id="buttons" style={{display:"flex", marginLeft  :"10" }}>
             <LabeledToggleButton
               id="toggleSortNumber"
               label={"See " + (this.state.numberOfFields || "") + " lowest topic scores fields in topic " + (this.props.ldaModel.selectedTopic)}
@@ -355,7 +352,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
                 borderBottomLeftRadius:"10px"}}
               checked={!this.state.sortByTop}
               onChange={this.toggleSortNumber.bind(this)}
-            /> 
+            />
             <LabeledToggleButton
               id="toggleSortName"
               label={"Sort lexicographically"}
@@ -364,7 +361,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
                 borderBottomRightRadius: "10px",
                 borderTopLeftRadius:"10px",
                 borderBottomLeftRadius:"10px",
-                marginLeft:"0"}}
+                marginLeft:"5"}}
               checked={this.state.sortByName}
               onChange={this.toggleSortName.bind(this)}
             />
@@ -393,10 +390,10 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
             step="1"
           ></input>
         </div>
-        <div style={{marginLeft:"8"}}>
-          <div style={{display: "flex", margin: "5px"}}>
+        <div style={{marginLeft:"10"}}>
+          <div style={{display: "table", margin: "5px"}}>
             <span id="topic action control">
-              <select 
+              <select
                   onChange={this.plotActionChange.bind(this)}>
                       <option value="Add">Add</option>
                       <option value="Remove">Remove</option>
@@ -428,7 +425,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
             </span>
           </div>
         </div>
-        <div id="buttons" style={{display:"flex", marginLeft:"5", textAlign:"center"}}>
+        <div id="buttons" style={{display:"flex", marginLeft:"10", textAlign:"center"}}>
           <LabeledToggleButton
             id="toggleSortNumber"
             label={"See " + (this.state.numberOfFieldsGeneral || "") + " lowest topic scores fields"}
@@ -463,11 +460,11 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
         <div style={{marginBottom:"80"}}>
           <hr></hr>
           This plot displays the average topic scores for metadata values
-        present cross topics in the collection of documents. Since there is 
-        often a very high number of distinct metadata values, this plot will
-        show up to 10 of the metadata values with either the highest or 
-        lowest average topic scores. The plot sorts by topic scores by default.
-        You can interact with the plot by the options below.
+          present cross topics in the collection of documents. Since there is 
+          often a very high number of distinct metadata values, this plot will
+          show up to 10 of the metadata values with either the highest or 
+          lowest average topic scores. The plot sorts by topic scores by default.
+          You can interact with the plot by the options below.
         <div
             className="configPanel"
             style={{
@@ -485,7 +482,6 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
         </div>
       )
     }
-
     else {
       return (
         <div>
@@ -499,7 +495,6 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
             of the metadata values with either the highest or lowest average topic
             scores. Nagivate to the options below interact configure the plot.
           </div>
-
           <div
             className="configPanel"
             style={{
@@ -512,7 +507,6 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
           >
             <div>{this.configChart()}</div>
           </div>
-
           {this.createBarChart(this.calculateDataToDisplay(this.props.ldaModel.selectedTopic, this.state.numberOfFields))}
         </div>
       );

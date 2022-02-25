@@ -3,7 +3,6 @@ import {topNWords} from 'funcs/utilityFunctions';
 import TopicDoc from '../TopicDoc/TopicDoc';
 import {LDAModel} from 'core';
 import './TopicOverview.css';
-// import Treemap from ''
 import TopicTreemap from "../Visualization/TopicTreemap";
 
 /**
@@ -86,6 +85,7 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps, T
             <>
                 <div id="pages">
                     <div id="to-page" className="page" style={{paddingBottom:"0px"}}>
+
                         <h2 id="label">Please Select a Topic</h2>
                     </div>
                     <div>

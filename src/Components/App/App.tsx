@@ -66,6 +66,7 @@ class App extends Component<AppProps, AppStates> {
             modelDataDLer: new LDAModelDataDLer(ldaModel),
 
             // The file location of default files
+
             docName: "moviePlotsDocs",
             documentsURL: moviePlotsDocs,
             stopwordsURL: defaultStops,
