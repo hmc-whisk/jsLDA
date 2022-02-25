@@ -56,6 +56,7 @@ export class HomePage extends React.Component {
                                     tab as well as available for analysis on the metadata tab.
                                 </li>
                             </ul>
+                            <hr />
                             <h4 style={{textAlign: "center"}}>Stoplist File Format</h4>
                             <p>
                                 The format for stopwords is one word per line. Filetype
@@ -79,23 +80,25 @@ export class HomePage extends React.Component {
                         <div style={{margin: "15px"}}>
                             <h4 style={{textAlign: "center"}}>Running Iterations</h4>
                             <p>
-                                When you first load a dataset, your topics will be more or less useless. You can fix
-                                this by having the model run iterations over your documents. Everything you need to do
-                                this can be found at the top left of the page. 100 to 200 iterations is good for initial
-                                investigation. For a final model and more reliable topics, you may want to do thousands
-                                of iterations.
+                                When you first load the app, your topics will be more or less useless. You can fix
+                                this by having the model run iterations over your documents. Everything you need to
+                                start training can be found at the top left of the page. Training for 100 to 200 iterations
+                                is good for initial investigation. For a final model and more reliable topics, you may
+                                want to run thousands of iterations.
                             </p>
+                            <hr />
                             <h4 style={{textAlign: "center"}}>Number of Topics</h4>
                             <p>
                                 Choosing the best number of topics to include in your model can be a tricky decision.
                                 Including too many topics can create duplicate topics, or create topics which are too
                                 specific to be useful. Include too few and your topics will miss more subtle, but
-                                potentially very important, themes. There is no straight forward answer to how many
+                                potentially very important, themes. There is no straightforward answer to how many
                                 topics any model should have. Instead, trying a few different numbers and seeing which
                                 one works best tends to be a pretty good method. Alternatively, there are tools out
                                 there that will choose an optimal number of topics based on a few different metrics, but
                                 no such tool is included here.
                             </p>
+                            <hr />
                             <h4 style={{textAlign: "center"}}>Stopwords</h4>
                             <p>
                                 Stopwords can be edited by uploading a stoplist or using the vocabulary tab.
@@ -105,7 +108,9 @@ export class HomePage extends React.Component {
                                 analysis your model will skip over stopwords, pretending like they do not exist. By
                                 default, some basic words like "the" are already included in your stoplist. Stopwords
                                 should be added sparingly, as adding too many can remove valuable information from your
-                                model. One good indicator of how much information you might lose from adding a stopword
+                                model.
+                            </p><p>
+                                One good indicator of how much information you might lose from adding a stopword
                                 is that word's topic specificity. Words with a high specificity (closer to 1) are more
                                 specific to a small number of topics and tend to tell you more about the contents of
                                 those topics. Words with a low specificity are found more commonly in many topics, and
@@ -140,6 +145,7 @@ export class HomePage extends React.Component {
                                 common words are unhelpful because they are the same for every topic, you may consider
                                 adding those common words to your list of stopwords.
                             </p>
+                            <hr />
                             <h4 style={{textAlign: "center"}}>Topic Documents Tab</h4>
                             <p>
                                 This tab in the tab bar will help you see how topics appear in your documents.
@@ -150,16 +156,19 @@ export class HomePage extends React.Component {
                                 how jsLDA 2.0 enables you to do this. To start, you’ll want to click on the topic you’d
                                 like to investigate in the topic bar. Now the documents will be sorted by their topic
                                 score. This score mostly indicates how much of the topic appears in this document, but
-                                it is also weighted to favor longer documents. Once you’ve done this, you can click on
+                                it is also weighted to favor longer documents.
+                            </p><p>
+                                Once you’ve done this, you can click on
                                 documents to reveal their full text. When the document is extended, you will notice that
                                 some words are highlighted. This highlighting is based on a metric called saliency.
-                                First theorized by Chuang et al and later adapted for looking at words in the context of
-                                topics by Alexander et al, this metric represents both how much of the topic that word
+                                First theorized by Chuang et al. and later adapted for looking at words in the context of
+                                topics by Alexander et al., this metric represents both how much of the topic that word
                                 accounts for and how distinct the word is to that topic. Words with a high saliency
                                 score are relatively common in the given topic and appear more in the selected topic
                                 than other topics. The 'Use Saliency' option allows you to sort the documents by their
                                 average saliency score.
                             </p>
+                            <hr />
                             <h4 style={{textAlign: "center"}}>Topic Correlations Tab</h4>
                             <p>This tab will help you see which topics show up together.</p>
                             <p>
@@ -171,6 +180,7 @@ export class HomePage extends React.Component {
                                 The size of the circle indicates the magnitude of their correlation. Hovering over a
                                 circle will provide additional information.
                             </p>
+                            <hr />
                             <h4 style={{textAlign: "center"}}>Time Series Tab</h4>
                             <p>This tab will help you see how prevalent topics are over time.</p>
                             <p>
@@ -179,24 +189,16 @@ export class HomePage extends React.Component {
                                 assigned to that topic at that time. While a topic is selected, only the graph for that
                                 topic will appear. Hovering over this plot will give you more information.
                             </p>
-                            <h4 style={{textAlign: "center"}}>Metadata Tab</h4>
+                            <hr />
+                            <h4 style={{textAlign: "center"}}>Topic Overview Tab</h4>
+			    <p>This tab will help you see key information about a particular topic.</p>
                             <p>
-                                This tab will help you see how topics relate to document metadata.
+				This display is meant to expand upon the information you would see in the left topic display bar:
+				an extended list of the top words, the top three most correlated topics with that topic,
+				and a visualization of how much probability each of the top words has in the topic.
                             </p>
                             <p>
-                                If you have included metadata in your documents file, you can use this tab to explore
-                                the relationships between your topics and the metadata. There are several different
-                                graphs available for use. For discrete data, you may use each of the bar plots. The
-                                normal bar plots are best for getting information about a particular topic, while the
-                                topic bar plot is best at getting information about which topics are related to a
-                                specific metadata value. For continuous data, the scatter plot is available. If you
-                                would prefer to make your own graphs, you have the option of exporting data related to
-                                any of these graphs on this page.
-                            </p>
-                            <h4 style={{textAlign: "center"}}>Downloads Tab</h4>
-                            <p>
-                                If you would like to continue your analysis with other tools, you have the option of
-                                downloading much of the information created by this website via this tab.
+
                             </p>
                         </div>
                     </div>
@@ -211,22 +213,14 @@ export class HomePage extends React.Component {
                 <span>
                     <p>
                         This is a tool designed to train and investigate LDA (latent Dirichlet allocation) topic
-                        models. You can begin by choosing a default dataset to
-                        work with, or by uploading your own dataset. If you are
+                        models. If you are
                         unfamiliar with topic models, reading <a
                         href="http://www.scottbot.net/HIAL/index.html@p=19113.html">this</a> is
                         a good place to start. For a more technical explanation
                         of LDA, you can look <a
                         href="https://www.pnas.org/content/pnas/101/suppl_1/5228.full.pdf">here</a>.
                     </p>
-
-                    <h3>Uploading your own files</h3>
-                        <p>
-                            If you choose to upload your own dataset, your files must
-                            be formatted so that jsLDA 2.0 can interpret them.
-                        </p>
-                    {this.uploadHelp}
-
+                    <hr /><br />
                     <h3>Training a Model</h3>
                         <p>
                             Your topics will start out totally random. To get meaningful topics,
@@ -234,11 +228,16 @@ export class HomePage extends React.Component {
                             Most of the controls for this can be found at the very top of the page.
                         </p>
                     {this.trainingHelp}
+
+                    <hr /><br />
+
                     <h3>Analyzing a Model</h3>
                         <p>Once you've trained a model, you'll need to figure out what your model has found. jsLDA 2.0 has a few different tools to help you do this.</p>
                     {this.analyzingHelp}
+
+                    <hr /><br />
                     <h3>About</h3>
-			<p>jsLDA was originally created by David Mimno at Cornell University. Further development was conducted at Harvey Mudd College by Alfredo Gomez, Dana Harris, Ingrid Wu, Mia Wang, Simon Babb, Taeyun Lee, Tatsuki Kuze, Theo Bayard de Volo, and Xanda Schofield.</p>
+			<p>jsLDA was originally created by David Mimno at Cornell University. Further development was conducted at Harvey Mudd College by Alfredo Gomez, Dana Harris, Ingrid Wu, Mia Celeste, Simon Babb, Taeyun Lee, Tatsuki Kuze, Theo Bayard de Volo, and Xanda Schofield.</p>
                 </span>
 
             </div>

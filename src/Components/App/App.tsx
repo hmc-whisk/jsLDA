@@ -8,7 +8,16 @@ import * as d3 from 'd3';
 import {getObjectKeys} from 'funcs/utilityFunctions'
 import {LDAModel, LDAModelDataDLer} from 'core'
 
-import {TopicDoc, Correlation, HomePage, TopicOverviewPage, DLPage, VocabTable, TimeSeries, TopicTreemap} from 'Components/Pages'
+import {
+    TopicDoc,
+    Correlation,
+    HomePage,
+    TopicOverviewPage,
+    DLPage,
+    VocabTable,
+    TimeSeries,
+    TopicTreemap
+} from 'Components/Pages'
 import {NavBar, TopBar} from 'Components/Header'
 import {SideBar} from 'Components/SideBar';
 
@@ -20,6 +29,7 @@ import corrTooltip from 'Components/Tooltip/corrTooltip.png';
 import {ImportExportPage} from "../Pages/importExportPage";
 import MetaDataPage from 'Components/Pages/MetaData/MetaDataPage';
 
+import movieReviews from 'defaultDocs/movieReviews.csv'
 
 
 // This adds the Object.keys() function to some old browsers that don't support it
@@ -57,8 +67,8 @@ class App extends Component<AppProps, AppStates> {
             modelDataDLer: new LDAModelDataDLer(ldaModel),
 
             // The file location of default files
-            docName: "Movie Plots",
-            documentsURL: moviePlotsDocs,
+            docName: "movieReviews",
+            documentsURL: movieReviews,
             stopwordsURL: defaultStops,
             defaultExt: "text/csv",
 
@@ -90,6 +100,27 @@ class App extends Component<AppProps, AppStates> {
 
     startingNumTopics = 25;
 
+    /**
+     * @summary function used by model to force update of webpage
+     */
+    modelForceUpdate() {
+        this.forceUpdate();
+        console.log("Forced Update");
+    }
+
+    downloadModel() {
+        const fileName = "jsLDA_Model";
+        const json = JSON.stringify(this.state.ldaModel);
+        const blob = new Blob([json], {type: 'application/json'});
+        const href = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = href;
+        link.download = fileName + ".json";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     // Default notes for correlation (placed here to avoid rerendering)
     corNotes = ``;
 
@@ -101,6 +132,9 @@ class App extends Component<AppProps, AppStates> {
     provideNotes() {
         return this.corNotes;
     }
+
+    // Data and functions for annotations in sidebar (placed here instead of as a state to avoid re-rendering)
+    annotations: string[] = [];
 
     changeAnnotation(text: string, i: number) {
         this.state.ldaModel.setAnnotation(i,text)
@@ -311,7 +345,7 @@ class App extends Component<AppProps, AppStates> {
     queueLoad() {
         this.resetNotes()
         this.state.ldaModel.reset();
-        Promise.all<string, string>([this.getStoplistUpload(), this.getDocsUpload()])
+        Promise.all<string>([this.getStoplistUpload(), this.getDocsUpload()])
             .then(([stops, lines]) => {
                 this.state.ldaModel.ready(null, stops, lines)
             })
@@ -443,6 +477,7 @@ class App extends Component<AppProps, AppStates> {
             case "to-tab":
                 DisplayPage = <TopicOverviewPage
                     ldaModel={this.state.ldaModel}
+                    annotations={this.annotations}
                     getTopicCorrelations={this.state.ldaModel.getTopicCorrelations.bind(this.state.ldaModel)}/>
                 break;
             case "import-export-tab":

@@ -1,5 +1,4 @@
 import React, {ChangeEvent, Component, SyntheticEvent} from 'react';
-import * as d3 from 'd3';
 import {topNWords} from 'funcs/utilityFunctions';
 
 import {PinAngle, PinAngleFill, EyeSlash, EyeSlashFill} from 'react-bootstrap-icons';
@@ -165,14 +164,11 @@ export class SideBar extends Component<SideBarProps, SideBarState> {
     }
 
 
-    // NOTE: kept the d3 implementation of this function because
-    // it affects an external element (sortVocabByTopic)
     toggleTopicDocuments(topic: number) {
         if (topic === this.props.selectedTopic) {
-            // unselect the topic
-            // d3.selectAll("div.topicwords").attr("class", "topicwords");
-            //sortVocabByTopic = false;
-            d3.select("#sortVocabByTopic").text("Sort by topic")
+            const el = document.getElementById("sortVocabByTopic")
+            if (el) el.innerText="Sort by topic"
+
             this.props.selectedTopicChange(-1);
         } else {
             this.props.selectedTopicChange(topic);

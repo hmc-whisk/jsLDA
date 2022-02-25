@@ -49,7 +49,7 @@ export class ImportExportPage extends Component<ImportExportPageProps, ImportExp
         let model: LDAModel
         try {
             model = await deserializeModel(file)
-        } catch (e) {
+        } catch (e:any) {
             this.setError(e.toString())
             console.error(e)
             return
@@ -130,7 +130,7 @@ export class ImportExportPage extends Component<ImportExportPageProps, ImportExp
         let model: LDAModel
         try {
             model = await deserializeMalletUpload(annotations, documents, contentType, stoplist, state)
-        } catch (e) {
+        } catch (e:any) {
             console.error(e)
             this.setError(e.toString())
             return

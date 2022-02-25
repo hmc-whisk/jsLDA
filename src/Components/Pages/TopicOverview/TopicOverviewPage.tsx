@@ -14,15 +14,16 @@ import TopicTreemap from "../Visualization/TopicTreemap";
  * @author Theo Bayard de Volo
  */
 
-interface TopicOverviewPageProps{
-    ldaModel:LDAModel,
+interface TopicOverviewPageProps {
+    ldaModel: LDAModel,
+    annotations: string[],
     getTopicCorrelations: () => number[][]
 }
 
-interface TopicOverviewPageState{}
+interface TopicOverviewPageState {}
 
 
-export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,TopicOverviewPageState> {
+export class TopicOverviewPage extends React.Component<TopicOverviewPageProps, TopicOverviewPageState> {
     // Some settings
     static numWordsToShow = 50 // Number of topic words in label
     static numDocuments = 20 // Number of documents to display
@@ -84,6 +85,16 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
         return (
             <>
                 <div id="pages">
+                    <div id="to-page" className="page" style={{paddingBottom: "0px"}}>
+                        <h2 id="label">Please Select a Topic</h2>
+                    </div>
+                    <div>
+                        More detailed information about the selected topic will show up here, including
+                        a list of the top words, the top three most correlated topics, and a treemap visualization
+                        of the top word probabilities.
+                    </div>
+                </div>
+                <div id="pages">
                     <div id="to-page" className="page" style={{paddingBottom:"0px"}}>
                         <h2 id="label">Please Select a Topic</h2>
                     </div>
@@ -104,6 +115,7 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
      */
     label() {
         const topicNum = this.props.ldaModel.selectedTopic
+        const nPosCorrelated = this.selectedTopicCorrelations.filter(n=>n>0).length
         return (
             <div id="label">
                 <h2>Topic {topicNum}</h2>
@@ -117,7 +129,7 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
                     whiteSpace: "pre-wrap",
                     overflow: "visible"
                 }}>
-                    <i>{this.props.ldaModel.annotations[topicNum]}</i>
+                    <i>{this.props.annotations[topicNum]}</i>
                 </pre>
                 <p className="subtitle" style={{textAlign: "left"}}>
                     <b>Top Words: </b>
@@ -126,17 +138,19 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
 
                 </p>
                 <p className="subtitle" style={{textAlign: "left"}}>
-                <b> Most Correlated Topics: </b>
+                    <b> {nPosCorrelated > 3 ? "Top 3" : "All"}
+                        &nbsp;positively correlated topics ({nPosCorrelated} total)
+                    </b>
                 </p>
                 <ul className="no-bullets">
                     {this.getMax(this.selectedTopicCorrelations).map(value => {
                         return <li key={value.toString()} style={{textAlign: "left"}}>
                             <b>Topic {value}: </b>
                             {topNWords(this.props.ldaModel.topicWordCounts[value],
-                            TopicOverviewPage.numWordsToShow)}
-                            </li>
+                                TopicOverviewPage.numWordsToShow)}
+                        </li>
                     })
-                }
+                    }
                 </ul>
 
             </div>
@@ -178,7 +192,7 @@ export class TopicOverviewPage extends React.Component<TopicOverviewPageProps,To
                 </h3>
                 {/* <TopicDoc
                     ldaModel={this.props.ldaModel}/> */}
-                    <TopicTreemap
+                <TopicTreemap
                     ldaModel={this.props.ldaModel}></TopicTreemap>
             </div>
         )
