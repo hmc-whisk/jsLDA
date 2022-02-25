@@ -174,17 +174,17 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                         <div style={{margin: "15px"}}>
                             <div className="configMenu">
                                 <h3> Topics </h3>
-                                {/* <div> */}
-                                    {/* <h5> Set number of topics: </h5>
+                                <div>
+                                    <h5> Set number of topics: </h5>
                                     <NumTopicSlider
                                         onChange={this.updateNumDisplay.bind(this)}
                                         sliderValue={this.state.sliderValue}
                                         updateNumTopics={this.confirmUpdate.bind(this)}
                                         onInput={this.updateNumDisplay.bind(this)}
                                         modelIsRunning={this.props.modelIsRunning}
-                                    /> */}
+                                    />
 
-                                    {/* <h6>
+                                    <h6>
                                         <Checkbox
                                             onChange={this.handleCheckOptimize.bind(this)}
                                             inputProps={{'aria-label': 'primary checkbox'}}
@@ -192,14 +192,14 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                             style={{paddingLeft: "0"}}
                                         />
                                         Optimize topic concentrations
-                                    </h6> */}
+                                    </h6>
 
                                     {/* <i> Optimized topic correlation allow the model to account for </i>
                                     <i> different proportions of topics in each documents </i> */}
-                                {/* </div> */}
+                                </div>
                             </div>
 
-                            {/* <div className="configMenu">
+                            <div className="configMenu">
                                 <h3> Vocabulary </h3>
                                 <div>
                                     <h6>
@@ -213,10 +213,10 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                     </h6>
                                     <i>Allows bigrams to be accounted for in the model.</i>
                                 </div>
-                            </div> */}
+                            </div>
 
 
-                            {/* <Uploader
+                            <Uploader
                                 onDocumentFileChange={this.props.onDocumentFileChange}
                                 onStopwordFileChange={this.props.onStopwordFileChange}
                                 onModelFileChange={this.props.onModelFileChange}
@@ -225,12 +225,12 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                 modelIsRunning={this.props.modelIsRunning}
                                 onDefaultDocChange={this.props.onDefaultDocChange}
                                 docName={this.props.docName}
-                            /> */}
+                            />
 
-                            {/* <CustomTokenizer
+                            <CustomTokenizer
                                 tokenRegex={this.props.tokenRegex}
                                 changeTokenRegex={this.props.changeTokenRegex}
-                            /> */}
+                            />
                         </div>
                     </div>
                 }/>
@@ -259,8 +259,8 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
 
                 </form>
                 <StatusDisplay/>
-
-                <div className="topRight" style={{display:"flex"}}>
+                {this.configuration}
+                {/* <div className="topRight" style={{display:"flex"}}>
                     <h5 ></h5>
                         <NumTopicSlider
                             onChange={this.updateNumDisplay.bind(this)}
@@ -269,7 +269,7 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                             onInput={this.updateNumDisplay.bind(this)}
                             modelIsRunning={this.props.modelIsRunning}
                         ></NumTopicSlider>
-                </div>
+                </div> */}
             </div>
 
 

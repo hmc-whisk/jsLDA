@@ -3,7 +3,6 @@ import { LDAModel } from "core";
 import { Bar } from "react-chartjs-2";
 import LabeledToggleButton from 'Components/LabeledToggleButton';
 import 'Components/Header/header.css';
-// import './MetaDataPage.css';
 
 interface metaDataProps {
   ldaModel: LDAModel,
@@ -455,7 +454,19 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
   }
 
   render() {
-    if (this.props.ldaModel.selectedTopic === -1) {
+    if (this.props.ldaModel.metaFields.length === 0) {
+      return (
+        <div
+            className="noMetaFields"
+            style={{ position: "relative", left: 10, paddingBottom: 0 }}
+          >
+            <hr></hr>
+            This current dataset doesn't not contain metadata fields. If you want 
+            to use the metadat charts, change the document and try again.
+          </div>
+      )
+    }
+    else if (this.props.ldaModel.selectedTopic === -1) {
       return (
         <div style={{marginBottom:"80"}}>
           <hr></hr>
