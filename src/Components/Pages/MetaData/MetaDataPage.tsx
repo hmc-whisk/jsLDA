@@ -461,7 +461,7 @@ export class MetaDataPage extends React.Component<metaDataProps, metaDataState> 
             style={{ position: "relative", left: 10, paddingBottom: 0 }}
           >
             <hr></hr>
-            This current dataset doesn't not contain metadata fields. If you want 
+            This current dataset does not contain metadata fields. If you want 
             to use the metadat charts, change the document and try again.
           </div>
       )
