@@ -162,7 +162,7 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
         right: "30%",
         borderRadius: "20px 0px 0px 20px",
         margin: "10px",
-        height: "70%",
+        // height: "70%",
         overflowY: "scroll"
     }
 
@@ -199,8 +199,8 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                 </div>
                             </div>
 
-                            <div className="configMenu">
-                                <h3> Vocabulary </h3>
+                            {/* <div className="configMenu"> */}
+                                {/* <h3> Vocabulary </h3>
                                 <div>
                                     <h6>
                                         <Checkbox
@@ -212,9 +212,8 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                         Allow bigrams
                                     </h6>
                                     <i>Allows bigrams to be accounted for in the model.</i>
-                                </div>
-                            </div>
-
+                                </div> */}
+                            {/* </div> */}
 
                             <Uploader
                                 onDocumentFileChange={this.props.onDocumentFileChange}
@@ -226,14 +225,14 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                 onDefaultDocChange={this.props.onDefaultDocChange}
                                 docName={this.props.docName}
                             />
-
                             <CustomTokenizer
                                 tokenRegex={this.props.tokenRegex}
                                 changeTokenRegex={this.props.changeTokenRegex}
                             />
                         </div>
                     </div>
-                }/>
+                }
+            />
         )
     }
 

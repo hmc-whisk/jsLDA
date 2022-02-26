@@ -483,10 +483,10 @@ class App extends Component<AppProps, AppStates> {
             case "import-export-tab":
                 DisplayPage = <ImportExportPage model={this.state.ldaModel} overwriteModel={this.overwriteModel.bind(this)}/>
                 break;
-            case "visual-tab":
-                DisplayPage = <TopicTreemap
-                    ldaModel={this.state.ldaModel}/>
-                break;
+            // case "visual-tab":
+            //     DisplayPage = <TopicTreemap
+            //         ldaModel={this.state.ldaModel}/>
+            //     break;
             default:
                 DisplayPage = null;
                 break;

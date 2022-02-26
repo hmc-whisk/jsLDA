@@ -10,6 +10,7 @@ import * as chromatic from "d3-scale-chromatic";
 interface DocTreeMapProps{
     ldaModel: LDAModel
     document: SortedLDADocument
+    size: string
 }
 
 interface DocTreeMapState{}
@@ -56,30 +57,31 @@ export class DocTreeMap extends React.Component<DocTreeMapProps, DocTreeMapState
 
     createTreeMap(){
         let treedata = this.getData();
+        let size = this.props.size.split(",", 2)
 
         return <Card.Body>
                     <div>
-                            <TreeMap<typeof treedata>
-                                height={500}
-                                width={750}
-                                data={treedata}
-                                colorModel={ColorModel.OneEachChildren}
-                                paddingInner={3}
-                                levelsToDisplay={1}
-                                nodeStyle={{paddingLeft: 10, paddingRight: 5, paddingTop:2}}
-                                valueFn={n=>n.toFixed(2) + "%"}
-                                tooltipOffsetY={140}
-                                tooltipOffsetX={-40}
-                                tooltipPlacement="top"
-                                paddingOuter={0}
-                                lightNodeBorderColor="white"
-                                disableBreadcrumb = {true}
-                                key={Math.random()} // force recreate element when rerender
-                                // @ts-ignore
-                                customD3ColorScale={scaleSequential(
-                                    chromatic.interpolateGnBu
-                                )}
-                            />
+                        <TreeMap<typeof treedata>
+                            height={parseInt(size[0])}
+                            width={parseInt(size[1])}
+                            data={treedata}
+                            colorModel={ColorModel.OneEachChildren}
+                            paddingInner={3}
+                            levelsToDisplay={1}
+                            nodeStyle={{paddingLeft: 10, paddingRight: 5, paddingTop:2}}
+                            valueFn={n=>n.toFixed(2) + "%"}
+                            tooltipOffsetY={140}
+                            tooltipOffsetX={-40}
+                            tooltipPlacement="top"
+                            paddingOuter={0}
+                            lightNodeBorderColor="white"
+                            disableBreadcrumb = {true}
+                            key={Math.random()} // force recreate element when rerender
+                            // @ts-ignore
+                            customD3ColorScale={scaleSequential(
+                                chromatic.interpolateGnBu
+                            )}
+                        />
                     </div>
             </Card.Body>
     }
