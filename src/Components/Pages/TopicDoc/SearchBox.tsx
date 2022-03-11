@@ -42,7 +42,7 @@ export class SearchBox extends React.Component<SearchProps,SearchState> {
             <Grid
             container
             direction="row"
-            alignItems="center"
+            alignItems="flex-end"
             spacing={1}
             >
                 <Grid item xs={5}>
@@ -65,13 +65,13 @@ export class SearchBox extends React.Component<SearchProps,SearchState> {
                 <Grid item xs={3}>
                     <InputLabel id="select-label">Search by</InputLabel>
                     <Select
-                    labelId="select-label"
-                    label="Search by"
-                    fullWidth
-                    displayEmpty
-                    value={this.state.searchKey}
-                    onChange={e => this.setState({searchKey: String(e.target.value)})}
-                    variant="outlined"
+                        labelId="select-label"
+                        label="Search by"
+                        fullWidth
+                        displayEmpty
+                        value={this.state.searchKey}
+                        onChange={e => this.setState({searchKey: String(e.target.value)})}
+                        variant="outlined"
                     >
                         <MenuItem key={'id'} value={'id'}>{'id'}</MenuItem>
                         {this.props.metadataKeys.map((key: string) => (

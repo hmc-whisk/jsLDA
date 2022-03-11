@@ -6,16 +6,14 @@ import type {LDAModelDataDLer} from "core";
  * @summary Component for Download page
  *  @prop modelDataDLer
  */
-export class DLPage extends React.Component<{
+export class DLModule extends React.Component<{
     modelDataDLer: LDAModelDataDLer
 }> {
 
     render() {
         return (
 
-            <div id="pages">
-
-                <div id="dl-page" className="page">
+            <div>
                     <div className="help">All of the following downloads are in CSV
                         format. Quotation marks are stripped from words upon download to avoid CSV errors.
                     </div>
@@ -29,7 +27,6 @@ export class DLPage extends React.Component<{
                         <li>{this.topicsTime}</li>
                         <li>{this.stopwordsFile}</li>
                     </ul>
-                </div>
 
             </div>
 
@@ -141,4 +138,4 @@ export class DLPage extends React.Component<{
     }
 }
 
-export default DLPage;
+export default DLModule;

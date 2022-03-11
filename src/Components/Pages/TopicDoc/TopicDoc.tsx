@@ -194,7 +194,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                         <Grid
                         container
                         direction="row"
-                        alignItems="center"
+                        alignItems="flex-end"
                         spacing={2}
                         style={{marginBottom: '0.5em'}}
                         >
@@ -237,6 +237,7 @@ export class TopicDoc extends Component<TopicDocProps, TopicDocState> {
                 id="toggleMetaData"
                 label="Show Metadata"
                 style={{
+                    borderWidth: "0px",
                     borderRadius: "4px",
                     width: "fit-content"
                 } as CSSProperties}

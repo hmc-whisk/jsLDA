@@ -13,7 +13,6 @@ import {
     Correlation,
     HomePage,
     TopicOverviewPage,
-    DLPage,
     VocabTable,
     TimeSeries,
     TopicTreemap
@@ -462,10 +461,6 @@ class App extends Component<AppProps, AppStates> {
                     update={this.state.update}
                 />;
                 break;
-            case "dl-tab":
-                DisplayPage = <DLPage
-                    modelDataDLer={this.state.modelDataDLer}/>;
-                break;
             case "home-tab":
                 DisplayPage = <HomePage/>
                 break;
@@ -481,7 +476,9 @@ class App extends Component<AppProps, AppStates> {
                     getTopicCorrelations={this.state.ldaModel.getTopicCorrelations.bind(this.state.ldaModel)}/>
                 break;
             case "import-export-tab":
-                DisplayPage = <ImportExportPage model={this.state.ldaModel} overwriteModel={this.overwriteModel.bind(this)}/>
+                DisplayPage = <ImportExportPage model={this.state.ldaModel}
+                    overwriteModel={this.overwriteModel.bind(this)}
+                    modelDataDLer={this.state.modelDataDLer}/>
                 break;
             case "visual-tab":
                 DisplayPage = <TopicTreemap

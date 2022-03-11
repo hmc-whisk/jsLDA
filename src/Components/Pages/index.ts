@@ -3,7 +3,6 @@ import {Correlation} from './Correlation'
 import {HomePage} from './HomePage'
 import {TimeSeries} from './TimeSeries'
 import {VocabTable} from './VocabTable'
-import {DLPage} from './DLPage'
 import {TopicOverviewPage} from './TopicOverview/TopicOverviewPage'
 import {TopicTreemap} from './Visualization/TopicTreemap'
 
@@ -18,7 +17,6 @@ export {
     HomePage,
     TimeSeries,
     VocabTable,
-    DLPage,
     TopicOverviewPage,
     TopicTreemap
 }

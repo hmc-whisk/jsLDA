@@ -3,10 +3,13 @@ import {displayMessage, LDAModel} from "core";
 import {deserializeMalletUpload, deserializeModel, readDocumentsUpload, saveModel} from "core/serialization";
 import {Tab, Row, Col, Nav} from "react-bootstrap"
 import {saveToStorage} from "../../core/storage";
+import type {LDAModelDataDLer} from "core";
+import {DLModule} from "./DLModule";
 
 interface ImportExportPageProps {
     model: LDAModel,
-    overwriteModel: (model: LDAModel) => void
+    overwriteModel: (model: LDAModel) => void,
+    modelDataDLer: LDAModelDataDLer
 }
 
 interface ImportExportPageState {
@@ -142,8 +145,6 @@ export class ImportExportPage extends Component<ImportExportPageProps, ImportExp
 
     render() {
         return <div style={{"width": "100%", "marginTop": "2em"}}>
-
-
             <Tab.Container id="left-tabs-example" defaultActiveKey="export-model">
                 <Row>
                     <Col sm={3}>
@@ -300,6 +301,8 @@ export class ImportExportPage extends Component<ImportExportPageProps, ImportExp
                     </span>
                 </div>
             }
+
+            <DLModule modelDataDLer={this.props.modelDataDLer}/>
 
         </div>
     }
