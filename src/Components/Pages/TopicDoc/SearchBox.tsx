@@ -5,6 +5,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Button from 'react-bootstrap/Button';
 import Grid from '@material-ui/core/Grid';
 import InputLabel from '@material-ui/core/InputLabel';
+import { BsSearch } from 'react-icons/bs';
 import './topicDoc.css';
 import type {LDAModel} from "core";
 import { Typography } from '@material-ui/core';
@@ -60,6 +61,7 @@ export class SearchBox extends React.Component<SearchProps,SearchState> {
                         }}}
                     />
                 </Grid>
+
                 <Grid item xs={3}>
                     <InputLabel id="select-label">Search by</InputLabel>
                     <Select
@@ -79,17 +81,22 @@ export class SearchBox extends React.Component<SearchProps,SearchState> {
                         <MenuItem key={'text'} value={'text'}>{'text'}</MenuItem>
                     </Select>
                 </Grid>
+
                 <Grid item xs={2}>
                     <Button
                         variant="outline-secondary"
                         id="button-addon2"
-                        style={{width:'100%'}}
+                        style={{
+                            width:'50%',
+                            padding: '10px'
+                        }}
                         onClick={() => {
                             this.props.changePage(1);
                             this.props.search(this.state.query, this.state.searchKey);}}>
-                        Search
+                        <BsSearch />
                     </Button>
-                </Grid>                            
+                </Grid>
+                            
                 <Grid item xs={2}>
                     <Button
                         variant="outline-secondary"

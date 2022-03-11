@@ -182,3 +182,7 @@ div.accordion {
     display: block;
     margin: 0px;
 }
+
+.MuiSelect-outlined.MuiSelect-outlined {
+    padding: 9.5px;
+}
