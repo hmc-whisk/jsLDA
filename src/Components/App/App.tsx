@@ -480,10 +480,10 @@ class App extends Component<AppProps, AppStates> {
                     overwriteModel={this.overwriteModel.bind(this)}
                     modelDataDLer={this.state.modelDataDLer}/>
                 break;
-            case "visual-tab":
-                DisplayPage = <TopicTreemap
-                    ldaModel={this.state.ldaModel}/>
-                break;
+            // case "visual-tab":
+            //     DisplayPage = <TopicTreemap
+            //         ldaModel={this.state.ldaModel}/>
+            //     break;
             default:
                 DisplayPage = null;
                 break;
