@@ -29,7 +29,6 @@ import {ImportExportPage} from "../Pages/importExportPage";
 import MetaDataPage from 'Components/Pages/MetaData/MetaDataPage';
 import movieReviews from 'defaultDocs/movieReviews.csv'
 
-
 // This adds the Object.keys() function to some old browsers that don't support it
 if (!Object.keys) {
     Object.keys = (getObjectKeys());
@@ -480,10 +479,10 @@ class App extends Component<AppProps, AppStates> {
                     overwriteModel={this.overwriteModel.bind(this)}
                     modelDataDLer={this.state.modelDataDLer}/>
                 break;
-            case "visual-tab":
-                DisplayPage = <TopicTreemap
-                    ldaModel={this.state.ldaModel}/>
-                break;
+            // case "visual-tab":
+            //     DisplayPage = <TopicTreemap
+            //         ldaModel={this.state.ldaModel}/>
+            //     break;
             default:
                 DisplayPage = null;
                 break;
@@ -494,7 +493,6 @@ class App extends Component<AppProps, AppStates> {
                 <div id="tooltip"></div>
 
                 <div id="main" style={{display: "flex", flexDirection: "column", height: "100%"}}>
-
                     <TopBar numTopics={this.state.ldaModel.numTopics}
                             onClick={this.runIterationsClick.bind(this)}
                             updateNumTopics={this.onTopicsChange.bind(this)}

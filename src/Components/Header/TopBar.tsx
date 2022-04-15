@@ -8,6 +8,7 @@ import './header.css';
 import {StatusDisplay} from "./Status";
 import {displayMessage} from "../../core";
 import {saveModel} from "../../core/serialization";
+import TutorialContoller from "Components/Tutorial/TutorialController";
 
 interface TopBarProps {
     numTopics: number,
@@ -162,7 +163,7 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
         right: "30%",
         borderRadius: "20px 0px 0px 20px",
         margin: "10px",
-        height: "70%",
+        // height: "70%",
         overflowY: "scroll"
     }
 
@@ -199,8 +200,8 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                 </div>
                             </div>
 
-                            <div className="configMenu">
-                                <h3> Vocabulary </h3>
+                            {/* <div className="configMenu"> */}
+                                {/* <h3> Vocabulary </h3>
                                 <div>
                                     <h6>
                                         <Checkbox
@@ -212,9 +213,8 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                         Allow bigrams
                                     </h6>
                                     <i>Allows bigrams to be accounted for in the model.</i>
-                                </div>
-                            </div>
-
+                                </div> */}
+                            {/* </div> */}
 
                             <Uploader
                                 onDocumentFileChange={this.props.onDocumentFileChange}
@@ -226,14 +226,14 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
                                 onDefaultDocChange={this.props.onDefaultDocChange}
                                 docName={this.props.docName}
                             />
-
                             <CustomTokenizer
                                 tokenRegex={this.props.tokenRegex}
                                 changeTokenRegex={this.props.changeTokenRegex}
                             />
                         </div>
                     </div>
-                }/>
+                }
+            />
         )
     }
 
@@ -259,6 +259,8 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
 
                 </form>
                 <StatusDisplay/>
+                <TutorialContoller/>
+
                 {this.configuration}
                 {/* <div className="topRight" style={{display:"flex"}}>
                     <h5 ></h5>

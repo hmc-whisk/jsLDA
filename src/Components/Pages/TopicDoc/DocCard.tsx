@@ -48,6 +48,7 @@ export class DocCard extends React.Component<DocCardProps,DocCardState> {
                             <DocTreeMap
                                 ldaModel={this.props.ldaModel}
                                 document={this.props.document}
+                                size={'200, 300'}//height, width
                             />
                         </div>
                     </span>
