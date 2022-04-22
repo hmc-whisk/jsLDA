@@ -9,6 +9,7 @@ import {StatusDisplay} from "./Status";
 import {displayMessage} from "../../core";
 import {saveModel} from "../../core/serialization";
 import TutorialContoller from "Components/Tutorial/TutorialController";
+import { List } from "echarts";
 
 interface TopBarProps {
     numTopics: number,
@@ -31,6 +32,9 @@ interface TopBarProps {
     bigramValue: boolean,
     tokenRegex: RegExp,
     changeTokenRegex: (inputRegex: RegExp) => void
+    tutorialOn: boolean,
+    tutorialOptions: any
+    selectedTab: string
 }
 
 interface TopBarState {
@@ -104,7 +108,6 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
      * @summary This value sets the display used for the run # iteratison
      */
     handleChange(event: ChangeEvent<HTMLInputElement>) {
-
         // Forces display value number or 0 (avoids NaN) on run button
         const val = event.target.value;
         this.setState({formValue: val});
@@ -112,8 +115,6 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
             this.props.onChange("0");
         else
             this.props.onChange(val);
-
-
     }
 
     /**
@@ -259,7 +260,10 @@ export class TopBar extends React.Component<TopBarProps, TopBarState> {
 
                 </form>
                 <StatusDisplay/>
-                <TutorialContoller/>
+                <TutorialContoller 
+                                selectedTab={this.props.selectedTab}
+                                tutorialOn={this.props.tutorialOn}
+                                tutorialOptions={this.props.tutorialOptions}/>
 
                 {this.configuration}
                 {/* <div className="topRight" style={{display:"flex"}}>

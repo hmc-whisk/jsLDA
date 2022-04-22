@@ -17,7 +17,7 @@ import {
     TimeSeries,
     TopicTreemap
 } from 'Components/Pages'
-import {NavBar, TopBar} from 'Components/Header'
+import {Configuration, NavBar, TopBar} from 'Components/Header'
 import {SideBar} from 'Components/SideBar';
 
 import stateOfUnionDocs from 'defaultDocs/stateOfUnionDocs.txt';
@@ -51,10 +51,11 @@ interface AppStates {
     sweepParameter: number,
     update: boolean,
     currentDocIsDefault: boolean,
+    tutorialOptions: any
 }
 
 class App extends Component<AppProps, AppStates> {
-    constructor(props: AppProps) {
+ constructor(props: AppProps) {
         super(props)
 
         let ldaModel = new LDAModel(this.startingNumTopics);
@@ -81,6 +82,8 @@ class App extends Component<AppProps, AppStates> {
             update: true,
 
             currentDocIsDefault: true,
+
+            tutorialOptions: new Map<string, boolean>()
         };
 
         window.addEventListener("beforeunload", (e: BeforeUnloadEvent) => {
@@ -159,8 +162,18 @@ class App extends Component<AppProps, AppStates> {
         this.setState({
             selectedTab: tabID
         });
-
         console.log("Tab is now: " + tabID)
+    }
+
+    updateTutorial(tabID: string) {
+        let options = new Map<string, boolean>();
+        options.set('Frontend', true)
+        this.setState({
+            tutorialOptions: options
+        });
+        console.log(this.state.tutorialOptions)
+        console.log("ot",options)
+        return null
     }
 
     /**
@@ -514,6 +527,9 @@ class App extends Component<AppProps, AppStates> {
                             bigramValue={this.state.ldaModel.bigrams}
                             tokenRegex={this.state.ldaModel.tokenRegex}
                             changeTokenRegex={this.onTokenRegexChange.bind(this)}
+                            tutorialOn={true}
+                            tutorialOptions={this.state.tutorialOptions}
+                            selectedTab={this.state.selectedTab}
                     />
 
                     <div style={{display: "flex", flex: "1", overflow: "hidden"}}>

@@ -2,9 +2,14 @@ import React, {Component, ReactElement} from 'react';
 import LabeledToggleButton from 'Components/LabeledToggleButton';
 import { LDAModel } from 'core';
 
-interface TutorialContollerProps{}
+interface TutorialContollerProps{
+    tutorialOn: boolean,
+    tutorialOptions: any
+    selectedTab: string
+}
 interface TutorialContollerState{
-    tutorialOn: boolean
+    tutorialOn:boolean
+    tutorialOptions: any
 }
 
 /**
@@ -15,7 +20,8 @@ export class TutorialContoller extends Component<TutorialContollerProps, Tutoria
     constructor(props:TutorialContollerProps) {
         super(props);
         this.state = {
-            tutorialOn: true
+            tutorialOn: this.props.tutorialOn,
+            tutorialOptions: this.props.tutorialOptions
         };
     }
 
@@ -25,11 +31,19 @@ export class TutorialContoller extends Component<TutorialContollerProps, Tutoria
         })
     }
 
+    checkOptions(){
+        // console.log(this.props.selectedTab)
+        let tab = this.props.selectedTab
+        this.state.tutorialOptions.set(tab, false)
+    }
+
     createToggle(){
+        this.checkOptions()
         let message ='';
         if(this.state.tutorialOn){
             message = " ON."
             console.log("tutorial mode is applied")
+            console.log(this.state.tutorialOptions)
         } else {
             message = " OFF."
             console.log("tutorial mode is off")
