@@ -33,8 +33,25 @@ export class TutorialContoller extends Component<TutorialContollerProps, Tutoria
 
     checkOptions(){
         // console.log(this.props.selectedTab)
+        if (this.state.tutorialOptions.size === 8 && this.state.tutorialOn){
+            console.log("tutorials done")
+            this.restartTutorial()
+        } else if (this.state.tutorialOptions.size === 7){
+            this.state.tutorialOptions.set("restart", true)
+        } else {
         let tab = this.props.selectedTab
         this.state.tutorialOptions.set(tab, false)
+        }
+    }
+
+    restartTutorial(){
+        if (window.confirm("Tutorials finished! Do you want to restart tutorials?") == true) {
+            console.log("Restart Tutorial.")
+			this.state.tutorialOptions.clear()
+		} else {
+            this.toggleChange()
+            console.log("Tutorial ends")
+		}
     }
 
     createToggle(){
